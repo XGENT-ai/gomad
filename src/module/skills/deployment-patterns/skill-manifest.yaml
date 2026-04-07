@@ -1,9 +1,0 @@
-canonicalId: mob-deployment-patterns
-type: skill
-module: mob
-install_to_bmad: true
-name: deployment-patterns
-description: Deployment workflows, CI/CD pipeline patterns, Docker
-  containerization, health checks, rollback strategies, and production readiness
-  checklists for web applications.
-category: devops
