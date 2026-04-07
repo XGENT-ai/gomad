@@ -1,7 +1,10 @@
 {
-  "name": "gomad",
-  "version": "0.1.0",
-  "description": "GOMAD Orchestration Method for Agile Development — curated Claude Code skills, agents, rules, hooks, and commands",
+  "name": "@xgent-ai/gomad",
+  "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "One command installs curated Claude Code skills, agents, rules, hooks, and commands into your project's local .claude/ directory.",
   "type": "module",
   "bin": {
     "gomad": "bin/gomad-cli.js"
