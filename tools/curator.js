@@ -182,7 +182,7 @@ export async function curate(options = {}) {
 }
 
 function writeLockfile(selections) {
-  const lockPath = join(__dirname, '..', 'gomad.lock.yaml');
+  const lockPath = join(process.cwd(), 'gomad.lock.yaml');
   const content = stringifyYaml({
     generated: new Date().toISOString(),
     version: '0.1.0',
