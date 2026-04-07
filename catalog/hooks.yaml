@@ -1,0 +1,146 @@
+# mobmad hook catalog — auto-generated from ~/.claude/scripts/hooks/
+
+hooks:
+  # === PreToolUse (15) ===
+  - name: auto-tmux-dev.js
+    type: PreToolUse
+    description: Auto-manage tmux development session windows
+    default_include: false
+  - name: check-console-log.js
+    type: PreToolUse
+    description: Check for debug console.log statements
+    default_include: true
+  - name: check-hook-enabled.js
+    type: PreToolUse
+    description: Validate hook enablement status
+    default_include: true
+  - name: config-protection.js
+    type: PreToolUse
+    description: Protect sensitive configuration files
+    default_include: true
+  - name: cost-tracker.js
+    type: PreToolUse
+    description: Track API costs and usage
+    default_include: false
+  - name: doc-file-warning.js
+    type: PreToolUse
+    description: Warn before editing documentation files
+    default_include: false
+  - name: insaits-security-monitor.py
+    type: PreToolUse
+    description: Monitor security vulnerabilities (Python)
+    default_include: false
+  - name: insaits-security-wrapper.js
+    type: PreToolUse
+    description: Wrap security monitoring for tools
+    default_include: false
+  - name: mcp-health-check.js
+    type: PreToolUse
+    description: Check MCP server health and availability
+    default_include: false
+  - name: pre-bash-commit-quality.js
+    type: PreToolUse
+    description: Quality checks before git commit
+    default_include: true
+  - name: pre-bash-dev-server-block.js
+    type: PreToolUse
+    description: Block dev server startup in bash
+    default_include: false
+  - name: pre-bash-git-push-reminder.js
+    type: PreToolUse
+    description: Reminder before git push operations
+    default_include: true
+  - name: pre-bash-tmux-reminder.js
+    type: PreToolUse
+    description: Reminder for tmux session management
+    default_include: false
+  - name: pre-compact.js
+    type: PreToolUse
+    description: Pre-processing for compact operations
+    default_include: false
+  - name: pre-write-doc-warn.js
+    type: PreToolUse
+    description: Warn before writing documentation files
+    default_include: false
+
+  # === PostToolUse (15) ===
+  - name: desktop-notify.js
+    type: PostToolUse
+    description: Send desktop notifications on events
+    default_include: false
+  - name: governance-capture.js
+    type: PostToolUse
+    description: Capture governance and audit events
+    default_include: false
+  - name: post-bash-build-complete.js
+    type: PostToolUse
+    description: Log completion of bash build commands
+    default_include: false
+  - name: post-bash-command-log.js
+    type: PostToolUse
+    description: Log bash command execution details
+    default_include: false
+  - name: post-bash-pr-created.js
+    type: PostToolUse
+    description: Notify when PR is created via bash
+    default_include: false
+  - name: post-edit-accumulator.js
+    type: PostToolUse
+    description: Accumulate edited files for batch processing
+    default_include: true
+  - name: post-edit-console-warn.js
+    type: PostToolUse
+    description: Warn about console methods in edits
+    default_include: true
+  - name: post-edit-format.js
+    type: PostToolUse
+    description: Auto-format JS/TS files after edits
+    default_include: true
+  - name: post-edit-typecheck.js
+    type: PostToolUse
+    description: TypeScript type-checking after edits
+    default_include: true
+  - name: quality-gate.js
+    type: PostToolUse
+    description: Gate code changes by quality thresholds
+    default_include: true
+  - name: run-with-flags-shell.sh
+    type: PostToolUse
+    description: Run commands with shell flags (Bash)
+    default_include: false
+  - name: run-with-flags.js
+    type: PostToolUse
+    description: Execute tools with additional flags
+    default_include: false
+  - name: session-start-bootstrap.js
+    type: PostToolUse
+    description: Initialize session on startup
+    default_include: false
+  - name: session-start.js
+    type: PostToolUse
+    description: Start session with context setup
+    default_include: false
+  - name: suggest-compact.js
+    type: PostToolUse
+    description: Suggest session compaction
+    default_include: false
+
+  # === Stop (6) ===
+  - name: evaluate-session.js
+    type: Stop
+    description: Evaluate session quality and learnings
+    default_include: false
+  - name: session-end-marker.js
+    type: Stop
+    description: Mark session end in logs
+    default_include: false
+  - name: session-end.js
+    type: Stop
+    description: Persist session learnings and state
+    default_include: false
+  - name: stop-format-typecheck.js
+    type: Stop
+    description: Batch format and typecheck edited files
+    default_include: true
+
+# Total: 36 hooks

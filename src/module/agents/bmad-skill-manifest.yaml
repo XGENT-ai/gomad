@@ -1,0 +1,146 @@
+# BMAD agent manifests for mobmad module
+# These agents are project-scoped and installed alongside BMAD skills
+
+bmad-analysis/api-documenter:
+  type: agent
+  name: mob-api-documenter
+  displayName: API Documenter
+  title: API Documentation Specialist
+  module: mob
+  canonicalId: mob-api-documenter
+  capabilities: "REST endpoint docs, GraphQL schema docs, gRPC service docs, message contract docs"
+
+bmad-analysis/codebase-analyzer:
+  type: agent
+  name: mob-codebase-analyzer
+  displayName: Codebase Analyzer
+  title: Codebase Analysis Specialist
+  module: mob
+  canonicalId: mob-codebase-analyzer
+  capabilities: "project structure analysis, architecture pattern detection, technology stack identification"
+
+bmad-analysis/data-analyst:
+  type: agent
+  name: mob-data-analyst
+  displayName: Data Analyst
+  title: Quantitative Analysis Specialist
+  module: mob
+  canonicalId: mob-data-analyst
+  capabilities: "market sizing, TAM/SAM/SOM, metrics calculations, financial analysis"
+
+bmad-analysis/pattern-detector:
+  type: agent
+  name: mob-pattern-detector
+  displayName: Pattern Detector
+  title: Architecture Pattern Specialist
+  module: mob
+  canonicalId: mob-pattern-detector
+  capabilities: "design pattern identification, coding convention detection, implementation strategy analysis"
+
+bmad-planning/dependency-mapper:
+  type: agent
+  name: mob-dependency-mapper
+  displayName: Dependency Mapper
+  title: Dependency Analysis Specialist
+  module: mob
+  canonicalId: mob-dependency-mapper
+  capabilities: "module dependency mapping, package coupling analysis, integration point identification"
+
+bmad-planning/epic-optimizer:
+  type: agent
+  name: mob-epic-optimizer
+  displayName: Epic Optimizer
+  title: Epic Scope Specialist
+  module: mob
+  canonicalId: mob-epic-optimizer
+  capabilities: "epic boundary optimization, scope definition, logical sequencing, value delivery"
+
+bmad-planning/requirements-analyst:
+  type: agent
+  name: mob-requirements-analyst
+  displayName: Requirements Analyst
+  title: Requirements Specialist
+  module: mob
+  canonicalId: mob-requirements-analyst
+  capabilities: "requirements analysis, completeness checking, clarity refinement, testability validation"
+
+bmad-planning/technical-decisions-curator:
+  type: agent
+  name: mob-technical-decisions-curator
+  displayName: Technical Decisions Curator
+  title: Architecture Decision Specialist
+  module: mob
+  canonicalId: mob-technical-decisions-curator
+  capabilities: "architecture decision recording, technology selection tracking, decision rationale documentation"
+
+bmad-planning/trend-spotter:
+  type: agent
+  name: mob-trend-spotter
+  displayName: Trend Spotter
+  title: Market Trends Specialist
+  module: mob
+  canonicalId: mob-trend-spotter
+  capabilities: "emerging trend identification, weak signal detection, future opportunity analysis"
+
+bmad-planning/user-journey-mapper:
+  type: agent
+  name: mob-user-journey-mapper
+  displayName: User Journey Mapper
+  title: User Journey Specialist
+  module: mob
+  canonicalId: mob-user-journey-mapper
+  capabilities: "user journey mapping, touchpoint identification, friction area detection, epic boundary alignment"
+
+bmad-planning/user-researcher:
+  type: agent
+  name: mob-user-researcher
+  displayName: User Researcher
+  title: User Research Specialist
+  module: mob
+  canonicalId: mob-user-researcher
+  capabilities: "user research, persona development, behavior pattern analysis"
+
+bmad-research/market-researcher:
+  type: agent
+  name: mob-market-researcher
+  displayName: Market Researcher
+  title: Market Research Specialist
+  module: mob
+  canonicalId: mob-market-researcher
+  capabilities: "market research, competitive analysis, product requirements research"
+
+bmad-research/tech-debt-auditor:
+  type: agent
+  name: mob-tech-debt-auditor
+  displayName: Tech Debt Auditor
+  title: Technical Debt Specialist
+  module: mob
+  canonicalId: mob-tech-debt-auditor
+  capabilities: "technical debt identification, code smell detection, risk assessment, remediation planning"
+
+bmad-review/document-reviewer:
+  type: agent
+  name: mob-document-reviewer
+  displayName: Document Reviewer
+  title: Documentation Quality Specialist
+  module: mob
+  canonicalId: mob-document-reviewer
+  capabilities: "documentation review, quality validation, completeness checking"
+
+bmad-review/technical-evaluator:
+  type: agent
+  name: mob-technical-evaluator
+  displayName: Technical Evaluator
+  title: Technology Evaluation Specialist
+  module: mob
+  canonicalId: mob-technical-evaluator
+  capabilities: "technology evaluation, architecture assessment, technical feasibility analysis"
+
+bmad-review/test-coverage-analyzer:
+  type: agent
+  name: mob-test-coverage-analyzer
+  displayName: Test Coverage Analyzer
+  title: Test Analysis Specialist
+  module: mob
+  canonicalId: mob-test-coverage-analyzer
+  capabilities: "test coverage analysis, testing strategy evaluation, gap identification"

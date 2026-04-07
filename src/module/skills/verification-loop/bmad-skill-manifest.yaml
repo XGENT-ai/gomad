@@ -1,0 +1,7 @@
+canonicalId: mob-verification-loop
+type: skill
+module: mob
+install_to_bmad: true
+name: verification-loop
+description: A comprehensive verification system for Claude Code sessions.
+category: review

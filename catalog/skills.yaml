@@ -1,0 +1,594 @@
+# mobmad skill catalog — auto-generated from ~/.claude/skills/
+# Fields: name, description, category, source, default_include
+# Categories: language, framework, testing, review, security, devops, content, tool, domain, workflow
+
+skills:
+  # === Language Patterns ===
+  - name: coding-standards
+    description: Universal coding standards for TypeScript, JavaScript, React, and Node.js
+    category: language
+    default_include: true
+  - name: python-patterns
+    description: Pythonic idioms, PEP 8, type hints, best practices
+    category: language
+    default_include: true
+  - name: golang-patterns
+    description: Idiomatic Go patterns, concurrency, error handling
+    category: language
+    default_include: true
+  - name: rust-patterns
+    description: Idiomatic Rust ownership, error handling, traits, concurrency
+    category: language
+    default_include: false
+  - name: kotlin-patterns
+    description: Kotlin idioms, coroutines, Compose, Android patterns
+    category: language
+    default_include: false
+  - name: perl-patterns
+    description: Modern Perl 5.36+ idioms and best practices
+    category: language
+    default_include: false
+  - name: cpp-coding-standards
+    description: C++ Core Guidelines for writing and reviewing C++ code
+    category: language
+    default_include: false
+  - name: java-coding-standards
+    description: Java coding standards for Spring Boot services
+    category: language
+    default_include: false
+  - name: claude-api
+    description: Anthropic Claude API patterns for Python and TypeScript
+    category: language
+    default_include: true
+
+  # === Frameworks ===
+  - name: frontend-patterns
+    description: React, Next.js state management, routing, performance
+    category: framework
+    default_include: true
+  - name: backend-patterns
+    description: Backend architecture for Node.js, Express, Next.js
+    category: framework
+    default_include: true
+  - name: django-patterns
+    description: Django architecture, DRF, ORM, caching, signals
+    category: framework
+    default_include: false
+  - name: laravel-patterns
+    description: Laravel routing, Eloquent ORM, service layers, queues
+    category: framework
+    default_include: false
+  - name: springboot-patterns
+    description: Spring Boot REST API, layered services, JPA
+    category: framework
+    default_include: false
+  - name: swiftui-patterns
+    description: SwiftUI state management, @Observable, navigation
+    category: framework
+    default_include: false
+  - name: compose-multiplatform-patterns
+    description: Compose Multiplatform and Jetpack Compose for KMP
+    category: framework
+    default_include: false
+  - name: kotlin-coroutines-flows
+    description: Kotlin Coroutines and Flow for Android and KMP
+    category: framework
+    default_include: false
+  - name: kotlin-exposed-patterns
+    description: JetBrains Exposed ORM DSL queries, DAO, transactions
+    category: framework
+    default_include: false
+  - name: kotlin-ktor-patterns
+    description: Ktor server routing DSL, plugins, auth, WebSockets
+    category: framework
+    default_include: false
+  - name: android-clean-architecture
+    description: Clean Architecture for Android and KMP projects
+    category: framework
+    default_include: false
+  - name: jpa-patterns
+    description: JPA/Hibernate entity design, queries, transactions
+    category: framework
+    default_include: false
+  - name: api-design
+    description: REST API design patterns, resource naming, status codes
+    category: framework
+    default_include: true
+  - name: postgres-patterns
+    description: PostgreSQL query optimization, schema design, indexing
+    category: framework
+    default_include: true
+  - name: clickhouse-io
+    description: ClickHouse database patterns and analytics
+    category: framework
+    default_include: false
+  - name: database-migrations
+    description: Database migration best practices, rollbacks, zero-downtime
+    category: framework
+    default_include: true
+  - name: mcp-server-patterns
+    description: Build MCP servers with Node/TypeScript SDK
+    category: framework
+    default_include: true
+  - name: frontend-design
+    description: Create distinctive production-grade frontend interfaces
+    category: framework
+    default_include: true
+  - name: liquid-glass-design
+    description: iOS 26 Liquid Glass design system
+    category: framework
+    default_include: false
+  - name: foundation-models-on-device
+    description: Apple FoundationModels framework for on-device LLM
+    category: framework
+    default_include: false
+  - name: swift-concurrency-6-2
+    description: Swift 6.2 Approachable Concurrency patterns
+    category: framework
+    default_include: false
+  - name: swift-actor-persistence
+    description: Thread-safe data persistence in Swift using actors
+    category: framework
+    default_include: false
+  - name: swift-protocol-di-testing
+    description: Protocol-based dependency injection for testable Swift
+    category: framework
+    default_include: false
+  - name: content-hash-cache-pattern
+    description: Cache expensive processing results using SHA-256 hashes
+    category: framework
+    default_include: false
+  - name: iterative-retrieval
+    description: Progressive context retrieval pattern
+    category: framework
+    default_include: false
+  - name: regex-vs-llm-structured-text
+    description: Decision framework for regex vs LLM parsing
+    category: framework
+    default_include: false
+  - name: project-guidelines-example
+    description: Example project-specific skill template
+    category: framework
+    default_include: false
+  - name: blueprint
+    description: Design and architecture blueprint for structured planning
+    category: framework
+    default_include: true
+
+  # === Testing ===
+  - name: tdd-workflow
+    description: Test-driven development with 80%+ coverage
+    category: testing
+    default_include: true
+  - name: e2e-testing
+    description: Playwright E2E testing, Page Object Model, CI/CD
+    category: testing
+    default_include: true
+  - name: python-testing
+    description: pytest, TDD, fixtures, mocking, parametrization
+    category: testing
+    default_include: true
+  - name: golang-testing
+    description: Go table-driven tests, subtests, benchmarks, fuzzing
+    category: testing
+    default_include: true
+  - name: rust-testing
+    description: Rust unit, integration, async, property-based tests
+    category: testing
+    default_include: false
+  - name: kotlin-testing
+    description: Kotest, MockK, coroutine testing, property-based
+    category: testing
+    default_include: false
+  - name: cpp-testing
+    description: GoogleTest/CTest, diagnostics, coverage, sanitizers
+    category: testing
+    default_include: false
+  - name: perl-testing
+    description: Test2::V0, Test::More, prove runner, mocking
+    category: testing
+    default_include: false
+  - name: django-tdd
+    description: Django pytest, factory_boy, mocking, coverage
+    category: testing
+    default_include: false
+  - name: django-verification
+    description: Django verification loop for migrations, tests, security
+    category: testing
+    default_include: false
+  - name: laravel-tdd
+    description: Laravel TDD with PHPUnit and Pest, factories
+    category: testing
+    default_include: false
+  - name: laravel-verification
+    description: Laravel verification loop for env, linting, tests
+    category: testing
+    default_include: false
+  - name: springboot-tdd
+    description: Spring Boot TDD with JUnit 5, Mockito, Testcontainers
+    category: testing
+    default_include: false
+  - name: springboot-verification
+    description: Spring Boot verification loop with build and tests
+    category: testing
+    default_include: false
+  - name: eval-harness
+    description: Formal evaluation framework for eval-driven development
+    category: testing
+    default_include: false
+  - name: ai-regression-testing
+    description: Regression testing for AI-assisted development
+    category: testing
+    default_include: false
+  - name: vitest
+    description: Vitest fast unit testing with Jest-compatible API
+    category: testing
+    default_include: true
+
+  # === Review ===
+  - name: audit
+    description: Technical quality checks for accessibility, performance, theming
+    category: review
+    default_include: true
+  - name: critique
+    description: UX perspective design evaluation with scoring
+    category: review
+    default_include: false
+  - name: skill-stocktake
+    description: Audit Claude skills and commands for quality
+    category: review
+    default_include: false
+  - name: verification-loop
+    description: Comprehensive verification system for Claude Code sessions
+    category: review
+    default_include: true
+  - name: workspace-surface-audit
+    description: Audit repo, MCP servers, plugins, env surfaces
+    category: review
+    default_include: false
+
+  # === Security ===
+  - name: security-review
+    description: Security checklist for auth, input, APIs, payments
+    category: security
+    default_include: true
+  - name: security-scan
+    description: Scan Claude Code config for vulnerabilities
+    category: security
+    default_include: true
+  - name: django-security
+    description: Django security for auth, CSRF, SQL injection
+    category: security
+    default_include: false
+  - name: laravel-security
+    description: Laravel security for auth, validation, CSRF
+    category: security
+    default_include: false
+  - name: springboot-security
+    description: Spring Security for auth, validation, CSRF, secrets
+    category: security
+    default_include: false
+  - name: perl-security
+    description: Perl taint mode, input validation, safe execution
+    category: security
+    default_include: false
+
+  # === DevOps ===
+  - name: deployment-patterns
+    description: CI/CD pipelines, Docker, health checks, rollbacks
+    category: devops
+    default_include: true
+  - name: docker-patterns
+    description: Docker and Compose for local dev, security, networking
+    category: devops
+    default_include: true
+
+  # === Content ===
+  - name: article-writing
+    description: Write articles, guides, blog posts, tutorials
+    category: content
+    default_include: false
+  - name: brand-voice
+    description: Build source-derived writing style profiles
+    category: content
+    default_include: false
+  - name: content-engine
+    description: Platform-native content for X, LinkedIn, TikTok, newsletters
+    category: content
+    default_include: false
+  - name: deep-research
+    description: Multi-source research using firecrawl and exa MCPs
+    category: content
+    default_include: true
+  - name: investor-materials
+    description: Pitch decks, one-pagers, investor memos
+    category: content
+    default_include: false
+  - name: investor-outreach
+    description: Draft cold emails, follow-ups for fundraising
+    category: content
+    default_include: false
+  - name: market-research
+    description: Market research, competitive analysis, industry intelligence
+    category: content
+    default_include: false
+
+  # === Tools ===
+  - name: adapt
+    description: Adapt designs across screen sizes, devices, contexts
+    category: tool
+    default_include: false
+  - name: agent-harness-construction
+    description: Design AI agent action spaces and tool definitions
+    category: tool
+    default_include: false
+  - name: animate
+    description: Enhance features with purposeful animations
+    category: tool
+    default_include: false
+  - name: arrange
+    description: Improve layout, spacing, and visual rhythm
+    category: tool
+    default_include: false
+  - name: bolder
+    description: Amplify safe designs to be more visually interesting
+    category: tool
+    default_include: false
+  - name: clarify
+    description: Improve unclear UX copy, error messages, microcopy
+    category: tool
+    default_include: false
+  - name: claude-devfleet
+    description: Orchestrate multi-agent coding tasks in worktrees
+    category: tool
+    default_include: false
+  - name: colorize
+    description: Add strategic color to monochromatic interfaces
+    category: tool
+    default_include: false
+  - name: configure-ecc
+    description: Interactive installer for Everything Claude Code
+    category: tool
+    default_include: false
+  - name: connections-optimizer
+    description: Reorganize X and LinkedIn network
+    category: tool
+    default_include: false
+  - name: cost-aware-llm-pipeline
+    description: Cost optimization for LLM API usage
+    category: tool
+    default_include: false
+  - name: crosspost
+    description: Multi-platform content distribution
+    category: tool
+    default_include: false
+  - name: data-scraper-agent
+    description: Build automated AI-powered data collection agents
+    category: tool
+    default_include: false
+  - name: delight
+    description: Add moments of joy and personality to interfaces
+    category: tool
+    default_include: false
+  - name: distill
+    description: Strip designs to their essence
+    category: tool
+    default_include: false
+  - name: exa-search
+    description: Neural search via Exa MCP for web and code research
+    category: tool
+    default_include: true
+  - name: extract
+    description: Extract reusable components and design tokens
+    category: tool
+    default_include: false
+  - name: fal-ai-media
+    description: Unified media generation via fal.ai MCP
+    category: tool
+    default_include: false
+  - name: find-skills
+    description: Discover and install agent skills
+    category: tool
+    default_include: true
+  - name: frontend-slides
+    description: Create animation-rich HTML presentations
+    category: tool
+    default_include: false
+  - name: google-workspace-ops
+    description: Operate across Google Drive, Docs, Sheets, Slides
+    category: tool
+    default_include: false
+  - name: harden
+    description: Improve interface resilience and error handling
+    category: tool
+    default_include: false
+  - name: laravel-plugin-discovery
+    description: Discover Laravel packages via LaraPlugins.io MCP
+    category: tool
+    default_include: false
+  - name: manim-video
+    description: Build Manim explainers for technical concepts
+    category: tool
+    default_include: false
+  - name: nanoclaw-repl
+    description: Operate NanoClaw v2 zero-dependency session REPL
+    category: tool
+    default_include: false
+  - name: normalize
+    description: Realign UI to design system standards
+    category: tool
+    default_include: false
+  - name: nutrient-document-processing
+    description: Process, convert, OCR, extract documents via Nutrient API
+    category: tool
+    default_include: false
+  - name: onboard
+    description: Design onboarding flows and first-run experiences
+    category: tool
+    default_include: false
+  - name: optimize
+    description: Diagnose and fix UI performance issues
+    category: tool
+    default_include: false
+  - name: overdrive
+    description: Push interfaces past conventional limits
+    category: tool
+    default_include: false
+  - name: plankton-code-quality
+    description: Write-time code quality enforcement via hooks
+    category: tool
+    default_include: false
+  - name: polish
+    description: Final quality pass for alignment, spacing, consistency
+    category: tool
+    default_include: false
+  - name: prompt-optimizer
+    description: Optimize prompts for better LLM performance
+    category: tool
+    default_include: true
+  - name: quieter
+    description: Tone down visually aggressive designs
+    category: tool
+    default_include: false
+  - name: remotion-video-creation
+    description: Remotion video creation in React
+    category: tool
+    default_include: false
+  - name: social-graph-ranker
+    description: Weighted social-graph ranking for warm intros
+    category: tool
+    default_include: false
+  - name: teach-impeccable
+    description: One-time setup for design context
+    category: tool
+    default_include: false
+  - name: team-builder
+    description: Interactive agent picker for parallel teams
+    category: tool
+    default_include: false
+  - name: token-budget-advisor
+    description: Optimize and track token budget usage
+    category: tool
+    default_include: false
+  - name: typeset
+    description: Improve typography choices and hierarchy
+    category: tool
+    default_include: false
+  - name: ui-demo
+    description: Record polished UI demo videos with Playwright
+    category: tool
+    default_include: false
+  - name: video-editing
+    description: AI-assisted video editing workflows
+    category: tool
+    default_include: false
+  - name: videodb
+    description: See, understand, act on video and audio assets
+    category: tool
+    default_include: false
+  - name: visa-doc-translate
+    description: Translate visa documents to English bilingual PDF
+    category: tool
+    default_include: false
+  - name: x-api
+    description: X/Twitter API for tweets, threads, search, analytics
+    category: tool
+    default_include: false
+
+  # === Domain ===
+  - name: carrier-relationship-management
+    description: Manage carrier relationships and logistics
+    category: domain
+    default_include: false
+  - name: connections-optimizer
+    description: Network optimization for X and LinkedIn
+    category: domain
+    default_include: false
+  - name: customer-billing-ops
+    description: Billing workflows, subscriptions, refunds, churn
+    category: domain
+    default_include: false
+  - name: customs-trade-compliance
+    description: Customs documentation and tariff classification
+    category: domain
+    default_include: false
+  - name: energy-procurement
+    description: Electricity and gas procurement operations
+    category: domain
+    default_include: false
+  - name: inventory-demand-planning
+    description: Demand forecasting and safety stock optimization
+    category: domain
+    default_include: false
+  - name: lead-intelligence
+    description: AI-native lead intelligence and outreach pipeline
+    category: domain
+    default_include: false
+  - name: logistics-exception-management
+    description: Freight exceptions and shipment delay handling
+    category: domain
+    default_include: false
+  - name: production-scheduling
+    description: Production scheduling and resource planning
+    category: domain
+    default_include: false
+  - name: quality-nonconformance
+    description: Quality control and non-conformance management
+    category: domain
+    default_include: false
+  - name: returns-reverse-logistics
+    description: Returns authorization and reverse logistics
+    category: domain
+    default_include: false
+
+  # === Workflow ===
+  - name: agentic-engineering
+    description: Eval-first execution, decomposition, cost-aware routing
+    category: workflow
+    default_include: false
+  - name: ai-first-engineering
+    description: Engineering operating model for AI-heavy teams
+    category: workflow
+    default_include: false
+  - name: autonomous-loops
+    description: Patterns for autonomous Claude Code loops
+    category: workflow
+    default_include: false
+  - name: continuous-agent-loop
+    description: Continuous autonomous agent loops with quality gates
+    category: workflow
+    default_include: false
+  - name: continuous-learning
+    description: Extract reusable patterns from sessions
+    category: workflow
+    default_include: false
+  - name: continuous-learning-v2
+    description: Instinct-based learning with confidence scoring
+    category: workflow
+    default_include: false
+  - name: dmux-workflows
+    description: Multi-agent orchestration using dmux/tmux
+    category: workflow
+    default_include: false
+  - name: enterprise-agent-ops
+    description: Long-lived agent workloads with observability
+    category: workflow
+    default_include: false
+  - name: project-flow-ops
+    description: Execution flow across GitHub and Linear
+    category: workflow
+    default_include: false
+  - name: ralphinho-rfc-pipeline
+    description: RFC-driven multi-agent DAG with quality gates
+    category: workflow
+    default_include: false
+  - name: search-first
+    description: Research-before-coding workflow
+    category: workflow
+    default_include: true
+  - name: strategic-compact
+    description: Context compaction at logical intervals
+    category: workflow
+    default_include: false
+
+# Total: 165 skills

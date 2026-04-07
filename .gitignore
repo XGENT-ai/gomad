@@ -1,0 +1,3 @@
+node_modules/
+*.lock.yaml
+.DS_Store

@@ -1,0 +1,44 @@
+{
+  "name": "mobmad",
+  "version": "0.1.0",
+  "description": "My Own BMAD — a personalized distribution of BMAD-METHOD with curated skills, agents, rules, and hooks",
+  "type": "module",
+  "bin": {
+    "mobmad": "bin/mobmad-cli.js"
+  },
+  "scripts": {
+    "test": "node --test 'test/test-*.js'",
+    "curate": "node tools/curator.js",
+    "lint": "npx eslint ."
+  },
+  "keywords": [
+    "bmad",
+    "claude-code",
+    "ai-development",
+    "skills",
+    "agents"
+  ],
+  "author": "Rockie Guo",
+  "license": "MIT",
+  "peerDependencies": {
+    "bmad-method": "^6.x"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1",
+    "commander": "^13.1.0",
+    "yaml": "^2.7.1",
+    "fs-extra": "^11.3.0",
+    "chalk": "^5.4.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "global/",
+    "catalog/",
+    "tools/",
+    "README.md"
+  ]
+}
