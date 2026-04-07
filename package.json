@@ -10,7 +10,7 @@
     "gomad": "bin/gomad-cli.js"
   },
   "scripts": {
-    "test": "node --test 'test/test-*.js'",
+    "test": "node --test --test-timeout=120000 'test/test-*.js'",
     "curate": "node tools/curator.js",
     "lint": "npx eslint ."
   },
