@@ -18,12 +18,11 @@ program
 
 program
   .command('install')
-  .description('Install gomad module and global assets')
+  .description('Install gomad assets to .claude/ in current project')
   .option('-p, --preset <preset>', 'Skill preset (full, full-stack, python-only, enterprise, lean, enhanced)')
-  .option('--global-only', 'Install only global assets to ~/.claude/')
   .option('-y, --yes', 'Skip interactive prompts, use defaults')
   .action(async (options) => {
-    const { install } = await import('../tools/global-installer.js');
+    const { install } = await import('../tools/installer.js');
     await install(options);
   });
 
@@ -36,35 +35,19 @@ program
   });
 
 program
-  .command('update')
-  .description('Pull latest content and re-apply gomad module')
-  .action(async () => {
-    const { install } = await import('../tools/global-installer.js');
-    console.log('Updating gomad...');
-    // Re-run install with existing lockfile
-    await install({ yes: true });
-  });
-
-program
   .command('status')
-  .description('Show installed skills, agents, rules, and hooks')
+  .description('Show installed gomad assets in current project')
   .action(async () => {
-    const { status } = await import('../tools/global-installer.js');
+    const { status } = await import('../tools/installer.js');
     status();
   });
 
 program
   .command('uninstall')
-  .description('Remove gomad assets')
-  .option('--global', 'Remove global assets from ~/.claude/')
-  .action(async (options) => {
-    if (options.global) {
-      const { uninstallGlobal } = await import('../tools/global-installer.js');
-      uninstallGlobal();
-    } else {
-      console.log('Use --global to remove global assets from ~/.claude/');
-      console.log('To remove the project module, delete .claude/skills/mob/ in your project.');
-    }
+  .description('Remove gomad assets from .claude/ in current project')
+  .action(async () => {
+    const { uninstall } = await import('../tools/installer.js');
+    uninstall();
   });
 
 program
@@ -73,14 +56,6 @@ program
   .action(async () => {
     const { packageSkills } = await import('../tools/package-skills.js');
     packageSkills();
-  });
-
-program
-  .command('sync')
-  .description('Populate global/ from ~/.claude/ based on lockfile selections')
-  .action(async () => {
-    const { syncUpstream } = await import('../tools/sync-upstream.js');
-    syncUpstream();
   });
 
 program
