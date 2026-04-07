@@ -21,13 +21,13 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 
 ### Active
 
-- [ ] Rename all references from mobmad to gomad (package.json, CLI binary, lock file, manifest, internal code, docs)
+- [x] Rename all references from mobmad to gomad — Validated in Phase 1: Rename
 - [ ] Change install target from ~/.claude/ (global) to ./.claude/ (project-local)
 - [ ] Remove BMAD-METHOD peer dependency and module registration system
 - [ ] Keep existing BMAD agents as regular agents (strip BMAD integration layer)
 - [ ] Remove backup/restore system (git is the backup for project-local .claude/)
-- [ ] Rename mobmad.lock.yaml to gomad.lock.yaml
-- [ ] Rename .mobmad-manifest.yaml to .gomad-manifest.yaml
+- [x] Rename mobmad.lock.yaml to gomad.lock.yaml — Validated in Phase 1: Rename
+- [x] Rename .mobmad-manifest.yaml to .gomad-manifest.yaml — Validated in Phase 1: Rename
 - [ ] Remove sync-upstream.js (no longer syncing from ~/.claude/)
 - [ ] Remove package-skills.js BMAD manifest generation (keep skill copying)
 - [ ] Update all tests to reflect new name and project-local behavior
@@ -85,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after initialization*
+*Last updated: 2026-04-07 after Phase 1 (Rename) completion*
