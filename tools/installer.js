@@ -43,6 +43,40 @@ function collectFiles(dir, base = dir) {
 }
 
 /**
+ * Recursively remove empty directories under (and including) `dir`.
+ * Walks bottom-up so child directories are pruned before parents.
+ * Silently ignores missing directories and removal errors.
+ */
+function pruneEmptyDirs(dir) {
+  if (!existsSync(dir)) return;
+  let entries;
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    const full = join(dir, entry);
+    let stat;
+    try {
+      stat = statSync(full);
+    } catch {
+      continue;
+    }
+    if (stat.isDirectory()) {
+      pruneEmptyDirs(full);
+    }
+  }
+  try {
+    if (readdirSync(dir).length === 0) {
+      rmSync(dir, { recursive: false, force: true });
+    }
+  } catch {
+    // ignore
+  }
+}
+
+/**
  * Copy files from source to target, creating directories as needed.
  * Merge strategy: overwrites existing files but does NOT delete files
  * that are not in the source. Preserves user customizations.
@@ -210,12 +244,17 @@ export function uninstall() {
 
     for (const file of fileList) {
       const filePath = join(target, file);
-      if (existsSync(filePath)) {
-        rmSync(filePath);
+      try {
+        rmSync(filePath, { force: true });
         assetRemoved++;
         removed++;
+      } catch (err) {
+        console.warn(chalk.yellow(`  could not remove ${file}: ${err.message}`));
       }
     }
+
+    // Prune empty directories left behind after file removal
+    pruneEmptyDirs(target);
 
     console.log(chalk.green(`  removed ${assetRemoved} ${assetType} files`));
   }
