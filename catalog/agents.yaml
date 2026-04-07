@@ -147,77 +147,70 @@ agents:
     scope: global
     default_include: true
 
-  # === Project-Specific Agents (15) — Project Scope ===
-  # analysis/
-  - name: analysis/api-documenter
+  # === Project-Specific Agents (16) — Project Scope ===
+  - name: api-documenter
     description: Document APIs, REST endpoints, GraphQL schemas
     scope: project
     default_include: true
-  - name: analysis/codebase-analyzer
+  - name: codebase-analyzer
     description: Comprehensive codebase analysis and architecture
     scope: project
     default_include: true
-  - name: analysis/data-analyst
+  - name: data-analyst
     description: Quantitative analysis, market sizing, TAM/SAM/SOM
     scope: project
     default_include: true
-  - name: analysis/pattern-detector
-    description: Identify architectural patterns and conventions
-    scope: project
-    default_include: true
-
-  # planning/
-  - name: planning/dependency-mapper
+  - name: dependency-mapper
     description: Map module and library dependencies
     scope: project
     default_include: true
-  - name: planning/epic-optimizer
+  - name: document-reviewer
+    description: Validate documentation quality and completeness
+    scope: project
+    default_include: true
+  - name: epic-optimizer
     description: Optimize epic boundaries and scope definition
     scope: project
     default_include: true
-  - name: planning/requirements-analyst
+  - name: market-researcher
+    description: Market research and competitive analysis
+    scope: project
+    default_include: true
+  - name: pattern-detector
+    description: Identify architectural patterns and conventions
+    scope: project
+    default_include: true
+  - name: requirements-analyst
     description: Refine product requirements for completeness
     scope: project
     default_include: true
-  - name: planning/technical-decisions-curator
+  - name: tech-debt-auditor
+    description: Technical debt identification and risk assessment
+    scope: project
+    default_include: true
+  - name: technical-decisions-curator
     description: Curate technical decisions throughout lifecycle
     scope: project
     default_include: true
-  - name: planning/trend-spotter
+  - name: technical-evaluator
+    description: Evaluate technology choices and feasibility
+    scope: project
+    default_include: true
+  - name: test-coverage-analyzer
+    description: Analyze test coverage and identify gaps
+    scope: project
+    default_include: true
+  - name: trend-spotter
     description: Identify emerging trends and opportunities
     scope: project
     default_include: true
-  - name: planning/user-journey-mapper
+  - name: user-journey-mapper
     description: Map user journeys, touchpoints, friction areas
     scope: project
     default_include: true
-  - name: planning/user-researcher
+  - name: user-researcher
     description: User research, personas, behavior analysis
     scope: project
     default_include: true
 
-  # research/
-  - name: research/market-researcher
-    description: Market research and competitive analysis
-    scope: project
-    default_include: true
-  - name: research/tech-debt-auditor
-    description: Technical debt identification and risk assessment
-    scope: project
-    default_include: true
-
-  # review/
-  - name: review/document-reviewer
-    description: Validate documentation quality and completeness
-    scope: project
-    default_include: true
-  - name: review/technical-evaluator
-    description: Evaluate technology choices and feasibility
-    scope: project
-    default_include: true
-  - name: review/test-coverage-analyzer
-    description: Analyze test coverage and identify gaps
-    scope: project
-    default_include: true
-
-# Total: 48 agents (33 global + 15 project)
+# Total: 52 agents (36 global + 16 project)
