@@ -67,7 +67,7 @@ Plans:
 - [x] 03-01-PLAN.md -- Audit src/module/skills/ references (D-07 verdict artifact)
 - [x] 03-02-PLAN.md -- Migrate 16 ex-BMAD agents to assets/agents/ + update catalog/agents.yaml + catalog/presets.yaml
 - [x] 03-03-PLAN.md -- Delete src/module/, tools/package-skills.js, package CLI command, peerDependencies; fix package.json files array; npm install
-- [ ] 03-04-PLAN.md -- Replace BMAD-coupled tests with test-decoupling.js guardrail (D-13)
+- [x] 03-04-PLAN.md -- Replace BMAD-coupled tests with test-decoupling.js guardrail (D-13)
 
 ### Phase 4: Publish and Verify
 **Goal**: gomad is publishable to private npm and works end-to-end via npx on a fresh project
