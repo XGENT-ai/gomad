@@ -83,7 +83,7 @@ describe('Package structure', () => {
   });
 
   it('all tool files exist', () => {
-    const tools = ['curator.js', 'global-installer.js', 'sync-upstream.js', 'package-skills.js'];
+    const tools = ['curator.js', 'installer.js', 'package-skills.js'];
     for (const tool of tools) {
       assert.ok(existsSync(join(PROJECT_ROOT, 'tools', tool)), `tools/${tool} should exist`);
     }
