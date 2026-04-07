@@ -49,8 +49,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Rewrite installer for project-local ./.claude/, delete sync/global-installer, rename global/ to assets/, update CLI
-- [ ] 02-02-PLAN.md -- Update test files for project-local verification and new file structure
+- [x] 02-01-PLAN.md -- Rewrite installer for project-local ./.claude/, delete sync/global-installer, rename global/ to assets/, update CLI
+- [x] 02-02-PLAN.md -- Update test files for project-local verification and new file structure
 
 ### Phase 3: BMAD Decoupling
 **Goal**: All BMAD-METHOD dependencies and integration code are removed; BMAD agents are preserved as regular agents
