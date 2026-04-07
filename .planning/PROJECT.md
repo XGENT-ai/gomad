@@ -30,8 +30,8 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 - [x] Rename .mobmad-manifest.yaml to .gomad-manifest.yaml — Validated in Phase 1: Rename
 - [x] Remove sync-upstream.js (no longer syncing from ~/.claude/) — Validated in Phase 2: Project-Local Install
 - [x] Remove package-skills.js BMAD manifest generation (keep skill copying) — Validated in Phase 3: BMAD Decoupling
-- [ ] Update all tests to reflect new name and project-local behavior
-- [ ] Publish to public npm as @xgent-ai/gomad
+- [x] Update all tests to reflect new name and project-local behavior — Validated in Phase 1 and Phase 4
+- [x] Publish to public npm as @xgent-ai/gomad — Package configured in Phase 4: Publish and Verify (manual `npm publish` deferred to post-merge)
 
 ### Out of Scope
 
@@ -60,11 +60,11 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Drop BMAD-METHOD dependency | Stand alone as gomad, simpler install, no external framework needed | — Pending |
+| Drop BMAD-METHOD dependency | Stand alone as gomad, simpler install, no external framework needed | ✓ Implemented in Phase 3 |
 | Project-local only (./.claude/) | Users want isolated, reproducible project configs without polluting global state | ✓ Implemented in Phase 2 |
-| Keep BMAD agents as regular agents | Agents are useful regardless of BMAD framework | — Pending |
+| Keep BMAD agents as regular agents | Agents are useful regardless of BMAD framework | ✓ Implemented in Phase 3 |
 | No backup system | Project .claude/ is git-tracked, git provides history | ✓ Implemented in Phase 2 |
-| Public npm publish as @xgent-ai/gomad | Standalone tool, broad distribution | — Pending (Phase 4) |
+| Public npm publish as @xgent-ai/gomad | Standalone tool, broad distribution | ✓ Configured in Phase 4 (manual publish deferred) |
 
 ## Evolution
 
@@ -84,4 +84,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after Phase 2 (Project-Local Install) completion*
+*Last updated: 2026-04-07 after Phase 4 (Publish and Verify) completion — milestone v1.0 complete*
