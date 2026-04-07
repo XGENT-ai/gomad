@@ -61,10 +61,13 @@ Plans:
   2. No source file imports or references bmad-method packages at runtime
   3. Agents previously under src/module/agents/ work as standalone agents without BMAD integration layer
   4. package-skills.js BMAD manifest generation is removed (skill copying retained)
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md -- Audit src/module/skills/ references (D-07 verdict artifact)
+- [ ] 03-02-PLAN.md -- Migrate 16 ex-BMAD agents to assets/agents/ + update catalog/agents.yaml + catalog/presets.yaml
+- [ ] 03-03-PLAN.md -- Delete src/module/, tools/package-skills.js, package CLI command, peerDependencies; fix package.json files array; npm install
+- [ ] 03-04-PLAN.md -- Replace BMAD-coupled tests with test-decoupling.js guardrail (D-13)
 
 ### Phase 4: Publish and Verify
 **Goal**: gomad is publishable to private npm and works end-to-end via npx on a fresh project
@@ -89,5 +92,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Rename | 3/4 | In progress | - |
 | 2. Project-Local Install | 0/2 | Not started | - |
-| 3. BMAD Decoupling | 0/1 | Not started | - |
+| 3. BMAD Decoupling | 0/4 | Not started | - |
 | 4. Publish and Verify | 0/1 | Not started | - |
