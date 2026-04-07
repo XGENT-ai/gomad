@@ -28,11 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Lock file is named gomad.lock.yaml and manifest is named .gomad-manifest.yaml
   3. package.json name field is "gomad" and bin field points to bin/gomad-cli.js
   4. All tests pass with vitest after renaming (test files reference gomad, not mobmad)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- Rename files/directories and update all string content (mobmad->gomad, strip bmad- prefix)
+- [ ] 01-02-PLAN.md -- Update test files and verify full test suite passes
 
 ### Phase 2: Project-Local Install
 **Goal**: All asset installation targets ./.claude/ within the project directory, with no global home directory access
@@ -81,7 +81,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
