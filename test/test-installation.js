@@ -67,27 +67,18 @@ describe('Integration: curate + package flow', () => {
   });
 });
 
-describe('Integration: sync populates global/', () => {
-  it('sync creates content in global/', async () => {
-    const { syncUpstream } = await import('../tools/sync-upstream.js');
-    const result = syncUpstream();
-    assert.ok(result.synced > 0, 'should sync some items');
-
-    const globalDir = join(PROJECT_ROOT, 'global');
-    assert.ok(existsSync(join(globalDir, 'rules')), 'rules should exist');
-    assert.ok(readdirSync(join(globalDir, 'rules')).length > 0, 'rules should have content');
-  });
-});
-
 describe('Integration: CLI help and version', () => {
   it('--help shows all commands', () => {
     const output = run('--help');
     assert.ok(output.includes('install'));
     assert.ok(output.includes('curate'));
     assert.ok(output.includes('status'));
-    assert.ok(output.includes('sync'));
     assert.ok(output.includes('package'));
     assert.ok(output.includes('uninstall'));
+    assert.ok(output.includes('mcp'));
+    // Removed commands must not appear as standalone command words
+    assert.ok(!/\bsync\b/.test(output), 'help should not list sync command');
+    assert.ok(!/^\s*update\b/m.test(output), 'help should not list update command');
   });
 
   it('--version shows package version', () => {
@@ -100,8 +91,33 @@ describe('Integration: CLI help and version', () => {
     assert.ok(output.includes('gomad status'));
   });
 
-  it('install --preset lean --yes --global-only runs without error', () => {
-    const output = run('install --preset lean --yes --global-only');
+  it('install --preset lean --yes runs without error', () => {
+    const output = run('install --preset lean --yes');
     assert.ok(output.includes('gomad install'));
+  });
+});
+
+describe('Project-local installation', () => {
+  it('installer.js does not reference homedir', () => {
+    const src = readFileSync(join(PROJECT_ROOT, 'tools', 'installer.js'), 'utf8');
+    assert.ok(!src.includes('homedir'), 'installer.js must not import or use homedir');
+    assert.ok(!src.includes('$HOME'), 'installer.js must not reference $HOME');
+    assert.ok(!src.includes('~/.claude'), 'installer.js must not reference ~/.claude/');
+  });
+
+  it('installer uses process.cwd for CLAUDE_DIR', () => {
+    const src = readFileSync(join(PROJECT_ROOT, 'tools', 'installer.js'), 'utf8');
+    assert.ok(
+      src.includes("join(process.cwd(), '.claude')"),
+      'CLAUDE_DIR must use process.cwd()'
+    );
+  });
+
+  it('curator writes lockfile to process.cwd', () => {
+    const src = readFileSync(join(PROJECT_ROOT, 'tools', 'curator.js'), 'utf8');
+    assert.ok(
+      src.includes("join(process.cwd(), 'gomad.lock.yaml')"),
+      'lockfile path must use process.cwd()'
+    );
   });
 });
