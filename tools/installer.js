@@ -66,22 +66,37 @@ function installFiles(srcDir, targetDir) {
 
 /**
  * Load the lockfile selections or return null.
+ * Returns null if the file is missing, empty, or contains invalid YAML.
  */
 function loadLockfile() {
   if (!existsSync(LOCKFILE_PATH)) return null;
-  const raw = readFileSync(LOCKFILE_PATH, 'utf8');
-  return parseYaml(raw);
+  try {
+    const raw = readFileSync(LOCKFILE_PATH, 'utf8');
+    const parsed = parseYaml(raw);
+    return parsed ?? null;
+  } catch (err) {
+    console.warn(chalk.yellow(`Warning: lockfile at ${LOCKFILE_PATH} is corrupt (${err.message}); ignoring.`));
+    return null;
+  }
 }
 
 /**
  * Load existing manifest or return empty one.
+ * Treats empty/corrupt manifests as empty so callers don't crash.
  */
 function loadManifest() {
+  const empty = { installed_at: null, version: null, files: {} };
   if (!existsSync(MANIFEST_PATH)) {
-    return { installed_at: null, version: null, files: {} };
+    return empty;
   }
-  const raw = readFileSync(MANIFEST_PATH, 'utf8');
-  return parseYaml(raw);
+  try {
+    const raw = readFileSync(MANIFEST_PATH, 'utf8');
+    const parsed = parseYaml(raw);
+    return parsed ?? empty;
+  } catch (err) {
+    console.warn(chalk.yellow(`Warning: manifest at ${MANIFEST_PATH} is corrupt (${err.message}); treating as empty.`));
+    return empty;
+  }
 }
 
 /**
