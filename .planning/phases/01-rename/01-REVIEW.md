@@ -1,8 +1,8 @@
 ---
 phase: 01-rename
-reviewed: 2026-04-07T12:00:00Z
+reviewed: 2026-04-07T14:00:00Z
 depth: standard
-files_reviewed: 17
+files_reviewed: 19
 files_reviewed_list:
   - bin/gomad-cli.js
   - catalog/agents.yaml
@@ -10,6 +10,7 @@ files_reviewed_list:
   - catalog/hooks.yaml
   - catalog/presets.yaml
   - catalog/skills.yaml
+  - CLAUDE.md
   - package.json
   - README.md
   - src/module/agents/skill-manifest.yaml
@@ -23,145 +24,143 @@ files_reviewed_list:
   - tools/package-skills.js
   - tools/sync-upstream.js
 findings:
-  critical: 3
-  warning: 5
-  info: 2
-  total: 10
+  critical: 1
+  warning: 7
+  info: 5
+  total: 13
 status: issues_found
 ---
 
-# Phase 1: Code Review Report
+# Phase 01-rename: Code Review Report
 
-**Reviewed:** 2026-04-07
+**Reviewed:** 2026-04-07T14:00:00Z
 **Depth:** standard
-**Files Reviewed:** 17
+**Files Reviewed:** 19
 **Status:** issues_found
 
 ## Summary
 
-The mobmad-to-gomad rename was executed across CLI, catalogs, tests, lockfile references, and package.json. The top-level rename (binary name, package name, lockfile name, manifest name, CLI strings) is complete and consistent. However, the **module code** `mob` and its derived identifiers (`mob-*` canonicalIds, `module: mob`) were not renamed. This is the dominant class of leftover reference -- it appears in 6 source files, 16 agent manifests, 27 CSV rows, and 14+ generated skill manifests. Additionally, CLAUDE.md still contains `bmad-enhanced` as a preset example, and there is a duplicate skill entry in `catalog/skills.yaml`.
+Reviewed 19 files across the gomad CLI tool: the CLI entry point, 5 catalog YAML files, module definitions, 3 test files, and 4 tool modules. The rename from "mobmad" to "gomad" is complete in user-facing surfaces (CLI binary name, package.json name, lockfile name, README). However, the internal module code `mob` and its derived identifiers (`mob-*` canonicalIds, `module: mob`) persist in module.yaml, skill-manifest.yaml, module-help.csv, package-skills.js, and test assertions. CLAUDE.md contains multiple stale references. Beyond the rename, there is a data integrity bug in the uninstall flow, a duplicate catalog entry, missing cycle detection in preset resolution, and a constraint contradiction regarding global writes.
 
 ## Critical Issues
 
-### CR-01: Module code `mob` not renamed -- pervasive across source and manifests
+### CR-01: Uninstall `rmSync` on individual files will throw EISDIR on directory entries
 
-**File:** `src/module/module.yaml:1`
-**Issue:** The module code remains `code: mob` and `name: "GOMAD"`. This `mob` code propagates everywhere: `tools/package-skills.js` hardcodes `canonicalId: mob-${skillName}` and `module: 'mob'` (lines 104-106), `src/module/agents/skill-manifest.yaml` uses `module: mob` and `name: mob-*` for all 16 agents, `src/module/module-help.csv` uses `mob-` prefix on all 27 skill rows, and `test/test-installation.js` asserts `manifest.module === 'mob'` and `canonicalId.startsWith('mob-')` (lines 62, 65). If the rename goal is to eliminate the old "mob/mobmad" identity, this is the largest gap.
-**Fix:**
-Replace `code: mob` with `code: gomad` in `module.yaml`, then update all derived references:
-```yaml
-# src/module/module.yaml line 1
-code: gomad
-```
-```javascript
-// tools/package-skills.js lines 104-106
-canonicalId: `gomad-${skillName}`,
-module: 'gomad',
-```
-```javascript
-// test/test-installation.js lines 62, 65
-assert.equal(manifest.module, 'gomad');
-assert.ok(manifest.canonicalId.startsWith('gomad-'));
-```
-Then regenerate `src/module/agents/skill-manifest.yaml` and `src/module/module-help.csv` with `gomad-` prefix.
-
-### CR-02: CLI uninstall message references old `mob/` directory
-
-**File:** `bin/gomad-cli.js:66`
-**Issue:** The uninstall command outputs `delete .claude/skills/mob/ in your project`, still referencing the old module code directory name. After CR-01 is fixed this would be `gomad/`.
+**File:** `tools/global-installer.js:309`
+**Issue:** In the `uninstallGlobal()` function, when no backup exists, the code iterates `installedFiles` and calls `rmSync(filePath)` without `{ recursive: true }`. The `installedFiles` array is populated by `collectFiles()` which returns relative paths of files only. However, `installFiles()` uses `cpSync` with `recursive: true`, which can create subdirectories. If the manifest's `files[assetType]` list contains a path where only a parent directory remains (after child files are deleted in a previous uninstall attempt or manual cleanup), calling `rmSync` on a directory path without `{ recursive: true }` will throw an `EISDIR` error, crashing the uninstall process mid-way and leaving a partially cleaned state.
 **Fix:**
 ```javascript
-console.log('To remove the project module, delete .claude/skills/gomad/ in your project.');
+// Line 309: Add recursive and force options for safe removal
+for (const file of installedFiles) {
+  const filePath = join(target, file);
+  if (existsSync(filePath)) {
+    rmSync(filePath, { recursive: true, force: true });
+    removed++;
+  }
+}
 ```
-
-### CR-03: `install_to_bmad` field and BMAD references not renamed in manifests and tests
-
-**File:** `tools/package-skills.js:107`
-**Issue:** The generated skill manifests include `install_to_bmad: true` -- a BMAD-specific field name. The test at `test/test-installation.js:64` asserts this field. If the project is rebranding away from BMAD, this field name should change. Additionally, `tools/global-installer.js:213-214` still prints "Project module installation requires bmad-method" and "Run: npx bmad-method install --modules bmm,mob". The `module.yaml:35` contains "Only install project-scoped BMAD module".
-**Fix:**
-Decide whether BMAD integration is being kept or removed. If removing:
-```javascript
-// tools/package-skills.js line 107
-install_to_project: true,  // or remove entirely
-```
-```javascript
-// tools/global-installer.js lines 213-214
-console.log(chalk.dim('Project module installation is handled by gomad.'));
-```
-```yaml
-# src/module/module.yaml line 35
-label: "No - Only install project-scoped module"
-```
-If keeping BMAD integration as-is, document this explicitly as intentional.
 
 ## Warnings
 
-### WR-01: CLAUDE.md still references `bmad-enhanced` preset name
+### WR-01: Duplicate skill entry "connections-optimizer" in skills catalog
 
-**File:** `CLAUDE.md:218`
-**Issue:** Line 218 lists preset examples as `full, full-stack, lean, enterprise, bmad-enhanced`. The preset was renamed to `enhanced` in `catalog/presets.yaml`. This stale reference in CLAUDE.md will confuse both developers and Claude Code itself (since CLAUDE.md is loaded as project instructions).
-**Fix:**
-```
-- Examples: `full`, `full-stack`, `lean`, `enterprise`, `enhanced`
-```
+**File:** `catalog/skills.yaml:353-355` and `catalog/skills.yaml:503-505`
+**Issue:** The skill `connections-optimizer` appears twice -- once in the "Tools" category (line 353, description: "Reorganize X and LinkedIn network") and once in the "Domain" category (line 503, description: "Network optimization for X and LinkedIn"). This inflates the total skill count (claims 165, actually 164 unique) and could cause confusing behavior during curation or catalog validation.
+**Fix:** Remove the duplicate entry at line 503-505 (the domain category one), keeping the tool category entry which appeared first.
 
-### WR-02: Duplicate `connections-optimizer` entry in skills catalog
+### WR-02: Recursive preset resolution has no cycle detection
 
-**File:** `catalog/skills.yaml:353` and `catalog/skills.yaml:503`
-**Issue:** The skill `connections-optimizer` appears twice -- once under "Tools" (line 353, category: tool) and once under "Domain" (line 503, category: domain) with different descriptions. This causes the "Total: 165 skills" count to be inflated by 1, and preset resolution or tests that check uniqueness could behave unexpectedly.
-**Fix:**
-Remove the duplicate entry. Keep whichever category is more appropriate (likely "tool" since it appears there first), or merge descriptions.
-
-### WR-03: `test/test-module.js` asserts `module.code === 'mob'` -- test will break after CR-01
-
-**File:** `test/test-module.js:20`
-**Issue:** Line 20 asserts `assert.equal(mod.code, 'mob')`. This is correct today but will fail once CR-01 is applied. Flagging it here since it is part of the rename scope.
+**File:** `tools/curator.js:39-44` and `test/test-presets.js:35-41`
+**Issue:** The `resolvePreset` function calls itself recursively via `preset.extend`. A circular reference (e.g., preset A extends B, B extends A) would cause infinite recursion and a stack overflow crash. The same function is duplicated in the test file without cycle detection.
 **Fix:**
 ```javascript
-assert.equal(mod.code, 'gomad');
+function resolvePreset(presetName, presets, catalogs, visited = new Set()) {
+  if (visited.has(presetName)) {
+    throw new Error(`Circular preset extension detected: ${presetName}`);
+  }
+  visited.add(presetName);
+  // ... rest unchanged, pass visited to recursive call
+}
 ```
 
-### WR-04: `test/test-module.js` asserts `peerDependencies['bmad-method']` exists
+### WR-03: Module code still uses "mob" prefix -- incomplete rename
 
-**File:** `test/test-module.js:78`
-**Issue:** The test asserts that `package.json` has a peer dependency on `bmad-method`. If the BMAD dependency is being removed as part of the rebrand (per CLAUDE.md: "now being rebranded as a standalone tool"), this assertion and the `peerDependencies` entry in `package.json:25` should both be removed.
+**File:** `src/module/module.yaml:1`, `src/module/agents/skill-manifest.yaml:9`, `tools/package-skills.js:104-106`, `bin/gomad-cli.js:66`
+**Issue:** The module code remains `mob` throughout: `module.yaml` declares `code: mob`, agent manifests use `module: mob` and `canonicalId: mob-*`, `package-skills.js` hardcodes `mob-${skillName}`, and the CLI uninstall message references `.claude/skills/mob/`. This is the largest remaining gap in the mobmad-to-gomad rename. Tests in `test/test-installation.js:62,65` and `test/test-module.js:20` assert the `mob` values, so they will need updating too.
+**Fix:** Update `module.yaml` to `code: gomad`, update `package-skills.js` to use `gomad-` prefix, update `bin/gomad-cli.js:66` to reference `.claude/skills/gomad/`, regenerate agent manifests and module-help.csv, and update test assertions.
+
+### WR-04: CLAUDE.md contains stale "mobmad" and "bmad-enhanced" references
+
+**File:** `CLAUDE.md` (multiple locations)
+**Issue:** CLAUDE.md still references `mobmad-cli.js`, `mobmad.lock.yaml`, `mobmad mcp enable`, `bmad-enhanced` preset name, and describes BMAD-specific architecture. Since CLAUDE.md is loaded as project instructions by Claude Code, stale references actively mislead the AI assistant during development. The actual files are `gomad-cli.js`, `gomad.lock.yaml`, and the preset is `enhanced`.
+**Fix:** Regenerate or manually update CLAUDE.md to reflect current file names, command names, and architecture.
+
+### WR-05: Constraint contradiction -- project writes to ~/.claude/ despite "no global writes" rule
+
+**File:** `tools/global-installer.js:15-16`, `CLAUDE.md` (constraint section)
+**Issue:** CLAUDE.md states the constraint: "No global writes: Must not write anything to ~/ or $HOME directories." However, `global-installer.js` writes extensively to `~/.claude/` -- this is a core feature of the `install`, `uninstall`, and `status` commands. Either the constraint is outdated or the installer is violating it.
+**Fix:** Update the CLAUDE.md constraint to accurately reflect the intended behavior. If global install is a supported feature, document it as such. If it should be removed, refactor the installer.
+
+### WR-06: Test ordering dependency across describe blocks
+
+**File:** `test/test-installation.js:40-79`
+**Issue:** The "package creates skill directories with manifests" test (line 40) explicitly re-runs `curate` because it depends on a lockfile from the previous test. The "sync populates global/" test (line 70) also depends on a lockfile existing. While `node:test` runs tests in order within a file, this implicit dependency makes tests fragile and harder to run in isolation.
+**Fix:** Add independent setup to each `describe` block or use `before()` hooks to ensure preconditions.
+
+### WR-07: `install` function does not validate lockfile structure
+
+**File:** `tools/global-installer.js:129-150`
+**Issue:** After loading the lockfile via `loadLockfile()`, the code proceeds without validating the parsed YAML has the expected shape. A corrupted or manually edited lockfile with unexpected types (e.g., `skills` as a string instead of an array) would cause runtime errors during iteration.
 **Fix:**
-If removing BMAD dependency:
 ```javascript
-// Remove this assertion from test/test-module.js line 78
-// assert.ok(pkg.peerDependencies['bmad-method'], 'should peer-depend on bmad-method');
-```
-And remove from `package.json`:
-```json
-// Remove peerDependencies block entirely
-```
-
-### WR-05: `module.yaml` directory template still uses `mob` path
-
-**File:** `src/module/module.yaml:39`
-**Issue:** The `directories` section specifies `{output_folder}/mob` as the directory to create during installation. After renaming the module code, this should be `{output_folder}/gomad`.
-**Fix:**
-```yaml
-directories:
-  - "{output_folder}/gomad"
+function loadLockfile() {
+  if (!existsSync(LOCKFILE_PATH)) return null;
+  const raw = readFileSync(LOCKFILE_PATH, 'utf8');
+  const parsed = parseYaml(raw);
+  if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.skills)) {
+    return null;
+  }
+  return parsed;
+}
 ```
 
 ## Info
 
-### IN-01: Generated skill manifests in `src/module/skills/` contain old `mob-` prefix
+### IN-01: Hooks catalog count mismatch
 
-**File:** `src/module/skills/*/skill-manifest.yaml` (14 files)
-**Issue:** All generated skill manifest files under `src/module/skills/` contain `canonicalId: mob-*` and `module: mob`. These are generated artifacts from `tools/package-skills.js`, so fixing CR-01 and re-running `gomad package` will regenerate them correctly. No manual edit needed for these files.
-**Fix:** Re-run `npx gomad package` after fixing CR-01.
+**File:** `catalog/hooks.yaml:128,146`
+**Issue:** The Stop section header says "(6)" but only 4 entries are listed (lines 129-144). The total comment says "36 hooks" but actual count is 15 + 15 + 4 = 34. The `full` preset description in `presets.yaml:5` also says "36 hooks".
+**Fix:** Update the Stop section header to "(4)" and total to "34 hooks". Update presets.yaml description accordingly.
 
-### IN-02: CLAUDE.md contains multiple stale references to BMAD and old architecture
+### IN-02: README skill count says "142+" but catalog has 165
 
-**File:** `CLAUDE.md:223`
-**Issue:** Beyond WR-01, CLAUDE.md line 223 says "Encapsulation of a packaged skill with BMAD manifest" and line 228 says "Write access to ~/.claude/ for global asset installation" (contradicts the project-local-only constraint stated at line 15). These are documentation-level issues in the auto-generated project context, not code bugs.
-**Fix:** Regenerate CLAUDE.md after completing the rename and architecture changes, or manually update the stale sections.
+**File:** `README.md:3`
+**Issue:** README says "142+ skills" while `catalog/skills.yaml` totals 165 skills (164 unique after WR-01 fix). The preset description for `full` also says "165 skills".
+**Fix:** Update README to match the current catalog count.
+
+### IN-03: `package.json` lists `bmad-method` as peer dependency
+
+**File:** `package.json:25`
+**Issue:** The `peerDependencies` section requires `bmad-method ^6.x`. CLAUDE.md describes gomad as "now being rebranded as a standalone tool," suggesting the bmad dependency may no longer be desired. Test at `test/test-module.js:78` also asserts this peer dependency exists.
+**Fix:** If gomad should work independently of bmad-method, remove the peer dependency and the corresponding test assertion.
+
+### IN-04: Unused `relative` import in package-skills.js
+
+**File:** `tools/package-skills.js:14`
+**Issue:** The `relative` function is imported from `path` but never used in the file.
+**Fix:**
+```javascript
+import { join, dirname } from 'path';
+```
+
+### IN-05: module-help.csv uses "GOMAD" module name with "mob-" skill prefix
+
+**File:** `src/module/module-help.csv:2-28`
+**Issue:** The CSV uses module column "GOMAD" (matching `module.yaml` `name`) but skill identifiers use `mob-` prefix (matching `module.yaml` `code`). This is internally consistent today but will need regeneration after the module code rename (WR-03).
+**Fix:** No immediate action needed -- will be resolved as part of WR-03.
 
 ---
 
-_Reviewed: 2026-04-07_
+_Reviewed: 2026-04-07T14:00:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_
