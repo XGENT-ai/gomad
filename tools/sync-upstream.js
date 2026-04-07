@@ -14,7 +14,7 @@ const PROJECT_ROOT = join(__dirname, '..');
 
 const CLAUDE_DIR = join(homedir(), '.claude');
 const GLOBAL_DIR = join(PROJECT_ROOT, 'global');
-const LOCKFILE_PATH = join(PROJECT_ROOT, 'mobmad.lock.yaml');
+const LOCKFILE_PATH = join(PROJECT_ROOT, 'gomad.lock.yaml');
 
 // Source paths in ~/.claude/ for each asset type
 const UPSTREAM_SOURCES = {
@@ -43,7 +43,7 @@ function loadCatalog(name) {
 }
 
 /**
- * Sync upstream ~/.claude/ content into the mobmad global/ directory.
+ * Sync upstream ~/.claude/ content into the gomad global/ directory.
  * Uses the lockfile to determine which items to include.
  *
  * For rules: copies entire directory trees (common/, typescript/, etc.)
@@ -52,11 +52,11 @@ function loadCatalog(name) {
  * For agents: copies selected agent .md files (global scope only)
  */
 export function syncUpstream(options = {}) {
-  console.log(chalk.bold('\nmobmad sync — populate global/ from ~/.claude/\n'));
+  console.log(chalk.bold('\ngomad sync — populate global/ from ~/.claude/\n'));
 
   const lockfile = loadLockfile();
   if (!lockfile) {
-    console.log(chalk.red('No lockfile found. Run `mobmad curate` first.\n'));
+    console.log(chalk.red('No lockfile found. Run `gomad curate` first.\n'));
     return { synced: 0 };
   }
 

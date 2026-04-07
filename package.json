@@ -1,10 +1,10 @@
 {
-  "name": "mobmad",
+  "name": "gomad",
   "version": "0.1.0",
-  "description": "My Own BMAD — a personalized distribution of BMAD-METHOD with curated skills, agents, rules, and hooks",
+  "description": "GOMAD Orchestration Method for Agile Development — curated Claude Code skills, agents, rules, hooks, and commands",
   "type": "module",
   "bin": {
-    "mobmad": "bin/mobmad-cli.js"
+    "gomad": "bin/gomad-cli.js"
   },
   "scripts": {
     "test": "node --test 'test/test-*.js'",
@@ -12,7 +12,7 @@
     "lint": "npx eslint ."
   },
   "keywords": [
-    "bmad",
+    "gomad",
     "claude-code",
     "ai-development",
     "skills",

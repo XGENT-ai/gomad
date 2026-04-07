@@ -60,7 +60,7 @@ describe('Preset resolution', () => {
   const { presets } = loadCatalog('presets');
 
   it('all preset names are valid', () => {
-    const expected = ['full', 'full-stack', 'python-only', 'enterprise', 'lean', 'bmad-enhanced'];
+    const expected = ['full', 'full-stack', 'python-only', 'enterprise', 'lean', 'enhanced'];
     for (const name of expected) {
       assert.ok(presets[name], `preset "${name}" should exist`);
     }
@@ -95,11 +95,11 @@ describe('Preset resolution', () => {
     assert.ok(enterprise.skills.length > fullStack.skills.length);
   });
 
-  it('bmad-enhanced extends lean and includes BMAD agents', () => {
-    assert.equal(presets['bmad-enhanced'].extend, 'lean');
-    const result = resolvePreset('bmad-enhanced', presets, catalogs);
-    const bmadAgents = result.agents.filter((a) => a.startsWith('bmad-'));
-    assert.ok(bmadAgents.length >= 10, `expected 10+ BMAD agents, got ${bmadAgents.length}`);
+  it('enhanced extends lean and includes project agents', () => {
+    assert.equal(presets['enhanced'].extend, 'lean');
+    const result = resolvePreset('enhanced', presets, catalogs);
+    const projectAgents = result.agents.filter((a) => a.includes('/'));
+    assert.ok(projectAgents.length >= 10, `expected 10+ project agents, got ${projectAgents.length}`);
   });
 
   it('all preset skills reference existing catalog entries', () => {

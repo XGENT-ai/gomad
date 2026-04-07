@@ -8,7 +8,7 @@ import { parse as parseYaml } from 'yaml';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
 
-describe('BMAD module definition', () => {
+describe('GOMAD module definition', () => {
   const moduleYamlPath = join(PROJECT_ROOT, 'src', 'module', 'module.yaml');
 
   it('module.yaml exists', () => {
@@ -18,7 +18,7 @@ describe('BMAD module definition', () => {
   it('module.yaml has required fields', () => {
     const mod = parseYaml(readFileSync(moduleYamlPath, 'utf8'));
     assert.equal(mod.code, 'mob');
-    assert.equal(mod.name, 'My Own BMAD');
+    assert.equal(mod.name, 'GOMAD');
     assert.ok(mod.description);
     assert.ok(mod.skill_preset, 'should have skill_preset config');
     assert.ok(mod.install_global_assets, 'should have install_global_assets config');
@@ -27,7 +27,7 @@ describe('BMAD module definition', () => {
   it('module.yaml skill_preset has all preset options', () => {
     const mod = parseYaml(readFileSync(moduleYamlPath, 'utf8'));
     const presetValues = mod.skill_preset['single-select'].map((o) => o.value);
-    const expected = ['full', 'full-stack', 'python-only', 'enterprise', 'lean', 'bmad-enhanced'];
+    const expected = ['full', 'full-stack', 'python-only', 'enterprise', 'lean', 'enhanced'];
     for (const preset of expected) {
       assert.ok(presetValues.includes(preset), `preset ${preset} missing from module.yaml`);
     }
@@ -47,11 +47,11 @@ describe('module-help.csv', () => {
     assert.ok(header.startsWith('module,skill,display-name,menu-code,description'));
   });
 
-  it('all rows belong to My Own BMAD module', () => {
+  it('all rows belong to GOMAD module', () => {
     const content = readFileSync(csvPath, 'utf8');
     const lines = content.trim().split('\n').slice(1); // skip header
     for (const line of lines) {
-      assert.ok(line.startsWith('My Own BMAD,'), `row should start with module name: ${line.slice(0, 40)}`);
+      assert.ok(line.startsWith('GOMAD,'), `row should start with module name: ${line.slice(0, 40)}`);
     }
   });
 
@@ -73,13 +73,13 @@ describe('module-help.csv', () => {
 describe('Package structure', () => {
   it('package.json exists with correct name', () => {
     const pkg = JSON.parse(readFileSync(join(PROJECT_ROOT, 'package.json'), 'utf8'));
-    assert.equal(pkg.name, 'mobmad');
-    assert.ok(pkg.bin.mobmad, 'should have bin entry');
+    assert.equal(pkg.name, 'gomad');
+    assert.ok(pkg.bin.gomad, 'should have bin entry');
     assert.ok(pkg.peerDependencies['bmad-method'], 'should peer-depend on bmad-method');
   });
 
   it('CLI entry point exists', () => {
-    assert.ok(existsSync(join(PROJECT_ROOT, 'bin', 'mobmad-cli.js')));
+    assert.ok(existsSync(join(PROJECT_ROOT, 'bin', 'gomad-cli.js')));
   });
 
   it('all tool files exist', () => {
@@ -89,12 +89,12 @@ describe('Package structure', () => {
     }
   });
 
-  it('BMAD agents are packaged', () => {
+  it('project agents are packaged', () => {
     const agentsDir = join(PROJECT_ROOT, 'src', 'module', 'agents');
-    const subdirs = ['bmad-analysis', 'bmad-planning', 'bmad-research', 'bmad-review'];
+    const subdirs = ['analysis', 'planning', 'research', 'review'];
     for (const sub of subdirs) {
       assert.ok(existsSync(join(agentsDir, sub)), `agents/${sub} should exist`);
     }
-    assert.ok(existsSync(join(agentsDir, 'bmad-skill-manifest.yaml')), 'agent manifest should exist');
+    assert.ok(existsSync(join(agentsDir, 'skill-manifest.yaml')), 'agent manifest should exist');
   });
 });

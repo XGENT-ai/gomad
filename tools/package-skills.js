@@ -2,7 +2,7 @@
 
 /**
  * Package skills from ~/.claude/skills/ into src/module/skills/
- * Creates BMAD-compatible skill directories with SKILL.md + bmad-skill-manifest.yaml
+ * Creates BMAD-compatible skill directories with SKILL.md + skill-manifest.yaml
  *
  * Usage: node tools/package-skills.js [--preset <name>] [--lockfile]
  */
@@ -24,7 +24,7 @@ const PROJECT_ROOT = join(__dirname, '..');
 const CLAUDE_DIR = join(homedir(), '.claude');
 const SKILLS_SRC = join(CLAUDE_DIR, 'skills');
 const MODULE_SKILLS = join(PROJECT_ROOT, 'src', 'module', 'skills');
-const LOCKFILE_PATH = join(PROJECT_ROOT, 'mobmad.lock.yaml');
+const LOCKFILE_PATH = join(PROJECT_ROOT, 'gomad.lock.yaml');
 const CATALOG_PATH = join(PROJECT_ROOT, 'catalog', 'skills.yaml');
 
 /**
@@ -64,7 +64,7 @@ function getCatalogEntry(skillName, catalog) {
  * For each skill:
  * 1. Copy the entire skill directory
  * 2. Ensure SKILL.md exists with valid frontmatter
- * 3. Create bmad-skill-manifest.yaml with canonicalId and module
+ * 3. Create skill-manifest.yaml with canonicalId and module
  */
 function packageSkill(skillName, catalogEntry) {
   const srcDir = join(SKILLS_SRC, skillName);
@@ -99,7 +99,7 @@ function packageSkill(skillName, catalogEntry) {
     writeFileSync(join(destDir, 'SKILL.md'), skillMdContent, 'utf8');
   }
 
-  // Create bmad-skill-manifest.yaml
+  // Create skill-manifest.yaml
   const manifest = {
     canonicalId: `mob-${skillName}`,
     type: 'skill',
@@ -111,7 +111,7 @@ function packageSkill(skillName, catalogEntry) {
   };
 
   writeFileSync(
-    join(destDir, 'bmad-skill-manifest.yaml'),
+    join(destDir, 'skill-manifest.yaml'),
     stringifyYaml(manifest),
     'utf8'
   );
@@ -123,11 +123,11 @@ function packageSkill(skillName, catalogEntry) {
  * Package all selected skills into src/module/skills/.
  */
 export function packageSkills(options = {}) {
-  console.log(chalk.bold('\nmobmad package-skills\n'));
+  console.log(chalk.bold('\ngomad package-skills\n'));
 
   // Load skill list from lockfile
   if (!existsSync(LOCKFILE_PATH)) {
-    console.log(chalk.red('No lockfile found. Run `mobmad curate` first.'));
+    console.log(chalk.red('No lockfile found. Run `gomad curate` first.'));
     return;
   }
 

@@ -1,6 +1,6 @@
 code: mob
-name: "My Own BMAD"
-description: "Personalized BMAD module bundling curated skills, agents, rules, and hooks from the user's Claude Code environment"
+name: "GOMAD"
+description: "GOMAD module bundling curated skills, agents, rules, and hooks from the user's Claude Code environment"
 default_selected: false
 
 # Configuration prompts
@@ -20,8 +20,8 @@ skill_preset:
       label: "Enterprise - All languages + healthcare + supply chain (~100 skills)"
     - value: "lean"
       label: "Lean - Core coding standards, TDD, code review, security (~20 skills)"
-    - value: "bmad-enhanced"
-      label: "BMAD Enhanced - 16 BMAD agents + complementary skills (~25 skills)"
+    - value: "enhanced"
+      label: "Enhanced - 16 project agents + complementary skills (~25 skills)"
 
 install_global_assets:
   prompt:
@@ -45,11 +45,11 @@ post_install_notes:
       value: "yes"
     message: |
       Global assets installed to ~/.claude/
-      Run `mobmad status` to see what was installed.
-      Run `mobmad uninstall --global` to rollback.
+      Run `gomad status` to see what was installed.
+      Run `gomad uninstall --global` to rollback.
   - condition:
       key: install_global_assets
       value: "no"
     message: |
       Global assets were NOT installed.
-      Run `mobmad install --global-only` later to add them.
+      Run `gomad install --global-only` later to add them.

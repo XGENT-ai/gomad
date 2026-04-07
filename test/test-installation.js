@@ -8,7 +8,7 @@ import { parse as parseYaml } from 'yaml';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
-const CLI = join(PROJECT_ROOT, 'bin', 'mobmad-cli.js');
+const CLI = join(PROJECT_ROOT, 'bin', 'gomad-cli.js');
 
 function run(cmd) {
   return execSync(`node ${CLI} ${cmd}`, {
@@ -20,7 +20,7 @@ function run(cmd) {
 
 describe('Integration: curate + package flow', () => {
   it('programmatic curate creates correct lockfile', async () => {
-    const lockPath = join(PROJECT_ROOT, 'mobmad.lock.yaml');
+    const lockPath = join(PROJECT_ROOT, 'gomad.lock.yaml');
     if (existsSync(lockPath)) rmSync(lockPath);
 
     const { curate } = await import('../tools/curator.js');
@@ -55,10 +55,10 @@ describe('Integration: curate + package flow', () => {
       const skillDir = join(skillsDir, dir);
       assert.ok(existsSync(join(skillDir, 'SKILL.md')),
         `${dir} should have SKILL.md`);
-      assert.ok(existsSync(join(skillDir, 'bmad-skill-manifest.yaml')),
-        `${dir} should have bmad-skill-manifest.yaml`);
+      assert.ok(existsSync(join(skillDir, 'skill-manifest.yaml')),
+        `${dir} should have skill-manifest.yaml`);
 
-      const manifest = parseYaml(readFileSync(join(skillDir, 'bmad-skill-manifest.yaml'), 'utf8'));
+      const manifest = parseYaml(readFileSync(join(skillDir, 'skill-manifest.yaml'), 'utf8'));
       assert.equal(manifest.module, 'mob');
       assert.equal(manifest.type, 'skill');
       assert.equal(manifest.install_to_bmad, true);
@@ -97,11 +97,11 @@ describe('Integration: CLI help and version', () => {
 
   it('status runs without error', () => {
     const output = run('status');
-    assert.ok(output.includes('mobmad status'));
+    assert.ok(output.includes('gomad status'));
   });
 
   it('install --preset lean --yes --global-only runs without error', () => {
     const output = run('install --preset lean --yes --global-only');
-    assert.ok(output.includes('mobmad install'));
+    assert.ok(output.includes('gomad install'));
   });
 });

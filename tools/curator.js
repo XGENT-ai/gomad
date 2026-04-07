@@ -74,7 +74,7 @@ function groupByCategory(items) {
 /**
  * Interactive skill/agent/hook selector using @clack/prompts.
  * Reads catalogs, presents preset selection, then per-item toggles.
- * Writes mobmad.lock.yaml with selections.
+ * Writes gomad.lock.yaml with selections.
  *
  * @param {object} options - { preset?: string, yes?: boolean }
  * @returns {object} resolved selections { skills, agents, commands, hooks }
@@ -100,7 +100,7 @@ export async function curate(options = {}) {
     return resolved;
   }
 
-  p.intro('mobmad — curate your skill set');
+  p.intro('gomad — curate your skill set');
 
   // Step 1: Preset selection
   const presetChoice = options.preset || await p.select({
@@ -176,13 +176,13 @@ export async function curate(options = {}) {
   // Write lockfile
   writeLockfile(resolved);
 
-  p.outro(`Saved selections to mobmad.lock.yaml — ${resolved.skills.length} skills, ${resolved.agents.length} agents, ${resolved.commands.length} commands, ${resolved.hooks.length} hooks`);
+  p.outro(`Saved selections to gomad.lock.yaml — ${resolved.skills.length} skills, ${resolved.agents.length} agents, ${resolved.commands.length} commands, ${resolved.hooks.length} hooks`);
 
   return resolved;
 }
 
 function writeLockfile(selections) {
-  const lockPath = join(__dirname, '..', 'mobmad.lock.yaml');
+  const lockPath = join(__dirname, '..', 'gomad.lock.yaml');
   const content = stringifyYaml({
     generated: new Date().toISOString(),
     version: '0.1.0',

@@ -13,9 +13,9 @@ const __dirname = dirname(__filename);
 const PROJECT_ROOT = join(__dirname, '..');
 
 const CLAUDE_DIR = join(homedir(), '.claude');
-const MANIFEST_PATH = join(CLAUDE_DIR, '.mobmad-manifest.yaml');
+const MANIFEST_PATH = join(CLAUDE_DIR, '.gomad-manifest.yaml');
 const GLOBAL_SRC = join(PROJECT_ROOT, 'global');
-const LOCKFILE_PATH = join(PROJECT_ROOT, 'mobmad.lock.yaml');
+const LOCKFILE_PATH = join(PROJECT_ROOT, 'gomad.lock.yaml');
 
 // Mapping from catalog asset type to source/target directories
 const ASSET_DIRS = {
@@ -33,7 +33,7 @@ function backupDir(targetDir) {
   if (!existsSync(targetDir)) return null;
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const backupPath = `${targetDir}.mobmad-backup-${timestamp}`;
+  const backupPath = `${targetDir}.gomad-backup-${timestamp}`;
   // Only back up if there are files to preserve
   try {
     const entries = readdirSync(targetDir);
@@ -113,7 +113,7 @@ function saveManifest(manifest) {
 }
 
 /**
- * Install mobmad global assets to ~/.claude/
+ * Install gomad global assets to ~/.claude/
  *
  * Flow:
  * 1. Run curator if no lockfile exists (or --preset provided)
@@ -123,7 +123,7 @@ function saveManifest(manifest) {
  * 5. Optionally delegate to bmad-method for project module
  */
 export async function install(options = {}) {
-  console.log(chalk.bold('\nmobmad install\n'));
+  console.log(chalk.bold('\ngomad install\n'));
 
   // Step 1: Ensure we have selections (run curator if needed)
   let lockfile = loadLockfile();
@@ -156,7 +156,7 @@ export async function install(options = {}) {
 
   if (!hasGlobalContent) {
     console.log(chalk.yellow('Global content not yet packaged (global/ dirs are empty).'));
-    console.log(chalk.yellow('Run Phase 4 content packaging first, or use `mobmad install --sync` to populate from ~/.claude/.'));
+    console.log(chalk.yellow('Run Phase 4 content packaging first, or use `gomad install --sync` to populate from ~/.claude/.'));
     console.log();
 
     if (!options.globalOnly) {
@@ -215,16 +215,16 @@ async function installProjectModule(options) {
 }
 
 /**
- * Show status of installed mobmad assets.
+ * Show status of installed gomad assets.
  */
 export function status() {
-  console.log(chalk.bold('\nmobmad status\n'));
+  console.log(chalk.bold('\ngomad status\n'));
 
   const manifest = loadManifest();
 
   if (!manifest.installed_at) {
-    console.log(chalk.yellow('No mobmad installation found.'));
-    console.log(chalk.dim('Run `mobmad install` to get started.\n'));
+    console.log(chalk.yellow('No gomad installation found.'));
+    console.log(chalk.dim('Run `gomad install` to get started.\n'));
     return;
   }
 
@@ -273,12 +273,12 @@ export function status() {
  * Uninstall global assets by restoring from backups.
  */
 export function uninstallGlobal() {
-  console.log(chalk.bold('\nmobmad uninstall --global\n'));
+  console.log(chalk.bold('\ngomad uninstall --global\n'));
 
   const manifest = loadManifest();
 
   if (!manifest.installed_at) {
-    console.log(chalk.yellow('No mobmad installation found. Nothing to uninstall.\n'));
+    console.log(chalk.yellow('No gomad installation found. Nothing to uninstall.\n'));
     return;
   }
 

@@ -12,14 +12,14 @@ const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf8
 const program = new Command();
 
 program
-  .name('mobmad')
-  .description('My Own BMAD — personalized BMAD-METHOD distribution')
+  .name('gomad')
+  .description('GOMAD — curated Claude Code environment')
   .version(pkg.version);
 
 program
   .command('install')
-  .description('Install mobmad module and global assets')
-  .option('-p, --preset <preset>', 'Skill preset (full, full-stack, python-only, enterprise, lean, bmad-enhanced)')
+  .description('Install gomad module and global assets')
+  .option('-p, --preset <preset>', 'Skill preset (full, full-stack, python-only, enterprise, lean, enhanced)')
   .option('--global-only', 'Install only global assets to ~/.claude/')
   .option('-y, --yes', 'Skip interactive prompts, use defaults')
   .action(async (options) => {
@@ -37,10 +37,10 @@ program
 
 program
   .command('update')
-  .description('Pull latest BMAD-METHOD and re-apply mobmad module')
+  .description('Pull latest content and re-apply gomad module')
   .action(async () => {
     const { install } = await import('../tools/global-installer.js');
-    console.log('Updating mobmad...');
+    console.log('Updating gomad...');
     // Re-run install with existing lockfile
     await install({ yes: true });
   });
@@ -55,7 +55,7 @@ program
 
 program
   .command('uninstall')
-  .description('Remove mobmad assets')
+  .description('Remove gomad assets')
   .option('--global', 'Remove global assets from ~/.claude/')
   .action(async (options) => {
     if (options.global) {
@@ -69,7 +69,7 @@ program
 
 program
   .command('package')
-  .description('Package selected skills into src/module/skills/ with BMAD manifests')
+  .description('Package selected skills into src/module/skills/ with manifests')
   .action(async () => {
     const { packageSkills } = await import('../tools/package-skills.js');
     packageSkills();
@@ -91,11 +91,11 @@ program
   .action(async (action, name) => {
     if (action === 'list') {
       console.log('MCP server templates (Phase 6 — not yet implemented):');
-      console.log('  Run `mobmad mcp enable <name>` to add a config to your MCP settings.');
+      console.log('  Run `gomad mcp enable <name>` to add a config to your MCP settings.');
     } else if (action === 'enable' && name) {
       console.log(`TODO: Enable MCP server "${name}"`);
     } else {
-      console.log('Usage: mobmad mcp list | mobmad mcp enable <name>');
+      console.log('Usage: gomad mcp list | gomad mcp enable <name>');
     }
   });
 

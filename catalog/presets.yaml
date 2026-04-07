@@ -1,4 +1,4 @@
-# mobmad presets — curated skill/agent/command/hook bundles
+# gomad presets — curated skill/agent/command/hook bundles
 
 presets:
   full:
@@ -200,23 +200,23 @@ presets:
       - opensource-forker
       - opensource-packager
       - opensource-sanitizer
-      # All BMAD agents
-      - bmad-analysis/api-documenter
-      - bmad-analysis/codebase-analyzer
-      - bmad-analysis/data-analyst
-      - bmad-analysis/pattern-detector
-      - bmad-planning/dependency-mapper
-      - bmad-planning/epic-optimizer
-      - bmad-planning/requirements-analyst
-      - bmad-planning/technical-decisions-curator
-      - bmad-planning/trend-spotter
-      - bmad-planning/user-journey-mapper
-      - bmad-planning/user-researcher
-      - bmad-research/market-researcher
-      - bmad-research/tech-debt-auditor
-      - bmad-review/document-reviewer
-      - bmad-review/technical-evaluator
-      - bmad-review/test-coverage-analyzer
+      # All project agents
+      - analysis/api-documenter
+      - analysis/codebase-analyzer
+      - analysis/data-analyst
+      - analysis/pattern-detector
+      - planning/dependency-mapper
+      - planning/epic-optimizer
+      - planning/requirements-analyst
+      - planning/technical-decisions-curator
+      - planning/trend-spotter
+      - planning/user-journey-mapper
+      - planning/user-researcher
+      - research/market-researcher
+      - research/tech-debt-auditor
+      - review/document-reviewer
+      - review/technical-evaluator
+      - review/test-coverage-analyzer
 
   lean:
     description: "Core coding standards, TDD, code review, security (~20 skills)"
@@ -255,8 +255,8 @@ presets:
       - pre-bash-commit-quality.js
       - quality-gate.js
 
-  bmad-enhanced:
-    description: "16 BMAD agents + complementary skills (~25 skills)"
+  enhanced:
+    description: "16 project agents + complementary skills (~25 skills)"
     extend: lean
     additional_skills:
       - blueprint
@@ -266,22 +266,22 @@ presets:
       - content-engine
       - article-writing
     additional_agents:
-      - bmad-analysis/api-documenter
-      - bmad-analysis/codebase-analyzer
-      - bmad-analysis/data-analyst
-      - bmad-analysis/pattern-detector
-      - bmad-planning/dependency-mapper
-      - bmad-planning/epic-optimizer
-      - bmad-planning/requirements-analyst
-      - bmad-planning/technical-decisions-curator
-      - bmad-planning/trend-spotter
-      - bmad-planning/user-journey-mapper
-      - bmad-planning/user-researcher
-      - bmad-research/market-researcher
-      - bmad-research/tech-debt-auditor
-      - bmad-review/document-reviewer
-      - bmad-review/technical-evaluator
-      - bmad-review/test-coverage-analyzer
+      - analysis/api-documenter
+      - analysis/codebase-analyzer
+      - analysis/data-analyst
+      - analysis/pattern-detector
+      - planning/dependency-mapper
+      - planning/epic-optimizer
+      - planning/requirements-analyst
+      - planning/technical-decisions-curator
+      - planning/trend-spotter
+      - planning/user-journey-mapper
+      - planning/user-researcher
+      - research/market-researcher
+      - research/tech-debt-auditor
+      - review/document-reviewer
+      - review/technical-evaluator
+      - review/test-coverage-analyzer
       - doc-updater
       - docs-lookup
       - refactor-cleaner
