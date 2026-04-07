@@ -201,22 +201,22 @@ presets:
       - opensource-packager
       - opensource-sanitizer
       # All project agents
-      - analysis/api-documenter
-      - analysis/codebase-analyzer
-      - analysis/data-analyst
-      - analysis/pattern-detector
-      - planning/dependency-mapper
-      - planning/epic-optimizer
-      - planning/requirements-analyst
-      - planning/technical-decisions-curator
-      - planning/trend-spotter
-      - planning/user-journey-mapper
-      - planning/user-researcher
-      - research/market-researcher
-      - research/tech-debt-auditor
-      - review/document-reviewer
-      - review/technical-evaluator
-      - review/test-coverage-analyzer
+      - api-documenter
+      - codebase-analyzer
+      - data-analyst
+      - pattern-detector
+      - dependency-mapper
+      - epic-optimizer
+      - requirements-analyst
+      - technical-decisions-curator
+      - trend-spotter
+      - user-journey-mapper
+      - user-researcher
+      - market-researcher
+      - tech-debt-auditor
+      - document-reviewer
+      - technical-evaluator
+      - test-coverage-analyzer
 
   lean:
     description: "Core coding standards, TDD, code review, security (~20 skills)"
@@ -266,22 +266,22 @@ presets:
       - content-engine
       - article-writing
     additional_agents:
-      - analysis/api-documenter
-      - analysis/codebase-analyzer
-      - analysis/data-analyst
-      - analysis/pattern-detector
-      - planning/dependency-mapper
-      - planning/epic-optimizer
-      - planning/requirements-analyst
-      - planning/technical-decisions-curator
-      - planning/trend-spotter
-      - planning/user-journey-mapper
-      - planning/user-researcher
-      - research/market-researcher
-      - research/tech-debt-auditor
-      - review/document-reviewer
-      - review/technical-evaluator
-      - review/test-coverage-analyzer
+      - api-documenter
+      - codebase-analyzer
+      - data-analyst
+      - pattern-detector
+      - dependency-mapper
+      - epic-optimizer
+      - requirements-analyst
+      - technical-decisions-curator
+      - trend-spotter
+      - user-journey-mapper
+      - user-researcher
+      - market-researcher
+      - tech-debt-auditor
+      - document-reviewer
+      - technical-evaluator
+      - test-coverage-analyzer
       - doc-updater
       - docs-lookup
       - refactor-cleaner

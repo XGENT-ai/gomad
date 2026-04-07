@@ -98,7 +98,10 @@ describe('Preset resolution', () => {
   it('enhanced extends lean and includes project agents', () => {
     assert.equal(presets['enhanced'].extend, 'lean');
     const result = resolvePreset('enhanced', presets, catalogs);
-    const projectAgents = result.agents.filter((a) => a.includes('/'));
+    const projectScopeNames = new Set(
+      catalogs.agents.filter((a) => a.scope === 'project').map((a) => a.name)
+    );
+    const projectAgents = result.agents.filter((a) => projectScopeNames.has(a));
     assert.ok(projectAgents.length >= 10, `expected 10+ project agents, got ${projectAgents.length}`);
   });
 
