@@ -26,7 +26,7 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - npm 8.x+ (inferred from package.json)
 - Lockfile: `package-lock.json` present
 ## Frameworks
-- commander 13.1.0 - Command-line interface framework (`bin/mobmad-cli.js`)
+- commander 13.1.0 - Command-line interface framework (`bin/gomad-cli.js`)
 - @clack/prompts 0.9.1 - Terminal UI for interactive selection (`tools/curator.js`)
 - yaml 2.7.1 - YAML parsing and stringification for catalog/config files
 - fs-extra 11.3.0 - File system utilities for installation and sync operations
@@ -40,12 +40,12 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - bmad-method ^6.x - BMAD-METHOD framework (required for module registration and integration)
 ## Configuration
 - No .env file — no environment variables required for runtime
-- Secrets: MCP configs with API keys are explicitly NOT auto-installed (user must opt in via `mobmad mcp enable`)
+- Secrets: MCP configs with API keys are explicitly NOT auto-installed (user must opt in via `gomad mcp enable`)
 - No build step — pure JavaScript modules (ESM)
 - No transpilation required (Node.js 18+ has native ESM support)
 ## Installation & Deployment
-- `bin/mobmad-cli.js` - CLI executable registered in package.json as `bin.mobmad`
-- Installed globally via `npm install -g mobmad` or locally via `npm install`
+- `bin/gomad-cli.js` - CLI executable registered in package.json as `bin.gomad`
+- Installed globally via `npm install -g gomad` or locally via `npm install`
 - Node.js >= 18.0.0
 - npm (any recent version)
 - BMAD-METHOD v6.x (to test module integration)
@@ -55,7 +55,7 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 ## Module System
 - All source files use `import` syntax (type: "module" in package.json)
 - Uses `fileURLToPath` and `dirname` for __dirname in ESM context
-- CLI commands: Dynamic imports in `bin/mobmad-cli.js` load tools on demand
+- CLI commands: Dynamic imports in `bin/gomad-cli.js` load tools on demand
 - Main tools exported as named functions: `curate()`, `install()`, `packageSkills()`, `syncUpstream()`
 <!-- GSD:stack-end -->
 
@@ -64,7 +64,7 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 
 ## Naming Patterns
 - PascalCase for utility/module files: `global-installer.js`, `package-skills.js`
-- kebab-case for CLI and tool scripts: `mobmad-cli.js`, `curator.js`, `sync-upstream.js`
+- kebab-case for CLI and tool scripts: `gomad-cli.js`, `curator.js`, `sync-upstream.js`
 - Consistent naming structure for utilities: `[purpose]-[type].js`
 - Test files use pattern: `test-[feature].js` in `test/` directory
 - camelCase for function names: `resolvePreset()`, `loadCatalog()`, `backupDir()`, `collectFiles()`
@@ -111,12 +111,12 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - File operations fail-safe: existing targets removed before copy (`rmSync` + `cpSync`)
 - Manifest tracking for rollback capability
 ## Logging
-- `console.log()` for status updates: `console.log('Updating mobmad...')`
+- `console.log()` for status updates: `console.log('Updating gomad...')`
 - `chalk` used for colored output: `chalk.bold()`, `chalk.red()`, `chalk.green()`
 - Process stderr for diagnostic logging: `process.stderr.write()` in hooks
 - Status line reporting with summaries: counts of files installed
 - Warnings logged to stderr, status to stdout (separation of concerns)
-- Tool initialization and completion: `console.log(chalk.bold('\nmobmad sync...\n'))`
+- Tool initialization and completion: `console.log(chalk.bold('\ngomad sync...\n'))`
 - File counts and summaries: `chalk.green(results)` for success
 - Errors and warnings: `chalk.red('No lockfile found')`
 - Structured output for CLI readability
@@ -149,7 +149,7 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - Helper functions kept internal (no export) unless reused
 - Modules are self-contained tools: curator handles curation, installer handles installation
 - Not used; imports reference specific module paths: `import { curate } from '../tools/curator.js'`
-- Top-level entry: `bin/mobmad-cli.js` dynamically imports submodules
+- Top-level entry: `bin/gomad-cli.js` dynamically imports submodules
 ## Immutability
 - Spread operator for set union: `[...new Set([...base.skills, ...result.skills])]`
 - Explicit object construction instead of mutation: `{ ...item, updated: true }`
@@ -168,7 +168,7 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - **Manifest tracking** - Timestamped backups and installation manifests enable safe rollback
 ## Layers
 - Purpose: Parse commands, delegate to tools, handle user feedback
-- Location: `bin/mobmad-cli.js`
+- Location: `bin/gomad-cli.js`
 - Contains: Commander command definitions, option parsing, action dispatching
 - Depends on: `tools/` modules for implementation
 - Used by: User terminal, CI/CD systems
@@ -225,11 +225,11 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - Contents: SKILL.md (with frontmatter), bmad-skill-manifest.yaml, content files
 - Pattern: Directory matching `{name}` with manifest defining canonicalId, module, metadata
 - Purpose: Audit trail of what was installed, when, and where for safe rollback
-- Location: `~/.claude/.mobmad-manifest.yaml`
+- Location: `~/.claude/.gomad-manifest.yaml`
 - Pattern: YAML with asset_type sections listing file paths and installation timestamps
 ## Entry Points
-- Location: `bin/mobmad-cli.js`
-- Triggers: `npm run curate`, `npx mobmad install`, user terminal invocation
+- Location: `bin/gomad-cli.js`
+- Triggers: `npm run curate`, `npx gomad install`, user terminal invocation
 - Responsibilities: 
 - Location: `src/module/module.yaml`
 - Triggers: `npx bmad-method install --modules mob` or BMAD framework during setup
@@ -246,9 +246,9 @@ GOMAD (GOMAD Orchestration Method for Agile Development) is a Node.js CLI tool t
 - Presets validated via tests: item references exist in catalog
 - Module structure validated: module.yaml has code, skills have SKILL.md + manifest
 - All validation in test suite, no runtime schema checking (fail at test time, not install time)
-- No authentication in mobmad itself
+- No authentication in gomad itself
 - MCP server credentials (API keys) are explicitly NOT auto-installed
-- User must manually enable MCP configs via `mobmad mcp enable <name>`
+- User must manually enable MCP configs via `gomad mcp enable <name>`
 - All catalog operations read-only (no modification to `.yaml` files)
 - Selections stored in separate lockfile, never merge into catalogs
 - Skill directories copied, never symlinked (independent instances per install)
