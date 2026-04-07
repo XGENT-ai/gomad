@@ -51,14 +51,6 @@ program
   });
 
 program
-  .command('package')
-  .description('Package selected skills into src/module/skills/ with manifests')
-  .action(async () => {
-    const { packageSkills } = await import('../tools/package-skills.js');
-    packageSkills();
-  });
-
-program
   .command('mcp')
   .description('Manage MCP server configurations')
   .argument('[action]', 'list or enable', 'list')
