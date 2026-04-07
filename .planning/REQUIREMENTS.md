@@ -33,7 +33,7 @@
 
 ### Publishing
 
-- [ ] **PUB-01**: package.json configured for private npm registry publication
+- [x] **PUB-01**: package.json configured for private npm registry publication
 - [ ] **PUB-02**: `npx gomad install` works end-to-end on a fresh project (writes ./.claude/ with selected assets)
 - [ ] **PUB-03**: `npx gomad install --preset full --yes` works non-interactively
 
@@ -87,7 +87,7 @@
 | BMA-03 | Phase 3 | Pending |
 | BMA-04 | Phase 3 | Pending |
 | BMA-05 | Phase 3 | Pending |
-| PUB-01 | Phase 4 | Pending |
+| PUB-01 | Phase 4 | Complete |
 | PUB-02 | Phase 4 | Pending |
 | PUB-03 | Phase 4 | Pending |
 | TST-01 | Phase 1 | Pending |

@@ -81,7 +81,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Configure package.json for public npm publish (@xgent-ai/gomad@1.0.0) and clean up stale test-runner mentions in planning docs
+- [x] 04-01-PLAN.md -- Configure package.json for public npm publish (@xgent-ai/gomad@1.0.0) and clean up stale test-runner mentions in planning docs
 - [ ] 04-02-PLAN.md -- Add test/test-publish-e2e.js (pack -> install tarball -> CLI -> filesystem assertions) and update npm test for Node 18 timeout
 
 ## Progress
