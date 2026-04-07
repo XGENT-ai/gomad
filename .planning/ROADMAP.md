@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Running `node bin/gomad-cli.js --help` shows "gomad" in all help text with no mention of "mobmad"
   2. Lock file is named gomad.lock.yaml and manifest is named .gomad-manifest.yaml
   3. package.json name field is "gomad" and bin field points to bin/gomad-cli.js
-  4. All tests pass with vitest after renaming (test files reference gomad, not mobmad)
+  4. All tests pass with the project test runner (`npm test`) after renaming (test files reference gomad, not mobmad)
 **Plans:** 4 plans
 
 Plans:
@@ -77,11 +77,11 @@ Plans:
   1. package.json is configured for private npm registry (publishConfig or private field)
   2. `npx gomad install` on a fresh project creates a populated ./.claude/ directory with selected assets
   3. `npx gomad install --preset full --yes` completes non-interactively without errors
-  4. Full test suite passes with vitest (all 20 requirements verified)
+  4. Full test suite passes with the project test runner `npm test` (all 20 requirements verified)
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Configure package.json for public npm publish (@xgent-ai/gomad@1.0.0) and clean up stale vitest mentions in planning docs
+- [ ] 04-01-PLAN.md -- Configure package.json for public npm publish (@xgent-ai/gomad@1.0.0) and clean up stale test-runner mentions in planning docs
 - [ ] 04-02-PLAN.md -- Add test/test-publish-e2e.js (pack -> install tarball -> CLI -> filesystem assertions) and update npm test for Node 18 timeout
 
 ## Progress

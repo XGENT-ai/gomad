@@ -42,7 +42,7 @@
 - [ ] **TST-01**: All existing tests updated to reference gomad instead of mobmad
 - [ ] **TST-02**: Tests verify assets are written to ./.claude/ (project-local) not ~/.claude/
 - [ ] **TST-03**: Tests verify no home directory access during install
-- [ ] **TST-04**: All tests pass with vitest
+- [ ] **TST-04**: All tests pass with the project test runner (`npm test`)
 
 ## v2 Requirements
 
@@ -63,7 +63,6 @@
 | Global installation to ~/.claude/ | Core design change — project-local only |
 | BMAD-METHOD integration | Dropping dependency entirely |
 | Backup/restore on install | Git handles versioning for project-local files |
-| Public npm publication | Private registry only for now |
 | MCP server auto-configuration | Defer — security-sensitive, users opt-in manually |
 | Template export/import | v2 feature, each project runs gomad install independently |
 

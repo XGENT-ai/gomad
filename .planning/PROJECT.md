@@ -17,7 +17,7 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 - ✓ Preset-based selection with inheritance — existing
 - ✓ Lockfile tracking of selections — existing
 - ✓ CLI with commander.js (install, curate, update, status, uninstall, package, sync, mcp) — existing
-- ✓ 35 unit tests with vitest — existing
+- ✓ 35 unit tests with node --test — existing
 
 ### Active
 
@@ -31,7 +31,7 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 - [x] Remove sync-upstream.js (no longer syncing from ~/.claude/) — Validated in Phase 2: Project-Local Install
 - [x] Remove package-skills.js BMAD manifest generation (keep skill copying) — Validated in Phase 3: BMAD Decoupling
 - [ ] Update all tests to reflect new name and project-local behavior
-- [ ] Publish to private npm registry as gomad
+- [ ] Publish to public npm as @xgent-ai/gomad
 
 ### Out of Scope
 
@@ -39,7 +39,6 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 - Template export/import across projects — each project runs `gomad install` independently
 - BMAD-METHOD integration — dropping peer dependency entirely
 - Backup/restore on install — git handles this for project-local files
-- Public npm publication — private registry only
 
 ## Context
 
@@ -54,7 +53,7 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 
 - **Tech stack**: Node.js, keep existing dependencies (commander, @clack/prompts, yaml, fs-extra, chalk)
 - **Compatibility**: Must work with Claude Code's .claude/ directory structure
-- **Registry**: Publish to private npm (not public)
+- **Registry**: Publish to public npm as @xgent-ai/gomad
 - **No global writes**: Must not write anything to ~/ or $HOME directories
 
 ## Key Decisions
@@ -65,7 +64,7 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 | Project-local only (./.claude/) | Users want isolated, reproducible project configs without polluting global state | ✓ Implemented in Phase 2 |
 | Keep BMAD agents as regular agents | Agents are useful regardless of BMAD framework | — Pending |
 | No backup system | Project .claude/ is git-tracked, git provides history | ✓ Implemented in Phase 2 |
-| Private npm publish | Internal distribution only | — Pending |
+| Public npm publish as @xgent-ai/gomad | Standalone tool, broad distribution | — Pending (Phase 4) |
 
 ## Evolution
 
