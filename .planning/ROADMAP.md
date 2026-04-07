@@ -34,7 +34,7 @@ Plans:
 - [x] 01-01-PLAN.md -- Rename files/directories and update all string content (mobmad->gomad, strip bmad- prefix)
 - [x] 01-02-PLAN.md -- Update test files and verify full test suite passes
 - [x] 01-03-PLAN.md -- Gap closure: update CLAUDE.md stale mobmad references and delete mobmad.lock.yaml
-- [ ] 01-04-PLAN.md -- Gap closure: delete leftover mobmad.lock.yaml from project root
+- [x] 01-04-PLAN.md -- Gap closure: delete leftover mobmad.lock.yaml from project root
 
 ### Phase 2: Project-Local Install
 **Goal**: All asset installation targets ./.claude/ within the project directory, with no global home directory access
