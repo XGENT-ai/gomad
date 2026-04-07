@@ -20,9 +20,6 @@
   ],
   "author": "Rockie Guo",
   "license": "MIT",
-  "peerDependencies": {
-    "bmad-method": "^6.x"
-  },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
     "commander": "^13.1.0",
@@ -35,8 +32,7 @@
   },
   "files": [
     "bin/",
-    "src/",
-    "global/",
+    "assets/",
     "catalog/",
     "tools/",
     "README.md"
