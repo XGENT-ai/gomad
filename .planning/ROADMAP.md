@@ -28,11 +28,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Lock file is named gomad.lock.yaml and manifest is named .gomad-manifest.yaml
   3. package.json name field is "gomad" and bin field points to bin/gomad-cli.js
   4. All tests pass with vitest after renaming (test files reference gomad, not mobmad)
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Rename files/directories and update all string content (mobmad->gomad, strip bmad- prefix)
-- [ ] 01-02-PLAN.md -- Update test files and verify full test suite passes
+- [x] 01-01-PLAN.md -- Rename files/directories and update all string content (mobmad->gomad, strip bmad- prefix)
+- [x] 01-02-PLAN.md -- Update test files and verify full test suite passes
+- [ ] 01-03-PLAN.md -- Gap closure: update CLAUDE.md stale mobmad references and delete mobmad.lock.yaml
 
 ### Phase 2: Project-Local Install
 **Goal**: All asset installation targets ./.claude/ within the project directory, with no global home directory access
@@ -85,7 +86,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Rename | 0/2 | Not started | - |
+| 1. Rename | 2/3 | In progress | - |
 | 2. Project-Local Install | 0/2 | Not started | - |
 | 3. BMAD Decoupling | 0/1 | Not started | - |
 | 4. Publish and Verify | 0/1 | Not started | - |
