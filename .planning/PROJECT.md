@@ -22,13 +22,13 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 ### Active
 
 - [x] Rename all references from mobmad to gomad — Validated in Phase 1: Rename
-- [ ] Change install target from ~/.claude/ (global) to ./.claude/ (project-local)
+- [x] Change install target from ~/.claude/ (global) to ./.claude/ (project-local) — Validated in Phase 2: Project-Local Install
 - [ ] Remove BMAD-METHOD peer dependency and module registration system
 - [ ] Keep existing BMAD agents as regular agents (strip BMAD integration layer)
-- [ ] Remove backup/restore system (git is the backup for project-local .claude/)
+- [x] Remove backup/restore system (git is the backup for project-local .claude/) — Validated in Phase 2: Project-Local Install
 - [x] Rename mobmad.lock.yaml to gomad.lock.yaml — Validated in Phase 1: Rename
 - [x] Rename .mobmad-manifest.yaml to .gomad-manifest.yaml — Validated in Phase 1: Rename
-- [ ] Remove sync-upstream.js (no longer syncing from ~/.claude/)
+- [x] Remove sync-upstream.js (no longer syncing from ~/.claude/) — Validated in Phase 2: Project-Local Install
 - [ ] Remove package-skills.js BMAD manifest generation (keep skill copying)
 - [ ] Update all tests to reflect new name and project-local behavior
 - [ ] Publish to private npm registry as gomad
@@ -62,9 +62,9 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | Drop BMAD-METHOD dependency | Stand alone as gomad, simpler install, no external framework needed | — Pending |
-| Project-local only (./.claude/) | Users want isolated, reproducible project configs without polluting global state | — Pending |
+| Project-local only (./.claude/) | Users want isolated, reproducible project configs without polluting global state | ✓ Implemented in Phase 2 |
 | Keep BMAD agents as regular agents | Agents are useful regardless of BMAD framework | — Pending |
-| No backup system | Project .claude/ is git-tracked, git provides history | — Pending |
+| No backup system | Project .claude/ is git-tracked, git provides history | ✓ Implemented in Phase 2 |
 | Private npm publish | Internal distribution only | — Pending |
 
 ## Evolution
@@ -85,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after Phase 1 (Rename) completion*
+*Last updated: 2026-04-07 after Phase 2 (Project-Local Install) completion*
