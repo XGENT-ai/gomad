@@ -168,9 +168,11 @@ export async function curate(options = {}) {
       required: false,
     });
 
-    if (!p.isCancel(agentSelected)) {
-      resolved.agents = agentSelected;
+    if (p.isCancel(agentSelected)) {
+      p.cancel('Curation cancelled.');
+      process.exit(0);
     }
+    resolved.agents = agentSelected;
   }
 
   // Write lockfile
