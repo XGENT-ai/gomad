@@ -300,14 +300,14 @@ it('installer.js does not reference homedir', () => {
 | A2 | Lockfile should move to process.cwd() for project-local semantics | Pitfall 1 | High -- if lockfile stays in package dir, multi-project usage breaks |
 | A3 | Empty directory cleanup after uninstall is desirable | Code Examples | Low -- cosmetic, non-functional |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Lockfile location in curator.js**
+1. **Lockfile location in curator.js** — RESOLVED: Included in Phase 2 scope. Plan 02-01 Task 1 explicitly changes curator.js line 185 to use `process.cwd()` so lockfile and installer agree on location.
    - What we know: Currently hardcoded to gomad package directory
    - What's unclear: Whether curator.js changes are in Phase 2 scope or deferred
    - Recommendation: Include in Phase 2 since installer reads the lockfile and both must agree on location
 
-2. **Skills installation gap**
+2. **Skills installation gap** — RESOLVED: Deferred to Phase 3 (BMAD decoupling). Not in Phase 2 scope.
    - What we know: Current installer handles rules/commands/hooks/agents but not skills. Skills go through package-skills.js + BMAD module.
    - What's unclear: Will Phase 3 (BMAD decoupling) add skills to the installer?
    - Recommendation: Note the gap but don't address in Phase 2. Skills installation is Phase 3's concern.
