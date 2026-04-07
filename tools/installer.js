@@ -128,7 +128,7 @@ export async function install(options = {}) {
     if (options.preset || options.yes) {
       await curate({
         preset: options.preset || 'full-stack',
-        yes: options.yes || !!options.preset,
+        yes: options.yes,
       });
     } else {
       await curate();
