@@ -34,15 +34,15 @@
 ### Publishing
 
 - [x] **PUB-01**: package.json configured for private npm registry publication
-- [ ] **PUB-02**: `npx gomad install` works end-to-end on a fresh project (writes ./.claude/ with selected assets)
-- [ ] **PUB-03**: `npx gomad install --preset full --yes` works non-interactively
+- [x] **PUB-02**: `npx gomad install` works end-to-end on a fresh project (writes ./.claude/ with selected assets)
+- [x] **PUB-03**: `npx gomad install --preset full --yes` works non-interactively
 
 ### Testing
 
 - [ ] **TST-01**: All existing tests updated to reference gomad instead of mobmad
 - [ ] **TST-02**: Tests verify assets are written to ./.claude/ (project-local) not ~/.claude/
 - [ ] **TST-03**: Tests verify no home directory access during install
-- [ ] **TST-04**: All tests pass with the project test runner (`npm test`)
+- [x] **TST-04**: All tests pass with the project test runner (`npm test`)
 
 ## v2 Requirements
 
@@ -88,12 +88,12 @@
 | BMA-04 | Phase 3 | Pending |
 | BMA-05 | Phase 3 | Pending |
 | PUB-01 | Phase 4 | Complete |
-| PUB-02 | Phase 4 | Pending |
-| PUB-03 | Phase 4 | Pending |
+| PUB-02 | Phase 4 | Complete |
+| PUB-03 | Phase 4 | Complete |
 | TST-01 | Phase 1 | Pending |
 | TST-02 | Phase 2 | Pending |
 | TST-03 | Phase 2 | Pending |
-| TST-04 | Phase 4 | Pending |
+| TST-04 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 20 total
