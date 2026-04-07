@@ -136,3 +136,79 @@ npx gomad package
 ## License
 
 MIT
+
+<!-- VERIFY: Sections above this marker contain stale pre-rebrand facts. Corrections:
+     - Package name is `@xgent-ai/gomad` (not `gomad`); install with `npm install @xgent-ai/gomad` or run `npx @xgent-ai/gomad install`.
+     - Quick Start `npm install gomad` is wrong — use `npx @xgent-ai/gomad install` (project-local only).
+     - CLI flag `--global-only` and command `gomad uninstall --global` no longer exist; gomad is project-local only and writes to `./.claude/`, never `~/.claude/`.
+     - `gomad sync` and `gomad package` commands have been removed along with `tools/sync-upstream.js` and `tools/package-skills.js`.
+     - "How It Works" diagram referencing `~/.claude/` → `src/module/` → `.claude/` no longer reflects reality. Current flow: `catalog/` + `assets/` → `gomad.lock.yaml` → `./.claude/`.
+     - Architecture tree is stale: there is no `src/module/` directory and no `global/` directory. Current layout is `bin/`, `tools/` (curator.js, installer.js), `catalog/`, `assets/` (agents/, commands/, hooks/, rules/), `test/`.
+     - Development section claims "35 tests, ~600ms" — actual count is 28 tests (see Testing section below).
+     - `npm run curate` and `npx gomad sync` / `npx gomad package` references in Development section are stale.
+-->
+
+## Requirements
+
+- Node.js >= 18.0.0
+- npm 8.x or newer
+- [Claude Code](https://claude.ai/code) CLI (consumer of the installed `.claude/` directory)
+
+## Installation
+
+gomad is **project-local only** — it writes to `./.claude/` in the current working directory and never touches `~/.claude/` or any global path.
+
+```bash
+# Run directly with npx (recommended — no global install needed)
+npx @xgent-ai/gomad install
+
+# Non-interactive with a preset
+npx @xgent-ai/gomad install --preset full-stack --yes
+
+# Or add as a dev dependency
+npm install --save-dev @xgent-ai/gomad
+npx gomad install
+```
+
+After installation, your project will have a `.claude/` directory containing the selected skills, agents, rules, hooks, and commands, plus a `gomad.lock.yaml` recording the selection.
+
+## Project Structure
+
+```
+gomad/
+  bin/
+    gomad-cli.js          # CLI entry point (commander)
+  tools/
+    curator.js            # Interactive preset/item selector (@clack/prompts)
+    installer.js          # Project-local installer that writes to ./.claude/
+  catalog/
+    skills.yaml           # Skill metadata and categories
+    agents.yaml           # Agent catalog (global + project-scoped)
+    commands.yaml         # Command catalog
+    hooks.yaml            # Hook catalog (PreToolUse / PostToolUse / Stop)
+    presets.yaml          # Preset bundles with inheritance
+  assets/                 # Source content copied into ./.claude/ on install
+    agents/
+    commands/
+    hooks/
+    rules/
+  test/
+    test-catalogs.js      # Catalog schema validation
+    test-presets.js       # Preset resolution and cross-references
+    test-installation.js  # Installer integration tests
+    test-decoupling.js    # Ensures no BMAD / global-path coupling
+    test-publish-e2e.js   # npm pack + install tarball + run CLI end-to-end
+  package.json
+  README.md
+```
+
+## Testing
+
+The project uses Node.js's built-in test runner (`node --test`). The suite covers catalog validation, preset resolution, installer integration, decoupling guarantees, and a publish-to-tarball end-to-end test.
+
+```bash
+# Run the full suite (28 tests across 5 files)
+npm test
+```
+
+Test files live in `test/` and match the pattern `test-*.js`. The publish E2E test runs `npm pack`, installs the resulting tarball into a temp directory, and verifies `npx gomad install --preset full --yes` populates `./.claude/` correctly.
