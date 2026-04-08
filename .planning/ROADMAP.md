@@ -28,11 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `package.json` exposes `gomad` binary, has renamed scripts (`gomad:install`, `gomad:uninstall`, `install:gomad`), no `rebundle` script, and `publishConfig.access` is `"public"`
   3. `tools/installer/external-official-modules.yaml`, `external-manager.js` consumer code, and any builder/web-bundle residue are gone from the repo
   4. `README_VN.md` and `docs/cs/`, `docs/fr/`, `docs/vi-vn/` no longer exist
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — Package identity, bin, scripts, and dependency cleanup
+- [ ] 01-02-PLAN.md — ExternalModuleManager removal, dead docs/translations, bundler cleanup
 
 ### Phase 2: Rename
 **Goal**: Every file path, directory name, manifest entry, skill ID, and content reference has been transformed from `bmad`/`BMAD`/`bmm` to `gomad`/`GOMAD`/`gm-*`, with no rename-related breakage in installer or tests
@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/2 | Not started | - |
+| 1. Foundation | 0/2 | Planned | - |
 | 2. Rename | 0/3 | Not started | - |
 | 3. Credit, Branding & Docs | 0/2 | Not started | - |
 | 4. Verification & Release | 0/1 | Not started | - |
