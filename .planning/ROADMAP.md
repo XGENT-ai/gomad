@@ -44,12 +44,12 @@ Plans:
   3. CLI entry point is `tools/installer/gomad-cli.js` and artifacts file is `gomad-artifacts.js`
   4. A grep for `bmad` across source, configs, manifests, and tests returns zero hits outside of LICENSE attribution, CHANGELOG history, and TRADEMARK fair-use references
   5. Test fixtures (`bmm-style.csv`, `core-style.csv`) are renamed and `test-file-refs-csv.js` passes
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — FS renames, atomic CLI/artifacts/manifest handoff, drop mobmad-plan (FS-01..05)
+- [ ] 02-02-PLAN.md — Content sweep script + execute sweep, reconcile module.yaml/module-help.csv (TXT-01..03)
+- [ ] 02-03-PLAN.md — Rename test fixture and run full phase-gate validation (TXT-04)
 
 ### Phase 3: Credit, Branding & Docs
 **Goal**: GoMad is properly credited as a hard fork of BMAD Method with correct legal files, new visual branding, and complete English + Chinese documentation
