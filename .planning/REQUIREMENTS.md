@@ -94,48 +94,48 @@ Deferred to milestone 2. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PKG-01 | TBD | Pending |
-| PKG-02 | TBD | Pending |
-| PKG-03 | TBD | Pending |
-| PKG-04 | TBD | Pending |
-| PKG-05 | TBD | Pending |
-| FS-01 | TBD | Pending |
-| FS-02 | TBD | Pending |
-| FS-03 | TBD | Pending |
-| FS-04 | TBD | Pending |
-| FS-05 | TBD | Pending |
-| TXT-01 | TBD | Pending |
-| TXT-02 | TBD | Pending |
-| TXT-03 | TBD | Pending |
-| TXT-04 | TBD | Pending |
-| SLIM-01 | TBD | Pending |
-| SLIM-02 | TBD | Pending |
-| SLIM-03 | TBD | Pending |
-| SLIM-04 | TBD | Pending |
-| CREDIT-01 | TBD | Pending |
-| CREDIT-02 | TBD | Pending |
-| CREDIT-03 | TBD | Pending |
-| CREDIT-04 | TBD | Pending |
-| BRAND-01 | TBD | Pending |
-| BRAND-02 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| DOCS-04 | TBD | Pending |
-| DOCS-05 | TBD | Pending |
-| DOCS-06 | TBD | Pending |
-| DOCS-07 | TBD | Pending |
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| VFY-01 | TBD | Pending |
-| VFY-02 | TBD | Pending |
-| VFY-03 | TBD | Pending |
+| PKG-01 | Phase 1 | Pending |
+| PKG-02 | Phase 1 | Pending |
+| PKG-03 | Phase 1 | Pending |
+| PKG-04 | Phase 1 | Pending |
+| PKG-05 | Phase 1 | Pending |
+| FS-01 | Phase 2 | Pending |
+| FS-02 | Phase 2 | Pending |
+| FS-03 | Phase 2 | Pending |
+| FS-04 | Phase 2 | Pending |
+| FS-05 | Phase 2 | Pending |
+| TXT-01 | Phase 2 | Pending |
+| TXT-02 | Phase 2 | Pending |
+| TXT-03 | Phase 2 | Pending |
+| TXT-04 | Phase 2 | Pending |
+| SLIM-01 | Phase 1 | Pending |
+| SLIM-02 | Phase 1 | Pending |
+| SLIM-03 | Phase 1 | Pending |
+| SLIM-04 | Phase 1 | Pending |
+| CREDIT-01 | Phase 3 | Pending |
+| CREDIT-02 | Phase 3 | Pending |
+| CREDIT-03 | Phase 3 | Pending |
+| CREDIT-04 | Phase 3 | Pending |
+| BRAND-01 | Phase 3 | Pending |
+| BRAND-02 | Phase 3 | Pending |
+| DOCS-01 | Phase 3 | Pending |
+| DOCS-02 | Phase 3 | Pending |
+| DOCS-03 | Phase 3 | Pending |
+| DOCS-04 | Phase 3 | Pending |
+| DOCS-05 | Phase 3 | Pending |
+| DOCS-06 | Phase 3 | Pending |
+| DOCS-07 | Phase 3 | Pending |
+| REL-01 | Phase 4 | Pending |
+| REL-02 | Phase 4 | Pending |
+| VFY-01 | Phase 4 | Pending |
+| VFY-02 | Phase 4 | Pending |
+| VFY-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 36 total
-- Mapped to phases: 0
-- Unmapped: 36 (roadmap pending)
+- Mapped to phases: 36
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after initial definition*
+*Last updated: 2026-04-08 -- traceability table populated with phase mappings*
