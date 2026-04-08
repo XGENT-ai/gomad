@@ -2,8 +2,9 @@
   "name": "@xgent-ai/gomad",
   "version": "1.0.0",
   "publishConfig": {
-    "access": "public"
-  },
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },  
   "description": "One command installs curated Claude Code skills, agents, rules, hooks, and commands into your project's local .claude/ directory.",
   "type": "module",
   "bin": {
@@ -21,7 +22,7 @@
     "skills",
     "agents"
   ],
-  "author": "Rockie Guo",
+  "author": "Rockie Guo <rockie@kitmi.com.au>",
   "license": "MIT",
   "dependencies": {
     "@clack/prompts": "^0.9.1",

@@ -40,14 +40,23 @@ One command (`npx gomad install`) gives any project a curated, project-local Cla
 - BMAD-METHOD integration — dropping peer dependency entirely
 - Backup/restore on install — git handles this for project-local files
 
-## Context
+## Current State (post-v1.0)
 
-- Existing codebase is functional as mobmad with BMAD-METHOD integration
-- The CLI, catalog system, curation UI, and test suite are solid foundations
-- Primary changes are: rename, retarget install path, strip BMAD coupling
-- The global-installer.js needs the most rework (home dir → project dir, remove backup logic)
-- The sync-upstream.js and package-skills.js tools become unnecessary
+- Standalone Node.js CLI shipped as `@xgent-ai/gomad@1.0.0` (configured for public npm publish; manual `npm publish` deferred until scope ownership confirmed)
+- Project-local installer writes to `./.claude/` only — no `~/` or `$HOME` writes anywhere in the codebase
+- BMAD-METHOD peer dependency fully removed; former BMAD agents preserved as regular Claude Code agents
+- 5 runtime dependencies: `commander`, `@clack/prompts`, `yaml`, `fs-extra`, `chalk`
+- 28 tests via `node --test` (~1.5s), including a hermetic E2E publish test that packs the tarball and installs into a throwaway consumer dir
+- Documentation set complete: `README.md`, `docs/ARCHITECTURE.md`, `CONFIGURATION.md`, `GETTING-STARTED.md`, `DEVELOPMENT.md`, `TESTING.md`
 - Node.js >= 18, ESM modules, no build step
+
+## Next Milestone Goals
+
+To be defined via `/gsd-new-milestone`. Likely candidates:
+
+- Resolve deferred human gates: actual `npm publish` + post-publish smoke test
+- README head cleanup (replace stale pre-rebrand content flagged by VERIFY block)
+- User feedback iteration based on real consumers
 
 ## Constraints
 
@@ -84,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 after Phase 4 (Publish and Verify) completion — milestone v1.0 complete*
+*Last updated: 2026-04-08 after v1.0 milestone (MVP — Standalone gomad) shipped*
