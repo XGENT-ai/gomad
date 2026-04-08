@@ -47,9 +47,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — FS renames, atomic CLI/artifacts/manifest handoff, drop mobmad-plan (FS-01..05)
-- [ ] 02-02-PLAN.md — Content sweep script + execute sweep, reconcile module.yaml/module-help.csv (TXT-01..03)
-- [ ] 02-03-PLAN.md — Rename test fixture and run full phase-gate validation (TXT-04)
+- [x] 02-01-PLAN.md — FS renames, atomic CLI/artifacts/manifest handoff, drop mobmad-plan (FS-01..05)
+- [x] 02-02-PLAN.md — Content sweep script + execute sweep, reconcile module.yaml/module-help.csv (TXT-01..03)
+- [x] 02-03-PLAN.md — Rename test fixture and run full phase-gate validation (TXT-04)
 
 ### Phase 3: Credit, Branding & Docs
 **Goal**: GoMad is properly credited as a hard fork of BMAD Method with correct legal files, new visual branding, and complete English + Chinese documentation
