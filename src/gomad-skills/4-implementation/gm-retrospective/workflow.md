@@ -26,7 +26,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
 
 - `project_name`, `user_name`
 - `communication_language`, `document_output_language`
@@ -51,7 +51,7 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
 
 ### Required Inputs
 
-- `agent_manifest` = `{project-root}/_bmad/_config/agent-manifest.csv`
+- `agent_manifest` = `{project-root}/_gomad/_config/agent-manifest.csv`
 
 ### Context
 

@@ -25,13 +25,13 @@ class CustomModules {
   /**
    * Install a custom module from its source path.
    * @param {string} moduleName - Module identifier
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    * @param {Function} fileTrackingCallback - Optional callback to track installed files
    * @param {Object} options - Install options
    * @param {Object} options.moduleConfig - Pre-collected module configuration
    * @returns {Object} Install result
    */
-  async install(moduleName, bmadDir, fileTrackingCallback = null, options = {}) {
+  async install(moduleName, gomadDir, fileTrackingCallback = null, options = {}) {
     const sourcePath = this.paths.get(moduleName);
     if (!sourcePath) {
       throw new Error(`No source path for custom module '${moduleName}'`);
@@ -41,7 +41,7 @@ class CustomModules {
       throw new Error(`Source for custom module '${moduleName}' not found at: ${sourcePath}`);
     }
 
-    const targetPath = path.join(bmadDir, moduleName);
+    const targetPath = path.join(gomadDir, moduleName);
 
     // Read custom.yaml and merge into module config
     let moduleConfig = options.moduleConfig ? { ...options.moduleConfig } : {};
@@ -68,8 +68,8 @@ class CustomModules {
 
     // Add to manifest
     const manifest = new Manifest();
-    const versionInfo = await manifest.getModuleVersionInfo(moduleName, bmadDir, sourcePath);
-    await manifest.addModule(bmadDir, moduleName, {
+    const versionInfo = await manifest.getModuleVersionInfo(moduleName, gomadDir, sourcePath);
+    await manifest.addModule(gomadDir, moduleName, {
       version: versionInfo.version,
       source: versionInfo.source,
       npmPackage: versionInfo.npmPackage,
@@ -201,11 +201,11 @@ class CustomModules {
    * Precedence: manifest-backed paths, explicit sources override them, then cached modules.
    * @param {Object} config - Quick update configuration
    * @param {Object} existingInstall - Existing installation snapshot
-   * @param {string} bmadDir - BMAD directory
+   * @param {string} gomadDir - GOMAD directory
    * @returns {Promise<Map<string, Object>>} Map of custom module ID to source info
    */
-  async assembleQuickUpdateSources(config, existingInstall, bmadDir) {
-    const projectRoot = path.dirname(bmadDir);
+  async assembleQuickUpdateSources(config, existingInstall, gomadDir) {
+    const projectRoot = path.dirname(gomadDir);
     const customModuleSources = new Map();
 
     if (existingInstall.customModules) {
@@ -215,8 +215,8 @@ class CustomModules {
 
         let sourcePath = customModule.sourcePath;
         if (sourcePath && sourcePath.startsWith('_config')) {
-          // Paths are relative to BMAD dir, but we want absolute paths for install
-          sourcePath = path.join(bmadDir, sourcePath);
+          // Paths are relative to GOMAD dir, but we want absolute paths for install
+          sourcePath = path.join(gomadDir, sourcePath);
         } else if (!sourcePath && customModule.relativePath) {
           // Fall back to relativePath
           sourcePath = path.resolve(projectRoot, customModule.relativePath);
@@ -253,7 +253,7 @@ class CustomModules {
       }
     }
 
-    const cacheDir = path.join(bmadDir, '_config', 'custom');
+    const cacheDir = path.join(gomadDir, '_config', 'custom');
     if (!(await fs.pathExists(cacheDir))) {
       return customModuleSources;
     }

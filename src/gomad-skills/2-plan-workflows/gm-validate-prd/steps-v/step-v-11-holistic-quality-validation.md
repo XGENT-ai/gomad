@@ -9,7 +9,7 @@ validationReportPath: '{validation_report_path}'
 
 ## STEP GOAL:
 
-Assess the PRD as a cohesive, compelling document - evaluating document flow, dual audience effectiveness (humans and LLMs), BMAD PRD principles compliance, and overall quality rating.
+Assess the PRD as a cohesive, compelling document - evaluating document flow, dual audience effectiveness (humans and LLMs), GOMAD PRD principles compliance, and overall quality rating.
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -41,7 +41,7 @@ Assess the PRD as a cohesive, compelling document - evaluating document flow, du
 ## EXECUTION PROTOCOLS:
 
 - 🎯 Use Advanced Elicitation for multi-perspective assessment
-- 🎯 Evaluate document flow, dual audience, BMAD principles
+- 🎯 Evaluate document flow, dual audience, GOMAD principles
 - 💾 Append comprehensive assessment to validation report
 - 📖 Display "Proceeding to next check..." and load next step
 - 🚫 FORBIDDEN to pause or request user input
@@ -64,7 +64,7 @@ Assess the PRD as a cohesive, compelling document - evaluating document flow, du
 "Perform holistic quality assessment on this PRD using multi-perspective evaluation:
 
 **Advanced Elicitation workflow:**
-Invoke the `bmad-advanced-elicitation` skill
+Invoke the `gomad-advanced-elicitation` skill
 
 **Evaluate the PRD from these perspectives:**
 
@@ -89,7 +89,7 @@ Invoke the `bmad-advanced-elicitation` skill
 - Architecture readiness: Can an LLM generate architecture from this?
 - Epic/Story readiness: Can an LLM break down into epics and stories?
 
-**3. BMAD PRD Principles Compliance:**
+**3. GOMAD PRD Principles Compliance:**
 - Information density: Every sentence carries weight?
 - Measurability: Requirements testable?
 - Traceability: Requirements trace to sources?
@@ -116,7 +116,7 @@ Return comprehensive assessment with all perspectives, rating, and top 3 improve
 - Read complete PRD
 - Evaluate document flow, coherence, transitions
 - Assess dual audience effectiveness
-- Check BMAD principles compliance
+- Check GOMAD principles compliance
 - Assign overall quality rating
 - Identify top 3 improvements
 
@@ -134,7 +134,7 @@ Return comprehensive assessment with all perspectives, rating, and top 3 improve
 - For LLMs: [assessment]
 - Overall dual audience score: [1-5]
 
-**BMAD Principles Compliance:**
+**GOMAD Principles Compliance:**
 - Principles met: [count]/7
 - Principles with issues: [list]
 
@@ -178,7 +178,7 @@ Append to validation report:
 
 **Dual Audience Score:** {score}/5
 
-### BMAD PRD Principles Compliance
+### GOMAD PRD Principles Compliance
 
 | Principle | Status | Notes |
 |-----------|--------|-------|
@@ -240,7 +240,7 @@ Without delay, read fully and follow: {nextStepFile} (step-v-12-completeness-val
 - Advanced Elicitation used for multi-perspective evaluation (or graceful degradation)
 - Document flow & coherence assessed
 - Dual audience effectiveness evaluated (humans and LLMs)
-- BMAD PRD principles compliance checked
+- GOMAD PRD principles compliance checked
 - Overall quality rating assigned (1-5 scale)
 - Top 3 improvements identified
 - Comprehensive assessment reported to validation report
@@ -252,7 +252,7 @@ Without delay, read fully and follow: {nextStepFile} (step-v-12-completeness-val
 - Not using Advanced Elicitation for multi-perspective evaluation
 - Missing document flow assessment
 - Missing dual audience evaluation
-- Not checking all BMAD principles
+- Not checking all GOMAD principles
 - Not assigning overall quality rating
 - Missing top 3 improvements
 - Not reporting comprehensive assessment to validation report

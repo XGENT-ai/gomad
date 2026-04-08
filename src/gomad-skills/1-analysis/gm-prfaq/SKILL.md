@@ -21,7 +21,7 @@ The PRFAQ forces customer-first clarity: write the press release announcing the 
 
 ## On Activation
 
-1. Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve::
+1. Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve::
    - Use `{user_name}` for greeting
    - Use `{communication_language}` for all communications
    - Use `{document_output_language}` for output documents
@@ -68,7 +68,7 @@ When the user gets stuck, offer concrete suggestions based on what they've share
 
 **Fast-track:** If the user provides all four essentials in their opening message (or via structured input), acknowledge and confirm understanding, then move directly to document creation and Stage 2 without extended discovery.
 
-**Graceful redirect:** If after 2-3 exchanges the user can't articulate a customer or problem, don't force it — suggest the idea may need more exploration first and recommend they invoke the `bmad-brainstorming` skill to develop it further.
+**Graceful redirect:** If after 2-3 exchanges the user can't articulate a customer or problem, don't force it — suggest the idea may need more exploration first and recommend they invoke the `gomad-brainstorming` skill to develop it further.
 
 **Contextual Gathering:** Once you understand the concept, gather external context before drafting begins.
 

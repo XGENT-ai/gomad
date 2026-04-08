@@ -34,10 +34,29 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 // D-06 exclude list — exact relative paths from repo root.
 // These files are owned by Phase 3 (credit/legal/branding) and must stay byte-
 // identical to their BMAD-origin or be rewritten by hand, not mechanically swept.
-const EXCLUDE_FILES = new Set(['LICENSE', 'CHANGELOG.md', 'TRADEMARK.md', 'CONTRIBUTORS.md', 'README.md', 'README_CN.md']);
+const EXCLUDE_FILES = new Set([
+  // D-06 Phase 3-owned files.
+  'LICENSE',
+  'CHANGELOG.md',
+  'TRADEMARK.md',
+  'CONTRIBUTORS.md',
+  'README.md',
+  'README_CN.md',
+  // BMAD upstream attribution surfaces rewritten by hand in Task 2 Part B so
+  // nominative-fair-use URLs (bmad-code-org/BMAD-METHOD, bmadcode.com,
+  // buymeacoffee.com/bmad, contact@bmadcode.com) are not mechanically corrupted.
+  // Without these exclusions the sweep would produce broken links like
+  // "gomad-code-org/GOMAD-METHOD". Documented as Rule 2 deviation in SUMMARY.
+  'docs/roadmap.mdx',
+  'docs/zh-cn/roadmap.mdx',
+  'website/src/styles/custom.css',
+]);
 
 // Target file set: any text file under the repo matching one of these extensions.
-const TARGET_GLOB = '**/*.{md,yaml,yml,json,js,mjs,cjs,ts,astro,html,csv}';
+// Extensions chosen so the sweep covers every extension that produced residual
+// bmad/BMAD/bmm hits in the first dry-run (mdx docs, toml IDE templates, py
+// helper scripts, sh validators, css stylesheets).
+const TARGET_GLOB = '**/*.{md,mdx,yaml,yml,json,js,mjs,cjs,ts,astro,html,csv,toml,py,sh,css}';
 const IGNORE_GLOBS = [
   'node_modules/**',
   '.git/**',
@@ -46,6 +65,10 @@ const IGNORE_GLOBS = [
   // The sweep script must not rewrite itself mid-run. Its own source file
   // intentionally contains the literal patterns in comments/regex.
   'tools/dev/rename-sweep.js',
+  // The sweep script's unit tests intentionally assert on literal bmad/BMAD/
+  // bmm strings. Sweeping them would turn the test fixtures into tautologies
+  // ("gomad transforms to gomad") and make the suite worthless.
+  'test/test-rename-sweep.js',
 ];
 
 // D-05 substitution mapping. Order matters: longest / most specific patterns
@@ -67,6 +90,12 @@ const MAPPINGS = Object.freeze([
   // underscore, but the <behavior> spec says "non-alphanumeric characters" and
   // the D-17 gate demands zero residual `bmm`. Following the behavior spec.
   { re: /(?<![A-Za-z0-9])bmm(?![A-Za-z0-9])/g, to: 'gomad', name: 'bmm→gomad (word-anchored)' },
+  // camelCase identifier head: `bmmPath`, `bmmConfigPath`, `bmmInfo` — legit
+  // JavaScript identifiers in installer code whose `bmm` prefix is namespace,
+  // followed by a capital letter. The previous rule won't match (capital is
+  // alphanumeric). Matches only at identifier start (non-alphanumeric before),
+  // so `someBmmPath` — if it existed — would NOT be rewritten.
+  { re: /(?<![A-Za-z0-9])bmm(?=[A-Z])/g, to: 'gomad', name: 'bmm→gomad (camelCase head)' },
 ]);
 
 /**

@@ -10,7 +10,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
 
 - `project_knowledge`
 - `user_name`

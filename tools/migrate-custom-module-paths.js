@@ -9,15 +9,15 @@ const yaml = require('yaml');
 const chalk = require('chalk');
 
 /**
- * Find BMAD directory in project
+ * Find GOMAD directory in project
  */
 function findBmadDir(projectDir = process.cwd()) {
-  const possibleNames = ['_bmad'];
+  const possibleNames = ['_gomad'];
 
   for (const name of possibleNames) {
-    const bmadDir = path.join(projectDir, name);
-    if (fs.existsSync(bmadDir)) {
-      return bmadDir;
+    const gomadDir = path.join(projectDir, name);
+    if (fs.existsSync(gomadDir)) {
+      return gomadDir;
     }
   }
 
@@ -84,18 +84,18 @@ async function updateManifest(manifestPath, projectRoot) {
  */
 async function migrate(directory) {
   const projectRoot = path.resolve(directory || process.cwd());
-  const bmadDir = findBmadDir(projectRoot);
+  const gomadDir = findBmadDir(projectRoot);
 
-  if (!bmadDir) {
-    console.error(chalk.red('✗ No BMAD installation found in directory'));
+  if (!gomadDir) {
+    console.error(chalk.red('✗ No GOMAD installation found in directory'));
     process.exit(1);
   }
 
-  console.log(chalk.blue.bold('🔄 BMAD Custom Module Path Migration'));
+  console.log(chalk.blue.bold('🔄 GOMAD Custom Module Path Migration'));
   console.log(chalk.dim(`Project: ${projectRoot}`));
-  console.log(chalk.dim(`BMAD Directory: ${bmadDir}`));
+  console.log(chalk.dim(`GOMAD Directory: ${gomadDir}`));
 
-  const manifestPath = path.join(bmadDir, '_config', 'manifest.yaml');
+  const manifestPath = path.join(gomadDir, '_config', 'manifest.yaml');
 
   if (!fs.existsSync(manifestPath)) {
     console.error(chalk.red('✗ No manifest.yaml found'));

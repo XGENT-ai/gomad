@@ -68,9 +68,9 @@ If no findings are generated (from either pass), the skill passes validation.
 
 - **Severity:** HIGH
 - **Applies to:** `SKILL.md`
-- **Rule:** The `name` value must start with `bmad-`, use only lowercase letters, numbers, and single hyphens between segments.
-- **Detection:** Regex test: `^bmad-[a-z0-9]+(-[a-z0-9]+)*$`.
-- **Fix:** Rename to comply with the format (e.g., `bmad-my-skill`).
+- **Rule:** The `name` value must start with `gomad-`, use only lowercase letters, numbers, and single hyphens between segments.
+- **Detection:** Regex test: `^gomad-[a-z0-9]+(-[a-z0-9]+)*$`.
+- **Fix:** Rename to comply with the format (e.g., `gomad-my-skill`).
 
 ### SKILL-05 — `name` Must Match Directory Name
 
@@ -105,7 +105,7 @@ If no findings are generated (from either pass), the skill passes validation.
 - **Rule:** The `name` field belongs only in `SKILL.md`. No other markdown file in the skill directory may have `name:` in its frontmatter.
 - **Detection:** Parse frontmatter of every non-SKILL.md markdown file and check for `name:` key.
 - **Fix:** Remove the `name:` line from the file's frontmatter.
-- **Exception:** `bmad-agent-tech-writer` — has sub-skill files with intentional `name` fields (to be revisited).
+- **Exception:** `gomad-agent-tech-writer` — has sub-skill files with intentional `name` fields (to be revisited).
 
 ### WF-02 — Only SKILL.md May Have `description` in Frontmatter
 
@@ -114,7 +114,7 @@ If no findings are generated (from either pass), the skill passes validation.
 - **Rule:** The `description` field belongs only in `SKILL.md`. No other markdown file in the skill directory may have `description:` in its frontmatter.
 - **Detection:** Parse frontmatter of every non-SKILL.md markdown file and check for `description:` key.
 - **Fix:** Remove the `description:` line from the file's frontmatter.
-- **Exception:** `bmad-agent-tech-writer` — has sub-skill files with intentional `description` fields (to be revisited).
+- **Exception:** `gomad-agent-tech-writer` — has sub-skill files with intentional `description` fields (to be revisited).
 
 ### WF-03 — workflow.md Frontmatter Variables Must Be Config or Runtime Only
 
@@ -175,13 +175,13 @@ If no findings are generated (from either pass), the skill passes validation.
 - **Applies to:** all files in the skill
 - **Rule:** A skill must never reference any file inside another skill's directory by file path. Skill directories are encapsulated — their internal files (steps, templates, checklists, data files, workflow.md) are private implementation details. The only valid way to reference another skill is via `skill:skill-name` syntax, which invokes the skill as a unit. Reaching into another skill to cherry-pick an internal file (e.g., a template, a step, or even its workflow.md) breaks encapsulation and creates fragile coupling that breaks when the target skill is moved or reorganized.
 - **Detection:** For each external file reference (frontmatter values, markdown links, inline paths), check whether the resolved path points into a directory that is or contains a skill (has a `SKILL.md`). Patterns to flag:
-  - `{project-root}/_bmad/.../other-skill/anything.md`
-  - `{project-root}/_bmad/.../other-skill/steps/...`
-  - `{project-root}/_bmad/.../other-skill/templates/...`
+  - `{project-root}/_gomad/.../other-skill/anything.md`
+  - `{project-root}/_gomad/.../other-skill/steps/...`
+  - `{project-root}/_gomad/.../other-skill/templates/...`
   - References to old pre-conversion locations that were skill directories (e.g., `core/workflows/skill-name/` when the skill has since moved to `core/skills/skill-name/`)
 - **Fix:**
   - If the intent is to invoke the other skill: replace with `skill:skill-name`.
-  - If the intent is to use a shared resource (template, data file): the resource should be extracted to a shared location outside both skills (e.g., `core/data/`, `bmm/data/`, or a config-referenced path) — not reached into from across skill boundaries.
+  - If the intent is to use a shared resource (template, data file): the resource should be extracted to a shared location outside both skills (e.g., `core/data/`, `gomad/data/`, or a config-referenced path) — not reached into from across skill boundaries.
 
 ### PATH-04 — No Intra-Skill Path Variables
 
@@ -299,7 +299,7 @@ If no findings are generated (from either pass), the skill passes validation.
 - **Severity:** HIGH
 - **Applies to:** all files
 - **Rule:** When a skill references another skill by name, the surrounding instruction must use the word "invoke". The canonical form is `Invoke the \`skill-name\` skill`. Phrases like "Read fully and follow", "Execute", "Run", "Load", "Open", or "Follow" are invalid — they imply file-level operations on a document, not skill invocation. A skill is a unit that is invoked, not a file that is read.
-- **Detection:** Find all references to other skills by name (typically backtick-quoted skill names like \`bmad-foo\`). Check the surrounding instruction text (same sentence or directive) for file-oriented verbs: "read", "follow", "load", "execute", "run", "open". Flag any that do not use "invoke" (or a close synonym like "activate" or "launch").
+- **Detection:** Find all references to other skills by name (typically backtick-quoted skill names like \`gomad-foo\`). Check the surrounding instruction text (same sentence or directive) for file-oriented verbs: "read", "follow", "load", "execute", "run", "open". Flag any that do not use "invoke" (or a close synonym like "activate" or "launch").
 - **Fix:** Replace the instruction with `Invoke the \`skill-name\` skill`. Remove any "read fully and follow" or similar file-oriented phrasing. Do NOT add a `skill:` prefix to the name — use natural language.
 
 ---

@@ -62,7 +62,7 @@ Offer validation workflows to ensure PRD is ready for implementation:
 
 **Available Validation Workflows:**
 
-**Option 1: Check Implementation Readiness** (`skill:bmad-check-implementation-readiness`)
+**Option 1: Check Implementation Readiness** (`skill:gomad-check-implementation-readiness`)
 - Validates PRD has all information needed for development
 - Checks epic coverage completeness
 - Reviews UX alignment with requirements
@@ -78,7 +78,7 @@ Offer validation workflows to ensure PRD is ready for implementation:
 
 ### 4. Suggest Next Workflows
 
-PRD complete. Invoke the `bmad-help` skill.
+PRD complete. Invoke the `gomad-help` skill.
 
 ### 5. Final Completion Confirmation
 

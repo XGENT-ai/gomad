@@ -64,8 +64,8 @@ Critical warnings only — data loss, security issues
 ```md
 | Skill                | Agent   | Purpose                              |
 | -------------------- | ------- | ------------------------------------ |
-| `bmad-brainstorming` | Analyst | Brainstorm a new project             |
-| `bmad-create-prd`    | PM      | Create Product Requirements Document |
+| `gomad-brainstorming` | Analyst | Brainstorm a new project             |
+| `gomad-create-prd`    | PM      | Create Product Requirements Document |
 ```
 
 ## 文件结构块（Folder Structure）
@@ -75,8 +75,8 @@ Critical warnings only — data loss, security issues
 ````md
 ```
 your-project/
-├── _bmad/                                   # BMad configuration
-├── _bmad-output/
+├── _gomad/                                   # GoMad configuration
+├── _gomad-output/
 │   ├── planning-artifacts/
 │   │   └── PRD.md                           # Your requirements document
 │   ├── implementation-artifacts/
@@ -325,7 +325,7 @@ Starlight 右侧 “On this page” 来自标题层级：
 在定义开头用斜体标记适用范围：
 
 - `*Quick Flow only.*`
-- `*BMad Method/Enterprise.*`
+- `*GoMad Method/Enterprise.*`
 - `*Phase N.*`
 - `*BMGD.*`
 - `*Established projects.*`
@@ -349,11 +349,11 @@ Starlight 右侧 “On this page” 来自标题层级：
 
 ### Do I always need architecture?
 
-Only for BMad Method and Enterprise tracks. Quick Flow skips to implementation.
+Only for GoMad Method and Enterprise tracks. Quick Flow skips to implementation.
 
 ### Can I change my plan later?
 
-Yes. The `bmad-correct-course` workflow handles scope changes mid-implementation.
+Yes. The `gomad-correct-course` workflow handles scope changes mid-implementation.
 
 **Have a question not answered here?** [Open an issue](...) or ask in [Discord](...).
 ```

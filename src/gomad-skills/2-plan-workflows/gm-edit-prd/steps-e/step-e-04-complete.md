@@ -1,7 +1,7 @@
 ---
 # File references (ONLY variables used in this step)
 prdFile: '{prd_file_path}'
-validationWorkflow: '{project-root}/_bmad/bmm-skills/2-plan-workflows/bmad-validate-prd/steps-v/step-v-01-discovery.md'
+validationWorkflow: '{project-root}/_gomad/gomad-skills/2-plan-workflows/gomad-validate-prd/steps-v/step-v-01-discovery.md'
 ---
 
 # Step E-4: Complete & Validate
@@ -69,7 +69,7 @@ From step e-03 change execution, compile:
 - Priority addressed: {Critical/High/Medium/Low}
 
 **PRD Status:**
-- Format: {BMAD Standard / BMAD Variant / Legacy (converted)}
+- Format: {GOMAD Standard / GOMAD Variant / Legacy (converted)}
 - Completeness: {assessment}
 - Ready for: {downstream use cases}
 

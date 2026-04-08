@@ -30,4 +30,4 @@ Run the tests using your project's test command.
 
 ---
 
-**Need more comprehensive testing?** Install [Test Architect (TEA)](https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/) for advanced workflows.
+**Need more comprehensive testing?** Install [Test Architect (TEA)](https://gomad-code-org.github.io/gomad-test-architecture-enterprise/) for advanced workflows.

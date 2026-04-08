@@ -17,7 +17,7 @@ import path from 'node:path';
 
 /**
  * @param {Object} options
- * @param {string} options.base - Site base path (e.g., '/BMAD-METHOD/')
+ * @param {string} options.base - Site base path (e.g., '/GOMAD-METHOD/')
  * @param {string} [options.contentDir] - Absolute path to content root; auto-detected if omitted
  */
 export default function rehypeMarkdownLinks(options = {}) {
@@ -107,8 +107,8 @@ export function detectContentDir(filePath) {
       return segments.slice(0, i + 1).join(path.sep);
     }
   }
-  // Also check for a standalone 'docs' directory (BMAD project structure)
-  // Path format: .../bmm/docs/file.mdx or .../bmm/website/...
+  // Also check for a standalone 'docs' directory (GOMAD project structure)
+  // Path format: .../gomad/docs/file.mdx or .../gomad/website/...
   for (let i = segments.length - 1; i >= 0; i--) {
     if (segments[i] === 'docs') {
       // Found docs directory - use its parent as the content root

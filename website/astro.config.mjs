@@ -43,7 +43,7 @@ export default defineConfig({
       filter: (page) => !/\/404(\/|$)/.test(new URL(page).pathname),
     }),
     starlight({
-      title: 'BMAD Method',
+      title: 'GoMad',
       tagline: 'AI-driven agile development with specialized agents and workflows that scale from bug fixes to enterprise platforms.',
 
       // i18n: locale config from shared module (website/src/lib/locales.mjs)
@@ -55,8 +55,8 @@ export default defineConfig({
       // Social links
       social: [
         { icon: 'discord', label: 'Discord', href: 'https://discord.gg/gk8jAdXWmj' },
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/bmad-code-org/BMAD-METHOD' },
-        { icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/@BMadCode' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/gomad-code-org/GOMAD-METHOD' },
+        { icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/@GoMadCode' },
       ],
 
       // Show last updated timestamps
@@ -68,7 +68,7 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             name: 'ai-terms',
-            content: `AI-optimized documentation: ${siteUrl}/llms-full.txt (plain text, ~100k tokens, complete BMAD reference). Index: ${siteUrl}/llms.txt`,
+            content: `AI-optimized documentation: ${siteUrl}/llms-full.txt (plain text, ~100k tokens, complete GOMAD reference). Index: ${siteUrl}/llms.txt`,
           },
         },
         {
@@ -128,15 +128,15 @@ export default defineConfig({
         },
         // TEA docs moved to standalone module site; keep BMM sidebar focused.
         {
-          label: 'BMad Ecosystem',
+          label: 'GoMad Ecosystem',
           collapsed: false,
           items: [
-            { label: 'BMad Builder', link: 'https://bmad-builder-docs.bmad-method.org/', attrs: { target: '_blank' } },
-            { label: 'Creative Intelligence Suite', link: 'https://cis-docs.bmad-method.org/', attrs: { target: '_blank' } },
-            { label: 'Game Dev Studio', link: 'https://game-dev-studio-docs.bmad-method.org/', attrs: { target: '_blank' } },
+            { label: 'GoMad Builder', link: 'https://gomad-builder-docs.gomad.org/', attrs: { target: '_blank' } },
+            { label: 'Creative Intelligence Suite', link: 'https://cis-docs.gomad.org/', attrs: { target: '_blank' } },
+            { label: 'Game Dev Studio', link: 'https://game-dev-studio-docs.gomad.org/', attrs: { target: '_blank' } },
             {
               label: 'Test Architect (TEA)',
-              link: 'https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/',
+              link: 'https://gomad-code-org.github.io/gomad-test-architecture-enterprise/',
               attrs: { target: '_blank' },
             },
           ],

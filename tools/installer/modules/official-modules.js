@@ -94,7 +94,7 @@ class OfficialModules {
   }
 
   /**
-   * List all available built-in modules (core and bmm).
+   * List all available built-in modules (core and gomad).
    * All other modules come from external-official-modules.yaml
    * @returns {Object} Object with modules array and customModules array
    */
@@ -111,12 +111,12 @@ class OfficialModules {
       }
     }
 
-    // Add built-in bmm module (directly under src/bmm-skills)
-    const bmmPath = getSourcePath('bmm-skills');
-    if (await fs.pathExists(bmmPath)) {
-      const bmmInfo = await this.getModuleInfo(bmmPath, 'bmm', 'src/bmm-skills');
-      if (bmmInfo) {
-        modules.push(bmmInfo);
+    // Add built-in gomad module (directly under src/gomad-skills)
+    const gomadPath = getSourcePath('gomad-skills');
+    if (await fs.pathExists(gomadPath)) {
+      const gomadInfo = await this.getModuleInfo(gomadPath, 'gomad', 'src/gomad-skills');
+      if (gomadInfo) {
+        modules.push(gomadInfo);
       }
     }
 
@@ -147,9 +147,9 @@ class OfficialModules {
       return null;
     }
 
-    // Mark as custom if it's using custom.yaml OR if it's outside src/bmm or src/core
+    // Mark as custom if it's using custom.yaml OR if it's outside src/gomad or src/core
     const isCustomSource =
-      sourceDescription !== 'src/bmm-skills' && sourceDescription !== 'src/core-skills' && sourceDescription !== 'src/modules';
+      sourceDescription !== 'src/gomad-skills' && sourceDescription !== 'src/core-skills' && sourceDescription !== 'src/modules';
     const moduleInfo = {
       id: defaultName,
       path: modulePath,
@@ -157,7 +157,7 @@ class OfficialModules {
         .split('-')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' '),
-      description: 'BMAD Module',
+      description: 'GOMAD Module',
       version: '5.0.0',
       source: sourceDescription,
       isCustom: configPath === rootCustomConfigPath || isCustomSource,
@@ -201,11 +201,11 @@ class OfficialModules {
       }
     }
 
-    // Check for built-in bmm module (directly under src/bmm-skills)
-    if (moduleCode === 'bmm') {
-      const bmmPath = getSourcePath('bmm-skills');
-      if (await fs.pathExists(bmmPath)) {
-        return bmmPath;
+    // Check for built-in gomad module (directly under src/gomad-skills)
+    if (moduleCode === 'gomad') {
+      const gomadPath = getSourcePath('gomad-skills');
+      if (await fs.pathExists(gomadPath)) {
+        return gomadPath;
       }
     }
 
@@ -215,16 +215,16 @@ class OfficialModules {
   /**
    * Install a module
    * @param {string} moduleName - Code of the module to install (from module.yaml)
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    * @param {Function} fileTrackingCallback - Optional callback to track installed files
    * @param {Object} options - Additional installation options
    * @param {Array<string>} options.installedIDEs - Array of IDE codes that were installed
    * @param {Object} options.moduleConfig - Module configuration from config collector
    * @param {Object} options.logger - Logger instance for output
    */
-  async install(moduleName, bmadDir, fileTrackingCallback = null, options = {}) {
+  async install(moduleName, gomadDir, fileTrackingCallback = null, options = {}) {
     const sourcePath = await this.findModuleSource(moduleName, { silent: options.silent });
-    const targetPath = path.join(bmadDir, moduleName);
+    const targetPath = path.join(gomadDir, moduleName);
 
     if (!sourcePath) {
       throw new Error(
@@ -239,14 +239,14 @@ class OfficialModules {
     await this.copyModuleWithFiltering(sourcePath, targetPath, fileTrackingCallback, options.moduleConfig);
 
     if (!options.skipModuleInstaller) {
-      await this.createModuleDirectories(moduleName, bmadDir, options);
+      await this.createModuleDirectories(moduleName, gomadDir, options);
     }
 
     const { Manifest } = require('../core/manifest');
     const manifestObj = new Manifest();
-    const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, bmadDir, sourcePath);
+    const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, gomadDir, sourcePath);
 
-    await manifestObj.addModule(bmadDir, moduleName, {
+    await manifestObj.addModule(gomadDir, moduleName, {
       version: versionInfo.version,
       source: versionInfo.source,
       npmPackage: versionInfo.npmPackage,
@@ -259,11 +259,11 @@ class OfficialModules {
   /**
    * Update an existing module
    * @param {string} moduleName - Name of the module to update
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    */
-  async update(moduleName, bmadDir) {
+  async update(moduleName, gomadDir) {
     const sourcePath = await this.findModuleSource(moduleName);
-    const targetPath = path.join(bmadDir, moduleName);
+    const targetPath = path.join(gomadDir, moduleName);
 
     if (!sourcePath) {
       throw new Error(`Module '${moduleName}' not found in any source location`);
@@ -285,10 +285,10 @@ class OfficialModules {
   /**
    * Remove a module
    * @param {string} moduleName - Name of the module to remove
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    */
-  async remove(moduleName, bmadDir) {
-    const targetPath = path.join(bmadDir, moduleName);
+  async remove(moduleName, gomadDir) {
+    const targetPath = path.join(gomadDir, moduleName);
 
     if (!(await fs.pathExists(targetPath))) {
       throw new Error(`Module '${moduleName}' is not installed`);
@@ -305,22 +305,22 @@ class OfficialModules {
   /**
    * Check if a module is installed
    * @param {string} moduleName - Name of the module
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    * @returns {boolean} True if module is installed
    */
-  async isInstalled(moduleName, bmadDir) {
-    const targetPath = path.join(bmadDir, moduleName);
+  async isInstalled(moduleName, gomadDir) {
+    const targetPath = path.join(gomadDir, moduleName);
     return await fs.pathExists(targetPath);
   }
 
   /**
    * Get installed module info
    * @param {string} moduleName - Name of the module
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    * @returns {Object|null} Module info or null if not installed
    */
-  async getInstalledInfo(moduleName, bmadDir) {
-    const targetPath = path.join(bmadDir, moduleName);
+  async getInstalledInfo(moduleName, gomadDir) {
+    const targetPath = path.join(gomadDir, moduleName);
 
     if (!(await fs.pathExists(targetPath))) {
       return null;
@@ -442,17 +442,17 @@ class OfficialModules {
    * This replaces the security-risky module installer pattern with declarative config
    * During updates, if a directory path changed, moves the old directory to the new path
    * @param {string} moduleName - Name of the module
-   * @param {string} bmadDir - Target bmad directory
+   * @param {string} gomadDir - Target gomad directory
    * @param {Object} options - Installation options
    * @param {Object} options.moduleConfig - Module configuration from config collector
    * @param {Object} options.existingModuleConfig - Previous module config (for detecting path changes during updates)
    * @param {Object} options.coreConfig - Core configuration
    * @returns {Promise<{createdDirs: string[], movedDirs: string[], createdWdsFolders: string[]}>} Created directories info
    */
-  async createModuleDirectories(moduleName, bmadDir, options = {}) {
+  async createModuleDirectories(moduleName, gomadDir, options = {}) {
     const moduleConfig = options.moduleConfig || {};
     const existingModuleConfig = options.existingModuleConfig || {};
-    const projectRoot = path.dirname(bmadDir);
+    const projectRoot = path.dirname(gomadDir);
     const emptyResult = { createdDirs: [], movedDirs: [], createdWdsFolders: [] };
 
     // Special handling for core module - it's in src/core-skills not src/modules
@@ -623,7 +623,7 @@ class OfficialModules {
         let configContent = await fs.readFile(configPath, 'utf8');
 
         // Replace path placeholders
-        configContent = configContent.replaceAll('{project-root}', `bmad/${moduleName}`);
+        configContent = configContent.replaceAll('{project-root}', `gomad/${moduleName}`);
         configContent = configContent.replaceAll('{module}', moduleName);
 
         await fs.writeFile(configPath, configContent, 'utf8');
@@ -689,16 +689,16 @@ class OfficialModules {
   // ─── Config collection methods (merged from ConfigCollector) ───
 
   /**
-   * Find the bmad installation directory in a project
+   * Find the gomad installation directory in a project
    * V6+ installations can use ANY folder name but ALWAYS have _config/manifest.yaml
    * @param {string} projectDir - Project directory
-   * @returns {Promise<string>} Path to bmad directory
+   * @returns {Promise<string>} Path to gomad directory
    */
   async findBmadDir(projectDir) {
     // Check if project directory exists
     if (!(await fs.pathExists(projectDir))) {
       // Project doesn't exist yet, return default
-      return path.join(projectDir, 'bmad');
+      return path.join(projectDir, 'gomad');
     }
 
     // V6+ strategy: Look for ANY directory with _config/manifest.yaml
@@ -720,11 +720,11 @@ class OfficialModules {
 
     // No V6+ installation found, return default
     // This will be used for new installations
-    return path.join(projectDir, 'bmad');
+    return path.join(projectDir, 'gomad');
   }
 
   /**
-   * Detect the existing BMAD folder name in a project
+   * Detect the existing GOMAD folder name in a project
    * @param {string} projectDir - Project directory
    * @returns {Promise<string|null>} Folder name (just the name, not full path) or null if not found
    */
@@ -765,18 +765,18 @@ class OfficialModules {
       return false;
     }
 
-    // Find the actual bmad directory (handles custom folder names)
-    const bmadDir = await this.findBmadDir(projectDir);
+    // Find the actual gomad directory (handles custom folder names)
+    const gomadDir = await this.findBmadDir(projectDir);
 
-    // Check if bmad directory exists
-    if (!(await fs.pathExists(bmadDir))) {
+    // Check if gomad directory exists
+    if (!(await fs.pathExists(gomadDir))) {
       return false;
     }
 
-    // Dynamically discover all installed modules by scanning bmad directory
+    // Dynamically discover all installed modules by scanning gomad directory
     // A directory is a module ONLY if it contains a config.yaml file
     let foundAny = false;
-    const entries = await fs.readdir(bmadDir, { withFileTypes: true });
+    const entries = await fs.readdir(gomadDir, { withFileTypes: true });
 
     for (const entry of entries) {
       if (entry.isDirectory()) {
@@ -785,7 +785,7 @@ class OfficialModules {
           continue;
         }
 
-        const moduleConfigPath = path.join(bmadDir, entry.name, 'config.yaml');
+        const moduleConfigPath = path.join(gomadDir, entry.name, 'config.yaml');
 
         if (await fs.pathExists(moduleConfigPath)) {
           try {
@@ -1291,7 +1291,7 @@ class OfficialModules {
    * @returns {string} Capitalized username\
    */
   getDefaultUsername() {
-    let result = 'BMad';
+    let result = 'GoMad';
     try {
       const os = require('node:os');
       const userInfo = os.userInfo();
@@ -1300,7 +1300,7 @@ class OfficialModules {
         result = username.charAt(0).toUpperCase() + username.slice(1);
       }
     } catch {
-      // Do nothing, just return 'BMad'
+      // Do nothing, just return 'GoMad'
     }
     return result;
   }
@@ -1694,7 +1694,7 @@ class OfficialModules {
 
   /**
    * Convert an existing stored value back into the prompt-facing value for templated fields.
-   * For example, "{test_artifacts}/{value}" + "_bmad-output/test-artifacts/test-design"
+   * For example, "{test_artifacts}/{value}" + "_gomad-output/test-artifacts/test-design"
    * becomes "test-design" so the template is not applied twice on modify.
    * @param {*} existingValue - Stored config value
    * @param {string} moduleName - Module name

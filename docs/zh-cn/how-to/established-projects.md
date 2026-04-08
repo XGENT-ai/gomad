@@ -1,27 +1,27 @@
 ---
 title: "既有项目"
-description: 如何在现有代码库中使用 BMad Method
+description: 如何在现有代码库中使用 GoMad Method
 sidebar:
   order: 6
 ---
 
-当你在现有项目或遗留代码库上工作时，本指南帮助你更稳妥地使用 BMad Method。
+当你在现有项目或遗留代码库上工作时，本指南帮助你更稳妥地使用 GoMad Method。
 
 如果你是从零开始的新项目，建议先看[快速入门](../tutorials/getting-started.md)；本文主要面向既有项目接入场景。
 
 :::note[前置条件]
-- 已安装 BMad Method（`npx bmad-method install`）
+- 已安装 GoMad Method（`npx gomad install`）
 - 一个你想要处理的现有代码库
 - 访问 AI 驱动的 IDE（Claude Code 或 Cursor）
 :::
 
 ## 步骤 1：清理已完成的规划产物
 
-如果你通过 BMad 流程完成了所有 PRD 史诗和用户故事，请清理这些文件。归档它们、删除它们，或者在需要时依赖版本历史。不要将这些文件保留在：
+如果你通过 GoMad 流程完成了所有 PRD 史诗和用户故事，请清理这些文件。归档它们、删除它们，或者在需要时依赖版本历史。不要将这些文件保留在：
 
 - `docs/`
-- `_bmad-output/planning-artifacts/`
-- `_bmad-output/implementation-artifacts/`
+- `_gomad-output/planning-artifacts/`
+- `_gomad-output/implementation-artifacts/`
 
 ## 步骤 2：创建项目上下文（project context）
 
@@ -32,7 +32,7 @@ sidebar:
 运行生成项目上下文工作流：
 
 ```bash
-bmad-generate-project-context
+gomad-generate-project-context
 ```
 
 这将扫描你的代码库以识别：
@@ -43,7 +43,7 @@ bmad-generate-project-context
 - 框架相关模式
 
 你可以先审阅并完善生成内容；如果更希望手动维护，也可以直接在
-`_bmad-output/project-context.md` 创建并编辑。
+`_gomad-output/project-context.md` 创建并编辑。
 
 [了解更多关于项目上下文](../explanation/project-context.md)
 
@@ -56,25 +56,25 @@ bmad-generate-project-context
 - 架构
 - 任何其他相关的项目信息
 
-对于复杂项目，可考虑使用 `bmad-document-project` 工作流。它会扫描整个项目并记录当前真实状态。
+对于复杂项目，可考虑使用 `gomad-document-project` 工作流。它会扫描整个项目并记录当前真实状态。
 
 ## 步骤 4：获取帮助
 
-### BMad-Help：默认起点
+### GoMad-Help：默认起点
 
-**当你不确定下一步做什么时，随时运行 `bmad-help`。** 这个智能指南会：
+**当你不确定下一步做什么时，随时运行 `gomad-help`。** 这个智能指南会：
 
 - 检查项目当前状态，识别哪些工作已经完成
 - 根据你安装的模块给出可行选项
 - 理解自然语言查询
 
 ```
-bmad-help 我有一个现有的 Rails 应用，我应该从哪里开始？
-bmad-help Quick Flow 和完整方法有什么区别？
-bmad-help 显示我当前有哪些可用工作流
+gomad-help 我有一个现有的 Rails 应用，我应该从哪里开始？
+gomad-help Quick Flow 和完整方法有什么区别？
+gomad-help 显示我当前有哪些可用工作流
 ```
 
-BMad-Help 还会在**每个工作流结束时自动运行**，明确告诉你下一步该做什么。
+GoMad-Help 还会在**每个工作流结束时自动运行**，明确告诉你下一步该做什么。
 
 ### 选择你的方法
 
@@ -82,8 +82,8 @@ BMad-Help 还会在**每个工作流结束时自动运行**，明确告诉你下
 
 | 范围 | 推荐方法 |
 | --- | --- |
-| **小型更新或新增** | 运行 `bmad-quick-dev`，在单个工作流中完成意图澄清、规划、实现与审查。完整四阶段 BMad Method 往往过重。 |
-| **重大变更或新增** | 从完整 BMad Method 开始，再按项目风险和协作需求调整流程严谨度。 |
+| **小型更新或新增** | 运行 `gomad-quick-dev`，在单个工作流中完成意图澄清、规划、实现与审查。完整四阶段 GoMad Method 往往过重。 |
+| **重大变更或新增** | 从完整 GoMad Method 开始，再按项目风险和协作需求调整流程严谨度。 |
 
 ### 在创建 PRD 期间
 

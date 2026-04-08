@@ -5,14 +5,14 @@ sidebar:
   order: 5
 ---
 
-BMad provides two testing paths: a built-in QA workflow for fast test generation and an installable Test Architect module for enterprise-grade test strategy.
+GoMad provides two testing paths: a built-in QA workflow for fast test generation and an installable Test Architect module for enterprise-grade test strategy.
 
 ## Which Should You Use?
 
 | Factor | Built-in QA | TEA Module |
 | --- | --- | --- |
 | **Best for** | Small-medium projects, quick coverage | Large projects, regulated or complex domains |
-| **Setup** | Nothing to install -- included in BMM | Install separately via `npx bmad-method install` |
+| **Setup** | Nothing to install -- included in BMM | Install separately via `npx gomad install` |
 | **Approach** | Generate tests fast, iterate later | Plan first, then generate with traceability |
 | **Test types** | API and E2E tests | API, E2E, ATDD, NFR, and more |
 | **Strategy** | Happy path + critical edge cases | Risk-based prioritization (P0-P3) |
@@ -24,9 +24,9 @@ Most projects should start with the built-in QA workflow. If you later need test
 
 ## Built-in QA Workflow
 
-The built-in QA workflow (`bmad-qa-generate-e2e-tests`) is part of the BMM (Agile suite) module, available through the Developer agent. It generates working tests quickly using your project's existing test framework -- no configuration or additional installation required.
+The built-in QA workflow (`gomad-qa-generate-e2e-tests`) is part of the BMM (Agile suite) module, available through the Developer agent. It generates working tests quickly using your project's existing test framework -- no configuration or additional installation required.
 
-**Trigger:** `QA` (via the Developer agent) or `bmad-qa-generate-e2e-tests`
+**Trigger:** `QA` (via the Developer agent) or `gomad-qa-generate-e2e-tests`
 
 ### What It Does
 
@@ -65,9 +65,9 @@ The QA workflow generates tests only. For code review and story validation, use 
 
 TEA is a standalone module that provides an expert agent (Murat) and nine structured workflows for enterprise-grade testing. It goes beyond test generation into test strategy, risk-based planning, quality gates, and requirements traceability.
 
-- **Documentation:** [TEA Module Docs](https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/)
-- **Install:** `npx bmad-method install` and select the TEA module
-- **npm:** [`bmad-method-test-architecture-enterprise`](https://www.npmjs.com/package/bmad-method-test-architecture-enterprise)
+- **Documentation:** [TEA Module Docs](https://gomad-code-org.github.io/gomad-test-architecture-enterprise/)
+- **Install:** `npx gomad install` and select the TEA module
+- **npm:** [`gomad-test-architecture-enterprise`](https://www.npmjs.com/package/gomad-test-architecture-enterprise)
 
 ### What TEA Provides
 
@@ -95,11 +95,11 @@ TEA also supports P0-P3 risk-based prioritization and optional integrations with
 
 ## How Testing Fits into Workflows
 
-The QA Automate workflow appears in Phase 4 (Implementation) of the BMad Method workflow map. It is designed to run **after a full epic is complete** — once all stories in an epic have been implemented and code-reviewed. A typical sequence:
+The QA Automate workflow appears in Phase 4 (Implementation) of the GoMad Method workflow map. It is designed to run **after a full epic is complete** — once all stories in an epic have been implemented and code-reviewed. A typical sequence:
 
 1. For each story in the epic: implement with Dev (`DS`), then validate with Code Review (`CR`)
 2. After the epic is complete: generate tests with `QA` (via the Developer agent) or TEA's Automate workflow
-3. Run retrospective (`bmad-retrospective`) to capture lessons learned
+3. Run retrospective (`gomad-retrospective`) to capture lessons learned
 
 The built-in QA workflow works directly from source code without loading planning documents (PRD, architecture). TEA workflows can integrate with upstream planning artifacts for traceability.
 

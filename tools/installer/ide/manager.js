@@ -1,4 +1,4 @@
-const { BMAD_FOLDER_NAME } = require('./shared/path-utils');
+const { GOMAD_FOLDER_NAME } = require('./shared/path-utils');
 const prompts = require('../prompts');
 
 /**
@@ -12,19 +12,19 @@ class IdeManager {
   constructor() {
     this.handlers = new Map();
     this._initialized = false;
-    this.bmadFolderName = BMAD_FOLDER_NAME; // Default, can be overridden
+    this.gomadFolderName = GOMAD_FOLDER_NAME; // Default, can be overridden
   }
 
   /**
-   * Set the bmad folder name for all IDE handlers
-   * @param {string} bmadFolderName - The bmad folder name
+   * Set the gomad folder name for all IDE handlers
+   * @param {string} gomadFolderName - The gomad folder name
    */
-  setBmadFolderName(bmadFolderName) {
-    this.bmadFolderName = bmadFolderName;
+  setBmadFolderName(gomadFolderName) {
+    this.gomadFolderName = gomadFolderName;
     // Update all loaded handlers
     for (const handler of this.handlers.values()) {
       if (typeof handler.setBmadFolderName === 'function') {
-        handler.setBmadFolderName(bmadFolderName);
+        handler.setBmadFolderName(gomadFolderName);
       }
     }
   }
@@ -62,7 +62,7 @@ class IdeManager {
 
       const handler = new ConfigDrivenIdeSetup(platformCode, platformInfo);
       if (typeof handler.setBmadFolderName === 'function') {
-        handler.setBmadFolderName(this.bmadFolderName);
+        handler.setBmadFolderName(this.gomadFolderName);
       }
       this.handlers.set(platformCode, handler);
     }
@@ -126,10 +126,10 @@ class IdeManager {
    * Setup IDE configuration
    * @param {string} ideName - Name of the IDE
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @param {Object} options - Setup options
    */
-  async setup(ideName, projectDir, bmadDir, options = {}) {
+  async setup(ideName, projectDir, gomadDir, options = {}) {
     const handler = this.handlers.get(ideName.toLowerCase());
 
     if (!handler) {
@@ -155,7 +155,7 @@ class IdeManager {
     }
 
     try {
-      const handlerResult = await handler.setup(projectDir, bmadDir, options);
+      const handlerResult = await handler.setup(projectDir, gomadDir, options);
       // Build detail string from handler-returned data
       let detail = '';
       if (handlerResult && handlerResult.results) {

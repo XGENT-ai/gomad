@@ -1,11 +1,11 @@
 ---
 name: gm-party-mode
-description: 'Orchestrates group discussions between installed BMAD agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when user requests party mode, wants multiple agent perspectives, group discussion, roundtable, or multi-agent conversation about their project.'
+description: 'Orchestrates group discussions between installed GOMAD agents, enabling natural multi-agent conversations where each agent is a real subagent with independent thinking. Use when user requests party mode, wants multiple agent perspectives, group discussion, roundtable, or multi-agent conversation about their project.'
 ---
 
 # Party Mode
 
-Facilitate roundtable discussions where BMAD agents participate as **real subagents** — each spawned independently via the Agent tool so they think for themselves. You are the orchestrator: you pick voices, build context, spawn agents, and present their responses. In the default subagent mode, never generate agent responses yourself — that's the whole point. In `--solo` mode, you roleplay all agents directly.
+Facilitate roundtable discussions where GOMAD agents participate as **real subagents** — each spawned independently via the Agent tool so they think for themselves. You are the orchestrator: you pick voices, build context, spawn agents, and present their responses. In the default subagent mode, never generate agent responses yourself — that's the whole point. In `--solo` mode, you roleplay all agents directly.
 
 ## Why This Matters
 
@@ -22,11 +22,11 @@ Party mode accepts optional arguments when invoked:
 
 1. **Parse arguments** — check for `--model` and `--solo` flags from the user's invocation.
 
-2. Load config from `{project-root}/_bmad/core/config.yaml` and resolve:
+2. Load config from `{project-root}/_gomad/core/config.yaml` and resolve:
   - Use `{user_name}` for greeting
   - Use `{communication_language}` for all communications
 
-3. **Read the agent manifest** at `{project-root}/_bmad/_config/agent-manifest.csv`. Build an internal roster of available agents with their displayName, title, icon, role, identity, communicationStyle, and principles.
+3. **Read the agent manifest** at `{project-root}/_gomad/_config/agent-manifest.csv`. Build an internal roster of available agents with their displayName, title, icon, role, identity, communicationStyle, and principles.
 
 4. **Load project context** — search for `**/project-context.md`. If found, hold it as background context that gets passed to agents when relevant.
 
@@ -52,7 +52,7 @@ For each selected agent, spawn a subagent using the Agent tool. Each subagent ge
 
 **The agent prompt** (built from the manifest data):
 ```
-You are {displayName} ({title}), a BMAD agent in a collaborative roundtable discussion.
+You are {displayName} ({title}), a GOMAD agent in a collaborative roundtable discussion.
 
 ## Your Persona
 - Icon: {icon}

@@ -9,7 +9,7 @@ const { Config } = require('./config');
 const { getProjectRoot, getSourcePath } = require('../project-root');
 const { ManifestGenerator } = require('./manifest-generator');
 const prompts = require('../prompts');
-const { BMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
+const { GOMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 const { InstallPaths } = require('./install-paths');
 
 const { ExistingInstall } = require('./existing-install');
@@ -21,7 +21,7 @@ class Installer {
     this.ideManager = new IdeManager();
     this.fileOps = new FileOps();
     this.installedFiles = new Set(); // Track all installed files
-    this.bmadFolderName = BMAD_FOLDER_NAME;
+    this.gomadFolderName = GOMAD_FOLDER_NAME;
   }
 
   /**
@@ -38,7 +38,7 @@ class Installer {
       const config = Config.build(originalConfig);
       const paths = await InstallPaths.create(config);
       const officialModules = await OfficialModules.build(config, paths);
-      const existingInstall = await ExistingInstall.detect(paths.bmadDir);
+      const existingInstall = await ExistingInstall.detect(paths.gomadDir);
 
       await this.customModules.discoverPaths(originalConfig, paths);
 
@@ -69,7 +69,7 @@ class Installer {
 
       // Render consolidated summary
       await this.renderInstallSummary(results, {
-        bmadDir: paths.bmadDir,
+        gomadDir: paths.gomadDir,
         modules: config.modules,
         ides: config.ides,
         customFiles: restoreResult.customFiles.length > 0 ? restoreResult.customFiles : undefined,
@@ -78,7 +78,7 @@ class Installer {
 
       return {
         success: true,
-        path: paths.bmadDir,
+        path: paths.gomadDir,
         modules: config.modules,
         ides: config.ides,
         projectDir: paths.projectRoot,
@@ -141,7 +141,7 @@ class Installer {
         await prompts.log.error(`${handler.displayName || ide}: ${handler.platformConfig.suspended}`);
       }
       throw new Error(
-        `All selected tool(s) are suspended: ${suspendedIdes.join(', ')}. Installation aborted to prevent upgrading _bmad/ without a working IDE configuration.`,
+        `All selected tool(s) are suspended: ${suspendedIdes.join(', ')}. Installation aborted to prevent upgrading _gomad/ without a working IDE configuration.`,
       );
     }
   }
@@ -178,7 +178,7 @@ class Installer {
     if (!this.customModules.paths || this.customModules.paths.size === 0) return;
 
     const { CustomModuleCache } = require('./custom-module-cache');
-    const customCache = new CustomModuleCache(paths.bmadDir);
+    const customCache = new CustomModuleCache(paths.gomadDir);
 
     for (const [moduleId, sourcePath] of this.customModules.paths) {
       const cachedInfo = await customCache.cacheModule(moduleId, sourcePath, {
@@ -225,7 +225,7 @@ class Installer {
     installTasks.push({
       title: 'Creating module directories',
       task: async (message) => {
-        const verboseMode = process.env.BMAD_VERBOSE_INSTALL === 'true' || config.verbose;
+        const verboseMode = process.env.GOMAD_VERBOSE_INSTALL === 'true' || config.verbose;
         const moduleLogger = {
           log: async (msg) => (verboseMode ? await prompts.log.message(msg) : undefined),
           error: async (msg) => await prompts.log.error(msg),
@@ -235,7 +235,7 @@ class Installer {
         if (config.modules && config.modules.length > 0) {
           for (const moduleName of config.modules) {
             message(`Setting up ${moduleName}...`);
-            const result = await officialModules.createModuleDirectories(moduleName, paths.bmadDir, {
+            const result = await officialModules.createModuleDirectories(moduleName, paths.gomadDir, {
               installedIDEs: config.ides || [],
               moduleConfig: moduleConfigs[moduleName] || {},
               existingModuleConfig: officialModules.existingConfig?.[moduleName] || {},
@@ -259,7 +259,7 @@ class Installer {
     const configTask = {
       title: 'Generating configurations',
       task: async (message) => {
-        await this.generateModuleConfigs(paths.bmadDir, moduleConfigs);
+        await this.generateModuleConfigs(paths.gomadDir, moduleConfigs);
         addResult('Configurations', 'ok', 'generated');
 
         this.installedFiles.add(paths.manifestFile());
@@ -281,13 +281,13 @@ class Installer {
           modulesForCsvPreserve = originalConfig._preserveModules ? [...allModules, ...originalConfig._preserveModules] : allModules;
         }
 
-        await manifestGen.generateManifests(paths.bmadDir, allModulesForManifest, [...this.installedFiles], {
+        await manifestGen.generateManifests(paths.gomadDir, allModulesForManifest, [...this.installedFiles], {
           ides: config.ides || [],
           preservedModules: modulesForCsvPreserve,
         });
 
         message('Generating help catalog...');
-        await this.mergeModuleHelpCatalogs(paths.bmadDir);
+        await this.mergeModuleHelpCatalogs(paths.gomadDir);
         addResult('Help catalog', 'ok');
 
         return 'Configurations generated';
@@ -331,7 +331,7 @@ class Installer {
     }
 
     for (const ide of validIdes) {
-      const setupResult = await this.ideManager.setup(ide, paths.projectRoot, paths.bmadDir, {
+      const setupResult = await this.ideManager.setup(ide, paths.projectRoot, paths.gomadDir, {
         selectedModules: allModules || [],
         verbose: config.verbose,
       });
@@ -369,7 +369,7 @@ class Installer {
             message(`Restoring ${updateState.customFiles.length} custom files...`);
 
             for (const originalPath of updateState.customFiles) {
-              const relativePath = path.relative(paths.bmadDir, originalPath);
+              const relativePath = path.relative(paths.gomadDir, originalPath);
               const backupPath = path.join(updateState.tempBackupDir, relativePath);
 
               if (await fs.pathExists(backupPath)) {
@@ -392,7 +392,7 @@ class Installer {
               message(`Restoring ${restoredModifiedFiles.length} modified files as .bak...`);
 
               for (const modifiedFile of restoredModifiedFiles) {
-                const relativePath = path.relative(paths.bmadDir, modifiedFile.path);
+                const relativePath = path.relative(paths.gomadDir, modifiedFile.path);
                 const tempBackupPath = path.join(updateState.tempModifiedBackupDir, relativePath);
                 const bakPath = modifiedFile.path + '.bak';
 
@@ -459,8 +459,8 @@ class Installer {
    */
   async _prepareUpdateState(paths, config, existingInstall, officialModules) {
     // Detect custom and modified files BEFORE updating (compare current files vs files-manifest.csv)
-    const existingFilesManifest = await this.readFilesManifest(paths.bmadDir);
-    const { customFiles, modifiedFiles } = await this.detectCustomFiles(paths.bmadDir, existingFilesManifest);
+    const existingFilesManifest = await this.readFilesManifest(paths.gomadDir);
+    const { customFiles, modifiedFiles } = await this.detectCustomFiles(paths.gomadDir, existingFilesManifest);
 
     // Preserve existing core configuration during updates
     // (no-op for quick-update which already has core config from collectModuleConfigQuick)
@@ -503,11 +503,11 @@ class Installer {
     let tempModifiedBackupDir;
 
     if (customFiles.length > 0) {
-      tempBackupDir = path.join(paths.projectRoot, '_bmad-custom-backup-temp');
+      tempBackupDir = path.join(paths.projectRoot, '_gomad-custom-backup-temp');
       await fs.ensureDir(tempBackupDir);
 
       for (const customFile of customFiles) {
-        const relativePath = path.relative(paths.bmadDir, customFile);
+        const relativePath = path.relative(paths.gomadDir, customFile);
         const backupPath = path.join(tempBackupDir, relativePath);
         await fs.ensureDir(path.dirname(backupPath));
         await fs.copy(customFile, backupPath);
@@ -515,11 +515,11 @@ class Installer {
     }
 
     if (modifiedFiles.length > 0) {
-      tempModifiedBackupDir = path.join(paths.projectRoot, '_bmad-modified-backup-temp');
+      tempModifiedBackupDir = path.join(paths.projectRoot, '_gomad-modified-backup-temp');
       await fs.ensureDir(tempModifiedBackupDir);
 
       for (const modifiedFile of modifiedFiles) {
-        const relativePath = path.relative(paths.bmadDir, modifiedFile.path);
+        const relativePath = path.relative(paths.gomadDir, modifiedFile.path);
         const tempBackupPath = path.join(tempModifiedBackupDir, relativePath);
         await fs.ensureDir(path.dirname(tempBackupPath));
         await fs.copy(modifiedFile.path, tempBackupPath, { overwrite: true });
@@ -550,7 +550,7 @@ class Installer {
       const moduleConfig = officialModules.moduleConfigs[moduleName] || {};
       await officialModules.install(
         moduleName,
-        paths.bmadDir,
+        paths.gomadDir,
         (filePath) => {
           this.installedFiles.add(filePath);
         },
@@ -581,12 +581,12 @@ class Installer {
       message(`${isQuickUpdate ? 'Updating' : 'Installing'} ${moduleName}...`);
 
       const collectedModuleConfig = officialModules.moduleConfigs[moduleName] || {};
-      const result = await this.customModules.install(moduleName, paths.bmadDir, (filePath) => this.installedFiles.add(filePath), {
+      const result = await this.customModules.install(moduleName, paths.gomadDir, (filePath) => this.installedFiles.add(filePath), {
         moduleConfig: collectedModuleConfig,
       });
 
       // Generate runtime config.yaml with merged values
-      await this.generateModuleConfigs(paths.bmadDir, {
+      await this.generateModuleConfigs(paths.gomadDir, {
         [moduleName]: { ...config.coreConfig, ...result.moduleConfig, ...collectedModuleConfig },
       });
 
@@ -596,11 +596,11 @@ class Installer {
 
   /**
    * Read files-manifest.csv
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @returns {Array} Array of file entries from files-manifest.csv
    */
-  async readFilesManifest(bmadDir) {
-    const filesManifestPath = path.join(bmadDir, '_config', 'files-manifest.csv');
+  async readFilesManifest(gomadDir) {
+    const filesManifestPath = path.join(gomadDir, '_config', 'files-manifest.csv');
     if (!(await fs.pathExists(filesManifestPath))) {
       return [];
     }
@@ -652,16 +652,16 @@ class Installer {
 
   /**
    * Detect custom and modified files
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @param {Array} existingFilesManifest - Previous files from files-manifest.csv
    * @returns {Object} Object with customFiles and modifiedFiles arrays
    */
-  async detectCustomFiles(bmadDir, existingFilesManifest) {
+  async detectCustomFiles(gomadDir, existingFilesManifest) {
     const customFiles = [];
     const modifiedFiles = [];
 
-    // Memory is always in _bmad/_memory
-    const bmadMemoryPath = '_memory';
+    // Memory is always in _gomad/_memory
+    const gomadMemoryPath = '_memory';
 
     // Check if the manifest has hashes - if not, we can't detect modifications
     let manifestHasHashes = false;
@@ -673,7 +673,7 @@ class Installer {
     const installedFilesMap = new Map();
     for (const fileEntry of existingFilesManifest) {
       if (fileEntry.path) {
-        const absolutePath = path.join(bmadDir, fileEntry.path);
+        const absolutePath = path.join(gomadDir, fileEntry.path);
         installedFilesMap.set(path.normalize(absolutePath), {
           hash: fileEntry.hash,
           relativePath: fileEntry.path,
@@ -681,7 +681,7 @@ class Installer {
       }
     }
 
-    // Recursively scan bmadDir for all files
+    // Recursively scan gomadDir for all files
     const scanDirectory = async (dir) => {
       try {
         const entries = await fs.readdir(dir, { withFileTypes: true });
@@ -699,7 +699,7 @@ class Installer {
             const fileInfo = installedFilesMap.get(normalizedPath);
 
             // Skip certain system files that are auto-generated
-            const relativePath = path.relative(bmadDir, fullPath);
+            const relativePath = path.relative(gomadDir, fullPath);
             const fileName = path.basename(fullPath);
 
             // Skip _config directory EXCEPT for modified agent customizations
@@ -707,7 +707,7 @@ class Installer {
               // Special handling for .customize.yaml files - only preserve if modified
               if (relativePath.includes('/agents/') && fileName.endsWith('.customize.yaml')) {
                 // Check if the customization file has been modified from manifest
-                const manifestPath = path.join(bmadDir, '_config', 'manifest.yaml');
+                const manifestPath = path.join(gomadDir, '_config', 'manifest.yaml');
                 if (await fs.pathExists(manifestPath)) {
                   const crypto = require('node:crypto');
                   const currentContent = await fs.readFile(fullPath, 'utf8');
@@ -727,7 +727,7 @@ class Installer {
               continue;
             }
 
-            if (relativePath.startsWith(bmadMemoryPath + '/') && path.dirname(relativePath).includes('-sidecar')) {
+            if (relativePath.startsWith(gomadMemoryPath + '/') && path.dirname(relativePath).includes('-sidecar')) {
               continue;
             }
 
@@ -761,30 +761,30 @@ class Installer {
       }
     };
 
-    await scanDirectory(bmadDir);
+    await scanDirectory(gomadDir);
     return { customFiles, modifiedFiles };
   }
 
   /**
    * Generate clean config.yaml files for each installed module
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @param {Object} moduleConfigs - Collected configuration values
    */
-  async generateModuleConfigs(bmadDir, moduleConfigs) {
+  async generateModuleConfigs(gomadDir, moduleConfigs) {
     const yaml = require('yaml');
 
     // Extract core config values to share with other modules
     const coreConfig = moduleConfigs.core || {};
 
     // Get all installed module directories
-    const entries = await fs.readdir(bmadDir, { withFileTypes: true });
+    const entries = await fs.readdir(gomadDir, { withFileTypes: true });
     const installedModules = entries
       .filter((entry) => entry.isDirectory() && entry.name !== '_config' && entry.name !== 'docs')
       .map((entry) => entry.name);
 
     // Generate config.yaml for each installed module
     for (const moduleName of installedModules) {
-      const modulePath = path.join(bmadDir, moduleName);
+      const modulePath = path.join(gomadDir, moduleName);
 
       // Get module-specific config or use empty object if none
       const config = moduleConfigs[moduleName] || {};
@@ -795,7 +795,7 @@ class Installer {
         // Create header
         const packageJson = require(path.join(getProjectRoot(), 'package.json'));
         const header = `# ${moduleName.toUpperCase()} Module Configuration
-# Generated by BMAD installer
+# Generated by GOMAD installer
 # Version: ${packageJson.version}
 # Date: ${new Date().toISOString()}
 
@@ -862,19 +862,19 @@ class Installer {
   }
 
   /**
-   * Merge all module-help.csv files into a single bmad-help.csv
+   * Merge all module-help.csv files into a single gomad-help.csv
    * Scans all installed modules for module-help.csv and merges them
    * Enriches agent info from agent-manifest.csv
-   * Output is written to _bmad/_config/bmad-help.csv
-   * @param {string} bmadDir - BMAD installation directory
+   * Output is written to _gomad/_config/gomad-help.csv
+   * @param {string} gomadDir - GOMAD installation directory
    */
-  async mergeModuleHelpCatalogs(bmadDir) {
+  async mergeModuleHelpCatalogs(gomadDir) {
     const allRows = [];
     const headerRow =
       'module,phase,name,code,sequence,workflow-file,command,required,agent-name,agent-command,agent-display-name,agent-title,options,description,output-location,outputs';
 
     // Load agent manifest for agent info lookup
-    const agentManifestPath = path.join(bmadDir, '_config', 'agent-manifest.csv');
+    const agentManifestPath = path.join(gomadDir, '_config', 'agent-manifest.csv');
     const agentInfo = new Map(); // agent-name -> {command, displayName, title+icon}
 
     if (await fs.pathExists(agentManifestPath)) {
@@ -892,8 +892,8 @@ class Installer {
           const icon = cols[3].replaceAll('"', '').trim();
           const module = cols[10] ? cols[10].replaceAll('"', '').trim() : '';
 
-          // Build agent command: bmad:module:agent:name
-          const agentCommand = module ? `bmad:${module}:agent:${agentName}` : `bmad:agent:${agentName}`;
+          // Build agent command: gomad:module:agent:name
+          const agentCommand = module ? `gomad:${module}:agent:${agentName}` : `gomad:agent:${agentName}`;
 
           agentInfo.set(agentName, {
             command: agentCommand,
@@ -905,7 +905,7 @@ class Installer {
     }
 
     // Get all installed module directories
-    const entries = await fs.readdir(bmadDir, { withFileTypes: true });
+    const entries = await fs.readdir(gomadDir, { withFileTypes: true });
     const installedModules = entries
       .filter((entry) => entry.isDirectory() && entry.name !== '_config' && entry.name !== 'docs' && entry.name !== '_memory')
       .map((entry) => entry.name);
@@ -921,7 +921,7 @@ class Installer {
 
     // Map installed module paths
     for (const moduleName of installedModules) {
-      const modulePath = path.join(bmadDir, moduleName);
+      const modulePath = path.join(gomadDir, moduleName);
       modulePaths.set(moduleName, modulePath);
     }
 
@@ -994,7 +994,7 @@ class Installer {
             }
           }
 
-          if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
+          if (process.env.GOMAD_VERBOSE_INSTALL === 'true') {
             await prompts.log.message(`  Merged module-help from: ${moduleName}`);
           }
         } catch (error) {
@@ -1029,9 +1029,9 @@ class Installer {
     });
 
     // Write merged catalog
-    const outputDir = path.join(bmadDir, '_config');
+    const outputDir = path.join(gomadDir, '_config');
     await fs.ensureDir(outputDir);
-    const outputPath = path.join(outputDir, 'bmad-help.csv');
+    const outputPath = path.join(outputDir, 'gomad-help.csv');
 
     const mergedContent = [headerRow, ...allRows].join('\n');
     await fs.writeFile(outputPath, mergedContent, 'utf8');
@@ -1039,15 +1039,15 @@ class Installer {
     // Track the installed file
     this.installedFiles.add(outputPath);
 
-    if (process.env.BMAD_VERBOSE_INSTALL === 'true') {
-      await prompts.log.message(`  Generated bmad-help.csv: ${allRows.length} workflows`);
+    if (process.env.GOMAD_VERBOSE_INSTALL === 'true') {
+      await prompts.log.message(`  Generated gomad-help.csv: ${allRows.length} workflows`);
     }
   }
 
   /**
    * Render a consolidated install summary using prompts.note()
    * @param {Array} results - Array of {step, status: 'ok'|'error'|'warn', detail}
-   * @param {Object} context - {bmadDir, modules, ides, customFiles, modifiedFiles}
+   * @param {Object} context - {gomadDir, modules, ides, customFiles, modifiedFiles}
    */
   async renderInstallSummary(results, context = {}) {
     const color = await prompts.getColor();
@@ -1061,7 +1061,7 @@ class Installer {
       if (r.status !== 'ok') {
         stepLabel = r.step;
       } else if (r.step === 'Core') {
-        stepLabel = 'BMAD';
+        stepLabel = 'GOMAD';
       } else if (r.step.startsWith('Module: ')) {
         stepLabel = r.step;
       } else if (selectedIdes.has(String(r.step).toLowerCase())) {
@@ -1085,13 +1085,13 @@ class Installer {
     }
 
     if ((context.ides || []).length === 0) {
-      lines.push(`  ${color.green('\u2713')}  No IDE selected ${color.dim('(installed in _bmad only)')}`);
+      lines.push(`  ${color.green('\u2713')}  No IDE selected ${color.dim('(installed in _gomad only)')}`);
     }
 
     // Context and warnings
     lines.push('');
-    if (context.bmadDir) {
-      lines.push(`  Installed to: ${color.dim(context.bmadDir)}`);
+    if (context.gomadDir) {
+      lines.push(`  Installed to: ${color.dim(context.gomadDir)}`);
     }
     if (context.customFiles && context.customFiles.length > 0) {
       lines.push(`  ${color.cyan(`Custom files preserved: ${context.customFiles.length}`)}`);
@@ -1104,16 +1104,16 @@ class Installer {
     lines.push(
       '',
       '  Next steps:',
-      `    Read our new Docs Site: ${color.dim('https://docs.bmad-method.org/')}`,
+      `    Read our new Docs Site: ${color.dim('https://docs.gomad.org/')}`,
       `    Join our Discord: ${color.dim('https://discord.gg/gk8jAdXWmj')}`,
-      `    Star us on GitHub: ${color.dim('https://github.com/bmad-code-org/BMAD-METHOD/')}`,
-      `    Subscribe on YouTube: ${color.dim('https://www.youtube.com/@BMadCode')}`,
+      `    Star us on GitHub: ${color.dim('https://github.com/gomad-code-org/GOMAD-METHOD/')}`,
+      `    Subscribe on YouTube: ${color.dim('https://www.youtube.com/@GoMadCode')}`,
     );
     if (context.ides && context.ides.length > 0) {
-      lines.push(`    Invoke the ${color.cyan('bmad-help')} skill in your IDE Agent to get started`);
+      lines.push(`    Invoke the ${color.cyan('gomad-help')} skill in your IDE Agent to get started`);
     }
 
-    await prompts.note(lines.join('\n'), 'BMAD is ready to use!');
+    await prompts.note(lines.join('\n'), 'GOMAD is ready to use!');
   }
 
   /**
@@ -1123,20 +1123,20 @@ class Installer {
    */
   async quickUpdate(config) {
     const projectDir = path.resolve(config.directory);
-    const { bmadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findBmadDir(projectDir);
 
-    // Check if bmad directory exists
-    if (!(await fs.pathExists(bmadDir))) {
-      throw new Error(`BMAD not installed at ${bmadDir}. Use regular install for first-time setup.`);
+    // Check if gomad directory exists
+    if (!(await fs.pathExists(gomadDir))) {
+      throw new Error(`GOMAD not installed at ${gomadDir}. Use regular install for first-time setup.`);
     }
 
     // Detect existing installation
-    const existingInstall = await ExistingInstall.detect(bmadDir);
+    const existingInstall = await ExistingInstall.detect(gomadDir);
     const installedModules = existingInstall.moduleIds;
     const configuredIdes = existingInstall.ides;
-    const projectRoot = path.dirname(bmadDir);
+    const projectRoot = path.dirname(gomadDir);
 
-    const customModuleSources = await this.customModules.assembleQuickUpdateSources(config, existingInstall, bmadDir);
+    const customModuleSources = await this.customModules.assembleQuickUpdateSources(config, existingInstall, gomadDir);
 
     // Get available modules (what we have source for)
     const availableModulesData = await new OfficialModules().listAvailable();
@@ -1159,7 +1159,7 @@ class Installer {
     // Handle missing custom module sources
     const customModuleResult = await this.handleMissingCustomSources(
       customModuleSources,
-      bmadDir,
+      gomadDir,
       projectRoot,
       'update',
       installedModules,
@@ -1249,29 +1249,29 @@ class Installer {
   }
 
   /**
-   * Uninstall BMAD with selective removal options
+   * Uninstall GOMAD with selective removal options
    * @param {string} directory - Project directory
    * @param {Object} options - Uninstall options
-   * @param {boolean} [options.removeModules=true] - Remove _bmad/ directory
+   * @param {boolean} [options.removeModules=true] - Remove _gomad/ directory
    * @param {boolean} [options.removeIdeConfigs=true] - Remove IDE configurations
    * @param {boolean} [options.removeOutputFolder=false] - Remove user artifacts output folder
    * @returns {Object} Result with success status and removed components
    */
   async uninstall(directory, options = {}) {
     const projectDir = path.resolve(directory);
-    const { bmadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findBmadDir(projectDir);
 
-    if (!(await fs.pathExists(bmadDir))) {
+    if (!(await fs.pathExists(gomadDir))) {
       return { success: false, reason: 'not-installed' };
     }
 
     // 1. DETECT: Read state BEFORE deleting anything
-    const existingInstall = await ExistingInstall.detect(bmadDir);
-    const outputFolder = await this._readOutputFolder(bmadDir);
+    const existingInstall = await ExistingInstall.detect(gomadDir);
+    const outputFolder = await this._readOutputFolder(gomadDir);
 
     const removed = { modules: false, ideConfigs: false, outputFolder: false };
 
-    // 2. IDE CLEANUP (before _bmad/ deletion so configs are accessible)
+    // 2. IDE CLEANUP (before _gomad/ deletion so configs are accessible)
     if (options.removeIdeConfigs !== false) {
       await this.uninstallIdeConfigs(projectDir, existingInstall, { silent: options.silent });
       removed.ideConfigs = true;
@@ -1282,7 +1282,7 @@ class Installer {
       removed.outputFolder = await this.uninstallOutputFolder(projectDir, outputFolder);
     }
 
-    // 4. BMAD DIRECTORY (last, after everything that needs it)
+    // 4. GOMAD DIRECTORY (last, after everything that needs it)
     if (options.removeModules !== false) {
       removed.modules = await this.uninstallModules(projectDir);
     }
@@ -1328,14 +1328,14 @@ class Installer {
   }
 
   /**
-   * Remove the _bmad/ directory
+   * Remove the _gomad/ directory
    * @param {string} projectDir - Project directory
    * @returns {Promise<boolean>} Whether the directory was removed
    */
   async uninstallModules(projectDir) {
-    const { bmadDir } = await this.findBmadDir(projectDir);
-    if (await fs.pathExists(bmadDir)) {
-      await fs.remove(bmadDir);
+    const { gomadDir } = await this.findBmadDir(projectDir);
+    if (await fs.pathExists(gomadDir)) {
+      await fs.remove(gomadDir);
       return true;
     }
     return false;
@@ -1346,8 +1346,8 @@ class Installer {
    */
   async getStatus(directory) {
     const projectDir = path.resolve(directory);
-    const { bmadDir } = await this.findBmadDir(projectDir);
-    return await ExistingInstall.detect(bmadDir);
+    const { gomadDir } = await this.findBmadDir(projectDir);
+    return await ExistingInstall.detect(gomadDir);
   }
 
   /**
@@ -1359,26 +1359,26 @@ class Installer {
 
   /**
    * Get the configured output folder name for a project
-   * Resolves bmadDir internally from projectDir
+   * Resolves gomadDir internally from projectDir
    * @param {string} projectDir - Project directory
-   * @returns {string} Output folder name (relative, default: '_bmad-output')
+   * @returns {string} Output folder name (relative, default: '_gomad-output')
    */
   async getOutputFolder(projectDir) {
-    const { bmadDir } = await this.findBmadDir(projectDir);
-    return this._readOutputFolder(bmadDir);
+    const { gomadDir } = await this.findBmadDir(projectDir);
+    return this._readOutputFolder(gomadDir);
   }
 
   /**
    * Handle missing custom module sources interactively
    * @param {Map} customModuleSources - Map of custom module ID to info
-   * @param {string} bmadDir - BMAD directory
+   * @param {string} gomadDir - GOMAD directory
    * @param {string} projectRoot - Project root directory
    * @param {string} operation - Current operation ('update', 'compile', etc.)
    * @param {Array} installedModules - Array of installed module IDs (will be modified)
    * @param {boolean} [skipPrompts=false] - Skip interactive prompts and keep all modules with missing sources
    * @returns {Object} Object with validCustomModules array and keptModulesWithoutSources array
    */
-  async handleMissingCustomSources(customModuleSources, bmadDir, projectRoot, operation, installedModules, skipPrompts = false) {
+  async handleMissingCustomSources(customModuleSources, gomadDir, projectRoot, operation, installedModules, skipPrompts = false) {
     const validCustomModules = [];
     const keptModulesWithoutSources = []; // Track modules kept without sources
     const customModulesWithMissingSources = [];
@@ -1505,7 +1505,7 @@ class Installer {
           missing.info.sourcePath = resolvedPath;
           // Remove relativePath - we only store absolute sourcePath now
           delete missing.info.relativePath;
-          await this.manifest.addCustomModule(bmadDir, missing.info);
+          await this.manifest.addCustomModule(gomadDir, missing.info);
 
           validCustomModules.push({
             id: missing.id,
@@ -1522,7 +1522,7 @@ class Installer {
         case 'remove': {
           // Extra confirmation for destructive remove
           await prompts.log.error(
-            `WARNING: This will PERMANENTLY DELETE "${missing.name}" and all its files!\n  Module location: ${path.join(bmadDir, missing.id)}`,
+            `WARNING: This will PERMANENTLY DELETE "${missing.name}" and all its files!\n  Module location: ${path.join(gomadDir, missing.id)}`,
           );
 
           const confirmDelete = await prompts.confirm({
@@ -1543,15 +1543,15 @@ class Installer {
 
             if (typedConfirm === 'DELETE') {
               // Remove the module from filesystem and manifest
-              const modulePath = path.join(bmadDir, missing.id);
+              const modulePath = path.join(gomadDir, missing.id);
               if (await fs.pathExists(modulePath)) {
                 const fsExtra = require('fs-extra');
                 await fsExtra.remove(modulePath);
                 await prompts.log.warn(`Deleted module directory: ${path.relative(projectRoot, modulePath)}`);
               }
 
-              await this.manifest.removeModule(bmadDir, missing.id);
-              await this.manifest.removeCustomModule(bmadDir, missing.id);
+              await this.manifest.removeModule(gomadDir, missing.id);
+              await this.manifest.removeCustomModule(gomadDir, missing.id);
               await prompts.log.warn('Removed from manifest');
 
               // Also remove from installedModules list
@@ -1602,30 +1602,30 @@ class Installer {
   }
 
   /**
-   * Find the bmad installation directory in a project
-   * Always uses the standard _bmad folder name
+   * Find the gomad installation directory in a project
+   * Always uses the standard _gomad folder name
    * @param {string} projectDir - Project directory
-   * @returns {Promise<Object>} { bmadDir: string }
+   * @returns {Promise<Object>} { gomadDir: string }
    */
   async findBmadDir(projectDir) {
-    const bmadDir = path.join(projectDir, BMAD_FOLDER_NAME);
-    return { bmadDir };
+    const gomadDir = path.join(projectDir, GOMAD_FOLDER_NAME);
+    return { gomadDir };
   }
 
   /**
    * Read the output_folder setting from module config files
-   * Checks bmm/config.yaml first, then other module configs
-   * @param {string} bmadDir - BMAD installation directory
+   * Checks gomad/config.yaml first, then other module configs
+   * @param {string} gomadDir - GOMAD installation directory
    * @returns {string} Output folder path or default
    */
-  async _readOutputFolder(bmadDir) {
+  async _readOutputFolder(gomadDir) {
     const yaml = require('yaml');
 
-    // Check bmm/config.yaml first (most common)
-    const bmmConfigPath = path.join(bmadDir, 'bmm', 'config.yaml');
-    if (await fs.pathExists(bmmConfigPath)) {
+    // Check gomad/config.yaml first (most common)
+    const gomadConfigPath = path.join(gomadDir, 'gomad', 'config.yaml');
+    if (await fs.pathExists(gomadConfigPath)) {
       try {
-        const content = await fs.readFile(bmmConfigPath, 'utf8');
+        const content = await fs.readFile(gomadConfigPath, 'utf8');
         const config = yaml.parse(content);
         if (config && config.output_folder) {
           // Strip {project-root}/ prefix if present
@@ -1638,10 +1638,10 @@ class Installer {
 
     // Scan other module config.yaml files
     try {
-      const entries = await fs.readdir(bmadDir, { withFileTypes: true });
+      const entries = await fs.readdir(gomadDir, { withFileTypes: true });
       for (const entry of entries) {
-        if (!entry.isDirectory() || entry.name === 'bmm' || entry.name.startsWith('_')) continue;
-        const configPath = path.join(bmadDir, entry.name, 'config.yaml');
+        if (!entry.isDirectory() || entry.name === 'gomad' || entry.name.startsWith('_')) continue;
+        const configPath = path.join(gomadDir, entry.name, 'config.yaml');
         if (await fs.pathExists(configPath)) {
           try {
             const content = await fs.readFile(configPath, 'utf8');
@@ -1659,7 +1659,7 @@ class Installer {
     }
 
     // Default fallback
-    return '_bmad-output';
+    return '_gomad-output';
   }
 
   /**

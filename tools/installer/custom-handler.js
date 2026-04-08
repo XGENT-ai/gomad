@@ -30,7 +30,7 @@ class CustomHandler {
             entry.name === 'dist' ||
             entry.name === 'build' ||
             entry.name === '.git' ||
-            entry.name === 'bmad'
+            entry.name === 'gomad'
           ) {
             continue;
           }

@@ -74,7 +74,7 @@ After the compressor (or merge compressor) returns:
 
    ```yaml
    ---
-   type: bmad-distillate
+   type: gomad-distillate
    sources:
      - "{relative path to source file 1}"
      - "{relative path to source file 2}"

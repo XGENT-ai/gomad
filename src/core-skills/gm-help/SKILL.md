@@ -1,13 +1,13 @@
 ---
 name: gm-help
-description: 'Analyzes current state and user query to answer BMad questions or recommend the next skill(s) to use. Use when user asks for help, bmad help, what to do next, or what to start with in BMad.'
+description: 'Analyzes current state and user query to answer GoMad questions or recommend the next skill(s) to use. Use when user asks for help, gomad help, what to do next, or what to start with in GoMad.'
 ---
 
-# BMad Help
+# GoMad Help
 
 ## Purpose
 
-Help the user understand where they are in their BMad workflow and what to do next. Answer BMad questions when asked.
+Help the user understand where they are in their GoMad workflow and what to do next. Answer GoMad questions when asked.
 
 ## Desired Outcomes
 
@@ -21,8 +21,8 @@ When this skill completes, the user should:
 
 ## Data Sources
 
-- **Catalog**: `{project-root}/_bmad/_config/bmad-help.csv` — assembled manifest of all installed module skills
-- **Config**: `config.yaml` and `user-config.yaml` files in `{project-root}/_bmad/` and its subfolders — resolve `output-location` variables, provide `communication_language` and `project_knowledge`
+- **Catalog**: `{project-root}/_gomad/_config/gomad-help.csv` — assembled manifest of all installed module skills
+- **Config**: `config.yaml` and `user-config.yaml` files in `{project-root}/_gomad/` and its subfolders — resolve `output-location` variables, provide `communication_language` and `project_knowledge`
 - **Artifacts**: Files matching `outputs` patterns at resolved `output-location` paths reveal which steps are possibly completed; their content may also provide grounding context for recommendations
 - **Project knowledge**: If `project_knowledge` resolves to an existing path, read it for grounding context. Never fabricate project-specific details.
 
@@ -58,7 +58,7 @@ module,skill,display-name,menu-code,description,action,args,phase,after,before,r
 
 For each recommended item, present:
 - `[menu-code]` **Display name** — e.g., "[CP] Create PRD"
-- Skill name in backticks — e.g., `bmad-create-prd`
+- Skill name in backticks — e.g., `gomad-create-prd`
 - For multi-action skills: action invocation context — e.g., "tech-writer lets create a mermaid diagram!"
 - Description if present in CSV; otherwise your existing knowledge of the skill suffices
 - Args if available

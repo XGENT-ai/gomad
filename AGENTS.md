@@ -1,4 +1,4 @@
-# BMAD-METHOD
+# GOMAD-METHOD
 
 Open source framework for structured, agent-assisted software delivery.
 

@@ -58,7 +58,7 @@ Handle fresh context validation by confirming PRD path, discovering and loading 
 Load and read the complete file at:
 `{prdPurpose}`
 
-This file contains the BMAD PRD philosophy, standards, and validation criteria that will guide all validation checks. Internalize this understanding - it defines what makes a great BMAD PRD.
+This file contains the GOMAD PRD philosophy, standards, and validation criteria that will guide all validation checks. Internalize this understanding - it defines what makes a great GOMAD PRD.
 
 ### 2. Discover PRD to Validate
 
@@ -190,8 +190,8 @@ Display: **Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Conti
 
 #### Menu Handling Logic:
 
-- IF A: Invoke the `bmad-advanced-elicitation` skill, and when finished redisplay the menu
-- IF P: Invoke the `bmad-party-mode` skill, and when finished redisplay the menu
+- IF A: Invoke the `gomad-advanced-elicitation` skill, and when finished redisplay the menu
+- IF P: Invoke the `gomad-party-mode` skill, and when finished redisplay the menu
 - IF C: Read fully and follow: {nextStepFile} to begin format detection
 - IF user provides additional document: Load it, update report, redisplay summary
 - IF Any other: help user, then redisplay menu

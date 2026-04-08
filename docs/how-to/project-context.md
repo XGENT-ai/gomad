@@ -8,7 +8,7 @@ sidebar:
 Use the `project-context.md` file to ensure AI agents follow your project's technical preferences and implementation rules throughout all workflows. To make sure this is always available, you can also add the line `Important project context and conventions are located in [path to project context]/project-context.md` to your tools context or always rules file (such as `AGENTS.md`)
 
 :::note[Prerequisites]
-- BMad Method installed
+- GoMad Method installed
 - Understanding of your project's technology stack and conventions
 :::
 
@@ -31,11 +31,11 @@ Use the `project-context.md` file to ensure AI agents follow your project's tech
 
 ### Option A: Manual Creation
 
-Create the file at `_bmad-output/project-context.md`:
+Create the file at `_gomad-output/project-context.md`:
 
 ```bash
-mkdir -p _bmad-output
-touch _bmad-output/project-context.md
+mkdir -p _gomad-output
+touch _gomad-output/project-context.md
 ```
 
 Add your technology stack and implementation rules:
@@ -77,7 +77,7 @@ sections_completed: ['technology_stack', 'critical_rules']
 Run the workflow in a fresh chat:
 
 ```bash
-bmad-generate-project-context
+gomad-generate-project-context
 ```
 
 The workflow scans your architecture document and project files to generate a context file capturing the decisions made.
@@ -87,7 +87,7 @@ The workflow scans your architecture document and project files to generate a co
 For existing projects, run:
 
 ```bash
-bmad-generate-project-context
+gomad-generate-project-context
 ```
 
 The workflow analyzes your codebase to identify conventions, then generates a context file you can review and refine.
@@ -118,7 +118,7 @@ A `project-context.md` file that:
 - **Focus on the unobvious** — Document patterns agents might miss (e.g., "Use JSDoc on every public class"), not universal practices like "use meaningful variable names."
 - **Keep it lean** — This file is loaded by every implementation workflow. Long files waste context. Exclude content that only applies to narrow scope or specific stories.
 - **Update as needed** — Edit manually when patterns change, or re-generate after significant architecture changes.
-- Works for Quick Flow and full BMad Method projects alike.
+- Works for Quick Flow and full GoMad Method projects alike.
 :::
 
 ## Next Steps

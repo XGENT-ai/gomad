@@ -16,7 +16,7 @@ const CLIUtils = {
   },
 
   /**
-   * Display BMAD logo and version using @clack intro + box
+   * Display GOMAD logo and version using @clack intro + box
    */
   async displayLogo() {
     const version = this.getVersion();

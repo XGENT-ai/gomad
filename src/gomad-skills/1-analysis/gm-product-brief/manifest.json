@@ -1,6 +1,6 @@
 {
-  "module-code": "bmm",
-  "replaces-skill": "bmad-create-product-brief",
+  "module-code": "gomad",
+  "replaces-skill": "gomad-create-product-brief",
   "capabilities": [
     {
       "name": "create-brief",

@@ -55,17 +55,17 @@ function getArtifactType(manifest, filename) {
 }
 
 /**
- * Get the install_to_bmad flag for a specific file from a loaded skill manifest.
+ * Get the install_to_gomad flag for a specific file from a loaded skill manifest.
  * @param {Object|null} manifest - Loaded manifest (from loadSkillManifest)
  * @param {string} filename - Source filename to look up
- * @returns {boolean} install_to_bmad value (defaults to true)
+ * @returns {boolean} install_to_gomad value (defaults to true)
  */
 function getInstallToBmad(manifest, filename) {
   if (!manifest) return true;
   // Single-entry manifest applies to all files in the directory
-  if (manifest.__single) return manifest.__single.install_to_bmad !== false;
+  if (manifest.__single) return manifest.__single.install_to_gomad !== false;
   // Multi-entry: look up by filename directly
-  if (manifest[filename]) return manifest[filename].install_to_bmad !== false;
+  if (manifest[filename]) return manifest[filename].install_to_gomad !== false;
   return true;
 }
 

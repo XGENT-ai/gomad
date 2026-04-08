@@ -62,7 +62,7 @@ See [Brainstorming](./brainstorming.md) for a deeper look at how sessions work.
 Product Brief and PRFAQ both produce input for the PRD — choose one based on how much challenge you want. The brief is collaborative discovery. The PRFAQ is a gauntlet. Both get you to the same destination; the PRFAQ tests whether your concept deserves to get there.
 
 :::tip[Not Sure?]
-Run `bmad-help` and describe your situation. It will recommend the right starting point based on what you've already done and what you're trying to accomplish.
+Run `gomad-help` and describe your situation. It will recommend the right starting point based on what you've already done and what you're trying to accomplish.
 :::
 
 ## What Happens After Analysis?

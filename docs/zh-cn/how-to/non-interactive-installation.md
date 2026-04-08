@@ -1,11 +1,11 @@
 ---
 title: "非交互式安装"
-description: 使用命令行参数安装 BMad，适用于 CI/CD 流水线和自动化部署
+description: 使用命令行参数安装 GoMad，适用于 CI/CD 流水线和自动化部署
 sidebar:
   order: 2
 ---
 
-使用命令行参数（flags）以非交互方式安装 BMad。适用于以下场景：
+使用命令行参数（flags）以非交互方式安装 GoMad。适用于以下场景：
 
 ## 使用场景
 
@@ -25,7 +25,7 @@ sidebar:
 | 参数 | 描述 | 示例 |
 |------|-------------|---------|
 | `--directory <path>` | 安装目录 | `--directory ~/projects/myapp` |
-| `--modules <modules>` | 逗号分隔的模块 ID | `--modules bmm,bmb` |
+| `--modules <modules>` | 逗号分隔的模块 ID | `--modules gomad,bmb` |
 | `--tools <tools>` | 逗号分隔的工具/IDE ID（使用 `none` 跳过） | `--tools claude-code,cursor` 或 `--tools none` |
 | `--custom-content <paths>` | 逗号分隔的自定义模块路径 | `--custom-content ~/my-module,~/another-module` |
 | `--action <type>` | 对现有安装的操作：`install`（默认）、`update` 或 `quick-update` | `--action quick-update` |
@@ -37,7 +37,7 @@ sidebar:
 | `--user-name <name>` | 智能体使用的名称 | 系统用户名 |
 | `--communication-language <lang>` | 智能体通信语言 | 英语 |
 | `--document-output-language <lang>` | 文档输出语言 | 英语 |
-| `--output-folder <path>` | 输出文件夹路径 | _bmad-output |
+| `--output-folder <path>` | 输出文件夹路径 | _gomad-output |
 
 ### 其他选项
 
@@ -50,10 +50,10 @@ sidebar:
 
 `--modules` 参数可用的模块 ID：
 
-- `bmm` — BMad Method Master
-- `bmb` — BMad Builder
+- `gomad` — GoMad Method Master
+- `bmb` — GoMad Builder
 
-查看 [BMad 注册表](https://github.com/bmad-code-org) 获取可用的外部模块。
+查看 [GoMad 注册表](https://github.com/gomad-code-org) 获取可用的外部模块。
 
 ## 工具/IDE ID
 
@@ -61,16 +61,16 @@ sidebar:
 
 **推荐：** `claude-code`、`cursor`
 
-运行一次 `npx bmad-method install` 交互式安装以查看完整的当前支持工具列表，或查看 [平台代码配置](https://github.com/bmad-code-org/BMAD-METHOD/blob/main/tools/installer/ide/platform-codes.yaml)。
+运行一次 `npx gomad install` 交互式安装以查看完整的当前支持工具列表，或查看 [平台代码配置](https://github.com/gomad-code-org/GOMAD-METHOD/blob/main/tools/installer/ide/platform-codes.yaml)。
 
 ## 安装模式
 
 | 模式 | 描述 | 示例 |
 |------|-------------|---------|
-| 完全非交互式 | 提供所有参数以跳过所有提示 | `npx bmad-method install --directory . --modules bmm --tools claude-code --yes` |
-| 半交互式 | 提供部分参数；BMad 提示其余部分 | `npx bmad-method install --directory . --modules bmm` |
-| 仅使用默认值 | 使用 `-y` 接受所有默认值 | `npx bmad-method install --yes` |
-| 不包含工具 | 跳过工具/IDE 配置 | `npx bmad-method install --modules bmm --tools none` |
+| 完全非交互式 | 提供所有参数以跳过所有提示 | `npx gomad install --directory . --modules gomad --tools claude-code --yes` |
+| 半交互式 | 提供部分参数；GoMad 提示其余部分 | `npx gomad install --directory . --modules gomad` |
+| 仅使用默认值 | 使用 `-y` 接受所有默认值 | `npx gomad install --yes` |
+| 不包含工具 | 跳过工具/IDE 配置 | `npx gomad install --modules gomad --tools none` |
 
 ## 示例
 
@@ -78,32 +78,32 @@ sidebar:
 
 ```bash
 #!/bin/bash
-# install-bmad.sh
+# install-gomad.sh
 
-npx bmad-method install \
+npx gomad install \
   --directory "${GITHUB_WORKSPACE}" \
-  --modules bmm \
+  --modules gomad \
   --tools claude-code \
   --user-name "CI Bot" \
   --communication-language English \
   --document-output-language English \
-  --output-folder _bmad-output \
+  --output-folder _gomad-output \
   --yes
 ```
 
 ### 更新现有安装
 
 ```bash
-npx bmad-method install \
+npx gomad install \
   --directory ~/projects/myapp \
   --action update \
-  --modules bmm,bmb,custom-module
+  --modules gomad,bmb,custom-module
 ```
 
 ### 快速更新（保留设置）
 
 ```bash
-npx bmad-method install \
+npx gomad install \
   --directory ~/projects/myapp \
   --action quick-update
 ```
@@ -111,22 +111,22 @@ npx bmad-method install \
 ### 使用自定义内容安装
 
 ```bash
-npx bmad-method install \
+npx gomad install \
   --directory ~/projects/myapp \
-  --modules bmm \
+  --modules gomad \
   --custom-content ~/my-custom-module,~/another-module \
   --tools claude-code
 ```
 
 ## 安装结果
 
-- 项目中完全配置的 `_bmad/` 目录
+- 项目中完全配置的 `_gomad/` 目录
 - 为所选模块和工具配置的智能体和工作流
-- 用于生成产物的 `_bmad-output/` 文件夹
+- 用于生成产物的 `_gomad-output/` 文件夹
 
 ## 参数校验与错误处理
 
-BMad 会验证你提供的所有参数：
+GoMad 会验证你提供的所有参数：
 
 - **目录** — 必须是具有写入权限的有效路径
 - **模块** — 对无效的模块 ID 发出警告（但不会失败）
@@ -167,6 +167,6 @@ BMad 会验证你提供的所有参数：
 - 在 `module.yaml` 中有 `code` 字段
 
 :::note[仍然卡住了？]
-使用 `--debug` 获取详细输出，尝试交互模式定位问题，或在 <https://github.com/bmad-code-org/BMAD-METHOD/issues> 提交反馈。
+使用 `--debug` 获取详细输出，尝试交互模式定位问题，或在 <https://github.com/gomad-code-org/GOMAD-METHOD/issues> 提交反馈。
 :::
 

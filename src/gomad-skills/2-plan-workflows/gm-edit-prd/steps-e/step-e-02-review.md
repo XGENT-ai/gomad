@@ -2,7 +2,7 @@
 # File references (ONLY variables used in this step)
 prdFile: '{prd_file_path}'
 validationReport: '{validation_report_path}'  # If provided
-prdPurpose: '{project-root}/_bmad/bmm-skills/2-plan-workflows/bmad-create-prd/data/prd-purpose.md'
+prdPurpose: '{project-root}/_gomad/gomad-skills/2-plan-workflows/gomad-create-prd/data/prd-purpose.md'
 ---
 
 # Step E-2: Deep Review & Analysis
@@ -65,7 +65,7 @@ Thoroughly review the existing PRD, analyze validation report findings (if provi
 
 **Context from step e-01:**
 - User's edit requirements: {user_requirements}
-- PRD format: {BMAD/legacy}
+- PRD format: {GOMAD/legacy}
 - Validation report provided: {yes/no}
 - Conversion mode: {restructure/targeted/both} (if legacy)
 
@@ -78,7 +78,7 @@ Thoroughly review the existing PRD, analyze validation report findings (if provi
 
 **IF no validation report:**
 1. Read entire PRD thoroughly
-2. Analyze against BMAD standards (from prd-purpose.md)
+2. Analyze against GOMAD standards (from prd-purpose.md)
 3. Identify issues in:
    - Information density (anti-patterns)
    - Structure and flow
@@ -215,8 +215,8 @@ Read fully and follow: `./step-e-03-edit.md`
 
 #### Menu Handling Logic:
 
-- IF A: Invoke the `bmad-advanced-elicitation` skill, then return to discussion
-- IF P: Invoke the `bmad-party-mode` skill, then return to discussion
+- IF A: Invoke the `gomad-advanced-elicitation` skill, then return to discussion
+- IF P: Invoke the `gomad-party-mode` skill, then return to discussion
 - IF C: Document approval, then load step-e-03-edit.md
 - IF Any other: discuss, then redisplay menu
 

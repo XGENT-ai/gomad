@@ -17,7 +17,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
 
 - `project_name`, `user_name`
 - `communication_language`, `document_output_language`
@@ -359,7 +359,7 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
   </check>
 
   <action>Report completion</action>
-  <output>**🎯 ULTIMATE BMad Method STORY CONTEXT CREATED, {user_name}!**
+  <output>**🎯 ULTIMATE GoMad Method STORY CONTEXT CREATED, {user_name}!**
 
     **Story Details:**
     - Story ID: {{story_id}}
@@ -371,7 +371,7 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
     1. Review the comprehensive story in {{story_file}}
     2. Run dev agents `dev-story` for optimized implementation
     3. Run `code-review` when complete (auto-marks done)
-    4. Optional: If Test Architect module installed, run `/bmad:tea:automate` after `dev-story` to generate guardrail tests
+    4. Optional: If Test Architect module installed, run `/gomad:tea:automate` after `dev-story` to generate guardrail tests
 
     **The developer now has everything needed for flawless implementation!**
   </output>

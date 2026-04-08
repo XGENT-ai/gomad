@@ -4,7 +4,7 @@ const yaml = require('yaml');
 const { Manifest } = require('./manifest');
 
 /**
- * Immutable snapshot of an existing BMAD installation.
+ * Immutable snapshot of an existing GOMAD installation.
  * Pure query object — no filesystem operations after construction.
  */
 class ExistingInstall {
@@ -40,12 +40,12 @@ class ExistingInstall {
   }
 
   /**
-   * Scan a bmad directory and return an immutable snapshot of what's installed.
-   * @param {string} bmadDir - Path to bmad directory
+   * Scan a gomad directory and return an immutable snapshot of what's installed.
+   * @param {string} gomadDir - Path to gomad directory
    * @returns {Promise<ExistingInstall>}
    */
-  static async detect(bmadDir) {
-    if (!(await fs.pathExists(bmadDir))) {
+  static async detect(gomadDir) {
+    if (!(await fs.pathExists(gomadDir))) {
       return ExistingInstall.empty();
     }
 
@@ -56,7 +56,7 @@ class ExistingInstall {
     let customModules = [];
 
     const manifest = new Manifest();
-    const manifestData = await manifest.read(bmadDir);
+    const manifestData = await manifest.read(gomadDir);
     if (manifestData) {
       version = manifestData.version;
       if (manifestData.customModules) {
@@ -67,7 +67,7 @@ class ExistingInstall {
       }
     }
 
-    const corePath = path.join(bmadDir, 'core');
+    const corePath = path.join(gomadDir, 'core');
     if (await fs.pathExists(corePath)) {
       hasCore = true;
 
@@ -89,7 +89,7 @@ class ExistingInstall {
 
     if (manifestData && manifestData.modules && manifestData.modules.length > 0) {
       for (const moduleId of manifestData.modules) {
-        const modulePath = path.join(bmadDir, moduleId);
+        const modulePath = path.join(gomadDir, moduleId);
         const moduleConfigPath = path.join(modulePath, 'config.yaml');
 
         const moduleInfo = {

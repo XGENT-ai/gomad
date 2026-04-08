@@ -1,5 +1,5 @@
 ---
-title: "How to Customize BMad"
+title: "How to Customize GoMad"
 description: Customize agents, workflows, and modules while preserving update compatibility
 sidebar:
   order: 7
@@ -15,7 +15,7 @@ Use the `.customize.yaml` files to tailor agent behavior, personas, and menus wh
 - You want agents to perform specific actions every time they start up
 
 :::note[Prerequisites]
-- BMad installed in your project (see [How to Install BMad](./install-bmad.md))
+- GoMad installed in your project (see [How to Install GoMad](./install-gomad.md))
 - A text editor for YAML files
 :::
 
@@ -30,10 +30,10 @@ Always use the `.customize.yaml` files described here rather than editing agent 
 After installation, find one `.customize.yaml` file per agent in:
 
 ```text
-_bmad/_config/agents/
-├── core-bmad-master.customize.yaml
-├── bmm-dev.customize.yaml
-├── bmm-pm.customize.yaml
+_gomad/_config/agents/
+├── core-gomad-master.customize.yaml
+├── gomad-dev.customize.yaml
+├── gomad-pm.customize.yaml
 └── ... (one file per installed agent)
 ```
 
@@ -131,7 +131,7 @@ prompts:
 After editing, reinstall to apply changes:
 
 ```bash
-npx bmad-method install
+npx gomad install
 ```
 
 The installer detects the existing installation and offers these options:
@@ -139,7 +139,7 @@ The installer detects the existing installation and offers these options:
 | Option                       | What It Does                                                        |
 | ---------------------------- | ------------------------------------------------------------------- |
 | **Quick Update**             | Updates all modules to the latest version and applies customizations |
-| **Modify BMad Installation** | Full installation flow for adding or removing modules               |
+| **Modify GoMad Installation** | Full installation flow for adding or removing modules               |
 
 For customization-only changes, **Quick Update** is the fastest option.
 
@@ -147,7 +147,7 @@ For customization-only changes, **Quick Update** is the fastest option.
 
 **Changes not appearing?**
 
-- Run `npx bmad-method install` and select **Quick Update** to apply changes
+- Run `npx gomad install` and select **Quick Update** to apply changes
 - Check that your YAML syntax is valid (indentation matters)
 - Verify you edited the correct `.customize.yaml` file for the agent
 
@@ -160,11 +160,11 @@ For customization-only changes, **Quick Update** is the fastest option.
 **Need to reset an agent?**
 
 - Clear or delete the agent's `.customize.yaml` file
-- Run `npx bmad-method install` and select **Quick Update** to restore defaults
+- Run `npx gomad install` and select **Quick Update** to restore defaults
 
 ## Workflow Customization
 
-Customization of existing BMad Method workflows and skills is coming soon.
+Customization of existing GoMad Method workflows and skills is coming soon.
 
 ## Module Customization
 

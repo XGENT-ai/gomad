@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-`bmad-quick-dev` 的目标很直接：在保证质量边界的前提下，把“意图到代码”的人机往返轮次降到最低。
+`gomad-quick-dev` 的目标很直接：在保证质量边界的前提下，把“意图到代码”的人机往返轮次降到最低。
 
 ![快速开发工作流图](/diagrams/quick-dev-diagram.png)
 

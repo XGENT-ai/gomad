@@ -1,12 +1,12 @@
 const path = require('node:path');
 const fs = require('fs-extra');
 const { getProjectRoot } = require('../project-root');
-const { BMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
+const { GOMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 
 class InstallPaths {
   static async create(config) {
     const srcDir = getProjectRoot();
-    await assertReadableDir(srcDir, 'BMAD source root');
+    await assertReadableDir(srcDir, 'GOMAD source root');
 
     const pkgPath = path.join(srcDir, 'package.json');
     await assertReadableFile(pkgPath, 'package.json');
@@ -15,16 +15,16 @@ class InstallPaths {
     const projectRoot = path.resolve(config.directory);
     await ensureWritableDir(projectRoot, 'project root');
 
-    const bmadDir = path.join(projectRoot, BMAD_FOLDER_NAME);
-    const isUpdate = await fs.pathExists(bmadDir);
+    const gomadDir = path.join(projectRoot, GOMAD_FOLDER_NAME);
+    const isUpdate = await fs.pathExists(gomadDir);
 
-    const configDir = path.join(bmadDir, '_config');
+    const configDir = path.join(gomadDir, '_config');
     const agentsDir = path.join(configDir, 'agents');
     const customCacheDir = path.join(configDir, 'custom');
-    const coreDir = path.join(bmadDir, 'core');
+    const coreDir = path.join(gomadDir, 'core');
 
     for (const [dir, label] of [
-      [bmadDir, 'bmad directory'],
+      [gomadDir, 'gomad directory'],
       [configDir, 'config directory'],
       [agentsDir, 'agents config directory'],
       [customCacheDir, 'custom modules cache'],
@@ -37,7 +37,7 @@ class InstallPaths {
       srcDir,
       version,
       projectRoot,
-      bmadDir,
+      gomadDir,
       configDir,
       agentsDir,
       customCacheDir,
@@ -61,13 +61,13 @@ class InstallPaths {
     return path.join(this.configDir, 'files-manifest.csv');
   }
   helpCatalog() {
-    return path.join(this.configDir, 'bmad-help.csv');
+    return path.join(this.configDir, 'gomad-help.csv');
   }
   moduleDir(name) {
-    return path.join(this.bmadDir, name);
+    return path.join(this.gomadDir, name);
   }
   moduleConfig(name) {
-    return path.join(this.bmadDir, name, 'config.yaml');
+    return path.join(this.gomadDir, name, 'config.yaml');
   }
 }
 

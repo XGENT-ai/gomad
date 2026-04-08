@@ -60,20 +60,20 @@ class ManifestGenerator {
 
   /**
    * Generate all manifests for the installation
-   * @param {string} bmadDir - _bmad
+   * @param {string} gomadDir - _gomad
    * @param {Array} selectedModules - Selected modules for installation
    * @param {Array} installedFiles - All installed files (optional, for hash tracking)
    */
-  async generateManifests(bmadDir, selectedModules, installedFiles = [], options = {}) {
+  async generateManifests(gomadDir, selectedModules, installedFiles = [], options = {}) {
     // Create _config directory if it doesn't exist
-    const cfgDir = path.join(bmadDir, '_config');
+    const cfgDir = path.join(gomadDir, '_config');
     await fs.ensureDir(cfgDir);
 
     // Store modules list (all modules including preserved ones)
     const preservedModules = options.preservedModules || [];
 
-    // Scan the bmad directory to find all actually installed modules
-    const installedModules = await this.scanInstalledModules(bmadDir);
+    // Scan the gomad directory to find all actually installed modules
+    const installedModules = await this.scanInstalledModules(gomadDir);
 
     // Since custom modules are now installed the same way as regular modules,
     // we don't need to exclude them from manifest generation
@@ -82,8 +82,8 @@ class ManifestGenerator {
     this.modules = allModules;
     this.updatedModules = allModules; // Include ALL modules (including custom) for scanning
 
-    this.bmadDir = bmadDir;
-    this.bmadFolderName = path.basename(bmadDir); // Get the actual folder name (e.g., '_bmad' or 'bmad')
+    this.gomadDir = gomadDir;
+    this.gomadFolderName = path.basename(gomadDir); // Get the actual folder name (e.g., '_gomad' or 'gomad')
     this.allInstalledFiles = installedFiles;
 
     if (!Object.prototype.hasOwnProperty.call(options, 'ides')) {
@@ -127,16 +127,16 @@ class ManifestGenerator {
    * Recursively walk a module directory tree, collecting native SKILL.md entrypoints.
    * A directory is discovered as a skill when it contains a SKILL.md file with
    * valid name/description frontmatter (name must match directory name).
-   * Manifest YAML is loaded only when present — for install_to_bmad and agent metadata.
+   * Manifest YAML is loaded only when present — for install_to_gomad and agent metadata.
    * Populates this.skills[] and this.skillClaimedDirs (Set of absolute paths).
    */
   async collectSkills() {
     this.skills = [];
     this.skillClaimedDirs = new Set();
-    const debug = process.env.BMAD_DEBUG_MANIFEST === 'true';
+    const debug = process.env.GOMAD_DEBUG_MANIFEST === 'true';
 
     for (const moduleName of this.updatedModules) {
-      const modulePath = path.join(this.bmadDir, moduleName);
+      const modulePath = path.join(this.gomadDir, moduleName);
       if (!(await fs.pathExists(modulePath))) continue;
 
       // Recursive walk skipping . and _ prefixed dirs
@@ -156,15 +156,15 @@ class ManifestGenerator {
         const skillMeta = await this.parseSkillMd(skillMdPath, dir, dirName, debug);
 
         if (skillMeta) {
-          // Load manifest when present (for install_to_bmad and agent metadata)
+          // Load manifest when present (for install_to_gomad and agent metadata)
           const manifest = await this.loadSkillManifest(dir);
           const artifactType = this.getArtifactType(manifest, skillFile);
 
           // Build path relative from module root (points to SKILL.md — the permanent entrypoint)
           const relativePath = path.relative(modulePath, dir).split(path.sep).join('/');
           const installPath = relativePath
-            ? `${this.bmadFolderName}/${moduleName}/${relativePath}/${skillFile}`
-            : `${this.bmadFolderName}/${moduleName}/${skillFile}`;
+            ? `${this.gomadFolderName}/${moduleName}/${relativePath}/${skillFile}`
+            : `${this.gomadFolderName}/${moduleName}/${skillFile}`;
 
           // Native SKILL.md entrypoints derive canonicalId from directory name.
           // Agent entrypoints may keep canonicalId metadata for compatibility, so
@@ -182,7 +182,7 @@ class ManifestGenerator {
             module: moduleName,
             path: installPath,
             canonicalId,
-            install_to_bmad: this.getInstallToBmad(manifest, skillFile),
+            install_to_gomad: this.getInstallToBmad(manifest, skillFile),
           });
 
           // Add to files list
@@ -272,19 +272,19 @@ class ManifestGenerator {
    */
   async collectAgents(selectedModules) {
     this.agents = [];
-    const debug = process.env.BMAD_DEBUG_MANIFEST === 'true';
+    const debug = process.env.GOMAD_DEBUG_MANIFEST === 'true';
 
     // Walk each module's full directory tree looking for type:agent manifests
     for (const moduleName of this.updatedModules) {
-      const modulePath = path.join(this.bmadDir, moduleName);
+      const modulePath = path.join(this.gomadDir, moduleName);
       if (!(await fs.pathExists(modulePath))) continue;
 
       const moduleAgents = await this.getAgentsFromDirRecursive(modulePath, moduleName, '', debug);
       this.agents.push(...moduleAgents);
     }
 
-    // Get standalone agents from bmad/agents/ directory
-    const standaloneAgentsDir = path.join(this.bmadDir, 'agents');
+    // Get standalone agents from gomad/agents/ directory
+    const standaloneAgentsDir = path.join(this.gomadDir, 'agents');
     if (await fs.pathExists(standaloneAgentsDir)) {
       const standaloneAgents = await this.getAgentsFromDirRecursive(standaloneAgentsDir, 'standalone', '', debug);
       this.agents.push(...standaloneAgents);
@@ -327,7 +327,7 @@ class ManifestGenerator {
         const m = dirManifest.__single;
         const dirRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
         const agentModule = m.module || moduleName;
-        const installPath = `${this.bmadFolderName}/${agentModule}/${dirRelativePath}`;
+        const installPath = `${this.gomadFolderName}/${agentModule}/${dirRelativePath}`;
 
         agents.push({
           name: m.name || entry.name,
@@ -422,7 +422,7 @@ class ManifestGenerator {
 
     for (const moduleName of this.modules) {
       // Get fresh version info from source
-      const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, this.bmadDir);
+      const versionInfo = await manifestObj.getModuleVersionInfo(moduleName, this.gomadDir);
 
       // Get existing install date if available
       const existing = existingModulesMap.get(moduleName);
@@ -472,7 +472,7 @@ class ManifestGenerator {
     const csvPath = path.join(cfgDir, 'skill-manifest.csv');
     const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
 
-    let csvContent = 'canonicalId,name,description,module,path,install_to_bmad\n';
+    let csvContent = 'canonicalId,name,description,module,path,install_to_gomad\n';
 
     for (const skill of this.skills) {
       const row = [
@@ -481,7 +481,7 @@ class ManifestGenerator {
         escapeCsv(skill.description),
         escapeCsv(skill.module),
         escapeCsv(skill.path),
-        escapeCsv(skill.install_to_bmad),
+        escapeCsv(skill.install_to_gomad),
       ].join(',');
       csvContent += row + '\n';
     }
@@ -595,8 +595,8 @@ class ManifestGenerator {
     if (this.allInstalledFiles && this.allInstalledFiles.length > 0) {
       // Process all installed files
       for (const filePath of this.allInstalledFiles) {
-        // Store paths relative to bmadDir (no folder prefix)
-        const relativePath = filePath.replace(this.bmadDir, '').replaceAll('\\', '/').replace(/^\//, '');
+        // Store paths relative to gomadDir (no folder prefix)
+        const relativePath = filePath.replace(this.gomadDir, '').replaceAll('\\', '/').replace(/^\//, '');
         const ext = path.extname(filePath).toLowerCase();
         const fileName = path.basename(filePath, ext);
 
@@ -619,8 +619,8 @@ class ManifestGenerator {
       // Fallback: use the collected workflows/agents/tasks
       for (const file of this.files) {
         // Strip the folder prefix if present (for consistency)
-        const relPath = file.path.replace(this.bmadFolderName + '/', '');
-        const filePath = path.join(this.bmadDir, relPath);
+        const relPath = file.path.replace(this.gomadFolderName + '/', '');
+        const filePath = path.join(this.gomadDir, relPath);
         const hash = await this.calculateFileHash(filePath);
         allFiles.push({
           ...file,
@@ -647,15 +647,15 @@ class ManifestGenerator {
   }
 
   /**
-   * Scan the bmad directory to find all installed modules
-   * @param {string} bmadDir - Path to bmad directory
+   * Scan the gomad directory to find all installed modules
+   * @param {string} gomadDir - Path to gomad directory
    * @returns {Array} List of module names
    */
-  async scanInstalledModules(bmadDir) {
+  async scanInstalledModules(gomadDir) {
     const modules = [];
 
     try {
-      const entries = await fs.readdir(bmadDir, { withFileTypes: true });
+      const entries = await fs.readdir(gomadDir, { withFileTypes: true });
 
       for (const entry of entries) {
         // Skip if not a directory or is a special directory
@@ -664,7 +664,7 @@ class ManifestGenerator {
         }
 
         // Check if this looks like a module (has agents directory or skill manifests)
-        const modulePath = path.join(bmadDir, entry.name);
+        const modulePath = path.join(gomadDir, entry.name);
         const hasAgents = await fs.pathExists(path.join(modulePath, 'agents'));
         const hasSkills = await this._hasSkillMdRecursive(modulePath);
 

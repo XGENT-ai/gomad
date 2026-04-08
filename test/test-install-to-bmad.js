@@ -1,15 +1,15 @@
 /**
- * install_to_bmad Flag — Design Contract Tests
+ * install_to_gomad Flag — Design Contract Tests
  *
- * Unit tests against the functions that implement the install_to_bmad flag.
+ * Unit tests against the functions that implement the install_to_gomad flag.
  * These nail down the 4 core design decisions:
  *
- * 1. true/omitted → skill stays in _bmad/ (default behavior)
- * 2. false → skill removed from _bmad/ after IDE install
+ * 1. true/omitted → skill stays in _gomad/ (default behavior)
+ * 2. false → skill removed from _gomad/ after IDE install
  * 3. No platform → no cleanup runs (cleanup lives in installVerbatimSkills)
  * 4. Mixed flags → each skill evaluated independently
  *
- * Usage: node test/test-install-to-bmad.js
+ * Usage: node test/test-install-to-gomad.js
  */
 
 const path = require('node:path');
@@ -45,13 +45,13 @@ function assert(condition, testName, errorMessage = '') {
 
 async function runTests() {
   console.log(`${colors.cyan}========================================`);
-  console.log('install_to_bmad — Design Contract Tests');
+  console.log('install_to_gomad — Design Contract Tests');
   console.log(`========================================${colors.reset}\n`);
 
   // ============================================================
-  // 1. true/omitted → getInstallToBmad returns true (keep in _bmad/)
+  // 1. true/omitted → getInstallToBmad returns true (keep in _gomad/)
   // ============================================================
-  console.log(`${colors.yellow}Design decision 1: true or omitted → skill stays in _bmad/${colors.reset}\n`);
+  console.log(`${colors.yellow}Design decision 1: true or omitted → skill stays in _gomad/${colors.reset}\n`);
 
   // Null manifest (no skill-manifest.yaml) → true
   assert(getInstallToBmad(null, 'workflow.md') === true, 'null manifest defaults to true');
@@ -64,29 +64,29 @@ async function runTests() {
 
   // Single-entry, explicit true → true
   assert(
-    getInstallToBmad({ __single: { type: 'skill', install_to_bmad: true } }, 'workflow.md') === true,
+    getInstallToBmad({ __single: { type: 'skill', install_to_gomad: true } }, 'workflow.md') === true,
     'single-entry manifest with explicit true returns true',
   );
 
   console.log('');
 
   // ============================================================
-  // 2. false → getInstallToBmad returns false (remove from _bmad/)
+  // 2. false → getInstallToBmad returns false (remove from _gomad/)
   // ============================================================
-  console.log(`${colors.yellow}Design decision 2: false → skill removed from _bmad/${colors.reset}\n`);
+  console.log(`${colors.yellow}Design decision 2: false → skill removed from _gomad/${colors.reset}\n`);
 
   // Single-entry, explicit false → false
   assert(
-    getInstallToBmad({ __single: { type: 'skill', install_to_bmad: false } }, 'workflow.md') === false,
+    getInstallToBmad({ __single: { type: 'skill', install_to_gomad: false } }, 'workflow.md') === false,
     'single-entry manifest with explicit false returns false',
   );
 
   // loadSkillManifest round-trip: YAML with false is preserved through load
   {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-itb-'));
-    await fs.writeFile(path.join(tmpDir, 'skill-manifest.yaml'), 'type: skill\ninstall_to_bmad: false\n');
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gomad-itb-'));
+    await fs.writeFile(path.join(tmpDir, 'skill-manifest.yaml'), 'type: skill\ninstall_to_gomad: false\n');
     const loaded = await loadSkillManifest(tmpDir);
-    assert(getInstallToBmad(loaded, 'workflow.md') === false, 'loadSkillManifest preserves install_to_bmad: false through round-trip');
+    assert(getInstallToBmad(loaded, 'workflow.md') === false, 'loadSkillManifest preserves install_to_gomad: false through round-trip');
     await fs.remove(tmpDir);
   }
 
@@ -103,7 +103,7 @@ async function runTests() {
   // Cleanup is driven by reading the CSV column inside installVerbatimSkills.
   // We verify the flag is just data — getInstallToBmad doesn't touch the filesystem.
   {
-    const manifest = { __single: { type: 'skill', install_to_bmad: false } };
+    const manifest = { __single: { type: 'skill', install_to_gomad: false } };
     const result = getInstallToBmad(manifest, 'workflow.md');
     assert(typeof result === 'boolean', 'getInstallToBmad returns a boolean (pure data, no side effects)');
     assert(result === false, 'false value is faithfully returned for consumer to act on');
@@ -119,8 +119,8 @@ async function runTests() {
   // Multi-entry manifest: different files can have different flags
   {
     const manifest = {
-      'workflow.md': { type: 'skill', install_to_bmad: false },
-      'other.md': { type: 'skill', install_to_bmad: true },
+      'workflow.md': { type: 'skill', install_to_gomad: false },
+      'other.md': { type: 'skill', install_to_gomad: true },
     };
     assert(getInstallToBmad(manifest, 'workflow.md') === false, 'multi-entry: workflow.md with false returns false');
     assert(getInstallToBmad(manifest, 'other.md') === true, 'multi-entry: other.md with true returns true');
@@ -139,10 +139,10 @@ async function runTests() {
   console.log(`========================================${colors.reset}\n`);
 
   if (failed === 0) {
-    console.log(`${colors.green}All install_to_bmad contract tests passed!${colors.reset}\n`);
+    console.log(`${colors.green}All install_to_gomad contract tests passed!${colors.reset}\n`);
     process.exit(0);
   } else {
-    console.log(`${colors.red}Some install_to_bmad contract tests failed${colors.reset}\n`);
+    console.log(`${colors.red}Some install_to_gomad contract tests failed${colors.reset}\n`);
     process.exit(1);
   }
 }

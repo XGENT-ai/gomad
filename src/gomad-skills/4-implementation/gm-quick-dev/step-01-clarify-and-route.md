@@ -42,7 +42,7 @@ Never ask extra questions if you already understand what the user intends.
 1. Load context.
    - List files in `{planning_artifacts}` and `{implementation_artifacts}`.
    - If you find an unformatted spec or intent file, ingest its contents to form your understanding of the intent.
-   - Planning artifacts are the output of BMAD phases 1-3. Typical files include:
+   - Planning artifacts are the output of GOMAD phases 1-3. Typical files include:
      - **PRD** (`*prd*`) — product requirements and success criteria
      - **Architecture** (`*architecture*`) — technical design decisions and constraints
      - **UX/Design** (`*ux*`) — user experience and interaction design

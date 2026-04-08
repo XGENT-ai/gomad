@@ -5,7 +5,7 @@ sidebar:
   order: 9
 ---
 
-当单个 Markdown 文档过大、影响模型读取时，可使用 `bmad-shard-doc` 工作流把文档拆成按章节组织的小文件，降低上下文压力。
+当单个 Markdown 文档过大、影响模型读取时，可使用 `gomad-shard-doc` 工作流把文档拆成按章节组织的小文件，降低上下文压力。
 
 :::caution[已弃用]
 这是兼容性方案，默认不推荐。随着工作流更新，以及主流模型/工具逐步支持子进程（subprocesses），很多场景将不再需要手动分片。
@@ -25,11 +25,11 @@ sidebar:
 
 ```text
 分片前：
-_bmad-output/planning-artifacts/
+_gomad-output/planning-artifacts/
 └── PRD.md（大型 50k token 文件）
 
 分片后：
-_bmad-output/planning-artifacts/
+_gomad-output/planning-artifacts/
 └── prd/
     ├── index.md                    # 带有描述的目录
     ├── overview.md                 # 第 1 节
@@ -40,10 +40,10 @@ _bmad-output/planning-artifacts/
 
 ## 步骤
 
-### 1. 运行 `bmad-shard-doc` 工作流
+### 1. 运行 `gomad-shard-doc` 工作流
 
 ```bash
-/bmad-shard-doc
+/gomad-shard-doc
 ```
 
 ### 2. 按交互流程完成分片
@@ -64,7 +64,7 @@ _bmad-output/planning-artifacts/
 
 ## 工作流发现机制
 
-BMad 工作流使用**双重发现机制**：
+GoMad 工作流使用**双重发现机制**：
 
 1. **先查完整文档** - 查找 `document-name.md`
 2. **再查分片入口** - 查找 `document-name/index.md`
@@ -78,5 +78,5 @@ BMad 工作流使用**双重发现机制**：
 
 ## 后续步骤
 
-- [如何自定义 BMad](./customize-bmad.md) - 了解高级配置与工作流定制边界
+- [如何自定义 GoMad](./customize-gomad.md) - 了解高级配置与工作流定制边界
 - [如何升级到 v6](./upgrade-to-v6.md) - 在迁移过程中处理文档与目录结构变化

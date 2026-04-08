@@ -77,7 +77,7 @@ When reader_type='llm', optimize for PRECISION and UNAMBIGUITY:
 - Scaffolding: Complex ideas built on established foundations
 
 ### Prompt/Task Definition (Functional)
-**Applicability:** BMAD tasks, prompts, system instructions, XML definitions
+**Applicability:** GOMAD tasks, prompts, system instructions, XML definitions
 - Meta-first: Inputs, usage constraints, and context defined before instructions
 - Separation of Concerns: Instructions (logic) separate from Data (content)
 - Step-by-step: Execution flow must be explicit and ordered

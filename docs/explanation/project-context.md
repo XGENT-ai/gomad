@@ -21,12 +21,12 @@ The `project-context.md` file solves this by documenting what agents need to kno
 Every implementation workflow automatically loads `project-context.md` if it exists. The architect workflow also loads it to respect your technical preferences when designing the architecture.
 
 **Loaded by these workflows:**
-- `bmad-create-architecture` — respects technical preferences during solutioning
-- `bmad-create-story` — informs story creation with project patterns
-- `bmad-dev-story` — guides implementation decisions
-- `bmad-code-review` — validates against project standards
-- `bmad-quick-dev` — applies patterns when implementing specs
-- `bmad-sprint-planning`, `bmad-retrospective`, `bmad-correct-course` — provides project-wide context
+- `gomad-create-architecture` — respects technical preferences during solutioning
+- `gomad-create-story` — informs story creation with project patterns
+- `gomad-dev-story` — guides implementation decisions
+- `gomad-code-review` — validates against project standards
+- `gomad-quick-dev` — applies patterns when implementing specs
+- `gomad-sprint-planning`, `gomad-retrospective`, `gomad-correct-course` — provides project-wide context
 
 ## When to Create It
 
@@ -34,10 +34,10 @@ The `project-context.md` file is useful at any stage of a project:
 
 | Scenario | When to Create | Purpose |
 |----------|----------------|---------|
-| **New project, before architecture** | Manually, before `bmad-create-architecture` | Document your technical preferences so the architect respects them |
-| **New project, after architecture** | Via `bmad-generate-project-context` or manually | Capture architecture decisions for implementation agents |
-| **Existing project** | Via `bmad-generate-project-context` | Discover existing patterns so agents follow established conventions |
-| **Quick Flow project** | Before or during `bmad-quick-dev` | Ensure quick implementation respects your patterns |
+| **New project, before architecture** | Manually, before `gomad-create-architecture` | Document your technical preferences so the architect respects them |
+| **New project, after architecture** | Via `gomad-generate-project-context` or manually | Capture architecture decisions for implementation agents |
+| **Existing project** | Via `gomad-generate-project-context` | Discover existing patterns so agents follow established conventions |
+| **Quick Flow project** | Before or during `gomad-quick-dev` | Ensure quick implementation respects your patterns |
 
 :::tip[Recommended]
 For new projects, create it manually before architecture if you have strong technical preferences. Otherwise, generate it after architecture to capture those decisions.
@@ -95,32 +95,32 @@ You have three options:
 
 ### Manual Creation
 
-Create the file at `_bmad-output/project-context.md` and add your rules:
+Create the file at `_gomad-output/project-context.md` and add your rules:
 
 ```bash
 # In your project root
-mkdir -p _bmad-output
-touch _bmad-output/project-context.md
+mkdir -p _gomad-output
+touch _gomad-output/project-context.md
 ```
 
 Edit it with your technology stack and implementation rules. The architect and implementation workflows will automatically find and load it.
 
 ### Generate After Architecture
 
-Run the `bmad-generate-project-context` workflow after completing your architecture:
+Run the `gomad-generate-project-context` workflow after completing your architecture:
 
 ```bash
-bmad-generate-project-context
+gomad-generate-project-context
 ```
 
 This scans your architecture document and project files to generate a context file capturing the decisions made.
 
 ### Generate for Existing Projects
 
-For existing projects, run `bmad-generate-project-context` to discover existing patterns:
+For existing projects, run `gomad-generate-project-context` to discover existing patterns:
 
 ```bash
-bmad-generate-project-context
+gomad-generate-project-context
 ```
 
 The workflow analyzes your codebase to identify conventions, then generates a context file you can review and refine.
@@ -150,8 +150,8 @@ The `project-context.md` file is a living document. Update it when:
 - Patterns evolve during implementation
 - You identify gaps from agent behavior
 
-You can edit it manually at any time, or re-run `bmad-generate-project-context` to update it after significant changes.
+You can edit it manually at any time, or re-run `gomad-generate-project-context` to update it after significant changes.
 
 :::note[File Location]
-The default location is `_bmad-output/project-context.md`. Workflows search for it there, and also check `**/project-context.md` anywhere in your project.
+The default location is `_gomad-output/project-context.md`. Workflows search for it there, and also check `**/project-context.md` anywhere in your project.
 :::

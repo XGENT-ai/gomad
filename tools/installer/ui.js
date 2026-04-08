@@ -52,10 +52,10 @@ class UI {
 
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { bmadDir } = await installer.findBmadDir(confirmedDirectory);
+    const { gomadDir } = await installer.findBmadDir(confirmedDirectory);
 
-    // Check if there's an existing BMAD installation
-    const hasExistingInstall = await fs.pathExists(bmadDir);
+    // Check if there's an existing GOMAD installation
+    const hasExistingInstall = await fs.pathExists(gomadDir);
 
     let customContentConfig = { hasCustomContent: false };
     if (!hasExistingInstall) {
@@ -68,7 +68,7 @@ class UI {
     // Only show action menu if there's an existing installation
     if (hasExistingInstall) {
       // Get version information
-      const { existingInstall, bmadDir } = await this.getExistingInstallation(confirmedDirectory);
+      const { existingInstall, gomadDir } = await this.getExistingInstallation(confirmedDirectory);
       const packageJsonPath = path.join(__dirname, '../../package.json');
       const currentVersion = require(packageJsonPath).version;
       const installedVersion = existingInstall.installed ? existingInstall.version || 'unknown' : 'unknown';
@@ -85,7 +85,7 @@ class UI {
       }
 
       // Common actions
-      choices.push({ name: 'Modify BMAD Installation', value: 'update' });
+      choices.push({ name: 'Modify GOMAD Installation', value: 'update' });
 
       // Check if action is provided via command-line
       if (options.action) {
@@ -254,7 +254,7 @@ class UI {
           }
         } else if (options.yes) {
           // Non-interactive mode: preserve existing custom modules (matches default: false)
-          const cacheDir = path.join(bmadDir, '_config', 'custom');
+          const cacheDir = path.join(gomadDir, '_config', 'custom');
           if (await fs.pathExists(cacheDir)) {
             const entries = await fs.readdir(cacheDir, { withFileTypes: true });
             for (const entry of entries) {
@@ -280,9 +280,9 @@ class UI {
             // Preserve existing custom modules if user doesn't want to modify them
             const { Installer } = require('./core/installer');
             const installer = new Installer();
-            const { bmadDir } = await installer.findBmadDir(confirmedDirectory);
+            const { gomadDir } = await installer.findBmadDir(confirmedDirectory);
 
-            const cacheDir = path.join(bmadDir, '_config', 'custom');
+            const cacheDir = path.join(gomadDir, '_config', 'custom');
             if (await fs.pathExists(cacheDir)) {
               const entries = await fs.readdir(cacheDir, { withFileTypes: true });
               for (const entry of entries) {
@@ -454,8 +454,8 @@ class UI {
     const { ExistingInstall } = require('./core/existing-install');
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { bmadDir } = await installer.findBmadDir(projectDir || process.cwd());
-    const existingInstall = await ExistingInstall.detect(bmadDir);
+    const { gomadDir } = await installer.findBmadDir(projectDir || process.cwd());
+    const existingInstall = await ExistingInstall.detect(gomadDir);
     const configuredIdes = existingInstall.ides;
 
     // Get IDE manager to fetch available IDEs dynamically
@@ -686,17 +686,17 @@ class UI {
   /**
    * Get existing installation info and installed modules
    * @param {string} directory - Installation directory
-   * @returns {Object} Object with existingInstall, installedModuleIds, and bmadDir
+   * @returns {Object} Object with existingInstall, installedModuleIds, and gomadDir
    */
   async getExistingInstallation(directory) {
     const { ExistingInstall } = require('./core/existing-install');
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { bmadDir } = await installer.findBmadDir(directory);
-    const existingInstall = await ExistingInstall.detect(bmadDir);
+    const { gomadDir } = await installer.findBmadDir(directory);
+    const existingInstall = await ExistingInstall.detect(gomadDir);
     const installedModuleIds = new Set(existingInstall.moduleIds);
 
-    return { existingInstall, installedModuleIds, bmadDir };
+    return { existingInstall, installedModuleIds, gomadDir };
   }
 
   /**
@@ -760,7 +760,7 @@ class UI {
           user_name: defaultUsername,
           communication_language: 'English',
           document_output_language: 'English',
-          output_folder: '_bmad-output',
+          output_folder: '_gomad-output',
         };
         await prompts.log.info('Using default configuration (--yes flag)');
       }
@@ -879,7 +879,7 @@ class UI {
     const lockedValues = ['core'];
 
     // Core module is always installed — show it locked at the top
-    allOptions.push({ label: 'BMad Core Module', value: 'core', hint: 'Core configuration and shared resources' });
+    allOptions.push({ label: 'GoMad Core Module', value: 'core', hint: 'Core configuration and shared resources' });
     initialValues.push('core');
 
     // Helper to build module entry with proper sorting and selection
@@ -907,10 +907,10 @@ class UI {
     }
     allOptions.push(...localEntries.map(({ label, value, hint }) => ({ label, value, hint })));
 
-    // Group 2: BMad Official Modules (type: bmad-org)
+    // Group 2: GoMad Official Modules (type: gomad-org)
     const officialModules = [];
     for (const mod of externalModules) {
-      if (mod.type === 'bmad-org') {
+      if (mod.type === 'gomad-org') {
         const entry = buildModuleEntry(mod, mod.code, 'Official');
         officialModules.push(entry);
         if (entry.selected) {
@@ -975,9 +975,9 @@ class UI {
       }
     }
 
-    // If no defaults found, use 'bmm' as the fallback default
+    // If no defaults found, use 'gomad' as the fallback default
     if (defaultModules.length === 0) {
-      defaultModules.push('bmm');
+      defaultModules.push('gomad');
     }
 
     return defaultModules;
@@ -1021,15 +1021,16 @@ class UI {
       if (stats.isDirectory()) {
         const files = await fs.readdir(directory);
         if (files.length > 0) {
-          // Check for any bmad installation (any folder with _config/manifest.yaml)
+          // Check for any gomad installation (any folder with _config/manifest.yaml)
           const { Installer } = require('./core/installer');
           const installer = new Installer();
-          const bmadResult = await installer.findBmadDir(directory);
+          const gomadResult = await installer.findBmadDir(directory);
           const hasBmadInstall =
-            (await fs.pathExists(bmadResult.bmadDir)) && (await fs.pathExists(path.join(bmadResult.bmadDir, '_config', 'manifest.yaml')));
+            (await fs.pathExists(gomadResult.gomadDir)) &&
+            (await fs.pathExists(path.join(gomadResult.gomadDir, '_config', 'manifest.yaml')));
 
-          const bmadNote = hasBmadInstall ? ` including existing BMAD installation (${path.basename(bmadResult.bmadDir)})` : '';
-          await prompts.log.message(`Directory exists and contains ${files.length} item(s)${bmadNote}`);
+          const gomadNote = hasBmadInstall ? ` including existing GOMAD installation (${path.basename(gomadResult.gomadDir)})` : '';
+          await prompts.log.message(`Directory exists and contains ${files.length} item(s)${gomadNote}`);
         } else {
           await prompts.log.message('Directory exists and is empty');
         }
@@ -1267,8 +1268,8 @@ class UI {
     const { ExistingInstall } = require('./core/existing-install');
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { bmadDir } = await installer.findBmadDir(directory);
-    const existingInstall = await ExistingInstall.detect(bmadDir);
+    const { gomadDir } = await installer.findBmadDir(directory);
+    const existingInstall = await ExistingInstall.detect(gomadDir);
     return existingInstall.ides;
   }
 
@@ -1416,9 +1417,9 @@ class UI {
     // Check if there are any custom modules in cache
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { bmadDir } = await installer.findBmadDir(directory);
+    const { gomadDir } = await installer.findBmadDir(directory);
 
-    const cacheDir = path.join(bmadDir, '_config', 'custom');
+    const cacheDir = path.join(gomadDir, '_config', 'custom');
     const cachedCustomModules = [];
 
     if (await fs.pathExists(cacheDir)) {
@@ -1635,17 +1636,17 @@ class UI {
    * @param {Object} statusData - Status data with modules, installation info, and available updates
    */
   async displayStatus(statusData) {
-    const { installation, modules, availableUpdates, bmadDir } = statusData;
+    const { installation, modules, availableUpdates, gomadDir } = statusData;
 
     // Installation info
     const infoLines = [
       `Version:       ${installation.version || 'unknown'}`,
-      `Location:      ${bmadDir}`,
+      `Location:      ${gomadDir}`,
       `Installed:     ${new Date(installation.installDate).toLocaleDateString()}`,
       `Last Updated:  ${installation.lastUpdated ? new Date(installation.lastUpdated).toLocaleDateString() : 'unknown'}`,
     ];
 
-    await prompts.note(infoLines.join('\n'), 'BMAD Status');
+    await prompts.note(infoLines.join('\n'), 'GOMAD Status');
 
     // Module versions
     await this.displayModuleVersions(modules, availableUpdates);
@@ -1653,7 +1654,7 @@ class UI {
     // Update summary
     if (availableUpdates.length > 0) {
       await prompts.log.warn(`${availableUpdates.length} update(s) available`);
-      await prompts.log.message('Run \'bmad install\' and select "Quick Update" to update');
+      await prompts.log.message('Run \'gomad install\' and select "Quick Update" to update');
     } else {
       await prompts.log.success('All modules are up to date');
     }

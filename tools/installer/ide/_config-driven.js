@@ -4,12 +4,12 @@ const fs = require('fs-extra');
 const yaml = require('yaml');
 const prompts = require('../prompts');
 const csv = require('csv-parse/sync');
-const { BMAD_FOLDER_NAME } = require('./shared/path-utils');
+const { GOMAD_FOLDER_NAME } = require('./shared/path-utils');
 
 /**
  * Config-driven IDE setup handler
  *
- * This class provides a standardized way to install BMAD artifacts to IDEs
+ * This class provides a standardized way to install GOMAD artifacts to IDEs
  * based on configuration in platform-codes.yaml. It eliminates the need for
  * individual installer files for each IDE.
  *
@@ -25,19 +25,19 @@ class ConfigDrivenIdeSetup {
     this.preferred = platformConfig.preferred || false;
     this.platformConfig = platformConfig;
     this.installerConfig = platformConfig.installer || null;
-    this.bmadFolderName = BMAD_FOLDER_NAME;
+    this.gomadFolderName = GOMAD_FOLDER_NAME;
 
     // Set configDir from target_dir so detect() works
     this.configDir = this.installerConfig?.target_dir || null;
   }
 
-  setBmadFolderName(bmadFolderName) {
-    this.bmadFolderName = bmadFolderName;
+  setBmadFolderName(gomadFolderName) {
+    this.gomadFolderName = gomadFolderName;
   }
 
   /**
    * Detect whether this IDE already has configuration in the project.
-   * Checks for bmad-prefixed entries in target_dir.
+   * Checks for gomad-prefixed entries in target_dir.
    * @param {string} projectDir - Project directory
    * @returns {Promise<boolean>}
    */
@@ -48,7 +48,7 @@ class ConfigDrivenIdeSetup {
     if (await fs.pathExists(dir)) {
       try {
         const entries = await fs.readdir(dir);
-        return entries.some((e) => typeof e === 'string' && e.startsWith('bmad'));
+        return entries.some((e) => typeof e === 'string' && e.startsWith('gomad'));
       } catch {
         return false;
       }
@@ -59,20 +59,20 @@ class ConfigDrivenIdeSetup {
   /**
    * Main setup method - called by IdeManager
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @param {Object} options - Setup options
    * @returns {Promise<Object>} Setup result
    */
-  async setup(projectDir, bmadDir, options = {}) {
-    // Check for BMAD files in ancestor directories that would cause duplicates
+  async setup(projectDir, gomadDir, options = {}) {
+    // Check for GOMAD files in ancestor directories that would cause duplicates
     if (this.installerConfig?.ancestor_conflict_check) {
       const conflict = await this.findAncestorConflict(projectDir);
       if (conflict) {
         await prompts.log.error(
-          `Found existing BMAD skills in ancestor installation: ${conflict}\n` +
+          `Found existing GOMAD skills in ancestor installation: ${conflict}\n` +
             `  ${this.name} inherits skills from parent directories, so this would cause duplicates.\n` +
-            `  Please remove the BMAD files from that directory first:\n` +
-            `    rm -rf "${conflict}"/bmad*`,
+            `  Please remove the GOMAD files from that directory first:\n` +
+            `    rm -rf "${conflict}"/gomad*`,
         );
         return {
           success: false,
@@ -85,7 +85,7 @@ class ConfigDrivenIdeSetup {
 
     if (!options.silent) await prompts.log.info(`Setting up ${this.name}...`);
 
-    // Clean up any old BMAD installation first
+    // Clean up any old GOMAD installation first
     await this.cleanup(projectDir, options);
 
     if (!this.installerConfig) {
@@ -93,7 +93,7 @@ class ConfigDrivenIdeSetup {
     }
 
     if (this.installerConfig.target_dir) {
-      return this.installToTarget(projectDir, bmadDir, this.installerConfig, options);
+      return this.installToTarget(projectDir, gomadDir, this.installerConfig, options);
     }
 
     return { success: false, reason: 'invalid-config' };
@@ -102,12 +102,12 @@ class ConfigDrivenIdeSetup {
   /**
    * Install to a single target directory
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @param {Object} config - Installation configuration
    * @param {Object} options - Setup options
    * @returns {Promise<Object>} Installation result
    */
-  async installToTarget(projectDir, bmadDir, config, options) {
+  async installToTarget(projectDir, gomadDir, config, options) {
     const { target_dir } = config;
     const targetPath = path.join(projectDir, target_dir);
     await fs.ensureDir(targetPath);
@@ -115,7 +115,7 @@ class ConfigDrivenIdeSetup {
     this.skillWriteTracker = new Set();
     const results = { skills: 0 };
 
-    results.skills = await this.installVerbatimSkills(projectDir, bmadDir, targetPath, config);
+    results.skills = await this.installVerbatimSkills(projectDir, gomadDir, targetPath, config);
     results.skillDirectories = this.skillWriteTracker.size;
 
     await this.printSummary(results, target_dir, options);
@@ -128,15 +128,15 @@ class ConfigDrivenIdeSetup {
    * Copies the entire source directory as-is into the IDE skill directory.
    * The source SKILL.md is used directly — no frontmatter transformation or file generation.
    * @param {string} projectDir - Project directory
-   * @param {string} bmadDir - BMAD installation directory
+   * @param {string} gomadDir - GOMAD installation directory
    * @param {string} targetPath - Target skills directory
    * @param {Object} config - Installation configuration
    * @returns {Promise<number>} Count of skills installed
    */
-  async installVerbatimSkills(projectDir, bmadDir, targetPath, config) {
-    const bmadFolderName = path.basename(bmadDir);
-    const bmadPrefix = bmadFolderName + '/';
-    const csvPath = path.join(bmadDir, '_config', 'skill-manifest.csv');
+  async installVerbatimSkills(projectDir, gomadDir, targetPath, config) {
+    const gomadFolderName = path.basename(gomadDir);
+    const gomadPrefix = gomadFolderName + '/';
+    const csvPath = path.join(gomadDir, '_config', 'skill-manifest.csv');
 
     if (!(await fs.pathExists(csvPath))) return 0;
 
@@ -153,10 +153,10 @@ class ConfigDrivenIdeSetup {
       if (!canonicalId) continue;
 
       // Derive source directory from path column
-      // path is like "_bmad/bmm/workflows/bmad-quick-flow/bmad-quick-dev-new-preview/SKILL.md"
-      // Strip bmadFolderName prefix and join with bmadDir, then get dirname
-      const relativePath = record.path.startsWith(bmadPrefix) ? record.path.slice(bmadPrefix.length) : record.path;
-      const sourceFile = path.join(bmadDir, relativePath);
+      // path is like "_gomad/gomad/workflows/gomad-quick-flow/gomad-quick-dev-new-preview/SKILL.md"
+      // Strip gomadFolderName prefix and join with gomadDir, then get dirname
+      const relativePath = record.path.startsWith(gomadPrefix) ? record.path.slice(gomadPrefix.length) : record.path;
+      const sourceFile = path.join(gomadDir, relativePath);
       const sourceDir = path.dirname(sourceFile);
 
       if (!(await fs.pathExists(sourceDir))) continue;
@@ -183,11 +183,11 @@ class ConfigDrivenIdeSetup {
       count++;
     }
 
-    // Post-install cleanup: remove _bmad/ directories for skills with install_to_bmad === "false"
+    // Post-install cleanup: remove _gomad/ directories for skills with install_to_gomad === "false"
     for (const record of records) {
-      if (record.install_to_bmad === 'false') {
-        const relativePath = record.path.startsWith(bmadPrefix) ? record.path.slice(bmadPrefix.length) : record.path;
-        const sourceFile = path.join(bmadDir, relativePath);
+      if (record.install_to_gomad === 'false') {
+        const relativePath = record.path.startsWith(gomadPrefix) ? record.path.slice(gomadPrefix.length) : record.path;
+        const sourceFile = path.join(gomadDir, relativePath);
         const sourceDir = path.dirname(sourceFile);
         if (await fs.pathExists(sourceDir)) {
           await fs.remove(sourceDir);
@@ -229,17 +229,17 @@ class ConfigDrivenIdeSetup {
       }
     }
 
-    // Strip BMAD markers from copilot-instructions.md if present
+    // Strip GOMAD markers from copilot-instructions.md if present
     if (this.name === 'github-copilot') {
       await this.cleanupCopilotInstructions(projectDir, options);
     }
 
-    // Strip BMAD modes from .kilocodemodes if present
+    // Strip GOMAD modes from .kilocodemodes if present
     if (this.name === 'kilo') {
       await this.cleanupKiloModes(projectDir, options);
     }
 
-    // Strip BMAD entries from .rovodev/prompts.yml if present
+    // Strip GOMAD entries from .rovodev/prompts.yml if present
     if (this.name === 'rovo-dev') {
       await this.cleanupRovoDevPrompts(projectDir, options);
     }
@@ -260,7 +260,7 @@ class ConfigDrivenIdeSetup {
   }
 
   /**
-   * Warn about stale BMAD files in a global legacy directory (never auto-deletes)
+   * Warn about stale GOMAD files in a global legacy directory (never auto-deletes)
    * @param {string} legacyDir - Legacy directory path (may start with ~)
    * @param {Object} options - Options (silent, etc.)
    */
@@ -275,10 +275,10 @@ class ConfigDrivenIdeSetup {
       if (!(await fs.pathExists(expanded))) return;
 
       const entries = await fs.readdir(expanded);
-      const bmadFiles = entries.filter((e) => typeof e === 'string' && e.startsWith('bmad'));
+      const gomadFiles = entries.filter((e) => typeof e === 'string' && e.startsWith('gomad'));
 
-      if (bmadFiles.length > 0 && !options.silent) {
-        await prompts.log.warn(`Found ${bmadFiles.length} stale BMAD file(s) in ${expanded}. Remove manually: rm ${expanded}/bmad-*`);
+      if (gomadFiles.length > 0 && !options.silent) {
+        await prompts.log.warn(`Found ${gomadFiles.length} stale GOMAD file(s) in ${expanded}. Remove manually: rm ${expanded}/gomad-*`);
       }
     } catch {
       // Errors reading global paths are silently ignored
@@ -297,7 +297,7 @@ class ConfigDrivenIdeSetup {
       return;
     }
 
-    // Remove all bmad* files
+    // Remove all gomad* files
     let entries;
     try {
       entries = await fs.readdir(targetPath);
@@ -316,7 +316,7 @@ class ConfigDrivenIdeSetup {
       if (!entry || typeof entry !== 'string') {
         continue;
       }
-      if (entry.startsWith('bmad') && !entry.startsWith('bmad-os-')) {
+      if (entry.startsWith('gomad') && !entry.startsWith('gomad-os-')) {
         const entryPath = path.join(targetPath, entry);
         try {
           await fs.remove(entryPath);
@@ -328,7 +328,7 @@ class ConfigDrivenIdeSetup {
     }
 
     if (removedCount > 0 && !options.silent) {
-      await prompts.log.message(`  Cleaned ${removedCount} BMAD files from ${targetDir}`);
+      await prompts.log.message(`  Cleaned ${removedCount} GOMAD files from ${targetDir}`);
     }
 
     // Remove empty directory after cleanup
@@ -345,8 +345,8 @@ class ConfigDrivenIdeSetup {
   }
 
   /**
-   * Strip BMAD-owned content from .github/copilot-instructions.md.
-   * The old custom installer injected content between <!-- BMAD:START --> and <!-- BMAD:END --> markers.
+   * Strip GOMAD-owned content from .github/copilot-instructions.md.
+   * The old custom installer injected content between <!-- GOMAD:START --> and <!-- GOMAD:END --> markers.
    * Deletes the file if nothing remains. Restores .bak backup if one exists.
    */
   async cleanupCopilotInstructions(projectDir, options = {}) {
@@ -356,12 +356,12 @@ class ConfigDrivenIdeSetup {
 
     try {
       const content = await fs.readFile(filePath, 'utf8');
-      const startIdx = content.indexOf('<!-- BMAD:START -->');
-      const endIdx = content.indexOf('<!-- BMAD:END -->');
+      const startIdx = content.indexOf('<!-- GOMAD:START -->');
+      const endIdx = content.indexOf('<!-- GOMAD:END -->');
 
       if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return;
 
-      const cleaned = content.slice(0, startIdx) + content.slice(endIdx + '<!-- BMAD:END -->'.length);
+      const cleaned = content.slice(0, startIdx) + content.slice(endIdx + '<!-- GOMAD:END -->'.length);
 
       if (cleaned.trim().length === 0) {
         await fs.remove(filePath);
@@ -376,16 +376,16 @@ class ConfigDrivenIdeSetup {
         if (await fs.pathExists(backupPath)) await fs.remove(backupPath);
       }
 
-      if (!options.silent) await prompts.log.message('  Cleaned BMAD markers from copilot-instructions.md');
+      if (!options.silent) await prompts.log.message('  Cleaned GOMAD markers from copilot-instructions.md');
     } catch {
-      if (!options.silent) await prompts.log.warn('  Warning: Could not clean BMAD markers from copilot-instructions.md');
+      if (!options.silent) await prompts.log.warn('  Warning: Could not clean GOMAD markers from copilot-instructions.md');
     }
   }
 
   /**
-   * Strip BMAD-owned modes from .kilocodemodes.
-   * The old custom kilo.js installer added modes with slug starting with 'bmad-'.
-   * Parses YAML, filters out BMAD modes, rewrites. Leaves file as-is on parse failure.
+   * Strip GOMAD-owned modes from .kilocodemodes.
+   * The old custom kilo.js installer added modes with slug starting with 'gomad-'.
+   * Parses YAML, filters out GOMAD modes, rewrites. Leaves file as-is on parse failure.
    */
   async cleanupKiloModes(projectDir, options = {}) {
     const kiloModesPath = path.join(projectDir, '.kilocodemodes');
@@ -405,13 +405,13 @@ class ConfigDrivenIdeSetup {
     if (!Array.isArray(config.customModes)) return;
 
     const originalCount = config.customModes.length;
-    config.customModes = config.customModes.filter((mode) => mode && (!mode.slug || !mode.slug.startsWith('bmad-')));
+    config.customModes = config.customModes.filter((mode) => mode && (!mode.slug || !mode.slug.startsWith('gomad-')));
     const removedCount = originalCount - config.customModes.length;
 
     if (removedCount > 0) {
       try {
         await fs.writeFile(kiloModesPath, yaml.stringify(config, { lineWidth: 0 }));
-        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} BMAD modes from .kilocodemodes`);
+        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} GOMAD modes from .kilocodemodes`);
       } catch {
         if (!options.silent) await prompts.log.warn('  Warning: Could not write .kilocodemodes during cleanup');
       }
@@ -419,9 +419,9 @@ class ConfigDrivenIdeSetup {
   }
 
   /**
-   * Strip BMAD-owned entries from .rovodev/prompts.yml.
+   * Strip GOMAD-owned entries from .rovodev/prompts.yml.
    * The old custom rovodev.js installer registered workflows in prompts.yml.
-   * Parses YAML, filters out entries with name starting with 'bmad-', rewrites.
+   * Parses YAML, filters out entries with name starting with 'gomad-', rewrites.
    * Removes the file if no entries remain.
    */
   async cleanupRovoDevPrompts(projectDir, options = {}) {
@@ -442,7 +442,7 @@ class ConfigDrivenIdeSetup {
     if (!Array.isArray(config.prompts)) return;
 
     const originalCount = config.prompts.length;
-    config.prompts = config.prompts.filter((entry) => entry && (!entry.name || !entry.name.startsWith('bmad-')));
+    config.prompts = config.prompts.filter((entry) => entry && (!entry.name || !entry.name.startsWith('gomad-')));
     const removedCount = originalCount - config.prompts.length;
 
     if (removedCount > 0) {
@@ -452,7 +452,7 @@ class ConfigDrivenIdeSetup {
         } else {
           await fs.writeFile(promptsPath, yaml.stringify(config, { lineWidth: 0 }));
         }
-        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} BMAD entries from prompts.yml`);
+        if (!options.silent) await prompts.log.message(`  Removed ${removedCount} GOMAD entries from prompts.yml`);
       } catch {
         if (!options.silent) await prompts.log.warn('  Warning: Could not write prompts.yml during cleanup');
       }
@@ -460,7 +460,7 @@ class ConfigDrivenIdeSetup {
   }
 
   /**
-   * Check ancestor directories for existing BMAD files in the same target_dir.
+   * Check ancestor directories for existing GOMAD files in the same target_dir.
    * IDEs like Claude Code inherit commands from parent directories, so an existing
    * installation in an ancestor would cause duplicate commands.
    * @param {string} projectDir - Project directory being installed to
@@ -480,7 +480,7 @@ class ConfigDrivenIdeSetup {
         if (await fs.pathExists(candidatePath)) {
           const entries = await fs.readdir(candidatePath);
           const hasBmad = entries.some(
-            (e) => typeof e === 'string' && e.toLowerCase().startsWith('bmad') && !e.toLowerCase().startsWith('bmad-os-'),
+            (e) => typeof e === 'string' && e.toLowerCase().startsWith('gomad') && !e.toLowerCase().startsWith('gomad-os-'),
           );
           if (hasBmad) {
             return candidatePath;

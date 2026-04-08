@@ -10,7 +10,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
 
 - `project_name`, `user_name`
 - `communication_language`, `document_output_language`
@@ -68,7 +68,7 @@ Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
 3. **Selectively load sections** based on relevance to the change being analyzed — do NOT load everything, only sections that relate to the impacted areas
 4. **This document is optional** — skip if `{project_knowledge}` does not exist (greenfield projects)
 
-**Fuzzy matching**: Be flexible with document names — users may use variations like `prd.md`, `bmm-prd.md`, `product-requirements.md`, etc.
+**Fuzzy matching**: Be flexible with document names — users may use variations like `prd.md`, `gomad-prd.md`, `product-requirements.md`, etc.
 
 **Missing documents**: Not all documents may exist. PRD and Epics are essential; Architecture, UX Design, Spec, and Document Project are loaded if available. HALT if PRD or Epics cannot be found.
 

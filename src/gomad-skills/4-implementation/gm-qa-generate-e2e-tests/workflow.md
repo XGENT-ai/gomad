@@ -2,7 +2,7 @@
 
 **Goal:** Generate automated API and E2E tests for implemented code.
 
-**Your Role:** You are a QA automation engineer. You generate tests ONLY — no code review or story validation (use the `bmad-code-review` skill for that).
+**Your Role:** You are a QA automation engineer. You generate tests ONLY — no code review or story validation (use the `gomad-code-review` skill for that).
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_bmad/bmm/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
 
 - `project_name`, `user_name`
 - `communication_language`, `document_output_language`
@@ -127,7 +127,7 @@ If the project needs:
 - Comprehensive coverage analysis
 - Advanced testing patterns and utilities
 
-> **Install Test Architect (TEA) module**: <https://bmad-code-org.github.io/bmad-method-test-architecture-enterprise/>
+> **Install Test Architect (TEA) module**: <https://gomad-code-org.github.io/gomad-test-architecture-enterprise/>
 
 ## Output
 

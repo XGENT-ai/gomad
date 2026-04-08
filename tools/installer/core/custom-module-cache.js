@@ -10,9 +10,9 @@ const crypto = require('node:crypto');
 const prompts = require('../prompts');
 
 class CustomModuleCache {
-  constructor(bmadDir) {
-    this.bmadDir = bmadDir;
-    this.customCacheDir = path.join(bmadDir, '_config', 'custom');
+  constructor(gomadDir) {
+    this.gomadDir = gomadDir;
+    this.customCacheDir = path.join(gomadDir, '_config', 'custom');
     this.manifestPath = path.join(this.customCacheDir, 'cache-manifest.yaml');
   }
 

@@ -5,7 +5,7 @@ sidebar:
   order: 5
 ---
 
-Use **Quick Dev** for bug fixes, refactorings, or small targeted changes that don't require the full BMad Method.
+Use **Quick Dev** for bug fixes, refactorings, or small targeted changes that don't require the full GoMad Method.
 
 ## When to Use This
 
@@ -15,7 +15,7 @@ Use **Quick Dev** for bug fixes, refactorings, or small targeted changes that do
 - Dependency updates
 
 :::note[Prerequisites]
-- BMad Method installed (`npx bmad-method install`)
+- GoMad Method installed (`npx gomad install`)
 - An AI-powered IDE (Claude Code, Cursor, or similar)
 :::
 
@@ -38,7 +38,7 @@ run quick-dev — fix https://github.com/org/repo/issues/42
 ```
 
 ```text
-run quick-dev — implement the intent in _bmad-output/implementation-artifacts/my-intent.md
+run quick-dev — implement the intent in _gomad-output/implementation-artifacts/my-intent.md
 ```
 
 ```text
@@ -86,10 +86,10 @@ Check this file after a run — it's your backlog of things to come back to. Eac
 
 ## When to Upgrade to Formal Planning
 
-Consider using the full BMad Method when:
+Consider using the full GoMad Method when:
 
 - The change affects multiple systems or requires coordinated updates across many files
 - You are unsure about the scope and need requirements discovery first
 - You need documentation or architectural decisions recorded for the team
 
-See [Quick Dev](../explanation/quick-dev.md) for more on how Quick Dev fits into the BMad Method.
+See [Quick Dev](../explanation/quick-dev.md) for more on how Quick Dev fits into the GoMad Method.

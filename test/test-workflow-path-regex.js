@@ -37,18 +37,18 @@ function assert(condition, testName, errorMessage = '') {
 // in tools/installer/modules/manager.js
 // ---------------------------------------------------------------------------
 
-// Source regex (line ~1081) — uses non-capturing group for _bmad
-const SOURCE_REGEX = /\{project-root\}\/(?:_bmad)\/([^/]+)\/workflows\/(.+)/;
+// Source regex (line ~1081) — uses non-capturing group for _gomad
+const SOURCE_REGEX = /\{project-root\}\/(?:_gomad)\/([^/]+)\/workflows\/(.+)/;
 
-// Install regex (line ~1091) — uses non-capturing group for _bmad,
+// Install regex (line ~1091) — uses non-capturing group for _gomad,
 // consistent with source regex
-const INSTALL_REGEX = /\{project-root\}\/(?:_bmad)\/([^/]+)\/workflows\/(.+)/;
+const INSTALL_REGEX = /\{project-root\}\/(?:_gomad)\/([^/]+)\/workflows\/(.+)/;
 
 // ---------------------------------------------------------------------------
 // Test data
 // ---------------------------------------------------------------------------
-const sourcePath = '{project-root}/_bmad/bmm/workflows/4-implementation/bmad-create-story/workflow.md';
-const installPath = '{project-root}/_bmad/bmgd/workflows/4-production/create-story/workflow.md';
+const sourcePath = '{project-root}/_gomad/gomad/workflows/4-implementation/gomad-create-story/workflow.md';
+const installPath = '{project-root}/_gomad/bmgd/workflows/4-production/create-story/workflow.md';
 
 console.log(`\n${colors.cyan}Workflow Path Regex Tests${colors.reset}\n`);
 
@@ -58,14 +58,14 @@ const sourceMatch = sourcePath.match(SOURCE_REGEX);
 
 assert(sourceMatch !== null, 'Source regex matches source path');
 assert(
-  sourceMatch && sourceMatch[1] === 'bmm',
+  sourceMatch && sourceMatch[1] === 'gomad',
   'Source regex group [1] is the module name',
-  `Expected "bmm", got "${sourceMatch && sourceMatch[1]}"`,
+  `Expected "gomad", got "${sourceMatch && sourceMatch[1]}"`,
 );
 assert(
-  sourceMatch && sourceMatch[2] === '4-implementation/bmad-create-story/workflow.md',
+  sourceMatch && sourceMatch[2] === '4-implementation/gomad-create-story/workflow.md',
   'Source regex group [2] is the workflow sub-path',
-  `Expected "4-implementation/bmad-create-story/workflow.md", got "${sourceMatch && sourceMatch[2]}"`,
+  `Expected "4-implementation/gomad-create-story/workflow.md", got "${sourceMatch && sourceMatch[2]}"`,
 );
 
 // --- Install regex tests (group [2] returns module name, not sub-path) ---

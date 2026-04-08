@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const { loadSkillManifest, getCanonicalId } = require('./skill-manifest');
 
 /**
- * Helpers for gathering BMAD agents/tasks from the installed tree.
+ * Helpers for gathering GOMAD agents/tasks from the installed tree.
  * Shared by installers that need Claude-style exports.
  *
  * TODO: Dead code cleanup — compiled XML agents are retired.
@@ -33,18 +33,18 @@ const { loadSkillManifest, getCanonicalId } = require('./skill-manifest');
  * writeColonArtifacts / writeDashArtifacts.
  * getTasksFromBmad and getTasksFromDir may still be live — verify before removing.
  */
-async function getAgentsFromBmad(bmadDir, selectedModules = []) {
+async function getAgentsFromBmad(gomadDir, selectedModules = []) {
   const agents = [];
 
   // Get core agents
-  if (await fs.pathExists(path.join(bmadDir, 'core', 'agents'))) {
-    const coreAgents = await getAgentsFromDir(path.join(bmadDir, 'core', 'agents'), 'core');
+  if (await fs.pathExists(path.join(gomadDir, 'core', 'agents'))) {
+    const coreAgents = await getAgentsFromDir(path.join(gomadDir, 'core', 'agents'), 'core');
     agents.push(...coreAgents);
   }
 
   // Get module agents
   for (const moduleName of selectedModules) {
-    const agentsPath = path.join(bmadDir, moduleName, 'agents');
+    const agentsPath = path.join(gomadDir, moduleName, 'agents');
 
     if (await fs.pathExists(agentsPath)) {
       const moduleAgents = await getAgentsFromDir(agentsPath, moduleName);
@@ -52,8 +52,8 @@ async function getAgentsFromBmad(bmadDir, selectedModules = []) {
     }
   }
 
-  // Get standalone agents from bmad/agents/ directory
-  const standaloneAgentsDir = path.join(bmadDir, 'agents');
+  // Get standalone agents from gomad/agents/ directory
+  const standaloneAgentsDir = path.join(gomadDir, 'agents');
   if (await fs.pathExists(standaloneAgentsDir)) {
     const agentDirs = await fs.readdir(standaloneAgentsDir, { withFileTypes: true });
 
@@ -86,16 +86,16 @@ async function getAgentsFromBmad(bmadDir, selectedModules = []) {
   return agents;
 }
 
-async function getTasksFromBmad(bmadDir, selectedModules = []) {
+async function getTasksFromBmad(gomadDir, selectedModules = []) {
   const tasks = [];
 
-  if (await fs.pathExists(path.join(bmadDir, 'core', 'tasks'))) {
-    const coreTasks = await getTasksFromDir(path.join(bmadDir, 'core', 'tasks'), 'core');
+  if (await fs.pathExists(path.join(gomadDir, 'core', 'tasks'))) {
+    const coreTasks = await getTasksFromDir(path.join(gomadDir, 'core', 'tasks'), 'core');
     tasks.push(...coreTasks);
   }
 
   for (const moduleName of selectedModules) {
-    const tasksPath = path.join(bmadDir, moduleName, 'tasks');
+    const tasksPath = path.join(gomadDir, moduleName, 'tasks');
 
     if (await fs.pathExists(tasksPath)) {
       const moduleTasks = await getTasksFromDir(tasksPath, moduleName);

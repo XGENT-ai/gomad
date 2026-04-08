@@ -1,5 +1,5 @@
 /**
- * BMAD Documentation Build Pipeline
+ * GOMAD Documentation Build Pipeline
  *
  * Consolidates docs from multiple sources, generates LLM-friendly files,
  * and builds the Astro+Starlight site.
@@ -23,7 +23,7 @@ import { translatedLocales } from '../website/src/lib/locales.mjs';
 const PROJECT_ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const BUILD_DIR = path.join(PROJECT_ROOT, 'build');
 
-const REPO_URL = 'https://github.com/bmad-code-org/BMAD-METHOD';
+const REPO_URL = 'https://github.com/gomad-code-org/GOMAD-METHOD';
 
 // DO NOT CHANGE THESE VALUES!
 // llms-full.txt is consumed by AI agents as context. Most LLMs have ~200k token limits.
@@ -45,7 +45,7 @@ const LLM_EXCLUDE_PATTERNS = [
 // =============================================================================
 // Main Entry Point
 /**
- * Orchestrates the full BMAD documentation build pipeline.
+ * Orchestrates the full GOMAD documentation build pipeline.
  *
  * Executes the high-level build steps in sequence: prints headers and paths, validates internal
  * documentation links, cleans the build directory, generates artifacts from the `docs/` folder,
@@ -60,7 +60,7 @@ async function main() {
   }
 
   console.log();
-  printBanner('BMAD Documentation Build Pipeline');
+  printBanner('GOMAD Documentation Build Pipeline');
   console.log();
   console.log(`Project root: ${PROJECT_ROOT}`);
   console.log(`Build directory: ${BUILD_DIR}`);
@@ -146,7 +146,7 @@ function generateLlmsTxt(outputDir) {
 
   const siteUrl = getSiteUrl();
   const content = [
-    '# BMAD Method Documentation',
+    '# GoMad Documentation',
     '',
     '> AI-driven agile development with specialized agents and workflows that scale from bug fixes to enterprise platforms.',
     '',
@@ -156,8 +156,8 @@ function generateLlmsTxt(outputDir) {
     '',
     '## Quick Start',
     '',
-    `- **[Getting Started](${siteUrl}/tutorials/getting-started/)** - Tutorial: install and learn how BMad works`,
-    `- **[Installation](${siteUrl}/how-to/install-bmad/)** - How to install BMad Method`,
+    `- **[Getting Started](${siteUrl}/tutorials/getting-started/)** - Tutorial: install and learn how GoMad works`,
+    `- **[Installation](${siteUrl}/how-to/install-gomad/)** - How to install GoMad Method`,
     '',
     '## Core Concepts',
     '',
@@ -196,7 +196,7 @@ function generateLlmsFullTxt(docsDir, outputDir) {
   const files = getAllMarkdownFiles(docsDir).sort(compareLlmDocs);
 
   const output = [
-    '# BMAD Method Documentation (Full)',
+    '# GoMad Documentation (Full)',
     '',
     '> Complete documentation for AI consumption',
     `> Generated: ${date}`,
