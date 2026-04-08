@@ -119,7 +119,7 @@
 
 **NPM:**
 - Package name: `bmad-method`
-- Repository: https://github.com/bmad-code-org/BMAD-METHOD
+- Repository: <https://github.com/bmad-code-org/BMAD-METHOD>
 - Main entry: `tools/installer/bmad-cli.js`
 - Bin commands: `bmad`, `bmad-method` (both alias same CLI)
 - License: MIT

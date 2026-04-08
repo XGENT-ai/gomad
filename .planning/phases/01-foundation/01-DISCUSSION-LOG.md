@@ -30,10 +30,10 @@
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| homepage: https://gomad.xgent.ai, bugs: GitHub issues URL | Uses the planned CNAME domain. | ✓ |
+| homepage: `https://gomad.xgent.ai`, bugs: GitHub issues URL | Uses the planned CNAME domain. | ✓ |
 | homepage: GitHub repo URL, bugs: GitHub issues URL | No custom domain until site is live. | |
 
-**User's choice:** homepage: https://gomad.xgent.ai, bugs: GitHub issues URL
+**User's choice:** homepage: `https://gomad.xgent.ai`, bugs: GitHub issues URL
 
 ---
 

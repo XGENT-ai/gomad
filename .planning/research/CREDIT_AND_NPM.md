@@ -212,7 +212,7 @@ npm install @xgent-ai/gomad
 
 > You may:
 > - Refer to BMad to accurately describe compatibility or integration (e.g., "Compatible with BMad Method v6")
-> - Link to https://github.com/bmad-code-org/BMAD-METHOD
+> - Link to <https://github.com/bmad-code-org/BMAD-METHOD>
 > - Fork the software and distribute your own version under a different name
 
 So our use case ("hard fork of BMAD Method, distributed as Gomad") is on the explicit allow-list. We are within the lines they themselves drew.
@@ -269,7 +269,7 @@ Example `contributors` entry:
 
 1. **npm org `xgent-ai` must exist.** If it doesn't:
    - Log in at npmjs.com → Create Organization → name `xgent-ai` → Free tier is fine for public packages.
-   - Verify at https://www.npmjs.com/org/xgent-ai
+   - Verify at <https://www.npmjs.com/org/xgent-ai>
 2. **Publishing user must be a member of the `xgent-ai` org** with publish rights (Developer or Owner).
 3. **2FA must be enabled** on the publishing account (npm now requires it for all publishes — see §2.3).
 4. **`package.json` must include `"publishConfig": { "access": "public" }`.** Without this, npm assumes scoped packages are private and the publish will fail with `E402 Payment Required` (private packages need a paid plan).

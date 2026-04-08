@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD001 -->
+
 # Phase 1: Foundation - Context
 
 **Gathered:** 2026-04-08

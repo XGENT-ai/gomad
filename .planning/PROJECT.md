@@ -83,7 +83,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 **Backstory.** `@xgent-ai/gomad@1.0.0` was published on npm as a Claude Code skills installer — a completely different product direction we now consider wrong. Rather than evolve from that, we restarted on the `next` branch with `ad2434b refactor: new start for next`, which forked BMAD Method's source and trimmed `src/` down to `bmm-skills/` and `core-skills/`. v1.1.0 builds on that reset and reuses the `@xgent-ai/gomad` package name to hard-pivot the published package into a BMAD-Method fork.
 
-**Upstream relationship.** GoMad is a hard fork of BMAD Method (https://github.com/bmad-code-org/BMAD-METHOD), MIT-licensed by Brian (BMad) Madison. We are not tracking upstream changes automatically; BMAD is treated as the seed, not a continuously merged base. Credit must remain prominent — both legally (MIT license preservation) and ethically (BMAD's authors did the original work). BMAD's own `TRADEMARK.md` explicitly permits forks under different names, so our position is on solid ground.
+**Upstream relationship.** GoMad is a hard fork of BMAD Method (<https://github.com/bmad-code-org/BMAD-METHOD>), MIT-licensed by Brian (BMad) Madison. We are not tracking upstream changes automatically; BMAD is treated as the seed, not a continuously merged base. Credit must remain prominent — both legally (MIT license preservation) and ethically (BMAD's authors did the original work). BMAD's own `TRADEMARK.md` explicitly permits forks under different names, so our position is on solid ground.
 
 **npm reality check.**
 - `@xgent-ai/gomad` is owned by us (Rockie / xgent-ai). v1.0.0 is published. v1.1.0 is the corrective release.

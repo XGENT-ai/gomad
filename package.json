@@ -12,6 +12,7 @@
     "development",
     "methodology"
   ],
+  "homepage": "https://gomad.xgent.ai",
   "bugs": {
     "url": "https://github.com/xgent-ai/gomad/issues"
   },
@@ -21,7 +22,6 @@
   },
   "license": "MIT",
   "author": "Rockie Guo <rockie@kitmi.com.au>",
-  "homepage": "https://gomad.xgent.ai",
   "main": "tools/installer/bmad-cli.js",
   "bin": {
     "gomad": "tools/installer/bmad-cli.js"
