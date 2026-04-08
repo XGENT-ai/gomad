@@ -18,7 +18,7 @@ class AgentCommandGenerator {
    * @returns {Object} Artifacts array with metadata
    */
   async collectAgentArtifacts(bmadDir, selectedModules = []) {
-    const { getAgentsFromBmad } = require('./bmad-artifacts');
+    const { getAgentsFromBmad } = require('./artifacts');
 
     // Get agents from INSTALLED bmad/ directory
     const agents = await getAgentsFromBmad(bmadDir, selectedModules);

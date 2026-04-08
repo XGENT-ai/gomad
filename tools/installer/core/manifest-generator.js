@@ -171,7 +171,7 @@ class ManifestGenerator {
           // only warn for non-agent SKILL.md directories.
           if (manifest && manifest.__single && manifest.__single.canonicalId && artifactType !== 'agent') {
             console.warn(
-              `Warning: Native entrypoint manifest at ${dir}/bmad-skill-manifest.yaml contains canonicalId — this field is ignored for SKILL.md directories (directory name is the canonical ID)`,
+              `Warning: Native entrypoint manifest at ${dir}/skill-manifest.yaml contains canonicalId — this field is ignored for SKILL.md directories (directory name is the canonical ID)`,
             );
           }
           const canonicalId = dirName;
@@ -297,7 +297,7 @@ class ManifestGenerator {
 
   /**
    * Recursively walk a directory tree collecting agents.
-   * Discovers agents via directory with bmad-skill-manifest.yaml containing type: agent
+   * Discovers agents via directory with skill-manifest.yaml containing type: agent
    *
    * @param {string} dirPath - Current directory being scanned
    * @param {string} moduleName - Module this directory belongs to

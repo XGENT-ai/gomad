@@ -22,9 +22,9 @@
   },
   "license": "MIT",
   "author": "Rockie Guo <rockie@kitmi.com.au>",
-  "main": "tools/installer/bmad-cli.js",
+  "main": "tools/installer/gomad-cli.js",
   "bin": {
-    "gomad": "tools/installer/bmad-cli.js"
+    "gomad": "tools/installer/gomad-cli.js"
   },
   "scripts": {
     "docs:build": "node tools/build-docs.mjs",
@@ -35,9 +35,9 @@
     "format:check": "prettier --check \"**/*.{js,cjs,mjs,json,yaml}\"",
     "format:fix": "prettier --write \"**/*.{js,cjs,mjs,json,yaml}\"",
     "format:fix:staged": "prettier --write",
-    "gomad:install": "node tools/installer/bmad-cli.js install",
-    "gomad:uninstall": "node tools/installer/bmad-cli.js uninstall",
-    "install:gomad": "node tools/installer/bmad-cli.js install",
+    "gomad:install": "node tools/installer/gomad-cli.js install",
+    "gomad:uninstall": "node tools/installer/gomad-cli.js uninstall",
+    "install:gomad": "node tools/installer/gomad-cli.js install",
     "lint": "eslint . --ext .js,.cjs,.mjs,.yaml --max-warnings=0",
     "lint:fix": "eslint . --ext .js,.cjs,.mjs,.yaml --fix",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",

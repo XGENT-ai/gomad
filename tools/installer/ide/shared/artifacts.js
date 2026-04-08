@@ -8,7 +8,7 @@ const { loadSkillManifest, getCanonicalId } = require('./skill-manifest');
  *
  * TODO: Dead code cleanup — compiled XML agents are retired.
  *
- * All agents now use the SKILL.md directory format with bmad-skill-manifest.yaml
+ * All agents now use the SKILL.md directory format with skill-manifest.yaml
  * (type: agent). The legacy pipeline below only discovers compiled .md files
  * containing <agent> XML tags, which no longer exist. The following are dead:
  *
