@@ -1,5 +1,5 @@
 ---
-name: bmad-correct-course
+name: gm-correct-course
 description: 'Manage significant changes during sprint execution. Use when the user says "correct course" or "propose sprint change"'
 ---
 

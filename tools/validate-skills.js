@@ -42,7 +42,7 @@ const positionalArgs = args.filter((a) => !a.startsWith('--'));
 
 // --- Constants ---
 
-const NAME_REGEX = /^bmad-[a-z0-9]+(-[a-z0-9]+)*$/;
+const NAME_REGEX = /^gm-[a-z0-9]+(-[a-z0-9]+)*$/;
 const STEP_FILENAME_REGEX = /^step-\d{2}[a-z]?-[a-z0-9-]+\.md$/;
 const TIME_ESTIMATE_PATTERNS = [/takes?\s+\d+\s*min/i, /~\s*\d+\s*min/i, /estimated\s+time/i, /\bETA\b/];
 
@@ -391,8 +391,8 @@ function validateSkill(skillDir) {
   }
 
   // --- WF-01 / WF-02: non-SKILL.md files must NOT have name/description ---
-  // TODO: bmad-agent-tech-writer has sub-skill files with intentional name/description
-  const WF_SKIP_SKILLS = new Set(['bmad-agent-tech-writer']);
+  // TODO: gm-agent-tech-writer has sub-skill files with intentional name/description
+  const WF_SKIP_SKILLS = new Set(['gm-agent-tech-writer']);
   for (const filePath of allFiles) {
     if (path.extname(filePath) !== '.md') continue;
     if (path.basename(filePath) === 'SKILL.md') continue;

@@ -1,5 +1,5 @@
 ---
-name: bmad-product-brief
+name: gm-product-brief
 description: Create or update product briefs through guided or autonomous discovery. Use when the user requests to create or update a Product Brief.
 ---
 
