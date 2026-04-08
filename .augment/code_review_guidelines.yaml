@@ -41,8 +41,6 @@ file_paths_to_ignore:
   - ".kiro/**"
   - ".roo/**"
   - ".github/chatmodes/**"
-  # --- Shared baseline: build temp ---
-  - ".bundler-temp/**"
   # --- Shared baseline: generated reports ---
   - "**/validation-report-*.md"
   - "CHANGELOG.md"
