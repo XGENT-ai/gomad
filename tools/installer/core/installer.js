@@ -11,13 +11,11 @@ const { ManifestGenerator } = require('./manifest-generator');
 const prompts = require('../prompts');
 const { BMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 const { InstallPaths } = require('./install-paths');
-const { ExternalModuleManager } = require('../modules/external-manager');
 
 const { ExistingInstall } = require('./existing-install');
 
 class Installer {
   constructor() {
-    this.externalModuleManager = new ExternalModuleManager();
     this.manifest = new Manifest();
     this.customModules = new CustomModules();
     this.ideManager = new IdeManager();
@@ -440,12 +438,6 @@ class Installer {
 
       // Skip if we already have this module from manifest
       if (this.customModules.paths.has(moduleId)) {
-        continue;
-      }
-
-      // Check if this is an external official module - skip cache for those
-      const isExternal = await this.externalModuleManager.hasModule(moduleId);
-      if (isExternal) {
         continue;
       }
 
@@ -1144,29 +1136,11 @@ class Installer {
     const configuredIdes = existingInstall.ides;
     const projectRoot = path.dirname(bmadDir);
 
-    const customModuleSources = await this.customModules.assembleQuickUpdateSources(
-      config,
-      existingInstall,
-      bmadDir,
-      this.externalModuleManager,
-    );
+    const customModuleSources = await this.customModules.assembleQuickUpdateSources(config, existingInstall, bmadDir);
 
     // Get available modules (what we have source for)
     const availableModulesData = await new OfficialModules().listAvailable();
     const availableModules = [...availableModulesData.modules, ...availableModulesData.customModules];
-
-    // Add external official modules to available modules
-    const externalModules = await this.externalModuleManager.listAvailable();
-    for (const externalModule of externalModules) {
-      if (installedModules.includes(externalModule.code) && !availableModules.some((m) => m.id === externalModule.code)) {
-        availableModules.push({
-          id: externalModule.code,
-          name: externalModule.name,
-          isExternal: true,
-          fromExternal: true,
-        });
-      }
-    }
 
     // Add custom modules from manifest if their sources exist
     for (const [moduleId, customModule] of customModuleSources) {

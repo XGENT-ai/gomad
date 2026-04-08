@@ -3,7 +3,6 @@ const os = require('node:os');
 const fs = require('fs-extra');
 const { CLIUtils } = require('./cli-utils');
 const { CustomHandler } = require('./custom-handler');
-const { ExternalModuleManager } = require('./modules/external-manager');
 const prompts = require('./prompts');
 
 // Separator class for visual grouping in select/multiselect prompts
@@ -870,9 +869,9 @@ class UI {
     const officialModulesSource = new OfficialModules();
     const { modules: localModules } = await officialModulesSource.listAvailable();
 
-    // Get external modules
-    const externalManager = new ExternalModuleManager();
-    const externalModules = await externalManager.listAvailable();
+    // External modules subsystem has been removed; keep list empty for backward-compat
+    // with the downstream grouping logic below.
+    const externalModules = [];
 
     // Build flat options list with group hints for autocompleteMultiselect
     const allOptions = [];

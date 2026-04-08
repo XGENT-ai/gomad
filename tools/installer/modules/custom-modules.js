@@ -202,10 +202,9 @@ class CustomModules {
    * @param {Object} config - Quick update configuration
    * @param {Object} existingInstall - Existing installation snapshot
    * @param {string} bmadDir - BMAD directory
-   * @param {Object} externalModuleManager - External module manager
    * @returns {Promise<Map<string, Object>>} Map of custom module ID to source info
    */
-  async assembleQuickUpdateSources(config, existingInstall, bmadDir, externalModuleManager) {
+  async assembleQuickUpdateSources(config, existingInstall, bmadDir) {
     const projectRoot = path.dirname(bmadDir);
     const customModuleSources = new Map();
 
@@ -274,12 +273,6 @@ class CustomModules {
 
       // Skip if we already have this module from manifest
       if (customModuleSources.has(moduleId)) {
-        continue;
-      }
-
-      // Check if this is an external official module - skip cache for those
-      const isExternal = await externalModuleManager.hasModule(moduleId);
-      if (isExternal) {
         continue;
       }
 

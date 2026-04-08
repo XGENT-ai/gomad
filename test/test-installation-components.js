@@ -1818,8 +1818,6 @@ async function runTests() {
   try {
     quickUpdateFixture = await createCustomModuleManifestFixture();
     const installer34 = new Installer();
-    installer34.externalModuleManager.hasModule = async () => false;
-    installer34.externalModuleManager.listAvailable = async () => [];
 
     let capturedInstallConfig34 = null;
     installer34.install = async (config) => {

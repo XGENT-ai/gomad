@@ -851,46 +851,7 @@ class Manifest {
       };
     }
 
-    // Check if this is an external official module
-    const { ExternalModuleManager } = require('../modules/external-manager');
-    const extMgr = new ExternalModuleManager();
-    const moduleInfo = await extMgr.getModuleByCode(moduleName);
-
-    if (moduleInfo) {
-      // External module - try to get version from npm registry first, then fall back to cache
-      let version = null;
-
-      if (moduleInfo.npmPackage) {
-        // Fetch version from npm registry
-        try {
-          version = await this.fetchNpmVersion(moduleInfo.npmPackage);
-        } catch {
-          // npm fetch failed, try cache as fallback
-        }
-      }
-
-      // If npm didn't work, try reading from cached repo's package.json
-      if (!version) {
-        const cacheDir = path.join(os.homedir(), '.bmad', 'cache', 'external-modules', moduleName);
-        const packageJsonPath = path.join(cacheDir, 'package.json');
-
-        if (await fs.pathExists(packageJsonPath)) {
-          try {
-            const pkg = require(packageJsonPath);
-            version = pkg.version;
-          } catch (error) {
-            await prompts.log.warn(`Failed to read package.json for ${moduleName}: ${error.message}`);
-          }
-        }
-      }
-
-      return {
-        version: version,
-        source: 'external',
-        npmPackage: moduleInfo.npmPackage || null,
-        repoUrl: moduleInfo.url || null,
-      };
-    }
+    // External modules subsystem has been removed — fall through to custom module handling.
 
     // Custom module - check cache directory
     const cacheDir = path.join(bmadDir, '_config', 'custom', moduleName);

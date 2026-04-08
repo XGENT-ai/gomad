@@ -4,11 +4,9 @@ const yaml = require('yaml');
 const prompts = require('../prompts');
 const { getProjectRoot, getSourcePath, getModulePath } = require('../project-root');
 const { CLIUtils } = require('../cli-utils');
-const { ExternalModuleManager } = require('./external-manager');
 
 class OfficialModules {
   constructor(options = {}) {
-    this.externalModuleManager = new ExternalModuleManager();
     // Config collection state (merged from ConfigCollector)
     this.collectedConfig = {};
     this._existingConfig = null;
@@ -209,12 +207,6 @@ class OfficialModules {
       if (await fs.pathExists(bmmPath)) {
         return bmmPath;
       }
-    }
-
-    // Check external official modules
-    const externalSource = await this.externalModuleManager.findExternalModuleSource(moduleCode, options);
-    if (externalSource) {
-      return externalSource;
     }
 
     return null;
