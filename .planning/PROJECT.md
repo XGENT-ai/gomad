@@ -1,8 +1,8 @@
-# Gomad
+# GoMad
 
 ## What This Is
 
-Gomad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. We extend BMAD's core agile methodology with our own agents, skills, and integrations while preserving the upstream's proven analysis → plan → solutioning → implementation flow. Distributed on npm as `@xgent-ai/gomad`.
+GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. We extend BMAD's core agile methodology with our own agents, skills, and integrations while preserving the upstream's proven analysis → plan → solutioning → implementation flow. Distributed on npm as `@xgent-ai/gomad`.
 
 ## Core Value
 
@@ -37,20 +37,20 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - [ ] **Verify no builder/web-bundle residue**: Confirm `next` branch refactor (`ad2434b`) actually removed all BMad builder and web bundle source
 
 **Text sweep**
-- [ ] **Full content sweep**: All `BMAD`/`BMAD Method`/`BMad`/`bmad-method`/`bmm` occurrences in markdown, YAML, JSON, JS, HTML, CSV → `Gomad`/`gomad` (case-preserving). Excludes: LICENSE (preserved), TRADEMARK.md (rewritten not swept), CHANGELOG history entries (preserved), README/LICENSE attribution sections (managed by Credit tasks below).
+- [ ] **Full content sweep**: All `BMAD`/`BMAD Method`/`BMad`/`bmad-method`/`bmm` occurrences in markdown, YAML, JSON, JS, HTML, CSV → `GoMad`/`GOMAD`/`gomad` (case-preserving: `BMAD Method`→`GoMad`, `BMAD`→`GOMAD`, `BMad`→`GoMad`, lowercase stays lowercase). Excludes: LICENSE (preserved), TRADEMARK.md (rewritten not swept), CHANGELOG history entries (preserved), README/LICENSE attribution sections (managed by Credit tasks below).
 
 **Credit & legal**
-- [ ] **LICENSE composition**: Keep BMAD's `LICENSE` byte-identical, append a horizontal rule + Gomad copyright block (`Copyright (c) 2026 Rockie Guo / xgent-ai`). Add explicit "not affiliated with, endorsed by, or sponsored by BMad Code, LLC" disclaimer. NOTE: NO `NOTICE` file — that's an Apache-2.0 convention, not MIT.
-- [ ] **README credits section**: Short factual intro sentence ("Gomad is a hard fork of BMAD Method by Brian (BMad) Madison.") + footer `## Credits` section with link to upstream repo and the same disclaimer as LICENSE. Apply to both `README.md` and `README_CN.md`.
-- [ ] **TRADEMARK.md rewrite**: Replace BMAD's existing TRADEMARK.md with a gomad-specific one that (a) makes no claim over the BMAD wordmark, (b) acknowledges BMAD as a trademark of BMad Code LLC via nominative fair use, (c) states whatever (if any) trademark claim xgent-ai wants over "gomad". BMAD's own TRADEMARK.md explicitly permits forks under different names — we are inside the lines they drew.
-- [ ] **Preserve `CONTRIBUTORS.md`**: Keep original BMAD contributors list intact; add a new section for gomad contributors going forward.
+- [ ] **LICENSE composition**: Keep BMAD's `LICENSE` byte-identical, append a horizontal rule + GoMad copyright block (`Copyright (c) 2026 Rockie Guo / xgent-ai`). Add explicit "not affiliated with, endorsed by, or sponsored by BMad Code, LLC" disclaimer. NOTE: NO `NOTICE` file — that's an Apache-2.0 convention, not MIT.
+- [ ] **README credits section**: Short factual intro sentence ("GoMad is a hard fork of BMAD Method by Brian (BMad) Madison.") + footer `## Credits` section with link to upstream repo and the same disclaimer as LICENSE. Apply to both `README.md` and `README_CN.md`.
+- [ ] **TRADEMARK.md rewrite**: Replace BMAD's existing TRADEMARK.md with a GoMad-specific one that (a) makes no claim over the BMAD wordmark, (b) acknowledges BMAD as a trademark of BMad Code LLC via nominative fair use, (c) states whatever (if any) trademark claim xgent-ai wants over "GoMad". BMAD's own TRADEMARK.md explicitly permits forks under different names — we are inside the lines they drew.
+- [ ] **Preserve `CONTRIBUTORS.md`**: Keep original BMAD contributors list intact; add a new GoMad contributors section going forward.
 
 **Branding**
 - [ ] **Visual assets**: New `banner-gomad.png` (replaces `banner-bmad-method.png`), regenerated `Wordmark.png`, favicon
-- [ ] **CLI banner**: Installer/CLI startup banner output rebranded to gomad
+- [ ] **CLI banner**: Installer/CLI startup banner output rebranded to GoMad
 
 **Docs**
-- [ ] **README EN+CN only**: `README.md` (English, default) and `README_CN.md` (Chinese) rewritten with gomad framing, install commands (`npm install @xgent-ai/gomad`), and credit section. Delete `README_VN.md`.
+- [ ] **README EN+CN only**: `README.md` (English, default) and `README_CN.md` (Chinese) rewritten with GoMad framing, install commands (`npm install @xgent-ai/gomad`), and credit section. Delete `README_VN.md`.
 - [ ] **Drop abandoned doc translations**: Delete `docs/cs/`, `docs/fr/`, `docs/vi-vn/`. Keep `docs/` (default English) and `docs/zh-cn/` only.
 - [ ] **CNAME**: Set to `gomad.xgent.ai` (deploy GitHub Pages later when project stabilizes)
 - [ ] **Supporting docs sweep**: `CHANGELOG.md` (add v1.1.0 entry framing the pivot from skills-installer to BMAD fork), `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `docs/`, `website/` content
@@ -77,13 +77,13 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - **Reworking bmm workflow internals** — `1-analysis` / `2-plan-workflows` / `3-solutioning` / `4-implementation` stay structurally as-is. Pure rename, no behavioral changes.
 - **GSD integration** — The `.claude/get-shit-done/` tooling we use to manage *this* project is NOT part of the gomad distribution. Out of scope for v1.1, and likely permanently.
 - **Reworking `@xgent-ai/gomad@1.0.0`** — v1.0.0 (Claude Code skills installer, wrong product direction) is left published as-is and deprecated. No retroactive rewrite or unpublish.
-- **Tracking BMAD upstream changes** — Gomad is a hard fork, not a continuously-merged downstream. We do not auto-sync from BMAD's `main`.
+- **Tracking BMAD upstream changes** — GoMad is a hard fork, not a continuously-merged downstream. We do not auto-sync from BMAD's `main`.
 
 ## Context
 
 **Backstory.** `@xgent-ai/gomad@1.0.0` was published on npm as a Claude Code skills installer — a completely different product direction we now consider wrong. Rather than evolve from that, we restarted on the `next` branch with `ad2434b refactor: new start for next`, which forked BMAD Method's source and trimmed `src/` down to `bmm-skills/` and `core-skills/`. v1.1.0 builds on that reset and reuses the `@xgent-ai/gomad` package name to hard-pivot the published package into a BMAD-Method fork.
 
-**Upstream relationship.** Gomad is a hard fork of BMAD Method (https://github.com/bmad-code-org/BMAD-METHOD), MIT-licensed by Brian (BMad) Madison. We are not tracking upstream changes automatically; BMAD is treated as the seed, not a continuously merged base. Credit must remain prominent — both legally (MIT license preservation) and ethically (BMAD's authors did the original work). BMAD's own `TRADEMARK.md` explicitly permits forks under different names, so our position is on solid ground.
+**Upstream relationship.** GoMad is a hard fork of BMAD Method (https://github.com/bmad-code-org/BMAD-METHOD), MIT-licensed by Brian (BMad) Madison. We are not tracking upstream changes automatically; BMAD is treated as the seed, not a continuously merged base. Credit must remain prominent — both legally (MIT license preservation) and ethically (BMAD's authors did the original work). BMAD's own `TRADEMARK.md` explicitly permits forks under different names, so our position is on solid ground.
 
 **npm reality check.**
 - `@xgent-ai/gomad` is owned by us (Rockie / xgent-ai). v1.0.0 is published. v1.1.0 is the corrective release.
@@ -101,7 +101,8 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 ## Constraints
 
-- **License**: BMAD's MIT license preserved byte-identical. Gomad additions are also MIT, appended below a horizontal rule in the same `LICENSE` file.
+- **License**: BMAD's MIT license preserved byte-identical. GoMad additions are also MIT, appended below a horizontal rule in the same `LICENSE` file.
+- **Casing**: The case-preserving display form is "GoMad" (not "Gomad"). Lowercase `gomad` for package names, paths, and CLI commands. Uppercase `GOMAD` for the acronym expansion only.
 - **Trademark**: "BMAD" is a trademark of BMad Code, LLC. We use it only via nominative fair use (in attribution sentences). The skill rename (`bmad-*` → `gm-*`) is a trademark-safety requirement, not just cosmetic — leaving `bmad-*` IDs in shipped code would be using the wordmark *inside* our product, which goes beyond nominative use.
 - **Tech stack**: Node.js / JavaScript (`type: module`), inherited from BMAD. No language change in v1.1.
 - **Branch**: All v1.1 work happens on `next`, merged to `main` only when milestone 1 ships.
@@ -119,7 +120,8 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 | Top-level dir `bmm-skills/` → `gomad-skills/` | Full `gomad` at module level, short `gm-` only for individual skill names | ✓ Good |
 | Manifest filenames: drop `bmad-` prefix entirely (`skill-manifest.yaml`, `manifest.json`) | Directory namespace already provides scoping; cleanest | ✓ Good |
 | `package.json author`: `Rockie Guo <rockie@kitmi.com.au>` only; BMAD attribution lives in LICENSE/README | Avoids confusing npm registry metadata; credit handled where users actually look | ✓ Good |
-| `LICENSE` strategy: append Gomad block to BMAD's MIT, single file, no `NOTICE` | OpenTofu/HashiCorp precedent; NOTICE is Apache-2.0 not MIT | ✓ Good |
+| `LICENSE` strategy: append GoMad block to BMAD's MIT, single file, no `NOTICE` | OpenTofu/HashiCorp precedent; NOTICE is Apache-2.0 not MIT | ✓ Good |
+| Casing: "GoMad" (not "Gomad") as display form | Matches the G-O-Mad acronym feel; lowercase `gomad` for paths/CLI, `GOMAD` for acronym expansion only | ✓ Good |
 | Drop `tools/installer/external-official-modules.yaml` + consumer code entirely | We are not a frontend for BMAD's external modules ecosystem | ✓ Good |
 | Drop `docs/cs/`, `docs/fr/`, `docs/vi-vn/`; keep default (en) + `zh-cn/` only | Same EN+CN policy as README; no maintainer for the others | ✓ Good |
 | Deprecate `@xgent-ai/gomad@1.0.0` (not `bmad-method`) | v1.0.0 was a Claude Code skills installer — wrong product direction; deprecation prevents accidental installs | — Pending |
