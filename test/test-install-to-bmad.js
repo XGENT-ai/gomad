@@ -53,7 +53,7 @@ async function runTests() {
   // ============================================================
   console.log(`${colors.yellow}Design decision 1: true or omitted → skill stays in _bmad/${colors.reset}\n`);
 
-  // Null manifest (no bmad-skill-manifest.yaml) → true
+  // Null manifest (no skill-manifest.yaml) → true
   assert(getInstallToBmad(null, 'workflow.md') === true, 'null manifest defaults to true');
 
   // Single-entry, flag omitted → true
@@ -84,7 +84,7 @@ async function runTests() {
   // loadSkillManifest round-trip: YAML with false is preserved through load
   {
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'bmad-itb-'));
-    await fs.writeFile(path.join(tmpDir, 'bmad-skill-manifest.yaml'), 'type: skill\ninstall_to_bmad: false\n');
+    await fs.writeFile(path.join(tmpDir, 'skill-manifest.yaml'), 'type: skill\ninstall_to_bmad: false\n');
     const loaded = await loadSkillManifest(tmpDir);
     assert(getInstallToBmad(loaded, 'workflow.md') === false, 'loadSkillManifest preserves install_to_bmad: false through round-trip');
     await fs.remove(tmpDir);

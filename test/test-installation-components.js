@@ -1446,7 +1446,7 @@ async function runTests() {
     // --- Regular workflow dir: core/workflows/regular-wf/ (type: workflow) ---
     const wfDir29 = path.join(tempFixture29, 'core', 'workflows', 'regular-wf');
     await fs.ensureDir(wfDir29);
-    await fs.writeFile(path.join(wfDir29, 'bmad-skill-manifest.yaml'), 'type: workflow\ncanonicalId: regular-wf\n');
+    await fs.writeFile(path.join(wfDir29, 'skill-manifest.yaml'), 'type: workflow\ncanonicalId: regular-wf\n');
     await fs.writeFile(
       path.join(wfDir29, 'workflow.md'),
       '---\nname: Regular Workflow\ndescription: A regular workflow not a skill\n---\n\nWorkflow body\n',
@@ -1473,7 +1473,7 @@ async function runTests() {
     // --- Native agent entrypoint inside agents/: core/agents/bmad-tea/ ---
     const nativeAgentDir29 = path.join(tempFixture29, 'core', 'agents', 'bmad-tea');
     await fs.ensureDir(nativeAgentDir29);
-    await fs.writeFile(path.join(nativeAgentDir29, 'bmad-skill-manifest.yaml'), 'type: agent\ncanonicalId: bmad-tea\n');
+    await fs.writeFile(path.join(nativeAgentDir29, 'skill-manifest.yaml'), 'type: agent\ncanonicalId: bmad-tea\n');
     await fs.writeFile(
       path.join(nativeAgentDir29, 'SKILL.md'),
       '---\nname: bmad-tea\ndescription: Native agent entrypoint\n---\n\nPresent a capability menu.\n',
@@ -1534,7 +1534,7 @@ async function runTests() {
     // Test scanInstalledModules recognizes native-agent-only modules too
     const agentOnlyModDir29 = path.join(tempFixture29, 'agent-only-mod');
     await fs.ensureDir(path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea'));
-    await fs.writeFile(path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea', 'bmad-skill-manifest.yaml'), 'type: agent\n');
+    await fs.writeFile(path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea', 'skill-manifest.yaml'), 'type: agent\n');
     await fs.writeFile(
       path.join(agentOnlyModDir29, 'deep', 'nested', 'bmad-tea', 'SKILL.md'),
       '---\nname: bmad-tea\ndescription: desc\n---\n\nAgent menu.\n',
@@ -1547,7 +1547,7 @@ async function runTests() {
     const multiEntryModDir29 = path.join(tempFixture29, 'multi-entry-mod');
     await fs.ensureDir(path.join(multiEntryModDir29, 'deep', 'nested', 'bmad-tea'));
     await fs.writeFile(
-      path.join(multiEntryModDir29, 'deep', 'nested', 'bmad-tea', 'bmad-skill-manifest.yaml'),
+      path.join(multiEntryModDir29, 'deep', 'nested', 'bmad-tea', 'skill-manifest.yaml'),
       'SKILL.md:\n  type: agent\n  canonicalId: bmad-tea\n',
     );
     await fs.writeFile(
