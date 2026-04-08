@@ -31,8 +31,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Package identity, bin, scripts, and dependency cleanup
-- [ ] 01-02-PLAN.md — ExternalModuleManager removal, dead docs/translations, bundler cleanup
+- [x] 01-01-PLAN.md — Package identity, bin, scripts, and dependency cleanup
+- [x] 01-02-PLAN.md — ExternalModuleManager removal, dead docs/translations, bundler cleanup
 
 ### Phase 2: Rename
 **Goal**: Every file path, directory name, manifest entry, skill ID, and content reference has been transformed from `bmad`/`BMAD`/`bmm` to `gomad`/`GOMAD`/`gm-*`, with no rename-related breakage in installer or tests
