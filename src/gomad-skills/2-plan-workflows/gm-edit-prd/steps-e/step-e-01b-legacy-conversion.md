@@ -1,7 +1,7 @@
 ---
 # File references (ONLY variables used in this step)
 prdFile: '{prd_file_path}'
-prdPurpose: '{project-root}/_gomad/gomad-skills/2-plan-workflows/gomad-create-prd/data/prd-purpose.md'
+prdPurpose: '{project-root}/_gomad/gomad-skills/2-plan-workflows/gm-create-prd/data/prd-purpose.md'
 ---
 
 # Step E-1B: Legacy PRD Conversion Assessment
