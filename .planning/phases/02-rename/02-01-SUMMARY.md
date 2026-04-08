@@ -48,7 +48,7 @@ completed_date: "2026-04-08"
 
 # Phase 02 Plan 01: Atomic File-system Rename Summary
 
-Atomic filesystem handoff of FS-01 through FS-05: bmm-skills/ tree rename, ~41 bmad-* skill directory renames to gm-*, manifest filename prefix drop, CLI entry rename (bmad-cli.js -> gomad-cli.js), artifacts helper rename, and deletion of docs/mobmad-plan.md.
+Atomic filesystem handoff of FS-01 through FS-05: `bmm-skills/` tree rename, ~41 `bmad-*` skill directory renames to `gm-*`, manifest filename prefix drop, CLI entry rename (`bmad-cli.js` -> `gomad-cli.js`), artifacts helper rename, and deletion of `docs/mobmad-plan.md`.
 
 ## What Shipped
 
@@ -78,8 +78,8 @@ Atomic filesystem handoff of FS-01 through FS-05: bmm-skills/ tree rename, ~41 b
 | Task | Subject | SHA |
 |------|---------|-----|
 | 1 | refactor(02-01): atomic CLI + artifacts + manifest-filename handoff (FS-03/04/05) | `a4614ee` |
-| 2 | refactor(02-01): git mv core-skills/bmad-* to gm-* (FS-02 part 1) | `b9a724e` |
-| 3 | refactor(02-01): git mv bmm-skills to gomad-skills, bmad-* to gm-*, drop bmad- manifest prefix (FS-01/02/03) | `a9d5522` |
+| 2 | `refactor(02-01): git mv core-skills/bmad-* to gm-* (FS-02 part 1)` | `b9a724e` |
+| 3 | `refactor(02-01): git mv bmm-skills to gomad-skills, bmad-* to gm-*, drop bmad- manifest prefix (FS-01/02/03)` | `a9d5522` |
 | 4 | refactor(02-01): update manifest id/name fields to gm-* (FS-02/D-10) | `3b04d3c` |
 | 4b | test(02-01): update test fixtures to use skill-manifest.yaml (FS-03 fallout) | `68c01c3` |
 
