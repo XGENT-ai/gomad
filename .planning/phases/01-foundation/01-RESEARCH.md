@@ -217,16 +217,11 @@ This phase involves no authentication, session management, access control, input
 | A2 | `@kayvan/markdown-tree-parser` was used by removed builder features and is safe to remove | Dependency Audit | Removing it breaks some code path not found by grep |
 | A3 | `sharp` is an implicit Astro dependency for image optimization | Dependency Audit | Removing it would break docs build |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should `bin` and `main` point to `gomad-cli.js` (non-existent) or `bmad-cli.js` (existing)?**
-   - What we know: D-08 says `"gomad": "tools/installer/gomad-cli.js"` and D-09 says `main` -> same path. But `gomad-cli.js` does not exist until Phase 2 (FS-04).
-   - What's unclear: Whether the user intends Phase 1 to be independently functional or accepts temporary breakage.
-   - Recommendation: Point `bin` to existing `bmad-cli.js` with the `gomad` command name: `{ "gomad": "tools/installer/bmad-cli.js" }`. Phase 2 updates the path when the file is renamed. This keeps `npx gomad install` working between phases.
+1. **Should `bin` and `main` point to `gomad-cli.js` (non-existent) or `bmad-cli.js` (existing)?** **RESOLVED 2026-04-08:** User chose staged transition. Phase 1 sets `bin.gomad` and `main` to `tools/installer/bmad-cli.js` to keep CLI functional. Phase 2 atomically renames the file AND updates these paths to `tools/installer/gomad-cli.js`. CONTEXT.md D-08 and D-09 have been revised accordingly.
 
-2. **Should `.bundler-temp` references in config files be cleaned up in Phase 1?**
-   - What we know: Three config files reference `.bundler-temp` in ignore patterns. The directory does not exist.
-   - Recommendation: Include as a minor cleanup task in SLIM-02 scope. Low risk.
+2. **Should `.bundler-temp` references in config files be cleaned up in Phase 1?** **RESOLVED 2026-04-08:** Yes. Plan 02 SLIM-02 scope cleans them up in `eslint.config.mjs`, `.coderabbit.yaml`, and `.augment/code_review_guidelines.yaml`.
 
 ## Sources
 

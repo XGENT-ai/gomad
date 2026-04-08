@@ -23,8 +23,8 @@ Establish the package as `@xgent-ai/gomad@1.1.0` with correct metadata, remove a
 - **D-07:** `publishConfig.access` → `"public"` (already set — verify preserved)
 
 ### Binary and scripts (PKG-03, PKG-04)
-- **D-08:** `bin` → `{ "gomad": "tools/installer/gomad-cli.js" }` — remove both `bmad` and `bmad-method` aliases entirely. Clean break, no backward compat.
-- **D-09:** `main` → `tools/installer/gomad-cli.js`
+- **D-08 (REVISED 2026-04-08):** `bin` → `{ "gomad": "tools/installer/bmad-cli.js" }` in Phase 1 — the `gomad` binary name is set now, but the file path stays as `bmad-cli.js` until Phase 2 FS-04 renames the file. Phase 2 will atomically rename the file AND update this path to `tools/installer/gomad-cli.js`. Both `bmad` and `bmad-method` aliases are removed entirely. Clean break on the binary name, staged transition on the file path. Rationale: prevents a broken CLI state between Phase 1 and Phase 2 commits.
+- **D-09 (REVISED 2026-04-08):** `main` → `tools/installer/bmad-cli.js` in Phase 1, updated to `tools/installer/gomad-cli.js` in Phase 2 (same staged rationale as D-08).
 - **D-10:** Scripts renamed: `bmad:install` → `gomad:install`, `bmad:uninstall` → `gomad:uninstall`, `install:bmad` → `install:gomad`
 - **D-11:** Delete dead `rebundle` script (references non-existent `tools/installer/bundlers/bundle-web.js`)
 
