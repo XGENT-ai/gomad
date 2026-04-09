@@ -202,7 +202,7 @@ class OfficialModules {
     }
 
     // Check for built-in gomad module (directly under src/gomad-skills)
-    if (moduleCode === 'gomad') {
+    if (moduleCode === 'agile') {
       const gomadPath = getSourcePath('gomad-skills');
       if (await fs.pathExists(gomadPath)) {
         return gomadPath;

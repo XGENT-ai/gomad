@@ -156,8 +156,18 @@ function mapInstalledToSource(refPath) {
   // Skip install-only paths (generated at install time, not in source)
   if (isInstallOnly(cleaned)) return null;
 
-  // core/, gomad/, and utility/ are directly under src/
-  if (cleaned.startsWith('core/') || cleaned.startsWith('gomad/') || cleaned.startsWith('utility/')) {
+  // Map installed module code dirs to their source dirs
+  // core/ → src/core-skills/, agile/ → src/gomad-skills/, utility/ → src/utility/
+  if (cleaned.startsWith('core/')) {
+    return path.join(SRC_DIR, 'core-skills', cleaned.slice('core/'.length));
+  }
+  if (cleaned.startsWith('agile/')) {
+    return path.join(SRC_DIR, 'gomad-skills', cleaned.slice('agile/'.length));
+  }
+  if (cleaned.startsWith('gomad-skills/')) {
+    return path.join(SRC_DIR, cleaned);
+  }
+  if (cleaned.startsWith('utility/')) {
     return path.join(SRC_DIR, cleaned);
   }
 

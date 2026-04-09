@@ -153,7 +153,7 @@ class ConfigDrivenIdeSetup {
       if (!canonicalId) continue;
 
       // Derive source directory from path column
-      // path is like "_gomad/gomad/workflows/gomad-quick-flow/gomad-quick-dev-new-preview/SKILL.md"
+      // path is like "_gomad/agile/workflows/gomad-quick-flow/gomad-quick-dev-new-preview/SKILL.md"
       // Strip gomadFolderName prefix and join with gomadDir, then get dirname
       const relativePath = record.path.startsWith(gomadPrefix) ? record.path.slice(gomadPrefix.length) : record.path;
       const sourceFile = path.join(gomadDir, relativePath);
@@ -161,24 +161,14 @@ class ConfigDrivenIdeSetup {
 
       if (!(await fs.pathExists(sourceDir))) continue;
 
-      // Clean target before copy to prevent stale files
+      // Symlink target to source for single source of truth
       const skillDir = path.join(targetPath, canonicalId);
       await fs.remove(skillDir);
-      await fs.ensureDir(skillDir);
       this.skillWriteTracker?.add(canonicalId);
 
-      // Copy all skill files, filtering OS/editor artifacts recursively
-      const skipPatterns = new Set(['.DS_Store', 'Thumbs.db', 'desktop.ini']);
-      const skipSuffixes = ['~', '.swp', '.swo', '.bak'];
-      const filter = (src) => {
-        const name = path.basename(src);
-        if (src === sourceDir) return true;
-        if (skipPatterns.has(name)) return false;
-        if (name.startsWith('.') && name !== '.gitkeep') return false;
-        if (skipSuffixes.some((s) => name.endsWith(s))) return false;
-        return true;
-      };
-      await fs.copy(sourceDir, skillDir, { filter });
+      // Create relative symlink: .claude/skills/{id} → ../../_gomad/{module}/{path}
+      const relTarget = path.relative(targetPath, sourceDir);
+      await fs.ensureSymlink(relTarget, skillDir);
 
       count++;
     }

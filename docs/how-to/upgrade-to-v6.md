@@ -95,6 +95,6 @@ your-project/
 | Concept       | v4                                    | v6                                   |
 | ------------- | ------------------------------------- | ------------------------------------ |
 | **Core**      | `_gomad-core` was actually GoMad Method | `_gomad/core/` is universal framework |
-| **Method**    | `_gomad`                        | `_gomad/gomad/`                         |
+| **Method**    | `_gomad`                        | `_gomad/agile/`                         |
 | **Config**    | Modified files directly               | `config.yaml` per module             |
 | **Documents** | Sharded or unsharded required setup   | Fully flexible, auto-scanned         |

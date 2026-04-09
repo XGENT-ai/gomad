@@ -80,8 +80,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Package hygiene: files allowlist, delete .npmignore/publish.yaml, fix residual bmad refs, tarball verification script
-- [ ] 04-02-PLAN.md — E2E fresh-install test, full quality gate validation
+- [x] 04-01-PLAN.md — Package hygiene: files allowlist, delete .npmignore/publish.yaml, fix residual bmad refs, tarball verification script
+- [x] 04-02-PLAN.md — E2E fresh-install test, full quality gate validation
 - [ ] 04-03-PLAN.md — Merge next->main, npm publish, deprecate v1.0.0, tag v1.1.0
 
 ## Progress

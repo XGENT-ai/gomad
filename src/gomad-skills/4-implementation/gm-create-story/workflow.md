@@ -17,7 +17,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 
 - `project_name`, `user_name`
 - `communication_language`, `document_output_language`

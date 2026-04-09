@@ -11,7 +11,7 @@
 
 ### Configuration Loading
 
-Load config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
+Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 
 - `project_knowledge`
 - `user_name`

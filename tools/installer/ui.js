@@ -889,8 +889,8 @@ class UI {
         label: mod.name,
         value,
         hint: mod.description || group,
-        // Pre-select only if already installed (not on fresh install)
-        selected: isInstalled,
+        // Pre-select if already installed or if default_selected is true (fresh install)
+        selected: isInstalled || mod.defaultSelected === true,
       };
     };
 
@@ -975,9 +975,9 @@ class UI {
       }
     }
 
-    // If no defaults found, use 'gomad' as the fallback default
+    // If no defaults found, use 'agile' as the fallback default
     if (defaultModules.length === 0) {
-      defaultModules.push('gomad');
+      defaultModules.push('agile');
     }
 
     return defaultModules;

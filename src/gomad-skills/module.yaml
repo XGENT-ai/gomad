@@ -1,5 +1,5 @@
-code: gomad
-name: "GoMad Method Agile-AI Driven-Development"
+code: agile
+name: "GoMad Agile Development Module"
 description: "AI-driven agile development framework"
 default_selected: true # This module will be selected by default for new installations
 

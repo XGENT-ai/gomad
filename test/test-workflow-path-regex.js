@@ -47,7 +47,7 @@ const INSTALL_REGEX = /\{project-root\}\/(?:_gomad)\/([^/]+)\/workflows\/(.+)/;
 // ---------------------------------------------------------------------------
 // Test data
 // ---------------------------------------------------------------------------
-const sourcePath = '{project-root}/_gomad/gomad/workflows/4-implementation/gomad-create-story/workflow.md';
+const sourcePath = '{project-root}/_gomad/agile/workflows/4-implementation/gomad-create-story/workflow.md';
 const installPath = '{project-root}/_gomad/bmgd/workflows/4-production/create-story/workflow.md';
 
 console.log(`\n${colors.cyan}Workflow Path Regex Tests${colors.reset}\n`);

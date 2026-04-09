@@ -50,7 +50,7 @@ sidebar:
 
 `--modules` 参数可用的模块 ID：
 
-- `gomad` — GoMad Method Master
+- `agile` — GoMad Agile Development Module
 - `bmb` — GoMad Builder
 
 查看 [GoMad 注册表](https://github.com/gomad-code-org) 获取可用的外部模块。

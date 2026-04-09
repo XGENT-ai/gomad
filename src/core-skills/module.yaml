@@ -11,12 +11,12 @@ user_name:
 
 communication_language:
   prompt: "What language should agents use when chatting with you?"
-  default: "English"
+  default: "Mandarin"
   result: "{value}"
 
 document_output_language:
   prompt: "Preferred document output language?"
-  default: "English"
+  default: "Mandarin"
   result: "{value}"
 
 output_folder:

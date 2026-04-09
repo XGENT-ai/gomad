@@ -1,5 +1,5 @@
 ---
-main_config: '{project-root}/_gomad/gomad/config.yaml'
+main_config: '{project-root}/_gomad/agile/config.yaml'
 ---
 
 # Quick Dev New Preview Workflow

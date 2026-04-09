@@ -9,20 +9,7 @@ startMessage: |
   Welcome to GoMad v1.1.0.
 
   GoMad (GOMAD Orchestration Method for Agile Development) is an agentic
-  workflow framework for AI-driven software development. v1.1.0 is a fresh
-  re-base: trimmed surface area, new branding, and attribution preserved.
-
-    - Package:  @xgent-ai/gomad
-    - License:  MIT (BMAD Method copyright and license preserved — see LICENSE)
-    - Repo:     https://github.com/xgent-ai/gomad
-    - Changes:  see CHANGELOG.md for v1.1.0 release notes
-
-  Credits:
-    GoMad is a hard fork of BMAD Method (bmad-code-org/BMAD-METHOD) by
-    Brian (BMad) Madison and contributors. xgent-ai is not affiliated with,
-    endorsed by, or sponsored by BMad Code, LLC. BMad™, BMad Method™, and
-    BMad Core™ remain trademarks of BMad Code, LLC and are referenced here
-    solely for attribution purposes.
+  workflow framework for AI-driven software development. 
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

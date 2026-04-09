@@ -62,7 +62,7 @@ The resolved path is what agents and workflows use at runtime when writing outpu
 
 Available module IDs for the `--modules` flag:
 
-- `gomad` — GoMad Method Master
+- `agile` — GoMad Agile Development Module
 - `bmb` — GoMad Builder
 
 Check the [GoMad registry](https://github.com/gomad-code-org) for available external modules.

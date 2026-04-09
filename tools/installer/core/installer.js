@@ -1101,14 +1101,7 @@ class Installer {
     }
 
     // Next steps
-    lines.push(
-      '',
-      '  Next steps:',
-      `    Read our new Docs Site: ${color.dim('https://docs.gomad.org/')}`,
-      `    Join our Discord: ${color.dim('https://discord.gg/gk8jAdXWmj')}`,
-      `    Star us on GitHub: ${color.dim('https://github.com/gomad-code-org/GOMAD-METHOD/')}`,
-      `    Subscribe on YouTube: ${color.dim('https://www.youtube.com/@GoMadCode')}`,
-    );
+    lines.push('', '  Next steps:', `    Read our new Docs Site: ${color.dim('https://gomad.xgent.ai/')}`);
     if (context.ides && context.ides.length > 0) {
       lines.push(`    Invoke the ${color.cyan('gomad-help')} skill in your IDE Agent to get started`);
     }

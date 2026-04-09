@@ -216,7 +216,7 @@ async function runTests() {
     await ideManager.ensureInitialized();
     const result = await ideManager.setup('windsurf', tempProjectDir, installedBmadDir, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result.success === true, 'Windsurf setup succeeds against temp project');
@@ -262,7 +262,7 @@ async function runTests() {
     await ideManager.ensureInitialized();
     const result = await ideManager.setup('kiro', tempProjectDir, installedBmadDir, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result.success === true, 'Kiro setup succeeds against temp project');
@@ -308,7 +308,7 @@ async function runTests() {
     await ideManager.ensureInitialized();
     const result = await ideManager.setup('antigravity', tempProjectDir, installedBmadDir, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result.success === true, 'Antigravity setup succeeds against temp project');
@@ -359,7 +359,7 @@ async function runTests() {
     await ideManager.ensureInitialized();
     const result = await ideManager.setup('auggie', tempProjectDir, installedBmadDir, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result.success === true, 'Auggie setup succeeds against temp project');
@@ -416,7 +416,7 @@ async function runTests() {
     await ideManager.ensureInitialized();
     const result = await ideManager.setup('opencode', tempProjectDir, installedBmadDir, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result.success === true, 'OpenCode setup succeeds against temp project');
@@ -466,7 +466,7 @@ async function runTests() {
     await ideManager9.ensureInitialized();
     const result9 = await ideManager9.setup('claude-code', tempProjectDir9, installedBmadDir9, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result9.success === true, 'Claude Code setup succeeds against temp project');
@@ -518,7 +518,7 @@ async function runTests() {
     await ideManager11.ensureInitialized();
     const result11 = await ideManager11.setup('codex', tempProjectDir11, installedBmadDir11, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result11.success === true, 'Codex setup succeeds against temp project');
@@ -572,7 +572,7 @@ async function runTests() {
     await ideManager13c.ensureInitialized();
     const result13c = await ideManager13c.setup('cursor', tempProjectDir13c, installedBmadDir13c, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result13c.success === true, 'Cursor setup succeeds against temp project');
@@ -623,7 +623,7 @@ async function runTests() {
     await ideManager13.ensureInitialized();
     const result13 = await ideManager13.setup('roo', tempProjectDir13, installedBmadDir13, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result13.success === true, 'Roo setup succeeds against temp project');
@@ -644,7 +644,7 @@ async function runTests() {
     // Reinstall/upgrade: run setup again over existing skills output
     const result13b = await ideManager13.setup('roo', tempProjectDir13, installedBmadDir13, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result13b.success === true, 'Roo reinstall/upgrade succeeds over existing skills');
@@ -708,7 +708,7 @@ async function runTests() {
     await ideManager17.ensureInitialized();
     const result17 = await ideManager17.setup('github-copilot', tempProjectDir17, installedBmadDir17, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result17.success === true, 'GitHub Copilot setup succeeds against temp project');
@@ -772,7 +772,7 @@ async function runTests() {
     await ideManager18.ensureInitialized();
     const result18 = await ideManager18.setup('cline', tempProjectDir18, installedBmadDir18, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result18.success === true, 'Cline setup succeeds against temp project');
@@ -790,7 +790,7 @@ async function runTests() {
     // Reinstall/upgrade: run setup again over existing skills output
     const result18b = await ideManager18.setup('cline', tempProjectDir18, installedBmadDir18, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result18b.success === true, 'Cline reinstall/upgrade succeeds over existing skills');
@@ -832,7 +832,7 @@ async function runTests() {
     await ideManager19.ensureInitialized();
     const result19 = await ideManager19.setup('codebuddy', tempProjectDir19, installedBmadDir19, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result19.success === true, 'CodeBuddy setup succeeds against temp project');
@@ -848,7 +848,7 @@ async function runTests() {
 
     const result19b = await ideManager19.setup('codebuddy', tempProjectDir19, installedBmadDir19, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result19b.success === true, 'CodeBuddy reinstall/upgrade succeeds over existing skills');
@@ -890,7 +890,7 @@ async function runTests() {
     await ideManager20.ensureInitialized();
     const result20 = await ideManager20.setup('crush', tempProjectDir20, installedBmadDir20, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result20.success === true, 'Crush setup succeeds against temp project');
@@ -906,7 +906,7 @@ async function runTests() {
 
     const result20b = await ideManager20.setup('crush', tempProjectDir20, installedBmadDir20, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result20b.success === true, 'Crush reinstall/upgrade succeeds over existing skills');
@@ -947,7 +947,7 @@ async function runTests() {
     await ideManager21.ensureInitialized();
     const result21 = await ideManager21.setup('trae', tempProjectDir21, installedBmadDir21, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result21.success === true, 'Trae setup succeeds against temp project');
@@ -963,7 +963,7 @@ async function runTests() {
 
     const result21b = await ideManager21.setup('trae', tempProjectDir21, installedBmadDir21, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result21b.success === true, 'Trae reinstall/upgrade succeeds over existing skills');
@@ -1016,7 +1016,7 @@ async function runTests() {
 
     const result22 = await ideManager22.setup('kilo', tempProjectDir22, installedBmadDir22, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result22.success === true, 'KiloCoder setup succeeds against temp project');
@@ -1032,7 +1032,7 @@ async function runTests() {
 
     const result22b = await ideManager22.setup('kilo', tempProjectDir22, installedBmadDir22, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result22b.success === true, 'KiloCoder reinstall/upgrade succeeds over existing skills');
@@ -1073,7 +1073,7 @@ async function runTests() {
     await ideManager23.ensureInitialized();
     const result23 = await ideManager23.setup('gemini', tempProjectDir23, installedBmadDir23, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result23.success === true, 'Gemini setup succeeds against temp project');
@@ -1089,7 +1089,7 @@ async function runTests() {
 
     const result23b = await ideManager23.setup('gemini', tempProjectDir23, installedBmadDir23, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result23b.success === true, 'Gemini reinstall/upgrade succeeds over existing skills');
@@ -1129,7 +1129,7 @@ async function runTests() {
     await ideManager24.ensureInitialized();
     const result24 = await ideManager24.setup('iflow', tempProjectDir24, installedBmadDir24, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result24.success === true, 'iFlow setup succeeds against temp project');
@@ -1178,7 +1178,7 @@ async function runTests() {
     await ideManager25.ensureInitialized();
     const result25 = await ideManager25.setup('qwen', tempProjectDir25, installedBmadDir25, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result25.success === true, 'QwenCoder setup succeeds against temp project');
@@ -1238,7 +1238,7 @@ async function runTests() {
     await ideManager26.ensureInitialized();
     const result26 = await ideManager26.setup('rovo-dev', tempProjectDir26, installedBmadDir26, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result26.success === true, 'Rovo Dev setup succeeds against temp project');
@@ -1306,7 +1306,7 @@ async function runTests() {
     await ideManager27.ensureInitialized();
     const result27 = await ideManager27.setup('claude-code', tempProjectDir27, installedBmadDir27, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result27.success === true, 'Claude Code setup succeeds with gomad-os-* skills present');
@@ -1367,7 +1367,7 @@ async function runTests() {
 
     const result28 = await ideManager28.setup('pi', tempProjectDir28, installedBmadDir28, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result28.success === true, 'Pi setup succeeds against temp project');
@@ -1409,7 +1409,7 @@ async function runTests() {
     // Reinstall/upgrade: run setup again over existing output
     const result28b = await ideManager28.setup('pi', tempProjectDir28, installedBmadDir28, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
     assert(result28b.success === true, 'Pi reinstall/upgrade succeeds over existing skills');
     assert(await fs.pathExists(skillFile28), 'Pi reinstall preserves SKILL.md output');
@@ -1707,7 +1707,7 @@ async function runTests() {
 
     const result32 = await ideManager32.setup('ona', tempProjectDir32, installedBmadDir32, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
 
     assert(result32.success === true, 'Ona setup succeeds against temp project');
@@ -1752,7 +1752,7 @@ async function runTests() {
     // Reinstall/upgrade: run setup again over existing output
     const result32b = await ideManager32.setup('ona', tempProjectDir32, installedBmadDir32, {
       silent: true,
-      selectedModules: ['gomad'],
+      selectedModules: ['agile'],
     });
     assert(result32b.success === true, 'Ona reinstall/upgrade succeeds over existing skills');
     assert(await fs.pathExists(skillFile32), 'Ona reinstall preserves SKILL.md output');

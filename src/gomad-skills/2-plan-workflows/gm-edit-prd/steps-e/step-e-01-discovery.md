@@ -1,6 +1,6 @@
 ---
 # File references (ONLY variables used in this step)
-prdPurpose: '{project-root}/_gomad/gomad-skills/2-plan-workflows/gm-create-prd/data/prd-purpose.md'
+prdPurpose: '{project-root}/_gomad/agile/2-plan-workflows/gm-create-prd/data/prd-purpose.md'
 ---
 
 # Step E-1: Discovery & Understanding

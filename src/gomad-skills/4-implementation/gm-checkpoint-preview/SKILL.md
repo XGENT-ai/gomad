@@ -17,7 +17,7 @@ You are assisting the user in reviewing a change.
 
 ## INITIALIZATION
 
-Load and read full config from `{project-root}/_gomad/gomad/config.yaml` and resolve:
+Load and read full config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 
 - `implementation_artifacts`
 - `planning_artifacts`
