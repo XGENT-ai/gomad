@@ -3,7 +3,13 @@
 // with GoMad typography. Run manually when the visual identity changes.
 // NOT executed at install, publish, or CI.
 
-const sharp = require('sharp');
+let sharp;
+try {
+  sharp = require('sharp');
+} catch {
+  console.error('sharp is required for this script. Run: npm install --save-dev sharp');
+  process.exit(1);
+}
 const path = require('node:path');
 const fs = require('node:fs');
 
