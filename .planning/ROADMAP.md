@@ -65,7 +65,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 03-01-PLAN.md — Legal + Identity: REQUIREMENTS/ROADMAP deltas, LICENSE composition, TRADEMARK rewrite, CONTRIBUTORS append, CONTRIBUTING rewrite, SECURITY/AGENTS delete, CHANGELOG truncate, CNAME, banner delete
+- [x] 03-01-PLAN.md — Legal + Identity: REQUIREMENTS/ROADMAP deltas, LICENSE composition, TRADEMARK rewrite, CONTRIBUTORS append, CONTRIBUTING rewrite, SECURITY/AGENTS delete, CHANGELOG truncate, CNAME, banner delete
 - [ ] 03-02-PLAN.md — Surface + Assets: README + README_CN surgical edit, CLI banner, Wordmark + favicon, website stub + i18n, docs landing + style guide + spot-check sweep
 
 ### Phase 4: Verification & Release

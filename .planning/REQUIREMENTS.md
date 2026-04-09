@@ -37,10 +37,10 @@
 
 ### Credit & Legal
 
-- [ ] **CREDIT-01**: `LICENSE` file preserves BMAD's original MIT text byte-identical, with a GoMad copyright block (`Copyright (c) 2026 Rockie Guo / xgent-ai`) appended below a horizontal rule, plus explicit "not affiliated with, endorsed by, or sponsored by BMad Code, LLC" disclaimer
+- [x] **CREDIT-01**: `LICENSE` file preserves BMAD's original MIT text byte-identical, with a GoMad copyright block (`Copyright (c) 2026 Rockie Guo / xgent-ai`) appended below a horizontal rule, plus explicit "not affiliated with, endorsed by, or sponsored by BMad Code, LLC" disclaimer
 - [ ] **CREDIT-02**: `README.md` and `README_CN.md` contain a `## Credits` footer section with: factual fork statement ("GoMad is a hard fork of BMAD Method by Brian (BMad) Madison"), link to upstream repo, and the same non-affiliation disclaimer. No fork-statement in intro (per Phase 3 CONTEXT D-04).
-- [ ] **CREDIT-03**: `TRADEMARK.md` rewritten for GoMad: no claim over the BMAD wordmark, acknowledges BMAD as a trademark of BMad Code LLC via nominative fair use, states xgent-ai's trademark posture for "GoMad"
-- [ ] **CREDIT-04**: `CONTRIBUTORS.md` preserves original BMAD contributors list; new GoMad contributors section added
+- [x] **CREDIT-03**: `TRADEMARK.md` rewritten for GoMad: no claim over the BMAD wordmark, acknowledges BMAD as a trademark of BMad Code LLC via nominative fair use, states xgent-ai's trademark posture for "GoMad"
+- [x] **CREDIT-04**: `CONTRIBUTORS.md` preserves original BMAD contributors list; new GoMad contributors section added
 
 ### Branding
 
@@ -51,11 +51,11 @@
 
 - [ ] **DOCS-01**: `README.md` (English) fully rewritten with GoMad framing, `npm install @xgent-ai/gomad` install instructions, and credit section
 - [ ] **DOCS-02**: `README_CN.md` (Chinese) fully rewritten, same scope as DOCS-01
-- [ ] **DOCS-03**: `CNAME` set to `gomad.xgent.ai`
-- [ ] **DOCS-04**: `CHANGELOG.md` has v1.1.0 entry that frames the pivot (from Claude Code skills installer to BMAD Method fork)
+- [x] **DOCS-03**: `CNAME` set to `gomad.xgent.ai`
+- [x] **DOCS-04**: `CHANGELOG.md` has v1.1.0 entry that frames the pivot (from Claude Code skills installer to BMAD Method fork)
 - [ ] **DOCS-05**: `CONTRIBUTING.md` rewritten with GoMad identity; `SECURITY.md` and `AGENTS.md` deleted (per Phase 3 CONTEXT D-24).
 - [ ] **DOCS-06**: `docs/` site content and `website/` content updated or cleaned up for GoMad (default en + zh-cn only)
-- [ ] **DOCS-07**: `docs/mobmad-plan.md` investigated and either renamed or deleted
+- [x] **DOCS-07**: `docs/mobmad-plan.md` investigated and either renamed or deleted
 
 ### Release
 
@@ -112,19 +112,19 @@ Deferred to milestone 2. Tracked but not in current roadmap.
 | SLIM-02 | Phase 1 | Pending |
 | SLIM-03 | Phase 1 | Pending |
 | SLIM-04 | Phase 1 | Pending |
-| CREDIT-01 | Phase 3 | Pending |
+| CREDIT-01 | Phase 3 | Complete |
 | CREDIT-02 | Phase 3 | Pending |
-| CREDIT-03 | Phase 3 | Pending |
-| CREDIT-04 | Phase 3 | Pending |
+| CREDIT-03 | Phase 3 | Complete |
+| CREDIT-04 | Phase 3 | Complete |
 | BRAND-01 | Phase 3 | Pending |
 | BRAND-02 | Phase 3 | Pending |
 | DOCS-01 | Phase 3 | Pending |
 | DOCS-02 | Phase 3 | Pending |
-| DOCS-03 | Phase 3 | Pending |
-| DOCS-04 | Phase 3 | Pending |
+| DOCS-03 | Phase 3 | Complete |
+| DOCS-04 | Phase 3 | Complete |
 | DOCS-05 | Phase 3 | Pending |
 | DOCS-06 | Phase 3 | Pending |
-| DOCS-07 | Phase 3 | Pending |
+| DOCS-07 | Phase 3 | Complete |
 | REL-01 | Phase 4 | Pending |
 | REL-02 | Phase 4 | Pending |
 | VFY-01 | Phase 4 | Pending |
