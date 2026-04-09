@@ -4,7 +4,7 @@ description: Common questions about using GoMad Method on established projects
 sidebar:
   order: 8
 ---
-Quick answers to common questions about working on established projects with the GoMad Method (BMM).
+Quick answers to common questions about working on established projects with the GoMad Method.
 
 ## Questions
 
@@ -45,6 +45,6 @@ Quick Flow detects your conventions and asks: "Should I follow these existing co
 - **Yes** → Maintain consistency with current codebase
 - **No** → Establish new standards (document why in spec)
 
-BMM respects your choice — it won't force modernization, but it will offer it.
+GoMad respects your choice — it won't force modernization, but it will offer it.
 
 **Have a question not answered here?** Please [open an issue](https://github.com/xgent-ai/gomad/issues) so we can add it.
