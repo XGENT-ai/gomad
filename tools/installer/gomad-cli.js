@@ -84,7 +84,7 @@ for (const file of commandFiles) {
 }
 
 // Set up main program
-program.version(packageJson.version).description('GOMAD Core CLI - Universal AI agent framework');
+program.version(`GoMad v${packageJson.version}`).description('GoMad CLI - Agentic workflow framework for AI-driven agile development');
 
 // Register all commands
 for (const [name, cmd] of Object.entries(commands)) {

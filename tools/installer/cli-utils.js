@@ -16,27 +16,27 @@ const CLIUtils = {
   },
 
   /**
-   * Display GOMAD logo and version using @clack intro + box
+   * Display GoMad logo and version using @clack intro + box
    */
   async displayLogo() {
     const version = this.getVersion();
     const color = await prompts.getColor();
 
-    // ASCII art logo
+    // Hand-authored 80-col-safe ASCII art spelling "GoMad".
+    // Generated once (pasted in literally). D-07 forbids figlet dep.
     const logo = [
-      '    ██████╗ ███╗   ███╗ █████╗ ██████╗ ™',
-      '    ██╔══██╗████╗ ████║██╔══██╗██╔══██╗',
-      '    ██████╔╝██╔████╔██║███████║██║  ██║',
-      '    ██╔══██╗██║╚██╔╝██║██╔══██║██║  ██║',
-      '    ██████╔╝██║ ╚═╝ ██║██║  ██║██████╔╝',
-      '    ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚═════╝',
+      '   ____       __  __           _ ',
+      String.raw`  / ___| ___ |  \/  | __ _  __| |`,
+      ' | |  _ / _ \\| |\\/| |/ _` |/ _` |',
+      ' | |_| | (_) | |  | | (_| | (_| |',
+      String.raw`  \____|\___/|_|  |_|\__,_|\__,_|`,
     ]
-      .map((line) => color.yellow(line))
+      .map((line) => color.cyan(line))
       .join('\n');
 
-    const tagline = '    Build More, Architect Dreams';
+    // No tagline (factual + minimal). No upstream credit text in CLI output (see D-08).
 
-    await prompts.box(`${logo}\n${tagline}`, `v${version}`, {
+    await prompts.box(logo, `v${version}`, {
       contentAlign: 'center',
       rounded: true,
       formatBorder: color.blue,
