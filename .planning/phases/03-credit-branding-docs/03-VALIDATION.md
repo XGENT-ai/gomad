@@ -2,7 +2,7 @@
 phase: 3
 slug: credit-branding-docs
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-04-09
 ---
@@ -40,7 +40,12 @@ created: 2026-04-09
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | TBD | TBD | — | TBD | TBD | TBD | ❌ W0 | ⬜ pending |
+| 03-01-T1 | 03-01 | 1 | All (Wave 0) | — | Requirement deltas applied; baselines + invariant checker exist | grep + file-exists | `grep -q "Credits footer" .planning/REQUIREMENTS.md && test -f test/validate-phase-03.js` | ✅ | ⬜ pending |
+| 03-01-T2 | 03-01 | 1 | CREDIT-01, CREDIT-03, CREDIT-04 | T-03-01-01, T-03-01-02 | LICENSE byte-preserved; TRADEMARK defensive posture; CONTRIBUTORS byte-preserved | diff + grep | `node test/validate-phase-03.js --only 1,2,6` | ✅ | ⬜ pending |
+| 03-01-T3 | 03-01 | 1 | DOCS-03, DOCS-04, DOCS-05, BRAND-01 (partial) | T-03-01-03, T-03-01-04, T-03-01-05, T-03-01-06 | CHANGELOG truncated + v1.1.0; CNAME correct; SECURITY/AGENTS deleted; banner deleted; CONTRIBUTING rewritten | grep + file-absence | `node test/validate-phase-03.js --only 3,5,9,10,13,14,19` | ✅ | ⬜ pending |
+| 03-02-T1 | 03-02 | 2 | CREDIT-02, DOCS-01, DOCS-02, BRAND-01 (completion) | T-03-02-05 | README + README_CN surgical edit with Credits + canonical disclaimer; full parity | grep + heading-count diff | `node test/validate-phase-03.js --only 3,5,6` | ✅ | ⬜ pending |
+| 03-02-T2 | 03-02 | 2 | BRAND-01, BRAND-02 | T-03-02-01, T-03-02-03, T-03-02-06 | CLI banner GoMad-only; Wordmark.png regenerated; favicon created; --version BMAD-free | grep + PNG metadata + --version run | `node test/validate-phase-03.js --only 7,8,15,16,20` | ✅ | ⬜ pending |
+| 03-02-T3 | 03-02 | 2 | DOCS-06 | T-03-02-02, T-03-02-04 | Website stub + i18n lockstep delete + astro.config fix; docs landing rewrites; docs spot-check sweep; astro build passes | grep + astro build + full invariant suite | `(cd website && npm run build) && node test/validate-phase-03.js` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

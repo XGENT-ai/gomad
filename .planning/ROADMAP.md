@@ -61,12 +61,12 @@ Plans:
   3. `TRADEMARK.md` is rewritten for GoMad (no BMAD wordmark claim, nominative fair use acknowledgment)
   4. `banner-gomad.png` exists, old `banner-bmad-method.png` is gone, and CLI startup banner shows "GoMad"
   5. `CHANGELOG.md` has a v1.1.0 entry framing the fork pivot; `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, and `docs/` site content reflect GoMad identity
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Legal + Identity: REQUIREMENTS/ROADMAP deltas, LICENSE composition, TRADEMARK rewrite, CONTRIBUTORS append, CONTRIBUTING rewrite, SECURITY/AGENTS delete, CHANGELOG truncate, CNAME, banner delete
+- [ ] 03-02-PLAN.md — Surface + Assets: README + README_CN surgical edit, CLI banner, Wordmark + favicon, website stub + i18n, docs landing + style guide + spot-check sweep
 
 ### Phase 4: Verification & Release
 **Goal**: The package passes all quality gates, installs cleanly from a local tarball, and is published to npm as `@xgent-ai/gomad@1.1.0` with v1.0.0 deprecated
