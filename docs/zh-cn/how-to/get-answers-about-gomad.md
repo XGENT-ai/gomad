@@ -58,7 +58,6 @@ GoMad-Help 通常会返回：
 | --- | --- | --- |
 | **`_gomad` 文件夹** | 智能体、工作流、提示词如何工作 | “PM 智能体具体做什么？” |
 | **完整 GitHub 仓库** | 版本历史、安装器、整体架构 | “v6 主要改了什么？” |
-| **`llms-full.txt`** | 文档层面的快速全景理解 | “解释 GoMad 的四个阶段” |
 
 安装 GoMad 后会生成 `_gomad` 文件夹；如果你还没有安装，可先克隆仓库。
 
@@ -67,15 +66,7 @@ GoMad-Help 通常会返回：
 **如果你的 AI 可以直接读文件（如 Claude Code、Cursor）：**
 
 - **已安装 GoMad：** 直接让它读取 `_gomad` 并提问
-- **想看更深上下文：** 克隆[完整仓库](https://github.com/gomad-code-org/GOMAD-METHOD)
-
-**如果你使用 ChatGPT 或 Claude.ai：**
-
-把 `llms-full.txt` 加入会话上下文：
-
-```text
-https://gomad-code-org.github.io/GOMAD-METHOD/llms-full.txt
-```
+- **想看更深上下文：** 克隆[完整仓库](https://github.com/xgent-ai/gomad)
 
 
 ### 3. 直接提问
@@ -107,28 +98,3 @@ https://gomad-code-org.github.io/GOMAD-METHOD/llms-full.txt
 | `#report-bugs-and-issues` | Bug 报告 |
 
 **GitHub Issues：** [github.com/xgent-ai/gomad/issues](https://github.com/xgent-ai/gomad/issues)（用于可复现问题）
-
-*你！*
-        *卡住*
-              *在队列中——*
-                       *等待*
-                               *等待谁？*
-
-*来源*
-        *就在那里，*
-                *显而易见！*
-
-*指向*
-      *你的机器。*
-               *释放它。*
-
-*它读取。*
-         *它说话。*
-                 *尽管问——*
-
-*为什么要等*
-         *明天*
-                 *当你拥有*
-                         *今天？*
-
-*—Claude*
