@@ -24,6 +24,7 @@ const CLIUtils = {
 
     // Hand-authored 80-col-safe ASCII art spelling "GoMad".
     // Generated once (pasted in literally). D-07 forbids figlet dep.
+    // See .planning/phases/03-credit-branding-docs/03-PLAN.md (decision D-07).
     const logo = [
       '   ____       __  __           _ ',
       String.raw`  / ___| ___ |  \/  | __ _  __| |`,
@@ -35,6 +36,7 @@ const CLIUtils = {
       .join('\n');
 
     // No tagline (factual + minimal). No upstream credit text in CLI output (see D-08).
+    // See .planning/phases/03-credit-branding-docs/03-PLAN.md (decision D-08).
 
     await prompts.box(logo, `v${version}`, {
       contentAlign: 'center',
