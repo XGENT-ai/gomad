@@ -1,39 +1,30 @@
-# GOMAD Installer Messages
-# These messages are displayed during installation
-# Edit this file to change what users see during the install process
+# GoMad Installer Messages
+# These messages are displayed during installation.
+# Edit this file to change what users see during the install process.
 
-# Display at the START of installation (after logo, before prompts)
+# Displayed at the START of installation (after logo, before prompts).
 startMessage: |
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  🎉 V6 IS HERE! Welcome to GoMad Method V6 - Official Stable Release!
+  Welcome to GoMad v1.1.0 — a lean hard fork of BMAD Method.
 
-  The GoMad Method is now a Platform powered by the GoMad Method Core and Module Ecosystem!
-    - Select and install modules during setup - customize your experience
-    - New GoMad Method for Agile AI-Driven Development (the evolution of V4)
-    - Exciting new modules available during installation, with community modules coming soon
-    - Documentation: https://docs.gomad.org
+  GoMad (GOMAD Orchestration Method for Agile Development) is an agentic
+  workflow framework for AI-driven software development. v1.1.0 is a fresh
+  re-base: trimmed surface area, new branding, and attribution preserved.
 
-  🌟 GoMad is 100% free and open source.
-    - No gated Discord. No paywalls. No gated content.
-    - We believe in empowering everyone, not just those who can pay.
-    - Knowledge should be shared, not sold.
+    - Package:  @xgent-ai/gomad
+    - License:  MIT (BMAD Method copyright and license preserved — see LICENSE)
+    - Repo:     https://github.com/xgent-ai/gomad
+    - Changes:  see CHANGELOG.md for v1.1.0 release notes
 
-  🎤 SPEAKING & MEDIA:
-    - Available for conferences, podcasts, and media appearances
-    - Topics: AI-Native Transformation, Spec and Context Engineering, GoMad Method
-    - For speaking inquiries or interviews, reach out to GoMad on Discord!
-
-  ⭐ HELP US GROW:
-    - Star us on GitHub: https://github.com/gomad-code-org/GOMAD-METHOD/
-    - Subscribe on YouTube: https://www.youtube.com/@GoMadCode
-    - Free Community and Support: https://discord.gg/gk8jAdXWmj
-    - Donate: https://buymeacoffee.com/gomad
-    - Corporate Sponsorship available
-
-  Latest updates: https://github.com/gomad-code-org/GOMAD-METHOD/blob/main/CHANGELOG.md
+  Credits:
+    GoMad is a hard fork of BMAD Method (bmad-code-org/BMAD-METHOD) by
+    Brian (BMad) Madison and contributors. xgent-ai is not affiliated with,
+    endorsed by, or sponsored by BMad Code, LLC. BMad™, BMad Method™, and
+    BMad Core™ remain trademarks of BMad Code, LLC and are referenced here
+    solely for attribution purposes.
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# No end message - install summary and next steps are rendered by the installer
+# No end message — install summary and next steps are rendered by the installer.
 endMessage: ""
