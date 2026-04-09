@@ -26,13 +26,11 @@ tools/validate-doc-links.js
 tools/validate-file-refs.js
 
 # Images (branding/marketing only)
-banner-bmad-method.png
 Wordmark.png
 
 # Repository metadata
 CONTRIBUTING.md
 CONTRIBUTORS.md
-SECURITY.md
 TRADEMARK.md
 CHANGELOG.md
 CNAME
