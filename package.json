@@ -23,6 +23,9 @@
   "license": "MIT",
   "author": "Rockie Guo <rockie@kitmi.com.au>",
   "main": "tools/installer/gomad-cli.js",
+  "bin": {
+    "gomad": "tools/installer/gomad-cli.js"
+  },
   "files": [
     "src/",
     "tools/installer/",
@@ -34,9 +37,6 @@
     "CONTRIBUTORS.md",
     "CONTRIBUTING.md"
   ],
-  "bin": {
-    "gomad": "tools/installer/gomad-cli.js"
-  },
   "scripts": {
     "docs:build": "node tools/build-docs.mjs",
     "docs:dev": "astro dev --root website",
