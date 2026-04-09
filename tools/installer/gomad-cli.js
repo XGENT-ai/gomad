@@ -17,9 +17,6 @@ if (process.stdin?.setMaxListeners) {
 // Check for updates - do this asynchronously so it doesn't block startup
 const packageJson = require('../../package.json');
 const packageName = '@xgent-ai/gomad';
-checkForUpdate().catch(() => {
-  // Silently ignore errors - version check is best-effort
-});
 
 async function checkForUpdate() {
   try {
@@ -54,6 +51,12 @@ async function checkForUpdate() {
     // Silently fail - network issues or npm not available
   }
 }
+
+// Kick off background update check (function declaration above is hoisted,
+// but we invoke after declaration for readability).
+checkForUpdate().catch(() => {
+  // Silently ignore errors - version check is best-effort
+});
 
 // Fix for stdin issues when running through npm on Windows
 // Ensures keyboard interaction works properly with CLI prompts
