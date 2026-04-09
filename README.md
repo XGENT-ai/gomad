@@ -1,8 +1,6 @@
 [![Version](https://img.shields.io/npm/v/@xgent-ai/gomad?color=blue&label=version)](https://www.npmjs.com/package/@xgent-ai/gomad)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
-[![Python Version](https://img.shields.io/badge/python-%3E%3D3.10-blue?logo=python&logoColor=white)](https://www.python.org)
-[![uv](https://img.shields.io/badge/uv-package%20manager-blueviolet?logo=uv)](https://docs.astral.sh/uv/)
 
 GoMad (GOMAD Orchestration Method for Agile Development) is an agentic workflow
 framework for AI-driven software development. It guides you through a structured
