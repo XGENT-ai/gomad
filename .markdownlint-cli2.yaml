@@ -9,6 +9,7 @@ ignores:
   - _bmad*/**
   - .agent/**
   - .claude/**
+  - .planning/**
   - .roo/**
   - .codex/**
   - .kiro/**
