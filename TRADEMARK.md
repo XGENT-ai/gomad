@@ -1,55 +1,50 @@
-# Trademark Notice & Guidelines
+# GoMad Trademark Policy
 
-## Trademark Ownership
+## 1. Nominative acknowledgment of BMAD
 
-The following names and logos are trademarks of BMad Code, LLC:
+GoMad is a hard fork of BMAD Method (<https://github.com/bmad-code-org/BMAD-METHOD>),
+originally authored by Brian (BMad) Madison and contributors. "BMAD", "BMad",
+"BMad Method", and "BMad Core" are trademarks of BMad Code, LLC. GoMad references
+these marks only in attribution, compatibility, and historical context — a use
+recognized as nominative fair use under U.S. trademark law. GoMad is a product of
+xgent-ai and is not a product of, nor derived from ongoing contributions by,
+BMad Code, LLC.
 
-- **BMad** (word mark, all casings: BMad, bmad, BMAD)
-- **BMad Method** (word mark, includes BMadMethod, BMAD-METHOD, and all variations)
-- **BMad Core** (word mark, includes BMadCore, BMAD-CORE, and all variations)
-- **BMad Code** (word mark)
-- BMad Method logo and visual branding
-- The "Build More, Architect Dreams" tagline
+## 2. Non-affiliation
 
-**All casings, stylings, and variations** of the above names (with or without hyphens, spaces, or specific capitalization) are covered by these trademarks.
+xgent-ai is not affiliated with, endorsed by, or sponsored by BMad Code, LLC.
+BMad™, BMad Method™, and BMad Core™ remain trademarks of BMad Code, LLC and are
+referenced here solely for attribution purposes.
 
-These trademarks are protected under trademark law and are **not** licensed under the MIT License. The MIT License applies to the software code only, not to the BMad brand identity.
+## 3. GoMad as a trademark
 
-## What This Means
+"GoMad" is an unregistered common-law trademark of xgent-ai (operated by Rockie
+Guo). All rights in the GoMad name, logo, and wordmark are reserved. xgent-ai
+asserts trademark rights in "GoMad" arising from commercial use, independent of
+any formal registration.
+
+## 4. Prohibited uses of the GoMad mark
+
+Without prior written permission from xgent-ai, you may not:
+
+- Use "GoMad", "Gomad", "Go-Mad", "GOMad", or any confusingly similar name as the
+  name of a product, service, company, organization, or internet domain.
+- Use the GoMad wordmark, logo, or visual identity in a way that implies
+  endorsement, affiliation, or sponsorship by xgent-ai.
+- Distribute a modified fork of this codebase under the name "GoMad" or any
+  confusingly similar name.
+
+## 5. Permitted uses
 
 You may:
 
-- Use the BMad software under the terms of the MIT License
-- Refer to BMad to accurately describe compatibility or integration (e.g., "Compatible with BMad Method v6")
-- Link to <https://github.com/bmad-code-org/BMAD-METHOD>
-- Fork the software and distribute your own version under a different name
+- Fork this codebase under the MIT License and distribute your fork under a
+  different name.
+- Reference "GoMad" in articles, documentation, reviews, tutorials, and other
+  descriptive writing, in accordance with nominative fair use.
+- State that your software is "built on GoMad" or "compatible with GoMad" where
+  such statements are factually accurate.
 
-You may **not**:
+## Contact
 
-- Use "BMad" or any confusingly similar variation as your product name, service name, company name, or domain name
-- Present your product as officially endorsed, approved, or certified by BMad Code, LLC when it is not, without written consent from an authorized representative of BMad Code, LLC
-- Use BMad logos or branding in a way that suggests your product is an official or endorsed BMad product
-- Register domain names, social media handles, or trademarks that incorporate BMad branding
-
-## Examples
-
-| Permitted                                              | Not Permitted                                |
-| ------------------------------------------------------ | -------------------------------------------- |
-| "My workflow tool, compatible with BMad Method"        | "BMadFlow" or "BMad Studio"                  |
-| "An alternative implementation inspired by BMad"       | "BMad Pro" or "BMad Enterprise"              |
-| "My Awesome Healthcare Module (Bmad Community Module)" | "The Official BMad Core Healthcare Module"   |
-| Accurately stating you use BMad as a dependency        | Implying official endorsement or partnership |
-
-## Commercial Use
-
-You may sell products that incorporate or work with BMad software. However:
-
-- Your product must have its own distinct name and branding
-- You must not use BMad trademarks in your marketing, domain names, or product identity
-- You may truthfully describe technical compatibility (e.g., "Works with BMad Method")
-
-## Questions?
-
-If you have questions about trademark usage or would like to discuss official partnership or endorsement opportunities, please reach out:
-
-- **Email**: <contact@bmadcode.com>
+Trademark inquiries: Rockie Guo <rockie@kitmi.com.au>

@@ -30,3 +30,13 @@ The BMad Method project is copyrighted by BMad Code, LLC. Individual contributio
 **Thank you to everyone who has helped make BMad Method better!**
 
 For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+----------------------------------------------------------------
+
+## GoMad Contributors
+
+GoMad is maintained by xgent-ai. Initial maintainer: Rockie Guo
+<rockie@kitmi.com.au>.
+
+New contributors are acknowledged via git history and future editions of this
+file.
