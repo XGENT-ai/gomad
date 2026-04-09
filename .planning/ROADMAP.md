@@ -77,10 +77,12 @@ Plans:
   2. `npm pack --dry-run` shows a clean tarball with no `bmad` branding assets, no `.planning/`, no `test/` -- only shipped files
   3. Fresh install from locally-packed tarball produces a working setup where all `gm-*` skills are loadable
   4. `@xgent-ai/gomad@1.1.0` is published on npm and `@xgent-ai/gomad@1.0.0` is deprecated with redirect message
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Package hygiene: files allowlist, delete .npmignore/publish.yaml, fix residual bmad refs, tarball verification script
+- [ ] 04-02-PLAN.md — E2E fresh-install test, full quality gate validation
+- [ ] 04-03-PLAN.md — Merge next->main, npm publish, deprecate v1.0.0, tag v1.1.0
 
 ## Progress
 
@@ -92,4 +94,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation | 0/2 | Planned | - |
 | 2. Rename | 0/3 | Not started | - |
 | 3. Credit, Branding & Docs | 0/2 | Not started | - |
-| 4. Verification & Release | 0/1 | Not started | - |
+| 4. Verification & Release | 0/3 | Not started | - |
