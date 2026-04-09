@@ -66,7 +66,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Legal + Identity: REQUIREMENTS/ROADMAP deltas, LICENSE composition, TRADEMARK rewrite, CONTRIBUTORS append, CONTRIBUTING rewrite, SECURITY/AGENTS delete, CHANGELOG truncate, CNAME, banner delete
-- [ ] 03-02-PLAN.md — Surface + Assets: README + README_CN surgical edit, CLI banner, Wordmark + favicon, website stub + i18n, docs landing + style guide + spot-check sweep
+- [x] 03-02-PLAN.md — Surface + Assets: README + README_CN surgical edit, CLI banner, Wordmark + favicon, website stub + i18n, docs landing + style guide + spot-check sweep
 
 ### Phase 4: Verification & Release
 **Goal**: The package passes all quality gates, installs cleanly from a local tarball, and is published to npm as `@xgent-ai/gomad@1.1.0` with v1.0.0 deprecated
