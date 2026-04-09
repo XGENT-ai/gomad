@@ -393,10 +393,7 @@ function parseArgs(argv) {
         break;
       }
       case '--dry-run': {
-        {
-          args.dryRun = true;
-          // No default
-        }
+        args.dryRun = true;
         break;
       }
     }
