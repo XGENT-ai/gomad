@@ -50,14 +50,10 @@ export default defineConfig({
       defaultLocale: 'root',
       locales,
 
-      favicon: '/favicon.ico',
+      favicon: '/favicon.png',
 
       // Social links
-      social: [
-        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/gk8jAdXWmj' },
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/gomad-code-org/GOMAD-METHOD' },
-        { icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/@GoMadCode' },
-      ],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/xgent-ai/gomad' }],
 
       // Show last updated timestamps
       lastUpdated: true,
@@ -94,52 +90,37 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Welcome',
-          translations: { 'vi-VN': 'Chào mừng', 'zh-CN': '欢迎', 'fr-FR': 'Bienvenue', 'cs-CZ': 'Vítejte' },
+          translations: { 'zh-CN': '欢迎' },
           slug: 'index',
         },
         {
           label: 'Roadmap',
-          translations: { 'vi-VN': 'Lộ trình', 'zh-CN': '路线图', 'fr-FR': 'Feuille de route', 'cs-CZ': 'Plán rozvoje' },
+          translations: { 'zh-CN': '路线图' },
           slug: 'roadmap',
         },
         {
           label: 'Tutorials',
-          translations: { 'vi-VN': 'Hướng dẫn nhập môn', 'zh-CN': '教程', 'fr-FR': 'Tutoriels', 'cs-CZ': 'Tutoriály' },
+          translations: { 'zh-CN': '教程' },
           collapsed: false,
           autogenerate: { directory: 'tutorials' },
         },
         {
           label: 'How-To Guides',
-          translations: { 'vi-VN': 'Hướng dẫn tác vụ', 'zh-CN': '操作指南', 'fr-FR': 'Guides pratiques', 'cs-CZ': 'Praktické návody' },
+          translations: { 'zh-CN': '操作指南' },
           collapsed: true,
           autogenerate: { directory: 'how-to' },
         },
         {
           label: 'Explanation',
-          translations: { 'vi-VN': 'Giải thích', 'zh-CN': '概念说明', 'fr-FR': 'Explications', 'cs-CZ': 'Vysvětlení' },
+          translations: { 'zh-CN': '概念说明' },
           collapsed: true,
           autogenerate: { directory: 'explanation' },
         },
         {
           label: 'Reference',
-          translations: { 'vi-VN': 'Tham chiếu', 'zh-CN': '参考', 'fr-FR': 'Référence', 'cs-CZ': 'Reference' },
+          translations: { 'zh-CN': '参考' },
           collapsed: true,
           autogenerate: { directory: 'reference' },
-        },
-        // TEA docs moved to standalone module site; keep BMM sidebar focused.
-        {
-          label: 'GoMad Ecosystem',
-          collapsed: false,
-          items: [
-            { label: 'GoMad Builder', link: 'https://gomad-builder-docs.gomad.org/', attrs: { target: '_blank' } },
-            { label: 'Creative Intelligence Suite', link: 'https://cis-docs.gomad.org/', attrs: { target: '_blank' } },
-            { label: 'Game Dev Studio', link: 'https://game-dev-studio-docs.gomad.org/', attrs: { target: '_blank' } },
-            {
-              label: 'Test Architect (TEA)',
-              link: 'https://gomad-code-org.github.io/gomad-test-architecture-enterprise/',
-              attrs: { target: '_blank' },
-            },
-          ],
         },
       ],
 

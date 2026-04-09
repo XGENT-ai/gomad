@@ -106,8 +106,7 @@ https://gomad-code-org.github.io/GOMAD-METHOD/llms-full.txt
 | `#suggestions-feedback` | 建议与功能诉求 |
 | `#report-bugs-and-issues` | Bug 报告 |
 
-**Discord：** [discord.gg/gk8jAdXWmj](https://discord.gg/gk8jAdXWmj)  
-**GitHub Issues：** [github.com/gomad-code-org/GOMAD-METHOD/issues](https://github.com/gomad-code-org/GOMAD-METHOD/issues)（用于可复现问题）
+**GitHub Issues：** [github.com/xgent-ai/gomad/issues](https://github.com/xgent-ai/gomad/issues)（用于可复现问题）
 
 *你！*
         *卡住*

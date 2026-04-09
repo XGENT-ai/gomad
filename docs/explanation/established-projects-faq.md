@@ -47,4 +47,4 @@ Quick Flow detects your conventions and asks: "Should I follow these existing co
 
 BMM respects your choice — it won't force modernization, but it will offer it.
 
-**Have a question not answered here?** Please [open an issue](https://github.com/gomad-code-org/GOMAD-METHOD/issues) or ask in [Discord](https://discord.gg/gk8jAdXWmj) so we can add it!
+**Have a question not answered here?** Please [open an issue](https://github.com/xgent-ai/gomad/issues) so we can add it.

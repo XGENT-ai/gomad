@@ -230,9 +230,12 @@ function check11() {
 }
 
 // Invariant 12: Astro website builds (Wave 2 only)
+// GoMad uses a wrapper script `npm run docs:build` (tools/build-docs.mjs) rather
+// than a standalone website/package.json. The wrapper invokes astro build under
+// the hood with the correct --root flag.
 function check12() {
   try {
-    execSync('cd website && npm run build', { cwd: ROOT, stdio: 'ignore' });
+    execSync('npm run docs:build', { cwd: ROOT, stdio: 'ignore' });
     return pass(12, 'astro build OK');
   } catch (error) {
     return fail(12, `astro build failed: ${error.message.split('\n')[0]}`);

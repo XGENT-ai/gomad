@@ -51,9 +51,7 @@ If neither GoMad-Help nor the source answered your question, you now have a much
 | `help-requests` forum     | Questions                                   |
 | `#suggestions-feedback`   | Ideas and feature requests                  |
 
-**Discord:** [discord.gg/gk8jAdXWmj](https://discord.gg/gk8jAdXWmj)
-
-**GitHub Issues:** [github.com/gomad-code-org/GOMAD-METHOD/issues](https://github.com/gomad-code-org/GOMAD-METHOD/issues)
+**GitHub Issues:** [github.com/xgent-ai/gomad/issues](https://github.com/xgent-ai/gomad/issues)
 *You!*
         *Stuck*
              *in the queue—*

@@ -53,7 +53,7 @@ GoMad Method 不会强制“立即现代化”，而是把决策权交给你。
 
 如果你不确定，先让 `gomad-help` 判断当前阶段更稳妥的 workflow。
 
-**还有问题？** 欢迎在 [GitHub Issues](https://github.com/gomad-code-org/GOMAD-METHOD/issues) 或 [Discord](https://discord.gg/gk8jAdXWmj) 提问。
+**还有问题？** 欢迎在 [GitHub Issues](https://github.com/xgent-ai/gomad/issues) 提问。
 
 如果你想了解这套接入方式的操作步骤，可继续阅读 [How-to：既有项目](../how-to/established-projects.md) 与 [How-to：项目上下文](../how-to/project-context.md)。想理解快速流程在方法论中的定位，可参见 [快速开发](./quick-dev.md)。
 

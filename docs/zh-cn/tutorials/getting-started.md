@@ -261,7 +261,7 @@ GoMad-Help 检查你的项目，检测你已完成的内容，并确切地告诉
 :::
 
 - **在工作流期间** — 智能体通过问题和解释引导你
-- **社区** — [Discord](https://discord.gg/gk8jAdXWmj) (#gomad-help, #report-bugs-and-issues)
+- **Issues 与讨论** — [github.com/xgent-ai/gomad/issues](https://github.com/xgent-ai/gomad/issues)
 
 ## 关键要点
 

@@ -227,7 +227,7 @@ your-project/
 | **Deep-Dive** | `document-project.md` |
 | **Configuration** | `core-tasks.md` |
 | **Glossary** | `glossary/index.md` |
-| **Comprehensive** | `bmgd-workflows.md` |
+| **Comprehensive** | `gomad-workflows.md` |
 
 ### Reference 索引页
 
@@ -327,7 +327,7 @@ Starlight 右侧 “On this page” 来自标题层级：
 - `*Quick Flow only.*`
 - `*GoMad Method/Enterprise.*`
 - `*Phase N.*`
-- `*BMGD.*`
+- `*GoMad.*`
 - `*Established projects.*`
 
 ### Glossary 检查清单

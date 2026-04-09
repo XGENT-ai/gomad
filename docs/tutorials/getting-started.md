@@ -262,7 +262,7 @@ GoMad-Help inspects your project, detects what you've completed, and tells you e
 :::
 
 - **During workflows** — Agents guide you with questions and explanations
-- **Community** — [Discord](https://discord.gg/gk8jAdXWmj) (#gomad-help, #report-bugs-and-issues)
+- **Issues & discussion** — [github.com/xgent-ai/gomad/issues](https://github.com/xgent-ai/gomad/issues)
 
 ## Key Takeaways
 

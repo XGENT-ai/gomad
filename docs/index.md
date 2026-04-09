@@ -1,60 +1,60 @@
 ---
-title: Welcome to the GoMad Method
-description: AI-driven development framework with specialized agents, guided workflows, and intelligent planning
+title: GoMad
+description: Agentic workflow framework for AI-driven agile development
 ---
 
-The GoMad Method (**B**uild **M**ore **A**rchitect **D**reams) is an AI-driven development framework module within the GoMad Method Ecosystem that helps you build software through the whole process from ideation and planning all the way through agentic implementation. It provides specialized AI agents, guided workflows, and intelligent planning that adapts to your project's complexity, whether you're fixing a bug or building an enterprise platform.
+# GoMad
 
-If you're comfortable working with AI coding assistants like Claude, Cursor, or GitHub Copilot, you're ready to get started.
+GoMad (GOMAD Orchestration Method for Agile Development) is an agentic workflow framework for AI-driven software development. It guides you through a structured pipeline of analysis, planning, solutioning, and implementation using specialized agents and composable skills. GoMad is distributed on npm as `@xgent-ai/gomad`.
 
-:::note[🚀 V6 is Here and We're Just Getting Started!]
-Skills Architecture, GoMad Builder v1, Dev Loop Automation, and so much more in the works. **[Check out the Roadmap →](/roadmap/)**
-:::
+GoMad is a hard fork of BMAD Method. It inherits the proven four-phase agile pipeline and extends it with xgent-ai's own agents, skills, and integrations. See [Credits](#credits) at the bottom of this page for fork origin.
 
-## New Here? Start with a Tutorial
+## What GoMad is
 
-The fastest way to understand GoMad is to try it.
+GoMad treats AI agents as expert collaborators in a structured agile process. Rather than asking a model to "do the thinking" for you, GoMad's workflows bring out your best thinking in partnership with the AI.
 
-- **[Get Started with GoMad](./tutorials/getting-started.md)** — Install and understand how GoMad works
-- **[Workflow Map](./reference/workflow-map.md)** — Visual overview of BMM phases, workflows, and context management
+The framework is organised around four sequential phases:
 
-:::tip[Just Want to Dive In?]
-Install GoMad and use the `gomad-help` skill — it will guide you through everything based on your project and installed modules.
-:::
+1. **Analysis** — Brainstorm, research, and scope the problem.
+2. **Planning** — Produce requirements, PRDs, or specs.
+3. **Solutioning** — Design the architecture and technical approach.
+4. **Implementation** — Execute with agentic workflows and tight review loops.
 
-## How to Use These Docs
+Each phase exposes a set of `gm-*` skills that specialized agents invoke to produce concrete artifacts. Skills are composable and can be adapted per project.
 
-These docs are organized into four sections based on what you're trying to do:
+## Install
 
-| Section           | Purpose                                                                                                    |
-| ----------------- | ---------------------------------------------------------------------------------------------------------- |
-| **Tutorials**     | Learning-oriented. Step-by-step guides that walk you through building something. Start here if you're new. |
-| **How-To Guides** | Task-oriented. Practical guides for solving specific problems. "How do I customize an agent?" lives here.  |
-| **Explanation**   | Understanding-oriented. Deep dives into concepts and architecture. Read when you want to know *why*.       |
-| **Reference**     | Information-oriented. Technical specifications for agents, workflows, and configuration.                   |
+```bash
+npm install @xgent-ai/gomad
+```
 
-## Extend and Customize
+Or run the interactive installer directly via `npx`:
 
-Want to expand GoMad with your own agents, workflows, or modules? The **[GoMad Builder](https://gomad-builder-docs.gomad.org/)** provides the framework and tools for creating custom extensions, whether you're adding new capabilities to GoMad or building entirely new modules from scratch.
+```bash
+npx @xgent-ai/gomad install
+```
 
-## What You'll Need
+Follow the installer prompts, then open your AI IDE (Claude Code, Cursor, etc.) in your project folder.
+
+## Where to go next
+
+These docs are organised into four Diataxis sections based on what you are trying to do:
+
+- **[Tutorials](./tutorials/getting-started.md)** — Learning-oriented. Step-by-step guides for building something. Start here if you are new.
+- **[How-To Guides](./how-to/install-gomad.md)** — Task-oriented. Practical recipes for solving specific problems.
+- **[Explanation](./explanation/analysis-phase.md)** — Understanding-oriented. Deep dives into concepts, architecture, and rationale.
+- **[Reference](./reference/agents.md)** — Information-oriented. Technical specifications for agents, workflows, and configuration.
+
+## What you'll need
 
 GoMad works with any AI coding assistant that supports custom system prompts or project context. Popular options include:
 
-- **[Claude Code](https://code.claude.com)** — Anthropic's CLI tool (recommended)
-- **[Cursor](https://cursor.sh)** — AI-first code editor
-- **[Codex CLI](https://github.com/openai/codex)** — OpenAI's terminal coding agent
+- [Claude Code](https://code.claude.com) — Anthropic's CLI tool (recommended)
+- [Cursor](https://cursor.sh) — AI-first code editor
+- [Codex CLI](https://github.com/openai/codex) — OpenAI's terminal coding agent
 
-You should be comfortable with basic software development concepts like version control, project structure, and agile workflows. No prior experience with GoMad-style agent systems is required—that's what these docs are for.
+Basic familiarity with version control, project structure, and agile workflows is helpful.
 
-## Join the Community
+## Credits
 
-Get help, share what you're building, or contribute to GoMad:
-
-- **[Discord](https://discord.gg/gk8jAdXWmj)** — Chat with other GoMad users, ask questions, share ideas
-- **[GitHub](https://github.com/gomad-code-org/GOMAD-METHOD)** — Source code, issues, and contributions
-- **[YouTube](https://www.youtube.com/@GoMadCode)** — Video tutorials and walkthroughs
-
-## Next Step
-
-Ready to dive in? **[Get Started with GoMad](./tutorials/getting-started.md)** and build your first project.
+GoMad is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD). See the repository README for the full attribution and the canonical non-affiliation disclaimer.
