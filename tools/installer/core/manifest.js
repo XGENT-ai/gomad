@@ -25,7 +25,7 @@ class Manifest {
     const moduleDetails = [];
     if (data.modules && Array.isArray(data.modules)) {
       for (const moduleName of data.modules) {
-        // Core and BMM modules use the GoMad version
+        // Core and GoMad modules use the GoMad version
         const moduleVersion = moduleName === 'core' || moduleName === 'gomad' ? gomadVersion : null;
         const now = data.installDate || new Date().toISOString();
 

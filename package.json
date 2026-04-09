@@ -23,6 +23,17 @@
   "license": "MIT",
   "author": "Rockie Guo <rockie@kitmi.com.au>",
   "main": "tools/installer/gomad-cli.js",
+  "files": [
+    "src/",
+    "tools/installer/",
+    "LICENSE",
+    "README.md",
+    "README_CN.md",
+    "CHANGELOG.md",
+    "TRADEMARK.md",
+    "CONTRIBUTORS.md",
+    "CONTRIBUTING.md"
+  ],
   "bin": {
     "gomad": "tools/installer/gomad-cli.js"
   },
@@ -46,6 +57,7 @@
     "test": "npm run test:refs && npm run test:install && npm run lint && npm run lint:md && npm run format:check",
     "test:install": "node test/test-installation-components.js",
     "test:refs": "node test/test-file-refs-csv.js",
+    "test:tarball": "node tools/verify-tarball.js",
     "validate:refs": "node tools/validate-file-refs.js --strict",
     "validate:skills": "node tools/validate-skills.js --strict"
   },

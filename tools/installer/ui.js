@@ -52,7 +52,7 @@ class UI {
 
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { gomadDir } = await installer.findBmadDir(confirmedDirectory);
+    const { gomadDir } = await installer.findGomadDir(confirmedDirectory);
 
     // Check if there's an existing GOMAD installation
     const hasExistingInstall = await fs.pathExists(gomadDir);
@@ -280,7 +280,7 @@ class UI {
             // Preserve existing custom modules if user doesn't want to modify them
             const { Installer } = require('./core/installer');
             const installer = new Installer();
-            const { gomadDir } = await installer.findBmadDir(confirmedDirectory);
+            const { gomadDir } = await installer.findGomadDir(confirmedDirectory);
 
             const cacheDir = path.join(gomadDir, '_config', 'custom');
             if (await fs.pathExists(cacheDir)) {
@@ -454,7 +454,7 @@ class UI {
     const { ExistingInstall } = require('./core/existing-install');
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { gomadDir } = await installer.findBmadDir(projectDir || process.cwd());
+    const { gomadDir } = await installer.findGomadDir(projectDir || process.cwd());
     const existingInstall = await ExistingInstall.detect(gomadDir);
     const configuredIdes = existingInstall.ides;
 
@@ -692,7 +692,7 @@ class UI {
     const { ExistingInstall } = require('./core/existing-install');
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { gomadDir } = await installer.findBmadDir(directory);
+    const { gomadDir } = await installer.findGomadDir(directory);
     const existingInstall = await ExistingInstall.detect(gomadDir);
     const installedModuleIds = new Set(existingInstall.moduleIds);
 
@@ -894,7 +894,7 @@ class UI {
       };
     };
 
-    // Local modules (BMM, BMB, etc.)
+    // Local modules (GoMad, GoMad Builder, etc.)
     const localEntries = [];
     for (const mod of localModules) {
       if (!mod.isCustom && mod.id !== 'core') {
@@ -968,7 +968,7 @@ class UI {
 
     const defaultModules = [];
 
-    // Add default-selected local modules (typically BMM)
+    // Add default-selected local modules (typically GoMad)
     for (const mod of localModules) {
       if (mod.defaultSelected === true || installedModuleIds.has(mod.id)) {
         defaultModules.push(mod.id);
@@ -1024,12 +1024,12 @@ class UI {
           // Check for any gomad installation (any folder with _config/manifest.yaml)
           const { Installer } = require('./core/installer');
           const installer = new Installer();
-          const gomadResult = await installer.findBmadDir(directory);
-          const hasBmadInstall =
+          const gomadResult = await installer.findGomadDir(directory);
+          const hasGomadInstall =
             (await fs.pathExists(gomadResult.gomadDir)) &&
             (await fs.pathExists(path.join(gomadResult.gomadDir, '_config', 'manifest.yaml')));
 
-          const gomadNote = hasBmadInstall ? ` including existing GOMAD installation (${path.basename(gomadResult.gomadDir)})` : '';
+          const gomadNote = hasGomadInstall ? ` including existing GOMAD installation (${path.basename(gomadResult.gomadDir)})` : '';
           await prompts.log.message(`Directory exists and contains ${files.length} item(s)${gomadNote}`);
         } else {
           await prompts.log.message('Directory exists and is empty');
@@ -1268,7 +1268,7 @@ class UI {
     const { ExistingInstall } = require('./core/existing-install');
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { gomadDir } = await installer.findBmadDir(directory);
+    const { gomadDir } = await installer.findGomadDir(directory);
     const existingInstall = await ExistingInstall.detect(gomadDir);
     return existingInstall.ides;
   }
@@ -1417,7 +1417,7 @@ class UI {
     // Check if there are any custom modules in cache
     const { Installer } = require('./core/installer');
     const installer = new Installer();
-    const { gomadDir } = await installer.findBmadDir(directory);
+    const { gomadDir } = await installer.findGomadDir(directory);
 
     const cacheDir = path.join(gomadDir, '_config', 'custom');
     const cachedCustomModules = [];

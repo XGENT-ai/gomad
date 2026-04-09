@@ -54,7 +54,7 @@ module.exports = {
         process.exit(1);
       }
 
-      const { gomadDir } = await installer.findBmadDir(projectDir);
+      const { gomadDir } = await installer.findGomadDir(projectDir);
 
       if (!(await fs.pathExists(gomadDir))) {
         await prompts.log.warn('No GOMAD installation found.');

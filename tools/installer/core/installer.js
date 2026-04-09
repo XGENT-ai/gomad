@@ -1123,7 +1123,7 @@ class Installer {
    */
   async quickUpdate(config) {
     const projectDir = path.resolve(config.directory);
-    const { gomadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findGomadDir(projectDir);
 
     // Check if gomad directory exists
     if (!(await fs.pathExists(gomadDir))) {
@@ -1259,7 +1259,7 @@ class Installer {
    */
   async uninstall(directory, options = {}) {
     const projectDir = path.resolve(directory);
-    const { gomadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findGomadDir(projectDir);
 
     if (!(await fs.pathExists(gomadDir))) {
       return { success: false, reason: 'not-installed' };
@@ -1333,7 +1333,7 @@ class Installer {
    * @returns {Promise<boolean>} Whether the directory was removed
    */
   async uninstallModules(projectDir) {
-    const { gomadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findGomadDir(projectDir);
     if (await fs.pathExists(gomadDir)) {
       await fs.remove(gomadDir);
       return true;
@@ -1346,7 +1346,7 @@ class Installer {
    */
   async getStatus(directory) {
     const projectDir = path.resolve(directory);
-    const { gomadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findGomadDir(projectDir);
     return await ExistingInstall.detect(gomadDir);
   }
 
@@ -1364,7 +1364,7 @@ class Installer {
    * @returns {string} Output folder name (relative, default: '_gomad-output')
    */
   async getOutputFolder(projectDir) {
-    const { gomadDir } = await this.findBmadDir(projectDir);
+    const { gomadDir } = await this.findGomadDir(projectDir);
     return this._readOutputFolder(gomadDir);
   }
 
@@ -1607,7 +1607,7 @@ class Installer {
    * @param {string} projectDir - Project directory
    * @returns {Promise<Object>} { gomadDir: string }
    */
-  async findBmadDir(projectDir) {
+  async findGomadDir(projectDir) {
     const gomadDir = path.join(projectDir, GOMAD_FOLDER_NAME);
     return { gomadDir };
   }

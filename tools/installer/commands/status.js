@@ -16,7 +16,7 @@ module.exports = {
     try {
       // Find the gomad directory
       const projectDir = process.cwd();
-      const { gomadDir } = await installer.findBmadDir(projectDir);
+      const { gomadDir } = await installer.findGomadDir(projectDir);
 
       // Check if gomad directory exists
       const fs = require('fs-extra');

@@ -694,7 +694,7 @@ class OfficialModules {
    * @param {string} projectDir - Project directory
    * @returns {Promise<string>} Path to gomad directory
    */
-  async findBmadDir(projectDir) {
+  async findGomadDir(projectDir) {
     // Check if project directory exists
     if (!(await fs.pathExists(projectDir))) {
       // Project doesn't exist yet, return default
@@ -766,7 +766,7 @@ class OfficialModules {
     }
 
     // Find the actual gomad directory (handles custom folder names)
-    const gomadDir = await this.findBmadDir(projectDir);
+    const gomadDir = await this.findGomadDir(projectDir);
 
     // Check if gomad directory exists
     if (!(await fs.pathExists(gomadDir))) {
