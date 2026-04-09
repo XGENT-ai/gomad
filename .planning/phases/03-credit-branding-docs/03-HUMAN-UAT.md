@@ -1,14 +1,14 @@
 ---
-status: partial
+status: resolved
 phase: 03-credit-branding-docs
 source: [03-VERIFICATION.md]
 started: 2026-04-09T03:12:35Z
-updated: 2026-04-09T03:15:00Z
+updated: 2026-04-09T03:45:00Z
 ---
 
 ## Current Test
 
-[awaiting human testing]
+[all tests approved by user]
 
 ## How to run each test
 
@@ -47,7 +47,7 @@ node -e "require('./tools/installer/ui.js').displayLogo()"
 **mark result as:** `pass` or `issue: <what you saw>`
 
 expected: `tools/installer/cli-utils.js` `displayLogo()` renders cleanly in an 80-column terminal with no wrap, alignment, or color-code artifacts; ASCII art reads as "GoMad".
-result: [pending]
+result: pass (approved by user; stale V6 startMessage also replaced in-session)
 
 ---
 
@@ -69,7 +69,7 @@ less TRADEMARK.md
 **mark result as:** `pass` or `issue: <what was unclear or wrong>`
 
 expected: TRADEMARK.md reads clearly to a non-lawyer; non-affiliation disclaimer is unambiguous; nominative fair-use framing is defensible.
-result: [pending]
+result: pass (approved by user)
 
 ---
 
@@ -99,7 +99,7 @@ node tools/dev/regenerate-wordmark.js
 **mark result as:** `pass` or `issue: <what was off>`
 
 expected: Regenerated `Wordmark.png` is visually acceptable as the project mark; no rendering/bleed artifacts from the sharp regeneration script.
-result: [pending]
+result: pass (approved by user)
 
 ---
 
@@ -131,7 +131,7 @@ npm run docs:dev
 **mark result as:** `pass` or `issue: <what drifted or was unclear>`
 
 expected: English and Chinese docs landing pages read well as onboarding; navigation makes sense; EN/CN content parity holds.
-result: [pending]
+result: pass (approved by user)
 
 ---
 
@@ -160,16 +160,16 @@ gh browse README_CN.md
 **mark result as:** `pass` or `issue: <what drifted>`
 
 expected: README prose flows naturally; GoMad Credits footer is correctly placed; EN/CN versions are in parity modulo language.
-result: [pending]
+result: pass (approved by user)
 
 ---
 
 ## Summary
 
 total: 5
-passed: 0
+passed: 5
 issues: 0
-pending: 5
+pending: 0
 skipped: 0
 blocked: 0
 
