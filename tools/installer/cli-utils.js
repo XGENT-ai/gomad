@@ -154,9 +154,10 @@ const CLIUtils = {
   /**
    * Display module completion message
    * @param {string} moduleName - Name of the completed module
-   * @param {boolean} clearScreen - Whether to clear the screen first (deprecated, always false now)
+   * @param {boolean} [_clearScreen] - Deprecated; previously controlled screen clearing, now a no-op kept for backwards compatibility.
+   * @deprecated No-op kept for backwards compatibility.
    */
-  displayModuleComplete(moduleName, clearScreen = false) {
+  displayModuleComplete(moduleName, _clearScreen = false) {
     // No longer clear screen or show boxes - just a simple completion message
     // This is deprecated but kept for backwards compatibility
   },
