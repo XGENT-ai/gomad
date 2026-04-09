@@ -57,10 +57,10 @@ Plans:
 **Requirements**: CREDIT-01, CREDIT-02, CREDIT-03, CREDIT-04, BRAND-01, BRAND-02, DOCS-01, DOCS-02, DOCS-03, DOCS-04, DOCS-05, DOCS-06, DOCS-07
 **Success Criteria** (what must be TRUE):
   1. `LICENSE` preserves BMAD's original MIT text byte-identical with GoMad copyright block appended below a horizontal rule, plus non-affiliation disclaimer
-  2. `README.md` and `README_CN.md` each contain a factual fork statement in the intro and a `## Credits` section with upstream link and disclaimer
+  2. `README.md` and `README_CN.md` each contain a `## Credits` footer section (fork statement lives in Credits only, not intro — per CONTEXT D-04) with upstream link and disclaimer
   3. `TRADEMARK.md` is rewritten for GoMad (no BMAD wordmark claim, nominative fair use acknowledgment)
-  4. `banner-gomad.png` exists, old `banner-bmad-method.png` is gone, and CLI startup banner shows "GoMad"
-  5. `CHANGELOG.md` has a v1.1.0 entry framing the fork pivot; `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, and `docs/` site content reflect GoMad identity
+  4. `banner-bmad-method.png` is deleted (no replacement banner), `Wordmark.png` regenerated for GoMad, and CLI startup banner shows 'GoMad' (per CONTEXT D-05)
+  5. `CHANGELOG.md` has a v1.1.0 entry framing the fork pivot; `CONTRIBUTING.md` reflects GoMad identity; `SECURITY.md` and `AGENTS.md` are deleted; `docs/` site content reflects GoMad identity (per CONTEXT D-24)
 **Plans**: 2 plans
 **UI hint**: yes
 

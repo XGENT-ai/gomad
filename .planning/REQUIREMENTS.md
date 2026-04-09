@@ -38,13 +38,13 @@
 ### Credit & Legal
 
 - [ ] **CREDIT-01**: `LICENSE` file preserves BMAD's original MIT text byte-identical, with a GoMad copyright block (`Copyright (c) 2026 Rockie Guo / xgent-ai`) appended below a horizontal rule, plus explicit "not affiliated with, endorsed by, or sponsored by BMad Code, LLC" disclaimer
-- [ ] **CREDIT-02**: `README.md` and `README_CN.md` contain a `## Credits` section with: factual fork statement ("GoMad is a hard fork of BMAD Method by Brian (BMad) Madison"), link to upstream repo, and the same non-affiliation disclaimer
+- [ ] **CREDIT-02**: `README.md` and `README_CN.md` contain a `## Credits` footer section with: factual fork statement ("GoMad is a hard fork of BMAD Method by Brian (BMad) Madison"), link to upstream repo, and the same non-affiliation disclaimer. No fork-statement in intro (per Phase 3 CONTEXT D-04).
 - [ ] **CREDIT-03**: `TRADEMARK.md` rewritten for GoMad: no claim over the BMAD wordmark, acknowledges BMAD as a trademark of BMad Code LLC via nominative fair use, states xgent-ai's trademark posture for "GoMad"
 - [ ] **CREDIT-04**: `CONTRIBUTORS.md` preserves original BMAD contributors list; new GoMad contributors section added
 
 ### Branding
 
-- [ ] **BRAND-01**: `banner-gomad.png` created and replaces `banner-bmad-method.png`; `Wordmark.png` regenerated for GoMad
+- [ ] **BRAND-01**: `banner-bmad-method.png` is deleted, NO replacement banner image is created, `Wordmark.png` is regenerated for GoMad, and the CLI startup banner shows "GoMad" (per Phase 3 CONTEXT D-05).
 - [ ] **BRAND-02**: CLI installer/startup banner output displays "GoMad" branding (not BMAD)
 
 ### Documentation
@@ -53,7 +53,7 @@
 - [ ] **DOCS-02**: `README_CN.md` (Chinese) fully rewritten, same scope as DOCS-01
 - [ ] **DOCS-03**: `CNAME` set to `gomad.xgent.ai`
 - [ ] **DOCS-04**: `CHANGELOG.md` has v1.1.0 entry that frames the pivot (from Claude Code skills installer to BMAD Method fork)
-- [ ] **DOCS-05**: `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md` updated with GoMad identity
+- [ ] **DOCS-05**: `CONTRIBUTING.md` rewritten with GoMad identity; `SECURITY.md` and `AGENTS.md` deleted (per Phase 3 CONTEXT D-24).
 - [ ] **DOCS-06**: `docs/` site content and `website/` content updated or cleaned up for GoMad (default en + zh-cn only)
 - [ ] **DOCS-07**: `docs/mobmad-plan.md` investigated and either renamed or deleted
 
