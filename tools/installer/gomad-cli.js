@@ -16,7 +16,7 @@ if (process.stdin?.setMaxListeners) {
 
 // Check for updates - do this asynchronously so it doesn't block startup
 const packageJson = require('../../package.json');
-const packageName = 'gomad';
+const packageName = '@xgent-ai/gomad';
 checkForUpdate().catch(() => {
   // Silently ignore errors - version check is best-effort
 });
@@ -43,7 +43,7 @@ async function checkForUpdate() {
         `You are using version ${packageJson.version} but ${result} is available.`,
         '',
         'To update, exit and first run:',
-        `  npm cache clean --force && npx gomad@${tag} install`,
+        `  npm cache clean --force && npx ${packageName}@${tag} install`,
       ].join('\n');
       await prompts.box(updateMsg, 'Update Available', {
         rounded: true,
