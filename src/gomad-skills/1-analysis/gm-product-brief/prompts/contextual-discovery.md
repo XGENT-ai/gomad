@@ -14,7 +14,7 @@ Now that you know what the brief is about, fan out subagents in parallel to gath
 
 1. **Artifact Analyzer** (`../agents/artifact-analyzer.md`) — Scans `{planning_artifacts}` and `{project_knowledge}` for relevant documents. Also scans any specific paths the user provided. Returns structured synthesis of what it found.
 
-2. **Web Researcher** (`../agents/web-researcher.md`) — Searches for competitive landscape, market context, trends, and relevant industry data. Returns structured findings scoped to the product domain.
+2. **Web Researcher** (`../agents/web-researcher.md`) — Searches for **functional reference points**: how similar products are structured, what features they offer, common user flows, and user-reported functional pain points. Returns structured findings scoped to the product domain. Commercial/market/investor content is explicitly out of scope for this researcher.
 
 ### Graceful Degradation
 
@@ -34,10 +34,11 @@ Once subagent results return (or inline scanning completes):
 ## Mode-Specific Behavior
 
 **Guided mode:**
-- Present a concise summary of what you found: "Here's what I learned from your documents and web research..."
-- Highlight anything surprising or worth discussing
-- Share the gaps you've identified
-- Ask: "Anything else you'd like to add, or shall we move on to filling in the details?"
+- Present a concise summary of what you found: "Here's what I learned from your documents and functional research..."
+- Highlight surprises at the **feature/flow** level — missing capabilities, common patterns in the domain, functional pain points users report.
+- Share the functional gaps you've identified (things you need to know to describe *what the product does*).
+- Offer the user **2-4 recommended directions** for where to focus the elicitation next (e.g., "1) lock in the core capability list, 2) walk through the main user flow, 3) decide MVP in/out, 4) something else"). See the "Core Interaction Principle" in SKILL.md.
+- Ask: "Anything else you'd like to add, or shall we pick a direction and dig in?"
 - Route to `guided-elicitation.md`
 
 **Yolo mode:**

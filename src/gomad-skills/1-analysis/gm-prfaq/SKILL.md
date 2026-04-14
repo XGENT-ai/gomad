@@ -68,7 +68,7 @@ When the user gets stuck, offer concrete suggestions based on what they've share
 
 **Fast-track:** If the user provides all four essentials in their opening message (or via structured input), acknowledge and confirm understanding, then move directly to document creation and Stage 2 without extended discovery.
 
-**Graceful redirect:** If after 2-3 exchanges the user can't articulate a customer or problem, don't force it — suggest the idea may need more exploration first and recommend they invoke the `gomad-brainstorming` skill to develop it further.
+**Graceful redirect:** If after 2-3 exchanges the user can't articulate a customer or problem, don't force it — suggest the idea may need more exploration first and recommend they invoke the `gm-brainstorming` skill to develop it further.
 
 **Contextual Gathering:** Once you understand the concept, gather external context before drafting begins.
 

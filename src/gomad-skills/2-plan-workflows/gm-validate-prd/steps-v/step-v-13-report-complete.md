@@ -179,7 +179,7 @@ Display:
 - **IF E (Use Edit Workflow):**
   - Explain: "The Edit workflow can use this validation report to systematically address issues. Edit mode will guide you through discovering what to edit, reviewing the PRD, and applying targeted improvements."
   - Offer: "Would you like to launch Edit mode now? It will help you fix validation findings systematically."
-  - If yes: Invoke the `gomad-edit-prd` skill, passing the validation report path as context
+  - If yes: Invoke the `gm-edit-prd` skill, passing the validation report path as context
   - If no: Return to menu
 
 - **IF F (Fix Simpler Items):**
@@ -195,7 +195,7 @@ Display:
 - **IF X (Exit):**
   - Display: "**Validation Report Saved:** {validationReportPath}"
   - Display: "**Summary:** {overall status} - {recommendation}"
-  - PRD Validation complete. Invoke the `gomad-help` skill.
+  - PRD Validation complete. Invoke the `gm-help` skill.
 
 - **IF Any other:** Help user, then redisplay menu
 

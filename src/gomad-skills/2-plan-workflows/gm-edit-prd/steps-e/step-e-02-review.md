@@ -215,8 +215,8 @@ Read fully and follow: `./step-e-03-edit.md`
 
 #### Menu Handling Logic:
 
-- IF A: Invoke the `gomad-advanced-elicitation` skill, then return to discussion
-- IF P: Invoke the `gomad-party-mode` skill, then return to discussion
+- IF A: Invoke the `gm-advanced-elicitation` skill, then return to discussion
+- IF P: Invoke the `gm-party-mode` skill, then return to discussion
 - IF C: Document approval, then load step-e-03-edit.md
 - IF Any other: discuss, then redisplay menu
 

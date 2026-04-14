@@ -190,8 +190,8 @@ Display: **Select an Option:** [A] Advanced Elicitation [P] Party Mode [C] Conti
 
 #### Menu Handling Logic:
 
-- IF A: Invoke the `gomad-advanced-elicitation` skill, and when finished redisplay the menu
-- IF P: Invoke the `gomad-party-mode` skill, and when finished redisplay the menu
+- IF A: Invoke the `gm-advanced-elicitation` skill, and when finished redisplay the menu
+- IF P: Invoke the `gm-party-mode` skill, and when finished redisplay the menu
 - IF C: Read fully and follow: {nextStepFile} to begin format detection
 - IF user provides additional document: Load it, update report, redisplay summary
 - IF Any other: help user, then redisplay menu

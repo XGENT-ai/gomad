@@ -30,8 +30,8 @@ This step will generate content and present choices:
 
 ## PROTOCOL INTEGRATION:
 
-- When 'A' selected: Invoke the `gomad-advanced-elicitation` skill
-- When 'P' selected: Invoke the `gomad-party-mode` skill
+- When 'A' selected: Invoke the `gm-advanced-elicitation` skill
+- When 'P' selected: Invoke the `gm-party-mode` skill
 - PROTOCOLS always return to this step's A/P/C menu
 - User accepts/rejects protocol changes before proceeding
 

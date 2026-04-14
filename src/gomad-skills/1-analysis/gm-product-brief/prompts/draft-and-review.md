@@ -11,10 +11,11 @@
 Use `../resources/brief-template.md` as a guide — adapt structure to fit the product's story.
 
 **Writing principles:**
-- **Executive audience** — persuasive, clear, concise. 1-2 pages.
-- **Lead with the problem** — make the reader feel the pain before presenting the solution
-- **Concrete over abstract** — specific examples, real scenarios, measurable outcomes
-- **Confident voice** — this is a pitch, not a hedge
+- **Functional-first** — the reader should leave knowing what the product *does* and *for whom*. 1-2 pages.
+- **Lead with the problem and users**, then move quickly into core capabilities and key user flows.
+- **Concrete over abstract** — specific capabilities, real scenarios, named flows over generic claims.
+- **Confident voice** — describe the product as built, not as hedged aspiration.
+- **Do NOT pad with commercial content** — no pricing, no financial KPIs, no investor narrative, no multi-year business roadmap. If the user supplied such content, it goes into the distillate instead.
 - Write in `{document_output_language}`
 
 **Create the output document at:** `{planning_artifacts}/product-brief-{project_name}.md`
@@ -36,17 +37,20 @@ Before showing the draft to the user, run it through multiple review lenses in p
 
 **Launch in parallel:**
 
-1. **Skeptic Reviewer** (`../agents/skeptic-reviewer.md`) — "What's missing? What assumptions are untested? What could go wrong? Where is the brief vague or hand-wavy?"
+1. **Skeptic Reviewer** (`../agents/skeptic-reviewer.md`) — "Where is the brief vague about features or flows? Which assumptions about user behavior are untested? What functional risks or edge cases are unacknowledged?"
 
-2. **Opportunity Reviewer** (`../agents/opportunity-reviewer.md`) — "What adjacent value propositions are being missed? What market angles or partnerships could strengthen this? What's underemphasized?"
+2. **Feature Coverage Reviewer** (`../agents/opportunity-reviewer.md`) — "What features, flows, user types, or scenarios are under-covered or missing? Is the MVP in/out list internally consistent? Are constraints translated into features?"
 
-3. **Contextual Reviewer** — You (the main agent) pick the most useful third lens based on THIS specific product. Choose the lens that addresses the SINGLE BIGGEST RISK that the skeptic and opportunity reviewers won't naturally catch. Examples:
-   - For healthtech: "Regulatory and compliance risk reviewer"
-   - For devtools: "Developer experience and adoption friction critic"
-   - For marketplace: "Network effects and chicken-and-egg problem analyst"
-   - For enterprise: "Procurement and organizational change management reviewer"
-   - **When domain is unclear, default to:** "Go-to-market and launch risk reviewer" — examines distribution, pricing, and first-customer acquisition. Almost always valuable, frequently missed.
+3. **Contextual Reviewer** — You (the main agent) pick the most useful third lens based on THIS specific product, keeping the focus **functional** (not commercial). Choose the lens that addresses the SINGLE BIGGEST functional risk the other two reviewers won't naturally catch. Examples:
+   - For healthtech: "Clinical-workflow and safety-critical flow reviewer"
+   - For devtools: "Developer-experience friction reviewer (setup, failure modes, docs)"
+   - For marketplace: "Cross-role interaction reviewer — does the product feature-set support both sides of the market?"
+   - For enterprise: "Admin, permissioning, and audit-flow reviewer"
+   - For data-heavy products: "Data quality, empty-state, and error-recovery reviewer"
+   - **When domain is unclear, default to:** "Onboarding and first-run experience reviewer" — examines whether a first-time user can reach the core value through the features as described.
    Describe the lens, run the review yourself inline.
+
+   **Do not** pick investor, GTM, pricing, or commercial-risk lenses — those are out of scope for this brief.
 
 ### Graceful Degradation
 
