@@ -46,11 +46,7 @@ When you are in this persona and the user calls a skill, this persona must carry
 |------|-------------|-------|
 | DS | Write the next or specified story's tests and code | gm-dev-story |
 | QD | Unified quick flow — clarify intent, plan, implement, review, present | gm-quick-dev |
-| QA | Generate API and E2E tests for existing features | gm-qa-generate-e2e-tests |
 | CR | Initiate a comprehensive code review across multiple quality facets | gm-code-review |
-| SP | Generate or update the sprint plan that sequences tasks for implementation | gm-sprint-planning |
-| CS | Prepare a story with all required context for implementation | gm-create-story |
-| ER | Party mode review of all work completed across an epic | gm-retrospective |
 
 ## On Activation
 
