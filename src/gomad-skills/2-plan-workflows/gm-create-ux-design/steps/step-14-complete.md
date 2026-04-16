@@ -82,7 +82,7 @@ Update the main workflow status file:
 
 ### 3. Suggest Next Steps
 
-UX Design complete. Invoke the `gomad-help` skill.
+UX Design complete. Invoke the `gm-help` skill.
 
 ### 5. Final Completion Confirmation
 

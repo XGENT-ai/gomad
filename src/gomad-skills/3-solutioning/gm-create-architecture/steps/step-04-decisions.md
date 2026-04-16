@@ -32,8 +32,8 @@ This step will generate content and present choices for each decision category:
 
 ## PROTOCOL INTEGRATION:
 
-- When 'A' selected: Invoke the `gomad-advanced-elicitation` skill
-- When 'P' selected: Invoke the `gomad-party-mode` skill
+- When 'A' selected: Invoke the `gm-advanced-elicitation` skill
+- When 'P' selected: Invoke the `gm-party-mode` skill
 - PROTOCOLS always return to display this step's A/P/C menu after the A or P have completed
 - User accepts/rejects protocol changes before proceeding
 
@@ -264,7 +264,7 @@ Show the generated decisions content and present choices:
 
 #### If 'A' (Advanced Elicitation):
 
-- Invoke the `gomad-advanced-elicitation` skill with specific decision categories
+- Invoke the `gm-advanced-elicitation` skill with specific decision categories
 - Process enhanced insights about particular decisions
 - Ask user: "Accept these enhancements to the architectural decisions? (y/n)"
 - If yes: Update content, then return to A/P/C menu
@@ -272,7 +272,7 @@ Show the generated decisions content and present choices:
 
 #### If 'P' (Party Mode):
 
-- Invoke the `gomad-party-mode` skill with architectural decisions context
+- Invoke the `gm-party-mode` skill with architectural decisions context
 - Process collaborative insights about decision trade-offs
 - Ask user: "Accept these changes to the architectural decisions? (y/n)"
 - If yes: Update content, then return to A/P/C menu

@@ -1,70 +1,107 @@
 **Language:** Use `{communication_language}` for all output.
 **Output Language:** Use `{document_output_language}` for documents.
 
-# Stage 3: Guided Elicitation
+# Stage 3: Guided Elicitation (Functional-First)
 
-**Goal:** Fill the gaps in what you know. By now you have the user's brain dump, artifact analysis, and web research. This stage is about smart, targeted questioning — not rote section-by-section interrogation.
+**Goal:** Fill the gaps in what you know about **what the product does** and **how users will use it**. By now you have the user's brain dump, artifact analysis, and any supporting research. This stage is smart, targeted questioning — **not** a rote section-by-section interrogation, and **not** a commercial/business deep-dive.
 
 **Skip this stage entirely in Yolo and Autonomous modes** — go directly to `draft-and-review.md`.
 
-## Approach
+## Core Principle: Always Offer Recommended Options
 
-You are NOT walking through a rigid questionnaire. You're having a conversation that covers the substance of a great product brief. The topics below are your mental checklist, not a script. Adapt to:
-- What you already know (don't re-ask what's been covered)
-- What the user is excited about (follow their energy)
-- What's genuinely unclear (focus questions where they matter)
+For every question in this stage, **present 2-4 concrete recommended options** before asking the user to describe freely. Options must be grounded in what you already know (user's input + artifact analysis + web research on reference implementations), not generic.
+
+**Standard prompt format:**
+
+```
+[Short question — one line]
+
+Based on what you've told me so far, here are a few directions — pick a number, edit, or write your own:
+
+  1. [Specific option grounded in prior input]
+  2. [Different angle or broader / narrower scope]
+  3. [A third plausible alternative if one exists]
+  4. Something else — tell me in your own words
+  0. Skip for now / not sure yet
+```
+
+**Do NOT present options when:**
+- The user has already given a clear, confident answer on that topic
+- The question is a simple confirmation ("Is X right?")
+- You're genuinely exploring something with no defensible shortlist
+
+When the user picks, paraphrase back in one sentence and move on. No long commentary.
 
 ## Topics to Cover (flexibly, conversationally)
 
-### Vision & Problem
+These are your **mental checklist**, not a script. Adapt to what the user cares about and what's already known.
+
+### Problem & Users (light touch if already covered)
 - What core problem does this solve? For whom?
-- How do people solve this today? What's frustrating about current approaches?
-- What would success look like for the people this helps?
-- What's the insight or angle that makes this approach different?
+- Are there distinct user types with different needs? Who is the primary one?
+- How do these users solve this today? What's the most painful part?
 
-### Users & Value
-- Who experiences this problem most acutely?
-- Are there different user types with different needs?
-- What's the "aha moment" — when does a user realize this is what they needed?
-- How does this fit into their existing workflow or life?
+### Core Features & Capabilities **(primary focus)**
+- What are the 3-7 core things the product can do? (Use options.)
+- For each core capability: what does the user see / experience?
+- Which capabilities are table-stakes vs. distinctive?
+- Are there must-have integrations (auth providers, data sources, external services) that shape features?
 
-### Market & Differentiation
-- What competitive or alternative solutions exist? (Leverage web research findings)
-- What's the unfair advantage or defensible moat?
-- Why is now the right time for this?
+### Key User Flows **(primary focus)**
+- What is the main end-to-end flow a user goes through? (Offer 2-3 candidate flows as options.)
+- Are there 1-2 secondary flows that also matter for v1?
+- Any moment in the flow where the user is most likely to drop off or get stuck?
 
-### Success & Scope
-- How will you know this is working? What metrics matter?
-- What's the minimum viable version that creates real value?
-- What's explicitly NOT in scope for the first version?
-- If this is wildly successful, what does it become in 2-3 years?
+### User Scenarios **(primary focus)**
+- Can you walk me through one realistic "day in the life" example of a user using this?
+- Are there edge-case scenarios (new user, power user, recovering from error) worth naming?
+
+### MVP Functional Scope **(primary focus)**
+- Of everything we've discussed, what's the smallest functional set that delivers real value? (Offer a "narrow / medium / broader" three-option shortlist grounded in prior input.)
+- What is explicitly OUT of v1? (Offer common deferrals as options: mobile, admin panel, bulk ops, integrations, etc.)
+- Any constraints (platform, regulatory, data) that force things in or out?
+
+### Differentiation (light touch — 1 short question)
+- In one sentence, what does this product *do* that alternatives don't, or do materially better? (One option: "skip, not important for this brief".)
+
+### Success Signals (qualitative, optional — 1 short question)
+- What would make you say "yes, this is working" from a user-experience standpoint? (Offer options like "fast time-to-first-value", "high weekly return rate", "low support load", "something else", "skip".)
+
+### Explicitly DO NOT probe for
+- Pricing, packaging, monetization strategy
+- CAC, LTV, ARR, payback period, or other financial KPIs
+- Investor-facing narrative or fundraising angles
+- Detailed 2-3 year business roadmap
+- Go-to-market channel strategy
+
+If the user volunteers any of the above, **capture silently** for the distillate with a brief "noted" — don't follow up on it.
 
 ## The Flow
 
 For each topic area where you have gaps:
 
-1. **Lead with what you know** — "Based on your input and my research, it sounds like [X]. Is that right?"
-2. **Ask the gap question** — targeted, specific, not generic
-3. **Reflect and confirm** — paraphrase what you heard
-4. **"Anything else on this, or shall we move on?"** — the soft gate
+1. **Lead with what you know** — "Based on your input and my research, the core capabilities look like A, B, C. Is that the right shortlist?"
+2. **Offer options** — use the standard prompt format above.
+3. **Paraphrase and confirm** — one sentence, then move on.
+4. **Soft gate** — "Anything else on this, or shall we move on?"
 
-If the user is giving you detail beyond brief scope (requirements, architecture, platform details, timelines), **capture it silently** for the distillate. Acknowledge it briefly ("Good detail, I'll capture that") but don't derail the conversation.
+If the user is giving you detail beyond brief scope (detailed requirements, architecture, platform specs, business metrics), **capture it silently** for the distillate. Acknowledge briefly ("Good detail — I'll note that for the PRD handoff") without derailing.
 
 ## When to Move On
 
-When you have enough substance to draft a compelling 1-2 page executive brief covering:
-- Clear problem and who it affects
-- Proposed solution and what makes it different
-- Target users (at least primary)
-- Some sense of success criteria or business objectives
-- MVP-level scope thinking
+When you have enough substance to draft a **functional** 1-2 page brief covering:
+- Clear problem and primary users
+- 3-7 core features / capabilities
+- At least one key user flow and one user scenario
+- MVP in/out/open scope
+- One-sentence differentiation (or skipped)
 
-You don't need perfection — you need enough to draft well. Missing details can be surfaced during the review stage.
+You don't need perfection — missing details can surface during review.
 
-If the user is providing complete, confident answers and you have solid coverage across all four topic areas after fewer than 3-4 exchanges, proactively offer to draft early.
+If the user is giving complete, confident answers and you have solid coverage after fewer than 3-4 exchanges, proactively offer to draft early.
 
-**Transition:** "I think I have a solid picture. Ready for me to draft the brief, or is there anything else you'd like to add?"
+**Transition:** "I think I have a solid functional picture. Ready for me to draft the brief, or is there anything else you'd like to add?"
 
 ## Stage Complete
 
-This stage is complete when sufficient substance exists to draft a compelling brief and the user confirms readiness. Route to `draft-and-review.md`.
+This stage is complete when sufficient substance exists to draft a functional brief and the user confirms readiness. Route to `draft-and-review.md`.
