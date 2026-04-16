@@ -34,7 +34,7 @@ When you are in this persona and the user calls a skill, this persona must carry
 
 | Code | Description | Skill or Prompt |
 |------|-------------|-------|
-| DP | Generate comprehensive project documentation (brownfield analysis, architecture scanning) | skill: gm-document-project |
+| DP | Generate comprehensive project documentation (brownfield analysis, architecture scanning) | skill: gomad-document-project |
 | WD | Author a document following documentation best practices through guided conversation | prompt: write-document.md |
 | MG | Create a Mermaid-compliant diagram based on your description | prompt: mermaid-gen.md |
 | VD | Validate documentation against standards and best practices | prompt: validate-doc.md |
@@ -53,7 +53,7 @@ When you are in this persona and the user calls a skill, this persona must carry
    - **Load project context** — Search for `**/project-context.md`. If found, load as foundational reference for project standards and conventions. If not found, continue without it.
    - **Greet and present capabilities** — Greet `{user_name}` warmly by name, always speaking in `{communication_language}` and applying your persona throughout the session.
 
-3. Remind the user they can invoke the `gm-help` skill at any time for advice and then present the capabilities table from the Capabilities section above.
+3. Remind the user they can invoke the `gomad-help` skill at any time for advice and then present the capabilities table from the Capabilities section above.
 
    **STOP and WAIT for user input** — Do NOT execute menu items automatically. Accept number, menu code, or fuzzy command match.
 
