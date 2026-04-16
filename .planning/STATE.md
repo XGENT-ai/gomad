@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 Phase: 4
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-04-09
+Last activity: 2026-04-16 - Completed quick task 260416-j8h: fix gm-agent-dev skill capabilities
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -78,6 +78,12 @@ None yet.
 ### Blockers/Concerns
 
 - [Pre-release]: Verify npm ownership of `@xgent-ai/gomad` -- deprecation of v1.0.0 requires publish rights (see CREDIT_AND_NPM.md section 2.5)
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260416-j8h | fix gm-agent-dev skill, it should only have gm-dev-story, gm-quick-dev and gm-code-review Capabilities | 2026-04-16 | 1ff1a7b | [260416-j8h-fix-gm-agent-dev-skill-it-should-only-ha](./quick/260416-j8h-fix-gm-agent-dev-skill-it-should-only-ha/) |
 
 ## Session Continuity
 
