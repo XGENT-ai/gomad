@@ -1,8 +1,20 @@
 # GoMad
 
+## Current Milestone: v1.2 — Agent-as-Command & Coding-Agent PRD Refinement
+
+**Goal:** Convert `gm-agent-*` skills into `/gm:agent-*` slash commands, make installs portable and upgrade-safe, and refocus PRD/product-brief artifacts on coding-agent consumers instead of human founders.
+
+**Target features:**
+
+- Agent → slash-command migration (7 `gm-agent-*` personas → `.claude/commands/gm/agent-*.md`, invoked as `/gm:agent-*`)
+- Reference sweep across source / docs / tests / manifests to replace `gm-agent-*` with `gm:agent-*`
+- Copy-only installer (symlink mode removed; installed output survives `git clone` to another workspace)
+- Install tracking + upgrade cleanup via `_gomad/_config/files-manifest.csv` (old files listed in prior manifest are cleaned before a re-install writes new files)
+- PRD + product-brief refinement for coding-agent consumers — drop human-founder framing (time windows, "why now?", business/operational metrics); amplify aggressive vision + MVP scope; sharpen dev-ready requirements
+
 ## What This Is
 
-GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. v1.1 shipped the fork pivot: renamed package, slim codebase, full credit + legal posture, bilingual docs, published as `@xgent-ai/gomad@1.1.0` on npm. Future milestones extend BMAD's core agile methodology with xgent-ai's own agents, skills, and integrations.
+GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. v1.1 shipped the fork pivot: renamed package, slim codebase, full credit + legal posture, bilingual docs, published as `@xgent-ai/gomad@1.1.0` on npm. v1.2 refactors the agent-invocation surface, hardens the installer for portable git-clone workflows, and retunes upstream planning artifacts so they read like dev-ready specs for coding agents rather than pitches for human product leads.
 
 ## Core Value
 
@@ -25,13 +37,20 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 ### Active
 
-<!-- Milestone 2 (v1.2): TBD — defined via /gsd-new-milestone -->
+<!-- Milestone 2 (v1.2): Agent-as-Command & Coding-Agent PRD Refinement. See .planning/REQUIREMENTS.md for REQ-ID detail. -->
 
-(To be defined via `/gsd-new-milestone`. Likely candidates from the deferred v2 list:)
+- [ ] **CMD**: The 7 `gm-agent-*` personas (analyst, tech-writer, pm, ux-designer, architect, sm, dev) are installed as `.claude/commands/gm/agent-*.md` and invoked as `/gm:agent-*` slash commands
+- [ ] **REF**: Every `gm-agent-*` reference across source (`gomad-skills/`, `core-skills/`, `tools/installer/`), docs (README, README_CN, docs/, website), tests + fixtures, and manifests is updated to the `gm:agent-*` command form
+- [ ] **INSTALL**: Installer is copy-only (symlink mode removed), writes `_gomad/_config/files-manifest.csv` tracking every installed path, and cleans files listed in the prior manifest before writing new ones on re-install / upgrade
+- [ ] **PRD**: `gm-create-prd` and `gm-product-brief` are retuned for coding-agent consumers — time-window estimation / "why now?" challenge / business-operational metrics removed; aggressive vision + MVP scope amplified; requirements clarity, feature boundaries, and dev-ready acceptance criteria sharpened
 
-- [ ] **CUSTOM-01**: New gomad-specific agents added to `src/gomad-skills/` or `src/core-skills/`
-- [ ] **CUSTOM-02**: New gomad-specific skills integrated into the `1-analysis` → `4-implementation` workflow
-- [ ] **CUSTOM-03**: Agent/skill documentation and installer support for new additions
+### Deferred (beyond v1.2)
+
+<!-- Previously aspirational; not in current milestone. -->
+
+- **CUSTOM-01**: New gomad-specific agents added to `src/gomad-skills/` or `src/core-skills/`
+- **CUSTOM-02**: New gomad-specific skills integrated into the `1-analysis` → `4-implementation` workflow
+- **CUSTOM-03**: Agent/skill documentation and installer support for new additions
 
 ### Out of Scope
 
@@ -99,6 +118,25 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 | CLI banner via hand-authored GoMad ASCII in `cli-utils.js displayLogo()`, no figlet dep                                                 | One less runtime dep; static banner is stable enough to hand-author                                                    | ✓ Good                                                   |
 | E2E test verifies tarball structurally (not via interactive `gomad install`)                                                            | Avoids `@clack/prompts` hang in non-TTY test environment                                                               | ✓ Good                                                   |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
 
-*Last updated: 2026-04-18 after v1.1 milestone*
+*Last updated: 2026-04-18 after v1.2 milestone kickoff*
