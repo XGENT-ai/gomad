@@ -82,8 +82,11 @@ class AgentCommandGenerator {
 
       const manifest = yaml.parse(await fs.readFile(manifestPath, 'utf8'));
       const rawSkillMd = await fs.readFile(skillMdPath, 'utf8');
+      // WR-03: normalize line endings before frontmatter strip to handle CRLF input
+      // (matches parseSkillMd behavior in manifest-generator.js:236).
+      const normalizedSkillMd = rawSkillMd.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
       // D-14: strip leading frontmatter block (lines 1-4 of SKILL.md)
-      const body = rawSkillMd.replace(/^---\n[\s\S]*?\n---\n+/, '');
+      const body = normalizedSkillMd.replace(/^---\n[\s\S]*?\n---\n+/, '');
 
       // D-15: emit full skill-manifest.yaml as frontmatter
       const frontmatter = yaml.stringify(manifest);
