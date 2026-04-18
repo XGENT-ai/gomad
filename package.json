@@ -59,6 +59,7 @@
     "test:gm-surface": "node test/test-gm-command-surface.js",
     "test:install": "node test/test-installation-components.js",
     "test:refs": "node test/test-file-refs-csv.js",
+    "test:self-install-guard": "node test/test-installer-self-install-guard.js",
     "test:tarball": "node tools/verify-tarball.js",
     "validate:refs": "node tools/validate-file-refs.js --strict",
     "validate:skills": "node tools/validate-skills.js --strict"
