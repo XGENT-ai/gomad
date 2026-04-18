@@ -682,15 +682,25 @@ class Installer {
         columns: true,
         skip_empty_lines: true,
       });
-      return records.map((r) => ({
-        type: r.type,
-        name: r.name,
-        module: r.module,
-        path: r.path,
-        hash: r.hash || null, // v1 compat: hash column always present since Phase 3
-        schema_version: r.schema_version || null, // D-23: v1 rows → null (implicit v1)
-        install_root: r.install_root || '_gomad', // D-25: default for v1 rows
-      }));
+      // WR-01: resolve absolute paths based on install_root so detectCustomFiles can
+      // match scanned IDE-target files (e.g. .claude/commands/gm/agent-pm.md). Without
+      // absolutePath, every v2 row whose install_root != '_gomad' would map to a bogus
+      // path under gomadDir, so launcher edits would be silently undetected.
+      const workspaceRoot = path.dirname(gomadDir);
+      return records.map((r) => {
+        const installRoot = r.install_root || '_gomad';
+        const rootPath = installRoot === '_gomad' ? gomadDir : path.join(workspaceRoot, installRoot);
+        return {
+          type: r.type,
+          name: r.name,
+          module: r.module,
+          path: r.path,
+          hash: r.hash || null, // v1 compat: hash column always present since Phase 3
+          schema_version: r.schema_version || null, // D-23: v1 rows → null (implicit v1)
+          install_root: installRoot, // D-25: default for v1 rows
+          absolutePath: path.join(rootPath, r.path || ''), // WR-01: install_root-aware absolute path
+        };
+      });
     } catch (error) {
       await prompts.log.warn('Could not read files-manifest.csv: ' + error.message);
       return [];
@@ -716,15 +726,25 @@ class Installer {
       manifestHasHashes = existingFilesManifest.some((f) => f.hash);
     }
 
-    // Build map of previously installed files from files-manifest.csv with their hashes
+    // Build map of previously installed files from files-manifest.csv with their hashes.
+    // WR-01: prefer absolutePath (install_root-aware) when present; fall back to gomadDir-relative
+    // for backward-compat with manifest entries that pre-date the install_root column.
     const installedFilesMap = new Map();
+    const extraScanRoots = new Set(); // WR-01: additional roots (e.g. .claude/) to scan beyond gomadDir
     for (const fileEntry of existingFilesManifest) {
       if (fileEntry.path) {
-        const absolutePath = path.join(gomadDir, fileEntry.path);
+        const absolutePath = fileEntry.absolutePath || path.join(gomadDir, fileEntry.path);
         installedFilesMap.set(path.normalize(absolutePath), {
           hash: fileEntry.hash,
           relativePath: fileEntry.path,
         });
+        // WR-01: any manifest row that lives outside gomadDir contributes its install_root
+        // to the scan list, so modifications to launcher files are observable.
+        if (fileEntry.install_root && fileEntry.install_root !== '_gomad') {
+          const workspaceRoot = path.dirname(gomadDir);
+          const rootAbs = path.join(workspaceRoot, fileEntry.install_root);
+          extraScanRoots.add(rootAbs);
+        }
       }
     }
 
@@ -809,6 +829,42 @@ class Installer {
     };
 
     await scanDirectory(gomadDir);
+
+    // WR-01: scan additional IDE roots (e.g. .claude/) that the manifest references,
+    // but ONLY to detect modifications to files we already know about. We deliberately
+    // do NOT flag unknown files in IDE roots as "custom" — those roots contain many
+    // user/IDE files unrelated to GOMAD that should be left alone.
+    for (const extraRoot of extraScanRoots) {
+      if (!(await fs.pathExists(extraRoot))) continue;
+      const scanForModifications = async (dir) => {
+        try {
+          const entries = await fs.readdir(dir, { withFileTypes: true });
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+              if (entry.name === 'node_modules' || entry.name === '.git') continue;
+              await scanForModifications(fullPath);
+            } else if (entry.isFile()) {
+              const normalizedPath = path.normalize(fullPath);
+              const fileInfo = installedFilesMap.get(normalizedPath);
+              if (fileInfo && manifestHasHashes && fileInfo.hash) {
+                const currentHash = await this.manifest.calculateFileHash(fullPath);
+                if (currentHash && currentHash !== fileInfo.hash) {
+                  modifiedFiles.push({
+                    path: fullPath,
+                    relativePath: fileInfo.relativePath,
+                  });
+                }
+              }
+            }
+          }
+        } catch {
+          // Ignore errors scanning directories
+        }
+      };
+      await scanForModifications(extraRoot);
+    }
+
     return { customFiles, modifiedFiles };
   }
 
