@@ -44,7 +44,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. The launcher-vs-self-contained decision is logged in PROJECT.md Key Decisions (outcome: launcher — slash command loads persona from `_gomad/gomad/agents/*.md` at runtime, per user decision)
   3. `.gitignore` excludes `.claude/commands/gm/` (and any other installer-generated command paths under the dev repo) while keeping `.claude/commands/gsd/` tracked; `git status` in a clean worktree shows no generated command files
   4. PROJECT.md no longer claims the installer is `type: module` — language corrected to CommonJS with `require()`-based loading
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 05-01-PLAN.md — Verification artifact (05-VERIFICATION.md citing gsd commands) + automated gm-command-surface test (CMD-05)
+- [ ] 05-02-PLAN.md — .gitignore narrow pattern for .claude/commands/gm/ + installer --self flag and self-install guard with test coverage (REF-03)
+- [ ] 05-03-PLAN.md — PROJECT.md factual correction (type: module → CommonJS) + launcher-form Key Decisions row (REL-01)
 
 ### Phase 6: Installer Mechanics — Copy + Manifest + Stub Generation
 **Goal**: Ship the three tightly-coupled installer-internal changes as one coherent unit — copy-only install (unblocks stub generation), extended files-manifest.csv schema with `schema_version` (unblocks cleanup in Phase 7), and revived `agent-command-generator.js` that produces `.claude/commands/gm/agent-*.md` launchers for all 7 personas from existing `gm-agent-*/skill-manifest.yaml` metadata.
@@ -108,7 +111,7 @@ Phases execute in numeric order: 5 → 6 → 7 → 8 → 9. Phase 8 (content) is
 | 2. Rename                                          | v1.1      | 3/3            | Complete    | 2026-04    |
 | 3. Credit, Branding & Docs                         | v1.1      | 2/2            | Complete    | 2026-04    |
 | 4. Verification & Release                          | v1.1      | 3/3            | Complete    | 2026-04-18 |
-| 5. Foundations & Command-Surface Validation        | v1.2      | 0/TBD          | Not started | -          |
+| 5. Foundations & Command-Surface Validation        | v1.2      | 0/3            | Not started | -          |
 | 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/TBD          | Not started | -          |
 | 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 0/TBD          | Not started | -          |
 | 8. PRD + Product-Brief Content Refinement          | v1.2      | 0/TBD          | Not started | -          |
