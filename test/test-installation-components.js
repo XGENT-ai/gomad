@@ -479,7 +479,14 @@ async function runTests() {
     const nameMatch9 = skillContent9.match(/^name:\s*(.+)$/m);
     assert(nameMatch9 && nameMatch9[1].trim() === 'gomad-master', 'Claude Code skill name frontmatter matches directory name exactly');
 
-    assert(!(await fs.pathExists(legacyDir9)), 'Claude Code setup removes legacy commands dir');
+    // Phase 6 (D-28/D-31): .claude/commands/ is now repopulated with launcher files
+    // at .claude/commands/gm/agent-*.md, so the legacy directory root may still exist.
+    // The semantic invariant is that the legacy file gomad-legacy.md is gone (was cleaned
+    // by cleanupTarget before the install). Verify that and that new launchers landed.
+    const legacyFile9 = path.join(legacyDir9, 'gomad-legacy.md');
+    assert(!(await fs.pathExists(legacyFile9)), 'Claude Code setup removes legacy gomad-* files from commands dir');
+    const launcherDir9 = path.join(tempProjectDir9, '.claude', 'commands', 'gm');
+    assert(await fs.pathExists(launcherDir9), 'Claude Code setup writes new agent launchers to .claude/commands/gm');
 
     await fs.remove(tempProjectDir9);
     await fs.remove(path.dirname(installedBmadDir9));

@@ -5,6 +5,7 @@ const yaml = require('yaml');
 const prompts = require('../prompts');
 const csv = require('csv-parse/sync');
 const { GOMAD_FOLDER_NAME } = require('./shared/path-utils');
+const { AgentCommandGenerator } = require('./shared/agent-command-generator');
 
 /**
  * Config-driven IDE setup handler
@@ -118,6 +119,31 @@ class ConfigDrivenIdeSetup {
     results.skills = await this.installVerbatimSkills(projectDir, gomadDir, targetPath, config);
     results.skillDirectories = this.skillWriteTracker.size;
 
+    // Phase 6 (D-28/D-29/D-31): For Claude Code (or any IDE that sets launcher_target_dir
+    // in platform-codes.yaml), write 7 launcher files flat under launcher_target_dir and
+    // remove any legacy .claude/skills/gm-agent-*/ directories atomically. All files
+    // produced are pushed into the trackInstalledFile callback so the post-IDE manifest
+    // refresh in installer.js includes them with install_root derived from target.
+    if (config.launcher_target_dir) {
+      const launcherGen = new AgentCommandGenerator(this.gomadFolderName);
+      const launcherDir = path.join(projectDir, config.launcher_target_dir);
+
+      // D-29: remove legacy v1.1 .claude/skills/gm-agent-*/ dirs atomically (no overlap window)
+      const removed = await launcherGen.removeLegacyAgentSkillDirs(projectDir);
+      if (removed.length > 0) {
+        await prompts.log.info(`Removed ${removed.length} legacy gm-agent-* skill dir(s)`);
+      }
+
+      // D-31: write 7 flat launchers at launcher_target_dir/agent-<shortName>.md
+      const launcherPaths = await launcherGen.writeAgentLaunchers(launcherDir, projectDir);
+      if (options.trackInstalledFile) {
+        for (const p of launcherPaths) {
+          options.trackInstalledFile(p);
+        }
+      }
+      results.launchers = launcherPaths.length;
+    }
+
     await this.printSummary(results, target_dir, options);
     this.skillWriteTracker = null;
     return { success: true, results };
@@ -212,6 +238,9 @@ class ConfigDrivenIdeSetup {
     const count = results.skillDirectories || results.skills || 0;
     if (count > 0) {
       await prompts.log.success(`${this.name} configured: ${count} skills → ${targetDir}`);
+    }
+    if (results.launchers > 0) {
+      await prompts.log.success(`${this.name} launchers configured: ${results.launchers} agents → ${this.installerConfig?.launcher_target_dir}`);
     }
   }
 

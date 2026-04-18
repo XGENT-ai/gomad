@@ -9,6 +9,7 @@ const { FileOps } = require('../file-ops');
 const { Config } = require('./config');
 const { getProjectRoot, getSourcePath } = require('../project-root');
 const { ManifestGenerator } = require('./manifest-generator');
+const { AgentCommandGenerator } = require('../ide/shared/agent-command-generator');
 const prompts = require('../prompts');
 const { GOMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 const { InstallPaths } = require('./install-paths');
@@ -22,6 +23,7 @@ class Installer {
     this.ideManager = new IdeManager();
     this.fileOps = new FileOps();
     this.installedFiles = new Set(); // Track all installed files
+    this.ideInstalledFiles = new Set(); // Phase 6: tracks IDE-target paths (launchers) for post-_setupIdes manifest refresh
     this.gomadFolderName = GOMAD_FOLDER_NAME;
   }
 
@@ -65,6 +67,24 @@ class Installer {
       await this._installAndConfigure(config, originalConfig, paths, officialModuleIds, allModules, addResult, officialModules);
 
       await this._setupIdes(config, allModules, paths, addResult);
+
+      // Phase 6 (D-25): Re-write files-manifest.csv so launcher files written by _setupIdes
+      // (_config-driven.js's launcher_target_dir block) land in the manifest with
+      // install_root='.claude' instead of being untracked. The first manifest write in
+      // configTask only saw _gomad/-internal paths; this second pass picks up IDE-target
+      // paths that were added to this.installedFiles during IDE setup.
+      if (this.ideInstalledFiles && this.ideInstalledFiles.size > 0) {
+        const manifestGen = new ManifestGenerator();
+        const allModulesForManifest = config.isQuickUpdate()
+          ? originalConfig._existingModules || allModules || []
+          : originalConfig._preserveModules
+            ? [...allModules, ...originalConfig._preserveModules]
+            : allModules || [];
+        await manifestGen.generateManifests(paths.gomadDir, allModulesForManifest, [...this.installedFiles], {
+          ides: config.ides || [],
+          preservedModules: allModulesForManifest,
+        });
+      }
 
       const restoreResult = await this._restoreUserFiles(paths, updateState);
 
@@ -266,6 +286,17 @@ class Installer {
         this.installedFiles.add(paths.manifestFile());
         this.installedFiles.add(paths.agentManifest());
 
+        // Phase 6 (D-14/D-15): extract 7 agent personas from src/gomad-skills/*/gm-agent-*/
+        // into _gomad/gomad/agents/<shortName>.md. Runs BEFORE generateManifests so the
+        // extracted files land in files-manifest.csv with install_root='_gomad'.
+        message('Extracting agent personas...');
+        const personaGen = new AgentCommandGenerator(this.gomadFolderName);
+        const workspaceRoot = path.dirname(paths.gomadDir);
+        const extractedPersonaPaths = await personaGen.extractPersonas(workspaceRoot);
+        for (const p of extractedPersonaPaths) {
+          this.installedFiles.add(p);
+        }
+
         message('Generating manifests...');
         const manifestGen = new ManifestGenerator();
 
@@ -335,6 +366,10 @@ class Installer {
       const setupResult = await this.ideManager.setup(ide, paths.projectRoot, paths.gomadDir, {
         selectedModules: allModules || [],
         verbose: config.verbose,
+        trackInstalledFile: (filePath) => {
+          this.installedFiles.add(filePath);
+          this.ideInstalledFiles.add(filePath);
+        },
       });
 
       if (setupResult.success) {

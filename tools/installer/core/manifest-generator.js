@@ -599,26 +599,39 @@ class ManifestGenerator {
     if (this.allInstalledFiles && this.allInstalledFiles.length > 0) {
       // Process all installed files
       for (const filePath of this.allInstalledFiles) {
-        // Store paths relative to gomadDir (no folder prefix)
-        const relativePath = filePath.replace(this.gomadDir, '').replaceAll('\\', '/').replace(/^\//, '');
-        const ext = path.extname(filePath).toLowerCase();
-        const fileName = path.basename(filePath, ext);
+        // Determine install_root by checking which standard root the path falls under.
+        // Phase 6 (D-25): paths under _gomad/ → install_root='_gomad' (default);
+        // paths under .claude/ → install_root='.claude'; others fall back to '_gomad' for now.
+        const workspaceRoot = path.dirname(this.gomadDir);
+        const absFilePath = path.resolve(filePath);
+
+        let installRoot = '_gomad';
+        let rootPath = this.gomadDir;
+        const claudeRoot = path.join(workspaceRoot, '.claude');
+        if (absFilePath.startsWith(claudeRoot + path.sep) || absFilePath === claudeRoot) {
+          installRoot = '.claude';
+          rootPath = claudeRoot;
+        }
+
+        const relativePath = absFilePath.replace(rootPath, '').replaceAll('\\', '/').replace(/^\//, '');
+        const ext = path.extname(absFilePath).toLowerCase();
+        const fileName = path.basename(absFilePath, ext);
 
         // Determine module from path (first directory component)
         const pathParts = relativePath.split('/');
         const module = pathParts.length > 0 ? pathParts[0] : 'unknown';
 
         // Calculate hash
-        const hash = await this.calculateFileHash(filePath);
+        const hash = await this.calculateFileHash(absFilePath);
 
         allFiles.push({
           type: ext.slice(1) || 'file',
           name: fileName,
           module: module,
-          path: relativePath.replaceAll('\\', '/'), // D-26: redundant-safe forward-slash normalization
+          path: relativePath, // D-26: forward-slash-normalized above
           hash: hash,
           schema_version: '2.0', // D-24
-          install_root: '_gomad', // D-25 default (Plan 06-03 overrides for IDE-target rows)
+          install_root: installRoot, // D-25: derived from path prefix
         });
       }
     } else {
