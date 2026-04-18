@@ -890,29 +890,31 @@ class Installer {
     const agentInfo = new Map(); // agent-name -> {command, displayName, title+icon}
 
     if (await fs.pathExists(agentManifestPath)) {
+      // WR-04: parse with csv-parse/sync (header-aware) — the previous hand-rolled
+      // split(',') broke on embedded commas in capabilities/role/principles, which
+      // pushed `module` (cols[10]) out of position for every gomad agent.
       const manifestContent = await fs.readFile(agentManifestPath, 'utf8');
-      const lines = manifestContent.split('\n').filter((line) => line.trim());
+      const records = csv.parse(manifestContent, {
+        columns: true,
+        skip_empty_lines: true,
+      });
 
-      for (const line of lines) {
-        if (line.startsWith('name,')) continue; // Skip header
+      for (const r of records) {
+        const agentName = (r.name || '').trim();
+        if (!agentName) continue;
+        const displayName = (r.displayName || '').trim();
+        const title = (r.title || '').trim();
+        const icon = (r.icon || '').trim();
+        const module = (r.module || '').trim();
 
-        const cols = line.split(',');
-        if (cols.length >= 4) {
-          const agentName = cols[0].replaceAll('"', '').trim();
-          const displayName = cols[1].replaceAll('"', '').trim();
-          const title = cols[2].replaceAll('"', '').trim();
-          const icon = cols[3].replaceAll('"', '').trim();
-          const module = cols[10] ? cols[10].replaceAll('"', '').trim() : '';
+        // Build agent command: gomad:module:agent:name
+        const agentCommand = module ? `gomad:${module}:agent:${agentName}` : `gomad:agent:${agentName}`;
 
-          // Build agent command: gomad:module:agent:name
-          const agentCommand = module ? `gomad:${module}:agent:${agentName}` : `gomad:agent:${agentName}`;
-
-          agentInfo.set(agentName, {
-            command: agentCommand,
-            displayName: displayName || agentName,
-            title: icon && title ? `${icon} ${title}` : title || agentName,
-          });
-        }
+        agentInfo.set(agentName, {
+          command: agentCommand,
+          displayName: displayName || agentName,
+          title: icon && title ? `${icon} ${title}` : title || agentName,
+        });
       }
     }
 
