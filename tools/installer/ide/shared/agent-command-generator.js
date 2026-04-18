@@ -12,13 +12,37 @@ class AgentCommandGenerator {
   // Short name → source skill directory under src/gomad-skills/
   // Plus a hand-authored one-line purpose for D-17 description formatting.
   static AGENT_SOURCES = [
-    { shortName: 'analyst',      dir: '1-analysis/gm-agent-analyst',          purpose: 'Market research, competitive analysis, requirements elicitation, domain expertise' },
-    { shortName: 'tech-writer',  dir: '1-analysis/gm-agent-tech-writer',      purpose: 'Technical writing, documentation, explanation, diagramming' },
-    { shortName: 'pm',           dir: '2-plan-workflows/gm-agent-pm',         purpose: 'Product management, PRD creation, feature scoping, stakeholder alignment' },
-    { shortName: 'ux-designer',  dir: '2-plan-workflows/gm-agent-ux-designer', purpose: 'UX design, user flows, interaction design, design reviews' },
-    { shortName: 'architect',    dir: '3-solutioning/gm-agent-architect',     purpose: 'System architecture, technical design, solution engineering' },
-    { shortName: 'sm',           dir: '4-implementation/gm-agent-sm',         purpose: 'Scrum mastery, story creation, sprint facilitation, implementation planning' },
-    { shortName: 'dev',          dir: '4-implementation/gm-agent-dev',        purpose: 'Development, implementation, coding, refactoring' },
+    {
+      shortName: 'analyst',
+      dir: '1-analysis/gm-agent-analyst',
+      purpose: 'Market research, competitive analysis, requirements elicitation, domain expertise',
+    },
+    {
+      shortName: 'tech-writer',
+      dir: '1-analysis/gm-agent-tech-writer',
+      purpose: 'Technical writing, documentation, explanation, diagramming',
+    },
+    {
+      shortName: 'pm',
+      dir: '2-plan-workflows/gm-agent-pm',
+      purpose: 'Product management, PRD creation, feature scoping, stakeholder alignment',
+    },
+    {
+      shortName: 'ux-designer',
+      dir: '2-plan-workflows/gm-agent-ux-designer',
+      purpose: 'UX design, user flows, interaction design, design reviews',
+    },
+    {
+      shortName: 'architect',
+      dir: '3-solutioning/gm-agent-architect',
+      purpose: 'System architecture, technical design, solution engineering',
+    },
+    {
+      shortName: 'sm',
+      dir: '4-implementation/gm-agent-sm',
+      purpose: 'Scrum mastery, story creation, sprint facilitation, implementation planning',
+    },
+    { shortName: 'dev', dir: '4-implementation/gm-agent-dev', purpose: 'Development, implementation, coding, refactoring' },
   ];
 
   constructor(gomadFolderName = GOMAD_FOLDER_NAME) {

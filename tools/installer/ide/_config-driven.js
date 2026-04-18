@@ -240,7 +240,9 @@ class ConfigDrivenIdeSetup {
       await prompts.log.success(`${this.name} configured: ${count} skills → ${targetDir}`);
     }
     if (results.launchers > 0) {
-      await prompts.log.success(`${this.name} launchers configured: ${results.launchers} agents → ${this.installerConfig?.launcher_target_dir}`);
+      await prompts.log.success(
+        `${this.name} launchers configured: ${results.launchers} agents → ${this.installerConfig?.launcher_target_dir}`,
+      );
     }
   }
 
