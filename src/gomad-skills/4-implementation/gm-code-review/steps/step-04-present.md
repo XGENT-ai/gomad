@@ -14,7 +14,7 @@ deferred_work_file: '{implementation_artifacts}/deferred-work.md'
 
 ### 1. Clean review shortcut
 
-If zero findings remain after triage (all dismissed or none raised): state that and proceed to section 6 (Sprint Status Update).
+If zero findings remain after triage (all dismissed or none raised): state "✅ Clean review — no actionable findings." Then set `{new_status}` = `done` and **YOU MUST** execute section 6 (Update story status and sync sprint tracking) before presenting next steps. Do NOT skip section 6 — status updates are mandatory even when the review is clean.
 
 ### 2. Write findings to the story file
 
@@ -89,6 +89,7 @@ Skip this section if `{spec_file}` is not set.
 
 #### Determine new status based on review outcome
 
+- If zero findings existed (clean review shortcut from section 1): `{new_status}` is already set to `done`. Update the story file Status section to `done`.
 - If all `decision-needed` and `patch` findings were resolved (fixed or dismissed) AND no unresolved HIGH/MEDIUM issues remain: set `{new_status}` = `done`. Update the story file Status section to `done`.
 - If `patch` findings were left as action items, or unresolved issues remain: set `{new_status}` = `in-progress`. Update the story file Status section to `in-progress`.
 
