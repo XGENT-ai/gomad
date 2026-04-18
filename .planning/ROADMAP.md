@@ -45,9 +45,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `.gitignore` excludes `.claude/commands/gm/` (and any other installer-generated command paths under the dev repo) while keeping `.claude/commands/gsd/` tracked; `git status` in a clean worktree shows no generated command files
   4. PROJECT.md no longer claims the installer is `type: module` — language corrected to CommonJS with `require()`-based loading
 **Plans**: 3 plans
-- [ ] 05-01-PLAN.md — Verification artifact (05-VERIFICATION.md citing gsd commands) + automated gm-command-surface test (CMD-05)
+- [x] 05-01-PLAN.md — Verification artifact (05-VERIFICATION.md citing gsd commands) + automated gm-command-surface test (CMD-05)
 - [ ] 05-02-PLAN.md — .gitignore narrow pattern for .claude/commands/gm/ + installer --self flag and self-install guard with test coverage (REF-03)
-- [ ] 05-03-PLAN.md — PROJECT.md factual correction (type: module → CommonJS) + launcher-form Key Decisions row (REL-01)
+- [x] 05-03-PLAN.md — PROJECT.md factual correction (type: module → CommonJS) + launcher-form Key Decisions row (REL-01)
 
 ### Phase 6: Installer Mechanics — Copy + Manifest + Stub Generation
 **Goal**: Ship the three tightly-coupled installer-internal changes as one coherent unit — copy-only install (unblocks stub generation), extended files-manifest.csv schema with `schema_version` (unblocks cleanup in Phase 7), and revived `agent-command-generator.js` that produces `.claude/commands/gm/agent-*.md` launchers for all 7 personas from existing `gm-agent-*/skill-manifest.yaml` metadata.
