@@ -1,5 +1,6 @@
 const path = require('node:path');
 const fs = require('fs-extra');
+const csv = require('csv-parse/sync');
 const { Manifest } = require('./manifest');
 const { OfficialModules } = require('../modules/official-modules');
 const { CustomModules } = require('../modules/custom-modules');
@@ -607,43 +608,19 @@ class Installer {
 
     try {
       const content = await fs.readFile(filesManifestPath, 'utf8');
-      const lines = content.split('\n');
-      const files = [];
-
-      for (let i = 1; i < lines.length; i++) {
-        // Skip header
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        // Parse CSV line properly handling quoted values
-        const parts = [];
-        let current = '';
-        let inQuotes = false;
-
-        for (const char of line) {
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
-            parts.push(current);
-            current = '';
-          } else {
-            current += char;
-          }
-        }
-        parts.push(current); // Add last part
-
-        if (parts.length >= 4) {
-          files.push({
-            type: parts[0],
-            name: parts[1],
-            module: parts[2],
-            path: parts[3],
-            hash: parts[4] || null, // Hash may not exist in old manifests
-          });
-        }
-      }
-
-      return files;
+      const records = csv.parse(content, {
+        columns: true,
+        skip_empty_lines: true,
+      });
+      return records.map((r) => ({
+        type: r.type,
+        name: r.name,
+        module: r.module,
+        path: r.path,
+        hash: r.hash || null, // v1 compat: hash column always present since Phase 3
+        schema_version: r.schema_version || null, // D-23: v1 rows → null (implicit v1)
+        install_root: r.install_root || '_gomad', // D-25: default for v1 rows
+      }));
     } catch (error) {
       await prompts.log.warn('Could not read files-manifest.csv: ' + error.message);
       return [];
