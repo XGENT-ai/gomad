@@ -84,50 +84,60 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Populated during roadmap creation.
+Which phases cover which requirements. Populated during roadmap creation (2026-04-18).
 
-| Requirement | Phase | Status |
-| ----------- | ----- | ------ |
-| CMD-01 | TBD | Pending |
-| CMD-02 | TBD | Pending |
-| CMD-03 | TBD | Pending |
-| CMD-04 | TBD | Pending |
-| CMD-05 | TBD | Pending |
-| INSTALL-01 | TBD | Pending |
-| INSTALL-02 | TBD | Pending |
-| INSTALL-03 | TBD | Pending |
-| INSTALL-04 | TBD | Pending |
-| INSTALL-05 | TBD | Pending |
-| INSTALL-06 | TBD | Pending |
-| INSTALL-07 | TBD | Pending |
-| INSTALL-08 | TBD | Pending |
-| INSTALL-09 | TBD | Pending |
-| REF-01 | TBD | Pending |
-| REF-02 | TBD | Pending |
-| REF-03 | TBD | Pending |
-| REF-04 | TBD | Pending |
-| REF-05 | TBD | Pending |
-| PRD-01 | TBD | Pending |
-| PRD-02 | TBD | Pending |
-| PRD-03 | TBD | Pending |
-| PRD-04 | TBD | Pending |
-| PRD-05 | TBD | Pending |
-| PRD-06 | TBD | Pending |
-| PRD-07 | TBD | Pending |
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| REL-03 | TBD | Pending |
-| REL-04 | TBD | Pending |
-| REL-05 | TBD | Pending |
-| REL-06 | TBD | Pending |
+| Requirement | Phase    | Status  |
+| ----------- | -------- | ------- |
+| CMD-01      | Phase 6  | Pending |
+| CMD-02      | Phase 6  | Pending |
+| CMD-03      | Phase 6  | Pending |
+| CMD-04      | Phase 6  | Pending |
+| CMD-05      | Phase 5  | Pending |
+| INSTALL-01  | Phase 6  | Pending |
+| INSTALL-02  | Phase 6  | Pending |
+| INSTALL-03  | Phase 6  | Pending |
+| INSTALL-04  | Phase 6  | Pending |
+| INSTALL-05  | Phase 7  | Pending |
+| INSTALL-06  | Phase 7  | Pending |
+| INSTALL-07  | Phase 7  | Pending |
+| INSTALL-08  | Phase 7  | Pending |
+| INSTALL-09  | Phase 7  | Pending |
+| REF-01      | Phase 9  | Pending |
+| REF-02      | Phase 9  | Pending |
+| REF-03      | Phase 5  | Pending |
+| REF-04      | Phase 9  | Pending |
+| REF-05      | Phase 9  | Pending |
+| PRD-01      | Phase 8  | Pending |
+| PRD-02      | Phase 8  | Pending |
+| PRD-03      | Phase 8  | Pending |
+| PRD-04      | Phase 8  | Pending |
+| PRD-05      | Phase 8  | Pending |
+| PRD-06      | Phase 8  | Pending |
+| PRD-07      | Phase 8  | Pending |
+| REL-01      | Phase 5  | Pending |
+| REL-02      | Phase 9  | Pending |
+| REL-03      | Phase 9  | Pending |
+| REL-04      | Phase 9  | Pending |
+| REL-05      | Phase 9  | Pending |
+| REL-06      | Phase 9  | Pending |
 
 **Coverage:**
 
 - v1.2 requirements: 32 total
-- Mapped to phases: 0 (pre-roadmap)
-- Unmapped: 32 (pre-roadmap)
+- Mapped to phases: 32 (100%)
+- Unmapped: 0
+
+**Per-phase count:**
+
+| Phase   | Name                                             | Requirements | Count |
+| ------- | ------------------------------------------------ | ------------ | ----- |
+| Phase 5 | Foundations & Command-Surface Validation         | CMD-05, REF-03, REL-01 | 3 |
+| Phase 6 | Installer Mechanics — Copy + Manifest + Stubs    | CMD-01, CMD-02, CMD-03, CMD-04, INSTALL-01, INSTALL-02, INSTALL-03, INSTALL-04 | 8 |
+| Phase 7 | Upgrade Safety — Manifest-Driven Cleanup         | INSTALL-05, INSTALL-06, INSTALL-07, INSTALL-08, INSTALL-09 | 5 |
+| Phase 8 | PRD + Product-Brief Content Refinement           | PRD-01, PRD-02, PRD-03, PRD-04, PRD-05, PRD-06, PRD-07 | 7 |
+| Phase 9 | Reference Sweep + Verification + Release         | REF-01, REF-02, REF-04, REF-05, REL-02, REL-03, REL-04, REL-05, REL-06 | 9 |
 
 ---
 
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after initial definition*
+*Last updated: 2026-04-18 — traceability populated after ROADMAP.md creation (5 phases, 32/32 mapped)*
