@@ -140,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-18 after v1.2 milestone kickoff*
+*Last updated: 2026-04-18 after Phase 5 (foundations & command-surface validation) complete — CMD-05, REF-03, REL-01 closed; launcher-form architecture locked; dev-repo pollution guard shipped*
