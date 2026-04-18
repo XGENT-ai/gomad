@@ -7,6 +7,26 @@ const { UI } = require('../ui');
 const installer = new Installer();
 const ui = new UI();
 
+// Self-install guard (D-11, Pitfall #7): refuse install into the gomad source
+// repo unless explicitly opted in with --self. The marker is src/gomad-skills/
+// at the TARGET directory — not the current working directory — so that running
+// the CLI from inside the gomad dev repo against a different --directory works.
+async function failIfGomadSourceTarget(targetDir) {
+  const resolved = path.resolve(targetDir);
+  const isGomadSource = await fs.pathExists(path.join(resolved, 'src', 'gomad-skills'));
+  if (!isGomadSource) return false;
+  await prompts.log.error(
+    [
+      'Refusing to install into the gomad source repo itself.',
+      `Detected src/gomad-skills/ in ${resolved}.`,
+      'This would pollute the dev repo with installer-generated output under .claude/commands/gm/.',
+      'If you really mean to install here (rare — typically only for local dev-loop seeding),',
+      'pass --self explicitly.',
+    ].join('\n'),
+  );
+  process.exit(1);
+}
+
 module.exports = {
   command: 'install',
   description: 'Install GOMAD Core agents and tools',
@@ -31,22 +51,15 @@ module.exports = {
     ],
   ],
   action: async (options) => {
-    // Self-install guard (D-11, Pitfall #7): refuse install into the gomad source
-    // repo unless explicitly opted in with --self. Marker: src/gomad-skills/ in cwd.
-    // Defense-in-depth with the .gitignore narrow pattern for .claude/commands/gm/.
-    const cwd = process.cwd();
-    const inGomadSourceRepo = await fs.pathExists(path.join(cwd, 'src', 'gomad-skills'));
-    if (inGomadSourceRepo && !options.self) {
-      await prompts.log.error(
-        [
-          'Refusing to install into the gomad source repo itself.',
-          `Detected src/gomad-skills/ in ${cwd}.`,
-          'This would pollute the dev repo with installer-generated output under .claude/commands/gm/.',
-          'If you really mean to install here (rare — typically only for local dev-loop seeding),',
-          'pass --self explicitly.',
-        ].join('\n'),
-      );
-      process.exit(1);
+    // Self-install guard (D-11, Pitfall #7) — fires BEFORE any prompts. The
+    // effective target is whatever `gomad install` would write to without
+    // further user interaction: --directory when given, else cwd as default.
+    // This allows `gomad install --directory <elsewhere>` from inside the
+    // gomad dev repo to proceed, while still blocking a bare `gomad install`
+    // from inside the source repo (which would default to cwd).
+    if (!options.self) {
+      const effectiveTarget = options.directory || process.cwd();
+      await failIfGomadSourceTarget(effectiveTarget);
     }
 
     try {
