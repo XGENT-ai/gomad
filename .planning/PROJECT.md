@@ -74,7 +74,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - CLI: `tools/installer/gomad-cli.js` is the single entry point, exposing the `gomad` command.
 - Manifests: `skill-manifest.yaml` and `manifest.json` (no `bmad-` prefix).
 - Website: Astro under-construction one-pager at `gomad.xgent.ai`.
-- Tech stack: Node.js / JavaScript (`type: module`), inherited from BMAD.
+- Tech stack: Node.js / JavaScript (CommonJS, `require()`-based loading), inherited from BMAD.
 - Docs: English default + `zh-cn/` Chinese translation.
 
 **Upstream relationship.** GoMad is a hard fork of BMAD Method (<https://github.com/bmad-code-org/BMAD-METHOD>), MIT-licensed by Brian (BMad) Madison. Credit preserved legally (MIT license byte-identical in LICENSE) and ethically (non-affiliation disclaimer, nominative fair use of BMAD trademark, BMAD contributors preserved in CONTRIBUTORS.md).
@@ -91,7 +91,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - **License**: BMAD's MIT license preserved byte-identical. GoMad additions are also MIT, appended below a horizontal rule in the same `LICENSE` file.
 - **Casing**: The case-preserving display form is "GoMad" (not "Gomad"). Lowercase `gomad` for package names, paths, and CLI commands. Uppercase `GOMAD` for the acronym expansion only.
 - **Trademark**: "BMAD" is a trademark of BMad Code, LLC. We use it only via nominative fair use (in attribution sentences). The skill rename (`bmad-*` → `gm-*`) is a trademark-safety requirement, not just cosmetic.
-- **Tech stack**: Node.js / JavaScript (`type: module`), inherited from BMAD.
+- **Tech stack**: Node.js / JavaScript (CommonJS, `require()`-based loading), inherited from BMAD.
 - **Scope discipline**: Future milestone work should stay focused; mixing structural changes with new-feature work dilutes both.
 - **npm publish mechanics**: Trusted publishing via GitHub Actions OIDC preferred; otherwise granular access token with "Bypass 2FA" enabled (classic automation tokens revoked Dec 2025).
 
@@ -117,6 +117,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 | Canonical non-affiliation disclaimer established as single source of truth, reused verbatim across LICENSE/TRADEMARK/README/README_CN   | Prevents drift across legal surfaces                                                                                   | ✓ Good                                                   |
 | CLI banner via hand-authored GoMad ASCII in `cli-utils.js displayLogo()`, no figlet dep                                                 | One less runtime dep; static banner is stable enough to hand-author                                                    | ✓ Good                                                   |
 | E2E test verifies tarball structurally (not via interactive `gomad install`)                                                            | Avoids `@clack/prompts` hang in non-TTY test environment                                                               | ✓ Good                                                   |
+| Launcher-form slash commands (not self-contained) — `.claude/commands/gm/agent-*.md` is a thin stub loading persona from `_gomad/gomad/agents/*.md` at runtime | Preserves `SKILL.md` as single source of truth (persona body extracted at install time per D-06); no hand-authored duplication; Claude Code sees rich metadata via launcher body | — Contract set in Phase 5; extractor lands in Phase 6    |
 
 ## Evolution
 
