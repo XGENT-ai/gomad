@@ -60,8 +60,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `src/gomad-skills/.../gm-agent-*/` directories remain on disk as the unchanged source of truth (not moved, not duplicated); `manifest-generator.js:parseSkillMd`'s `skillMeta.name === dirName` assertion still passes
   5. Invoking `/gm:agent-pm` on a fresh install loads the John persona from `_gomad/gomad/agents/pm.md` (or equivalent path) and enters persona mode
 **Plans**: 3 plans
-- [ ] 06-01-PLAN.md — Copy-only switch: replace fs.ensureSymlink with fs.copy in _config-driven.js + gated fs.lstat symlink-leftover unlink (INSTALL-01, INSTALL-02)
-- [ ] 06-02-PLAN.md — Manifest v2 schema: csv-parse/sync reader in installer.js + 7-column writer in manifest-generator.js with schema_version='2.0' + install_root + forward-slash paths (INSTALL-03, INSTALL-04)
+- [x] 06-01-PLAN.md — Copy-only switch: replace fs.ensureSymlink with fs.copy in _config-driven.js + gated fs.lstat symlink-leftover unlink (INSTALL-01, INSTALL-02)
+- [x] 06-02-PLAN.md — Manifest v2 schema: csv-parse/sync reader in installer.js + 7-column writer in manifest-generator.js with schema_version='2.0' + install_root + forward-slash paths (INSTALL-03, INSTALL-04)
 - [ ] 06-03-PLAN.md — Launcher generator revival: platform-codes.yaml launcher_target_dir + extended template body + AgentCommandGenerator.extractPersonas + writeAgentLaunchers + removeLegacyAgentSkillDirs + wire in installer.js + post-IDE manifest refresh (CMD-01, CMD-02, CMD-03, CMD-04)
 
 ### Phase 7: Upgrade Safety — Manifest-Driven Cleanup
