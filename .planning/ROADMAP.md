@@ -59,7 +59,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `_gomad/_config/files-manifest.csv` exists after install, parses cleanly with `csv-parse` (no hand-rolled splitting), includes a `schema_version` field, and enumerates every installed path with columns `type,name,module,path,hash` — covering both `_gomad/`-internal paths and IDE-target paths (`.claude/commands/gm/*.md`, `.{ide}/skills/*`)
   4. `src/gomad-skills/.../gm-agent-*/` directories remain on disk as the unchanged source of truth (not moved, not duplicated); `manifest-generator.js:parseSkillMd`'s `skillMeta.name === dirName` assertion still passes
   5. Invoking `/gm:agent-pm` on a fresh install loads the John persona from `_gomad/gomad/agents/pm.md` (or equivalent path) and enters persona mode
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 06-01-PLAN.md — Copy-only switch: replace fs.ensureSymlink with fs.copy in _config-driven.js + gated fs.lstat symlink-leftover unlink (INSTALL-01, INSTALL-02)
+- [ ] 06-02-PLAN.md — Manifest v2 schema: csv-parse/sync reader in installer.js + 7-column writer in manifest-generator.js with schema_version='2.0' + install_root + forward-slash paths (INSTALL-03, INSTALL-04)
+- [ ] 06-03-PLAN.md — Launcher generator revival: platform-codes.yaml launcher_target_dir + extended template body + AgentCommandGenerator.extractPersonas + writeAgentLaunchers + removeLegacyAgentSkillDirs + wire in installer.js + post-IDE manifest refresh (CMD-01, CMD-02, CMD-03, CMD-04)
 
 ### Phase 7: Upgrade Safety — Manifest-Driven Cleanup
 **Goal**: Deliver the single highest-severity change in v1.2 — safe, reversible manifest-driven cleanup that removes stale files on re-install without ever deleting outside allowed install roots. Includes realpath containment, dual-format sniff for v1.1→v1.2 legacy cleanup, optional backup snapshotting, and a `--dry-run` flag so users can preview destructive actions before they happen.
@@ -112,7 +115,7 @@ Phases execute in numeric order: 5 → 6 → 7 → 8 → 9. Phase 8 (content) is
 | 3. Credit, Branding & Docs                         | v1.1      | 2/2            | Complete    | 2026-04    |
 | 4. Verification & Release                          | v1.1      | 3/3            | Complete    | 2026-04-18 |
 | 5. Foundations & Command-Surface Validation        | v1.2      | 0/3            | Not started | -          |
-| 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/TBD          | Not started | -          |
+| 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/3            | Not started | -          |
 | 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 0/TBD          | Not started | -          |
 | 8. PRD + Product-Brief Content Refinement          | v1.2      | 0/TBD          | Not started | -          |
 | 9. Reference Sweep + Verification + Release        | v1.2      | 0/TBD          | Not started | -          |
