@@ -117,6 +117,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 | Canonical non-affiliation disclaimer established as single source of truth, reused verbatim across LICENSE/TRADEMARK/README/README_CN   | Prevents drift across legal surfaces                                                                                   | ✓ Good                                                   |
 | CLI banner via hand-authored GoMad ASCII in `cli-utils.js displayLogo()`, no figlet dep                                                 | One less runtime dep; static banner is stable enough to hand-author                                                    | ✓ Good                                                   |
 | E2E test verifies tarball structurally (not via interactive `gomad install`)                                                            | Avoids `@clack/prompts` hang in non-TTY test environment                                                               | ✓ Good                                                   |
+| Launcher-form slash commands (not self-contained) — `.claude/commands/gm/agent-*.md` is a thin stub loading persona from `_gomad/gomad/agents/*.md` at runtime | Preserves `SKILL.md` as single source of truth (persona body extracted at install time per D-06); no hand-authored duplication; Claude Code sees rich metadata via launcher body | — Contract set in Phase 5; extractor lands in Phase 6    |
 
 ## Evolution
 
