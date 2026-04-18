@@ -1,4 +1,5 @@
 const path = require('node:path');
+const fs = require('fs-extra');
 const prompts = require('../prompts');
 const { Installer } = require('../core/installer');
 const { UI } = require('../ui');
@@ -24,8 +25,30 @@ module.exports = {
     ['--document-output-language <lang>', 'Language for document output (default: English)'],
     ['--output-folder <path>', 'Output folder path relative to project root (default: _gomad-output)'],
     ['-y, --yes', 'Accept all defaults and skip prompts where possible'],
+    [
+      '--self',
+      'Permit install into the gomad source repo itself (bypasses the self-install guard). Use only when intentionally re-seeding local dev output.',
+    ],
   ],
   action: async (options) => {
+    // Self-install guard (D-11, Pitfall #7): refuse install into the gomad source
+    // repo unless explicitly opted in with --self. Marker: src/gomad-skills/ in cwd.
+    // Defense-in-depth with the .gitignore narrow pattern for .claude/commands/gm/.
+    const cwd = process.cwd();
+    const inGomadSourceRepo = await fs.pathExists(path.join(cwd, 'src', 'gomad-skills'));
+    if (inGomadSourceRepo && !options.self) {
+      await prompts.log.error(
+        [
+          'Refusing to install into the gomad source repo itself.',
+          `Detected src/gomad-skills/ in ${cwd}.`,
+          'This would pollute the dev repo with installer-generated output under .claude/commands/gm/.',
+          'If you really mean to install here (rare — typically only for local dev-loop seeding),',
+          'pass --self explicitly.',
+        ].join('\n'),
+      );
+      process.exit(1);
+    }
+
     try {
       // Set debug flag as environment variable for all components
       if (options.debug) {
