@@ -1,10 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.2
-milestone_name: "Agent-as-Command & Coding-Agent PRD Refinement"
-status: ready_to_plan
-last_updated: "2026-04-18"
-last_activity: 2026-04-18
+milestone_name: Agent-as-Command & Coding-Agent PRD Refinement
+status: planning
+stopped_at: Phase 5 context gathered
+last_updated: "2026-04-18T09:16:04.791Z"
+last_activity: 2026-04-18 — Roadmap created with 5 v1.2 phases; 32/32 v1.2 requirements mapped
 progress:
   total_phases: 5
   completed_phases: 0
@@ -34,6 +35,7 @@ Progress: [░░░░░░░░░░] 0% (0/5 v1.2 phases complete)
 ## Performance Metrics
 
 **Velocity:**
+
 - v1.2 plans completed: 0
 - v1.1 baseline: 10 plans across 4 phases, ~12 days total
 
@@ -73,6 +75,6 @@ Items carried from v1.1 close and deferred beyond v1.2:
 
 ## Session Continuity
 
-Last session: 2026-04-18 — v1.2 roadmap created (5 phases, 32/32 requirements mapped).
-Stopped at: Roadmap + STATE + REQUIREMENTS traceability written; ready for phase planning.
+Last session: 2026-04-18T09:16:04.787Z
+Stopped at: Phase 5 context gathered
 Resume: run `/gsd-plan-phase 5` to begin planning Phase 5 (Foundations & Command-Surface Validation).
