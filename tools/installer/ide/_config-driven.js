@@ -146,6 +146,11 @@ class ConfigDrivenIdeSetup {
       skip_empty_lines: true,
     });
 
+    // D-22: symlink-leftover pre-check runs ONLY on re-install (v1.1 manifest present).
+    // Fresh installs skip the lstat entirely — nothing to leftover-handle.
+    const filesManifestPath = path.join(gomadDir, '_config', 'files-manifest.csv');
+    const isReinstall = await fs.pathExists(filesManifestPath);
+
     let count = 0;
 
     for (const record of records) {
@@ -161,14 +166,23 @@ class ConfigDrivenIdeSetup {
 
       if (!(await fs.pathExists(sourceDir))) continue;
 
-      // Symlink target to source for single source of truth
+      // D-19/D-20/D-22: copy-only install (no symlinks). On re-install, if the
+      // destination is a symlink from a v1.1 install, unlink it first so fs.copy
+      // writes through into targetPath (not back through the symlink into the source tree).
       const skillDir = path.join(targetPath, canonicalId);
+      if (isReinstall && (await fs.pathExists(skillDir))) {
+        const destStat = await fs.lstat(skillDir);
+        if (destStat.isSymbolicLink()) {
+          await prompts.log.info(`upgrading from symlink: ${skillDir}`);
+          await fs.unlink(skillDir);
+        }
+      }
       await fs.remove(skillDir);
       this.skillWriteTracker?.add(canonicalId);
 
-      // Create relative symlink: .claude/skills/{id} → ../../_gomad/{module}/{path}
-      const relTarget = path.relative(targetPath, sourceDir);
-      await fs.ensureSymlink(relTarget, skillDir);
+      // D-19: universal copy (applies to every IDE — no per-IDE gate).
+      // sourceDir is the live source under gomadDir; copy into targetPath as real files.
+      await fs.copy(sourceDir, skillDir);
 
       count++;
     }
