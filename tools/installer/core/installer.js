@@ -80,9 +80,13 @@ class Installer {
           : originalConfig._preserveModules
             ? [...allModules, ...originalConfig._preserveModules]
             : allModules || [];
+        // WR-02: pass IDE root list so writeFilesManifest can correctly derive
+        // install_root for launcher files outside _gomad/.
+        const ideRoots = await this._collectIdeRoots();
         await manifestGen.generateManifests(paths.gomadDir, allModulesForManifest, [...this.installedFiles], {
           ides: config.ides || [],
           preservedModules: allModulesForManifest,
+          ideRoots,
         });
       }
 
@@ -313,9 +317,13 @@ class Installer {
           modulesForCsvPreserve = originalConfig._preserveModules ? [...allModules, ...originalConfig._preserveModules] : allModules;
         }
 
+        // WR-02: pass IDE root list so writeFilesManifest can derive install_root
+        // for any IDE-target files (e.g. .claude/commands/gm/agent-*.md).
+        const ideRoots = await this._collectIdeRoots();
         await manifestGen.generateManifests(paths.gomadDir, allModulesForManifest, [...this.installedFiles], {
           ides: config.ides || [],
           preservedModules: modulesForCsvPreserve,
+          ideRoots,
         });
 
         message('Generating help catalog...');
@@ -628,6 +636,33 @@ class Installer {
 
       addResult(`Module: ${moduleName}`, 'ok', isQuickUpdate ? 'updated' : 'installed');
     }
+  }
+
+  /**
+   * WR-02: Collect the set of leading-segment IDE root directories defined in
+   * platform-codes.yaml (e.g. '.claude', '.cursor', '.opencode'). Used by
+   * ManifestGenerator.writeFilesManifest to derive `install_root` for any file
+   * installed outside `_gomad/`. Returns a sorted array of unique root segments.
+   * @returns {Promise<string[]>} Array of IDE root directory names (leading segment only)
+   */
+  async _collectIdeRoots() {
+    const { loadPlatformCodes } = require('../ide/platform-codes');
+    const platformConfig = await loadPlatformCodes();
+    const roots = new Set();
+    for (const platformInfo of Object.values(platformConfig.platforms || {})) {
+      const installer = platformInfo?.installer;
+      if (!installer) continue;
+      for (const key of ['target_dir', 'launcher_target_dir']) {
+        const value = installer[key];
+        if (typeof value !== 'string' || !value) continue;
+        // Take the first path segment — that's the IDE root we record in install_root.
+        const leading = value.split('/')[0].split(path.sep)[0];
+        if (leading && leading !== '~' && !leading.startsWith('..')) {
+          roots.add(leading);
+        }
+      }
+    }
+    return [...roots].sort();
   }
 
   /**

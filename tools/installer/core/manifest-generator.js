@@ -86,6 +86,12 @@ class ManifestGenerator {
     this.gomadFolderName = path.basename(gomadDir); // Get the actual folder name (e.g., '_gomad' or 'gomad')
     this.allInstalledFiles = installedFiles;
 
+    // WR-02: ideRoots is the list of standard IDE root directories (e.g. ['.claude','.cursor',...])
+    // used by writeFilesManifest to derive install_root for files that live outside _gomad/.
+    // Caller passes the union of target_dir + launcher_target_dir leading components from
+    // platform-codes.yaml. Empty/missing ⇒ writeFilesManifest falls back to its built-in default.
+    this.ideRoots = Array.isArray(options.ideRoots) ? options.ideRoots.filter((r) => typeof r === 'string' && r) : [];
+
     if (!Object.prototype.hasOwnProperty.call(options, 'ides')) {
       throw new Error('ManifestGenerator requires `options.ides` to be provided – installer should supply the selected IDEs array.');
     }
@@ -597,20 +603,31 @@ class ManifestGenerator {
     // If we have ALL installed files, use those instead of just workflows/agents/tasks
     const allFiles = [];
     if (this.allInstalledFiles && this.allInstalledFiles.length > 0) {
+      // WR-02: derive workspaceRoot once, and build the IDE-root candidate list per
+      // generateManifests call rather than per file. Each candidate becomes a possible
+      // install_root value when an installed-file path falls under it.
+      const workspaceRoot = path.dirname(this.gomadDir);
+      // Always include '.claude' for backward-compat with the original auto-detection;
+      // additional roots come from this.ideRoots (passed by installer.js, sourced from
+      // platform-codes.yaml target_dir / launcher_target_dir leading components).
+      const ideRootSet = new Set(['.claude', ...(this.ideRoots || [])]);
+      const ideRootCandidates = [...ideRootSet].map((r) => ({ name: r, abs: path.join(workspaceRoot, r) }));
+
       // Process all installed files
       for (const filePath of this.allInstalledFiles) {
         // Determine install_root by checking which standard root the path falls under.
         // Phase 6 (D-25): paths under _gomad/ → install_root='_gomad' (default);
-        // paths under .claude/ → install_root='.claude'; others fall back to '_gomad' for now.
-        const workspaceRoot = path.dirname(this.gomadDir);
+        // paths under any IDE root → install_root='<ide-root>'.
         const absFilePath = path.resolve(filePath);
 
         let installRoot = '_gomad';
         let rootPath = this.gomadDir;
-        const claudeRoot = path.join(workspaceRoot, '.claude');
-        if (absFilePath.startsWith(claudeRoot + path.sep) || absFilePath === claudeRoot) {
-          installRoot = '.claude';
-          rootPath = claudeRoot;
+        for (const candidate of ideRootCandidates) {
+          if (absFilePath === candidate.abs || absFilePath.startsWith(candidate.abs + path.sep)) {
+            installRoot = candidate.name;
+            rootPath = candidate.abs;
+            break;
+          }
         }
 
         const relativePath = absFilePath.replace(rootPath, '').replaceAll('\\', '/').replace(/^\//, '');
