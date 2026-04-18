@@ -73,6 +73,11 @@ _bmad-output
 .trae
 .windsurf
 
+# Installer-generated output (dev-repo pollution prevention per Pitfall #7, D-10)
+# The gomad installer writes .claude/commands/gm/agent-*.md into a target workspace.
+# Must never be committed from the dev repo itself. Narrow pattern chosen over
+# broad allowlist to avoid accidentally hiding deliberately-tracked future dirs.
+.claude/commands/gm/
 
 # Astro / Documentation Build
 website/.astro/
