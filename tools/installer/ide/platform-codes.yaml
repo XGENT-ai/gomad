@@ -33,6 +33,7 @@ platforms:
       legacy_targets:
         - .claude/commands
       target_dir: .claude/skills
+      launcher_target_dir: .claude/commands/gm
 
   cline:
     name: "Cline"
