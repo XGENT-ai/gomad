@@ -74,7 +74,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - CLI: `tools/installer/gomad-cli.js` is the single entry point, exposing the `gomad` command.
 - Manifests: `skill-manifest.yaml` and `manifest.json` (no `bmad-` prefix).
 - Website: Astro under-construction one-pager at `gomad.xgent.ai`.
-- Tech stack: Node.js / JavaScript (`type: module`), inherited from BMAD.
+- Tech stack: Node.js / JavaScript (CommonJS, `require()`-based loading), inherited from BMAD.
 - Docs: English default + `zh-cn/` Chinese translation.
 
 **Upstream relationship.** GoMad is a hard fork of BMAD Method (<https://github.com/bmad-code-org/BMAD-METHOD>), MIT-licensed by Brian (BMad) Madison. Credit preserved legally (MIT license byte-identical in LICENSE) and ethically (non-affiliation disclaimer, nominative fair use of BMAD trademark, BMAD contributors preserved in CONTRIBUTORS.md).
@@ -91,7 +91,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - **License**: BMAD's MIT license preserved byte-identical. GoMad additions are also MIT, appended below a horizontal rule in the same `LICENSE` file.
 - **Casing**: The case-preserving display form is "GoMad" (not "Gomad"). Lowercase `gomad` for package names, paths, and CLI commands. Uppercase `GOMAD` for the acronym expansion only.
 - **Trademark**: "BMAD" is a trademark of BMad Code, LLC. We use it only via nominative fair use (in attribution sentences). The skill rename (`bmad-*` → `gm-*`) is a trademark-safety requirement, not just cosmetic.
-- **Tech stack**: Node.js / JavaScript (`type: module`), inherited from BMAD.
+- **Tech stack**: Node.js / JavaScript (CommonJS, `require()`-based loading), inherited from BMAD.
 - **Scope discipline**: Future milestone work should stay focused; mixing structural changes with new-feature work dilutes both.
 - **npm publish mechanics**: Trusted publishing via GitHub Actions OIDC preferred; otherwise granular access token with "Bypass 2FA" enabled (classic automation tokens revoked Dec 2025).
 
