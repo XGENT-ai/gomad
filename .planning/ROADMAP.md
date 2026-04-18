@@ -62,7 +62,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 - [x] 06-01-PLAN.md — Copy-only switch: replace fs.ensureSymlink with fs.copy in _config-driven.js + gated fs.lstat symlink-leftover unlink (INSTALL-01, INSTALL-02)
 - [x] 06-02-PLAN.md — Manifest v2 schema: csv-parse/sync reader in installer.js + 7-column writer in manifest-generator.js with schema_version='2.0' + install_root + forward-slash paths (INSTALL-03, INSTALL-04)
-- [ ] 06-03-PLAN.md — Launcher generator revival: platform-codes.yaml launcher_target_dir + extended template body + AgentCommandGenerator.extractPersonas + writeAgentLaunchers + removeLegacyAgentSkillDirs + wire in installer.js + post-IDE manifest refresh (CMD-01, CMD-02, CMD-03, CMD-04)
+- [x] 06-03-PLAN.md — Launcher generator revival: platform-codes.yaml launcher_target_dir + extended template body + AgentCommandGenerator.extractPersonas + writeAgentLaunchers + removeLegacyAgentSkillDirs + wire in installer.js + post-IDE manifest refresh (CMD-01, CMD-02, CMD-03, CMD-04)
 
 ### Phase 7: Upgrade Safety — Manifest-Driven Cleanup
 **Goal**: Deliver the single highest-severity change in v1.2 — safe, reversible manifest-driven cleanup that removes stale files on re-install without ever deleting outside allowed install roots. Includes realpath containment, dual-format sniff for v1.1→v1.2 legacy cleanup, optional backup snapshotting, and a `--dry-run` flag so users can preview destructive actions before they happen.
