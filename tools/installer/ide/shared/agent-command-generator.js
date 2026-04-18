@@ -81,6 +81,10 @@ class AgentCommandGenerator {
       }
 
       const manifest = yaml.parse(await fs.readFile(manifestPath, 'utf8'));
+      // WR-05: fail-fast if manifest did not parse to an object (null, scalar, malformed).
+      if (!manifest || typeof manifest !== 'object') {
+        throw new Error(`extractPersonas: skill-manifest.yaml at ${manifestPath} did not parse to an object`);
+      }
       const rawSkillMd = await fs.readFile(skillMdPath, 'utf8');
       // WR-03: normalize line endings before frontmatter strip to handle CRLF input
       // (matches parseSkillMd behavior in manifest-generator.js:236).
@@ -106,6 +110,13 @@ class AgentCommandGenerator {
    * @returns {Promise<string>} Rendered launcher content
    */
   async generateLauncherContent(agent) {
+    // WR-05: fail-fast on missing or non-string template fields rather than emitting "undefined".
+    const required = ['shortName', 'displayName', 'title', 'icon', 'capabilities', 'purpose'];
+    for (const key of required) {
+      if (typeof agent?.[key] !== 'string' || !agent[key]) {
+        throw new Error(`generateLauncherContent: missing or non-string "${key}" for agent ${agent?.shortName || '<unknown>'}`);
+      }
+    }
     const template = await fs.readFile(this.templatePath, 'utf8');
     // D-17: description format "<Title> (<displayName>). <one-line purpose>."
     const description = `${agent.title} (${agent.displayName}). ${agent.purpose}.`;
@@ -138,6 +149,11 @@ class AgentCommandGenerator {
         throw new Error(`writeAgentLaunchers: missing skill-manifest.yaml at ${manifestPath}`);
       }
       const manifest = yaml.parse(await fs.readFile(manifestPath, 'utf8'));
+      // WR-05: fail-fast if manifest did not parse to an object — otherwise field access
+      // below would silently coerce undefined into the literal string "undefined".
+      if (!manifest || typeof manifest !== 'object') {
+        throw new Error(`writeAgentLaunchers: skill-manifest.yaml at ${manifestPath} did not parse to an object`);
+      }
 
       const content = await this.generateLauncherContent({
         shortName: src.shortName,
