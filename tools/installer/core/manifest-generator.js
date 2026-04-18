@@ -586,9 +586,13 @@ class ManifestGenerator {
    */
   async writeFilesManifest(cfgDir) {
     const csvPath = path.join(cfgDir, 'files-manifest.csv');
+    // Reuse the escapeCsv idiom from writeAgentManifest:499 — symmetric with csv.parse on read.
+    const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
 
-    // Create CSV header with hash column
-    let csv = 'type,name,module,path,hash\n';
+    // Phase 6 v2 manifest header (D-23 adds schema_version column per D-24 value='2.0';
+    // D-25 adds install_root column — default '_gomad' for internal paths, set explicitly
+    // to '.claude' / '.cursor' / etc. by the IDE-target row pushers in Plan 06-03).
+    let csvContent = 'type,name,module,path,hash,schema_version,install_root\n';
 
     // If we have ALL installed files, use those instead of just workflows/agents/tasks
     const allFiles = [];
@@ -611,8 +615,10 @@ class ManifestGenerator {
           type: ext.slice(1) || 'file',
           name: fileName,
           module: module,
-          path: relativePath,
+          path: relativePath.replaceAll('\\', '/'), // D-26: redundant-safe forward-slash normalization
           hash: hash,
+          schema_version: '2.0', // D-24
+          install_root: '_gomad', // D-25 default (Plan 06-03 overrides for IDE-target rows)
         });
       }
     } else {
@@ -624,8 +630,10 @@ class ManifestGenerator {
         const hash = await this.calculateFileHash(filePath);
         allFiles.push({
           ...file,
-          path: relPath,
+          path: relPath.replaceAll('\\', '/'), // D-26
           hash: hash,
+          schema_version: '2.0', // D-24
+          install_root: file.install_root || '_gomad', // preserve if caller set it, else default
         });
       }
     }
@@ -637,12 +645,21 @@ class ManifestGenerator {
       return a.name.localeCompare(b.name);
     });
 
-    // Add all files
+    // Add all files (quoted via escapeCsv for symmetric read-side parsing via csv-parse)
     for (const file of allFiles) {
-      csv += `"${file.type}","${file.name}","${file.module}","${file.path}","${file.hash}"\n`;
+      const row = [
+        escapeCsv(file.type),
+        escapeCsv(file.name),
+        escapeCsv(file.module),
+        escapeCsv(file.path),
+        escapeCsv(file.hash),
+        escapeCsv(file.schema_version),
+        escapeCsv(file.install_root),
+      ].join(',');
+      csvContent += row + '\n';
     }
 
-    await fs.writeFile(csvPath, csv);
+    await fs.writeFile(csvPath, csvContent);
     return csvPath;
   }
 
