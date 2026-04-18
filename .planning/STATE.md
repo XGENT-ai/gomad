@@ -4,14 +4,14 @@ milestone: v1.2
 milestone_name: Agent-as-Command & Coding-Agent PRD Refinement
 status: executing
 stopped_at: Phase 6 context gathered
-last_updated: "2026-04-18T12:01:16.666Z"
-last_activity: 2026-04-18
+last_updated: "2026-04-18T13:30:54.469Z"
+last_activity: 2026-04-18 -- Phase 06 execution started
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
-  percent: 100
+  percent: 50
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18 after v1.2 milestone kickoff)
 
 **Core value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
-**Current focus:** Phase 05 — foundations-command-surface-validation
+**Current focus:** Phase 06 — installer-mechanics-copy-manifest-stub-generation
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
-Status: Executing Phase 05
-Last activity: 2026-04-18
+Phase: 06 (installer-mechanics-copy-manifest-stub-generation) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 06
+Last activity: 2026-04-18 -- Phase 06 execution started
 
 Progress: [░░░░░░░░░░] 0% (0/5 v1.2 phases complete)
 
