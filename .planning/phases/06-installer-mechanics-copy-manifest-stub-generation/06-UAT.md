@@ -53,16 +53,14 @@ result: pass
 
 ### 10. Idempotent re-install
 expected: Running `gomad install --yes --directory <same-tmpDir> --tools claude-code` a SECOND time succeeds with zero file-count delta and no duplicate rows in `files-manifest.csv`. No `upgrading from symlink:` logs on the second pass (nothing to upgrade).
-result: issue
-reported: "以下3个文件，还保留了旧的 gm-agent-* 引用: ./_gomad/_config/agent-manifest.csv ./_gomad/_config/gomad-help.csv ./_gomad/_config/skill-manifest.csv"
-severity: major
-note: "User-visible name columns in agent/skill/help manifests still use `gm-agent-*` (dash) instead of migrated `gm:agent-*` (colon). Filesystem path columns correctly keep dash form per D-05. Strict idempotency claim of Test 10 (no file-count delta, no duplicate rows) is orthogonal to this finding and was not tested because the name-format finding was surfaced first."
+result: pass
+resolved_by: "fix commit 2bcb594 — migrated user-visible agent refs in agent-manifest.csv, skill-manifest.csv, gomad-help.csv to gm:agent-* form. Verified: 0 gm-agent-* refs in user-visible columns; 7/7 + 7/7 + 5/5 migrated; path columns correctly keep dash form; two sequential installs produce bit-identical manifests (idempotency confirmed)."
 
 ## Summary
 
 total: 10
-passed: 8
-issues: 2
+passed: 9
+issues: 1
 pending: 0
 skipped: 0
 blocked: 0
@@ -98,33 +96,33 @@ blocked: 0
     summary: "Extracted failIfGomadSourceTarget(targetDir) helper. Guard now resolves effective target = options.directory || process.cwd() and checks that path. Preserves D-11 test contract (bare install in source repo still fires); 6/6 guard tests + 205 install tests + gm-surface smoke all green."
 
 - truth: "Config manifests (agent-manifest.csv, skill-manifest.csv, gomad-help.csv) emit user-visible agent identifiers in the migrated `gm:agent-*` (colon) form, not the legacy `gm-agent-*` (dash) source-tree form"
-  status: failed
+  status: resolved
   reason: "User reported: 以下3个文件，还保留了旧的 gm-agent-* 引用: ./_gomad/_config/agent-manifest.csv ./_gomad/_config/gomad-help.csv ./_gomad/_config/skill-manifest.csv"
   severity: major
   test: 10
   root_cause: |
     Source-tree skill-manifest.yaml files under src/gomad-skills/<module>/gm-agent-<shortName>/
-    declare `name: gm-agent-<shortName>`. The manifest writers (writeAgentManifest in
-    manifest-generator.js, writeSkillManifest, and the help-catalog aggregator
-    mergeModuleHelpCatalogs in installer.js) copy this `name` through to the emitted
-    `_gomad/_config/*.csv` files verbatim. Phase 06 did NOT touch these writers — Plan
-    06-02 only upgraded files-manifest.csv (separate file) to v2 schema, and Plan 06-03
-    only generated persona + launcher artifacts. The project decision (STATE.md Key
-    Decisions) states: "Filesystem dirs keep gm-agent-* (dash); only user-visible
-    references migrate to gm:agent-*". The `name` column in these 3 CSVs IS user-visible
-    (rendered by the gomad-help surface and used as an agent identifier in tooling),
-    so it should be migrated, but the migration plan never covered these writers.
+    declare `name: gm-agent-<shortName>`. The manifest writers copied this `name` through
+    to `_gomad/_config/*.csv` verbatim. User chose Option C (treat as Phase 06 blocker),
+    so the migration was completed inline via Strategy (a) — transform at write time —
+    rather than deferred.
   artifacts:
     - path: "tools/installer/core/manifest-generator.js"
-      issue: "writeAgentManifest emits `name` column from source-tree skill-manifest.yaml verbatim — dash form leaks into user-visible output"
+      issue: "writeAgentManifest + writeSkillManifest emitted `name`/`canonicalId` columns verbatim from source"
     - path: "tools/installer/core/installer.js"
-      issue: "mergeModuleHelpCatalogs propagates dash-form agent names into gomad-help.csv user-facing rows"
-    - path: "src/gomad-skills/*/gm-agent-*/skill-manifest.yaml"
-      issue: "Source `name:` field values (e.g. `gm-agent-analyst`) are the canonical source of the dash form that leaks downstream"
-  missing:
-    - "Decide migration strategy: (a) transform dash→colon at manifest-write time, (b) update source skill-manifest.yaml `name:` fields and separate source-tree path from user-visible name, or (c) add a new `displayId` column and keep `name` as source-tree ID"
-    - "Apply chosen transform in writeAgentManifest (manifest-generator.js), writeSkillManifest, and mergeModuleHelpCatalogs (installer.js) so the 3 CSVs emit gm:agent-* for user-visible columns"
-    - "Audit any downstream consumers of these CSVs that may rely on the current dash form (gomad-help skill rendering, agent-command-generator lookups)"
-  debug_session: ""
-  deferred: true
-  deferred_reason: "Not a Phase 06 regression — pre-existing gap in cross-milestone agent-name migration plan. Requires scope decision (which column is source-tree ID vs user-visible name) and touches 3 writers + potentially source YAML. Defer to decimal phase 06.1 (or fold into Phase 07 installer-cleanup scope)."
+      issue: "mergeModuleHelpCatalogs propagated dash-form names into gomad-help.csv `agent-name` + `phase` columns"
+  resolution:
+    commit: "2bcb594"
+    strategy: "Transform-at-write-time (Strategy A): source-tree skill-manifest.yaml files retain `name: gm-agent-*` as canonical internal ID; writers apply `toUserVisibleAgentId` helper at emit time for user-visible columns only. Path columns correctly keep dash form per D-05."
+    summary: |
+      Added toUserVisibleAgentId() / fromUserVisibleAgentId() helpers scoped to `gm-agent-` prefix.
+      Applied in writeSkillManifest (canonicalId + name), writeAgentManifest (name + canonicalId,
+      with dash-normalized dedup key), and mergeModuleHelpCatalogs (dash-keyed agentInfo dict,
+      colon-emitted agent-name + phase + agent-command).
+
+      Verification:
+      - 0 gm-agent-* refs in user-visible columns across all 3 manifests
+      - 7/7 + 7/7 + 5/5 refs migrated to gm:agent-* form
+      - Path columns (7 + 7) correctly preserve dash form (Windows-safe on-disk names)
+      - Two sequential installs produce bit-identical manifests (idempotent)
+      - 212 tests pass (7 refs + 205 install) + lint + markdown + prettier green
