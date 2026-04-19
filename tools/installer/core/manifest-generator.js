@@ -16,6 +16,48 @@ const {
 const packageJson = require('../../../package.json');
 
 /**
+ * Transform a source-tree agent identifier (e.g. `gm-agent-analyst`) to its
+ * user-visible form (`gm:agent-analyst`).
+ *
+ * Per STATE.md Key Decisions: filesystem dirs keep `gm-agent-*` (dash, Windows-
+ * safe) but user-visible references migrate to `gm:agent-*` (colon). This helper
+ * is applied only at manifest-write time to user-visible identifier columns
+ * (`name`, `canonicalId`, `agent-name`). Filesystem path columns are NEVER
+ * transformed — they must continue to match the on-disk directory names.
+ *
+ * Non-agent identifiers (e.g. `gm-brainstorming`, `gm-distillator`) pass through
+ * untouched because the `^gm-agent-` prefix scopes the transform strictly to
+ * agent IDs.
+ *
+ * @param {string|undefined|null} id Source-tree identifier
+ * @returns {string} User-visible identifier (or empty string if id is falsy)
+ */
+function toUserVisibleAgentId(id) {
+  if (!id) return '';
+  const s = String(id);
+  return s.startsWith('gm-agent-') ? `gm:agent-${s.slice('gm-agent-'.length)}` : s;
+}
+
+/**
+ * Inverse of {@link toUserVisibleAgentId}. Restores a user-visible identifier
+ * (e.g. `gm:agent-analyst`) to its source-tree form (`gm-agent-analyst`).
+ *
+ * Used when reading back a manifest that may already contain the migrated
+ * colon form, so internal lookup keys (which are dash-based) stay consistent
+ * across read/write cycles. On second install the previously-written manifest
+ * has colon form; without this normalization the dedup key would diverge and
+ * produce duplicate rows.
+ *
+ * @param {string|undefined|null} id User-visible identifier
+ * @returns {string} Source-tree identifier (or empty string if id is falsy)
+ */
+function fromUserVisibleAgentId(id) {
+  if (!id) return '';
+  const s = String(id);
+  return s.startsWith('gm:agent-') ? `gm-agent-${s.slice('gm:agent-'.length)}` : s;
+}
+
+/**
  * Generates manifest files for installed skills and agents
  */
 class ManifestGenerator {
@@ -482,10 +524,13 @@ class ManifestGenerator {
 
     for (const skill of this.skills) {
       const row = [
-        escapeCsv(skill.canonicalId),
-        escapeCsv(skill.name),
+        // Migrate agent skill IDs to user-visible `gm:agent-*` form at emit time.
+        // Non-agent skill IDs (e.g. `gm-brainstorming`) pass through unchanged.
+        escapeCsv(toUserVisibleAgentId(skill.canonicalId)),
+        escapeCsv(toUserVisibleAgentId(skill.name)),
         escapeCsv(skill.description),
         escapeCsv(skill.module),
+        // Path column is filesystem-bound: keep dash form to match on-disk dirs.
         escapeCsv(skill.path),
         escapeCsv(skill.install_to_gomad),
       ].join(',');
@@ -504,7 +549,11 @@ class ManifestGenerator {
     const csvPath = path.join(cfgDir, 'agent-manifest.csv');
     const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
 
-    // Read existing manifest to preserve entries
+    // Read existing manifest to preserve entries. The previously-written file
+    // may already contain the migrated `gm:agent-*` form (after the first
+    // post-migration install), so we normalize back to dash form for the
+    // internal dedup key to keep it aligned with `this.agents` (which is built
+    // from source-tree identifiers).
     const existingEntries = new Map();
     if (await fs.pathExists(csvPath)) {
       const content = await fs.readFile(csvPath, 'utf8');
@@ -513,7 +562,13 @@ class ManifestGenerator {
         skip_empty_lines: true,
       });
       for (const record of records) {
-        existingEntries.set(`${record.module}:${record.name}`, record);
+        const internalName = fromUserVisibleAgentId(record.name);
+        const internalCanonicalId = fromUserVisibleAgentId(record.canonicalId);
+        existingEntries.set(`${record.module}:${internalName}`, {
+          ...record,
+          name: internalName,
+          canonicalId: internalCanonicalId,
+        });
       }
     }
 
@@ -550,7 +605,9 @@ class ManifestGenerator {
     // Write all agents
     for (const [, record] of allAgents) {
       const row = [
-        escapeCsv(record.name),
+        // Emit `name` and `canonicalId` in user-visible `gm:agent-*` form per
+        // STATE.md migration decision. Path column stays dash (filesystem-bound).
+        escapeCsv(toUserVisibleAgentId(record.name)),
         escapeCsv(record.displayName),
         escapeCsv(record.title),
         escapeCsv(record.icon),
@@ -561,7 +618,7 @@ class ManifestGenerator {
         escapeCsv(record.principles),
         escapeCsv(record.module),
         escapeCsv(record.path),
-        escapeCsv(record.canonicalId),
+        escapeCsv(toUserVisibleAgentId(record.canonicalId)),
       ].join(',');
       csvContent += row + '\n';
     }

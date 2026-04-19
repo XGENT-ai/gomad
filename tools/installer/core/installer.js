@@ -980,6 +980,23 @@ class Installer {
     const agentManifestPath = path.join(gomadDir, '_config', 'agent-manifest.csv');
     const agentInfo = new Map(); // agent-name -> {command, displayName, title+icon}
 
+    // Local helpers for the Phase 06 agent-id migration. The source tree uses
+    // dash form (`gm-agent-*`, Windows-safe filesystem names); user-visible CSV
+    // columns emit colon form (`gm:agent-*`). agent-manifest.csv was migrated
+    // at write time, but module-help.csv sources (src/gomad-skills/module-help.csv
+    // and per-module module-help.csv) still carry dash form as internal refs —
+    // so normalize the lookup key on both sides, and transform only at emit.
+    const toUserVisibleAgentId = (id) => {
+      if (!id) return '';
+      const s = String(id);
+      return s.startsWith('gm-agent-') ? `gm:agent-${s.slice('gm-agent-'.length)}` : s;
+    };
+    const fromUserVisibleAgentId = (id) => {
+      if (!id) return '';
+      const s = String(id);
+      return s.startsWith('gm:agent-') ? `gm-agent-${s.slice('gm:agent-'.length)}` : s;
+    };
+
     if (await fs.pathExists(agentManifestPath)) {
       // WR-04: parse with csv-parse/sync (header-aware) — the previous hand-rolled
       // split(',') broke on embedded commas in capabilities/role/principles, which
@@ -993,18 +1010,23 @@ class Installer {
       for (const r of records) {
         const agentName = (r.name || '').trim();
         if (!agentName) continue;
+        // Store the lookup key in internal (dash) form so it matches agent-name
+        // cells in module-help.csv which are not yet migrated.
+        const internalAgentName = fromUserVisibleAgentId(agentName);
         const displayName = (r.displayName || '').trim();
         const title = (r.title || '').trim();
         const icon = (r.icon || '').trim();
         const module = (r.module || '').trim();
 
-        // Build agent command: gomad:module:agent:name
-        const agentCommand = module ? `gomad:${module}:agent:${agentName}` : `gomad:agent:${agentName}`;
+        // Build agent command using the user-visible form so the help surface
+        // mirrors the actual slash-command namespace (`/gm:agent-*`).
+        const userVisibleAgentName = toUserVisibleAgentId(internalAgentName);
+        const agentCommand = module ? `gomad:${module}:agent:${userVisibleAgentName}` : `gomad:agent:${userVisibleAgentName}`;
 
-        agentInfo.set(agentName, {
+        agentInfo.set(internalAgentName, {
           command: agentCommand,
-          displayName: displayName || agentName,
-          title: icon && title ? `${icon} ${title}` : title || agentName,
+          displayName: displayName || userVisibleAgentName,
+          title: icon && title ? `${icon} ${title}` : title || userVisibleAgentName,
         });
       }
     }
@@ -1071,21 +1093,32 @@ class Installer {
               // If module column is empty, set it to this module's name (except for core which stays empty for universal tools)
               const finalModule = (!module || module.trim() === '') && moduleName !== 'core' ? moduleName : module || '';
 
-              // Lookup agent info
-              const cleanAgentName = agentName ? agentName.trim() : '';
-              const agentData = agentInfo.get(cleanAgentName) || { command: '', displayName: '', title: '' };
+              // Lookup agent info. module-help.csv sources carry agent-name in
+              // internal (dash) form, so normalize to that form for the dict
+              // lookup and emit the user-visible (colon) form into the final CSV.
+              const rawAgentName = agentName ? agentName.trim() : '';
+              const internalAgentName = fromUserVisibleAgentId(rawAgentName);
+              const agentData = agentInfo.get(internalAgentName) || { command: '', displayName: '', title: '' };
+              const emittedAgentName = internalAgentName ? toUserVisibleAgentId(internalAgentName) : '';
+
+              // The `phase` column in gomad-help.csv maps from source
+              // module-help.csv's `skill` column. When that source skill is
+              // an agent (e.g. `gm-agent-tech-writer`), the value is a
+              // user-visible agent reference and must use the migrated colon
+              // form. Non-agent skill IDs pass through unchanged.
+              const emittedPhase = toUserVisibleAgentId(phase || '');
 
               // Build new row with agent info
               const newRow = [
                 finalModule,
-                phase || '',
+                emittedPhase,
                 name || '',
                 code || '',
                 sequence || '',
                 workflowFile || '',
                 command || '',
                 required || 'false',
-                cleanAgentName,
+                emittedAgentName,
                 agentData.command,
                 agentData.displayName,
                 agentData.title,
