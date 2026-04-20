@@ -344,7 +344,9 @@ function makeRealWs(prefix) {
     const rSrc = await fs.realpath(srcFile);
 
     const plan = {
-      to_snapshot: [{ src: rSrc, install_root: '.claude', relative_path: 'skills/gm-agent-pm/custom.md', orig_hash: null, was_modified: null }],
+      to_snapshot: [
+        { src: rSrc, install_root: '.claude', relative_path: 'skills/gm-agent-pm/custom.md', orig_hash: null, was_modified: null },
+      ],
       to_remove: [rSrc],
       to_write: [],
       refused: [],
