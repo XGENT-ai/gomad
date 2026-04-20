@@ -192,7 +192,14 @@ class ManifestGenerator {
         let entries;
         try {
           entries = await fs.readdir(dir, { withFileTypes: true });
-        } catch {
+        } catch (error) {
+          // Phase 7 WR-02: ENOENT/ENOTDIR are expected traversal outcomes (dir removed
+          // or not actually a directory) — silent is correct. Surface other I/O failures
+          // (EACCES, EIO, EMFILE, ELOOP) so permission issues don't silently
+          // omit skills from the manifest.
+          if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
+            await prompts.log.warn(`Could not read directory ${dir}: ${error.message}. Skipping subtree.`);
+          }
           return;
         }
 
@@ -311,6 +318,16 @@ class ManifestGenerator {
       return null;
     } catch (error) {
       if (debug) console.log(`[DEBUG] parseSkillMd: failed to parse SKILL.md in "${dir}": ${error.message} — skipping`);
+      // Phase 7 WR-02: ENOENT on SKILL.md is expected (caught upstream by pathExists,
+      // but may race between the check and the read) — silent is correct. Surface
+      // permission errors (EACCES) and YAML parse failures so malformed frontmatter
+      // is visible to the operator instead of silently dropping the skill.
+      if (error.code && error.code !== 'ENOENT') {
+        await prompts.log.warn(`Could not read SKILL.md in "${dir}": ${error.message}. Skipping skill.`);
+      } else if (!error.code) {
+        // No fs error code → yaml.parse throw (YAMLParseError) or similar logic error.
+        await prompts.log.warn(`Could not parse SKILL.md in "${dir}": ${error.message}. Skipping skill.`);
+      }
       return null;
     }
   }
@@ -357,7 +374,13 @@ class ManifestGenerator {
     let entries;
     try {
       entries = await fs.readdir(dirPath, { withFileTypes: true });
-    } catch {
+    } catch (error) {
+      // Phase 7 WR-02: ENOENT/ENOTDIR is the expected traversal case (recursion
+      // hit a deleted dir or a file). Surface other I/O errors (EACCES, EMFILE)
+      // so agent discovery failures don't silently produce an empty agent set.
+      if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
+        await prompts.log.warn(`Could not read agent directory ${dirPath}: ${error.message}. Skipping subtree.`);
+      }
       return agents;
     }
 
@@ -458,8 +481,18 @@ class ManifestGenerator {
           // are still installed. Without that, customModules can retain stale entries for modules that were removed.
           existingCustomModules = existingManifest.customModules.filter((customModule) => installedModuleSet.has(customModule?.id));
         }
-      } catch {
-        // If we can't read existing manifest, continue with defaults
+      } catch (error) {
+        // Phase 7 WR-02: the existence check above means this path is entered
+        // only if manifest.yaml is present but unreadable/unparseable. ENOENT is
+        // a race (file removed between pathExists and readFile) — silent is fine.
+        // Anything else (EACCES, EIO, yaml.parse throw) is operator-visible: the
+        // fallback regenerates with a fresh installDate, clobbering preserved
+        // metadata, so surface the reason.
+        if (error.code !== 'ENOENT') {
+          await prompts.log.warn(
+            `Could not read existing manifest.yaml: ${error.message}. Falling back to defaults — installDate and customModules metadata will be regenerated.`,
+          );
+        }
       }
     }
 
@@ -813,7 +846,14 @@ class ManifestGenerator {
     let entries;
     try {
       entries = await fs.readdir(dir, { withFileTypes: true });
-    } catch {
+    } catch (error) {
+      // Phase 7 WR-02: ENOENT/ENOTDIR = dir removed or not actually a directory,
+      // which is the expected traversal outcome. Surface other I/O failures
+      // (EACCES) so a permission problem doesn't silently suppress a skill
+      // module from being detected as installed.
+      if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
+        await prompts.log.warn(`Could not scan directory ${dir} for SKILL.md: ${error.message}.`);
+      }
       return false;
     }
 
