@@ -3,7 +3,7 @@
  * User input comes from either UI answers or headless CLI flags.
  */
 class Config {
-  constructor({ directory, modules, ides, skipPrompts, verbose, actionType, coreConfig, moduleConfigs, quickUpdate }) {
+  constructor({ directory, modules, ides, skipPrompts, verbose, actionType, coreConfig, moduleConfigs, quickUpdate, dryRun }) {
     this.directory = directory;
     this.modules = Object.freeze([...modules]);
     this.ides = Object.freeze([...ides]);
@@ -13,6 +13,10 @@ class Config {
     this.coreConfig = coreConfig;
     this.moduleConfigs = moduleConfigs;
     this._quickUpdate = quickUpdate;
+    // Phase 7 D-40/D-41: dry-run flag propagated from Commander (--dry-run) through
+    // commands/install.js into Config.build. Consumed by Installer._prepareUpdateState
+    // to branch into cleanup-planner.renderPlan + process.exit(0) before any disk write.
+    this.dryRun = !!dryRun;
     Object.freeze(this);
   }
 
@@ -37,6 +41,7 @@ class Config {
       coreConfig: userInput.coreConfig || {},
       moduleConfigs: userInput.moduleConfigs || null,
       quickUpdate: userInput._quickUpdate || false,
+      dryRun: userInput.dryRun || false,
     });
   }
 

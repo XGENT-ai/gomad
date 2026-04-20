@@ -49,6 +49,10 @@ module.exports = {
       '--self',
       'Permit install into the gomad source repo itself (bypasses the self-install guard). Use only when intentionally re-seeding local dev output.',
     ],
+    [
+      '--dry-run',
+      'Print the planned cleanup + copy actions (TO SNAPSHOT / TO REMOVE / TO WRITE) without touching disk (Phase 7 D-40)',
+    ],
   ],
   action: async (options) => {
     // Self-install guard (D-11, Pitfall #7) — fires BEFORE any prompts. The
@@ -70,6 +74,11 @@ module.exports = {
       }
 
       const config = await ui.promptInstall(options);
+
+      // Phase 7 D-40/D-41: propagate --dry-run from Commander options into
+      // installer config. Consumed by _prepareUpdateState which calls
+      // cleanupPlanner.renderPlan + process.exit(0) BEFORE any disk write.
+      config.dryRun = !!options.dryRun;
 
       // Handle cancel
       if (config.actionType === 'cancel') {
