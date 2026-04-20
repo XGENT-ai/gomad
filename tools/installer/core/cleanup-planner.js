@@ -292,7 +292,11 @@ async function buildCleanupPlan(input) {
 
     // D-26 + D-36: relative_path is forward-slash normalized for
     // serialization (metadata.json files[].relative_path).
-    const rootAbs = installRoot === '_gomad' ? path.join(workspaceRoot, '_gomad') : path.join(workspaceRoot, installRoot);
+    // Phase 7 WR-04: the earlier `installRoot === '_gomad' ? ... : ...` ternary
+    // collapsed both branches to the same path.join, so it was dead conditional
+    // logic. If a future decision remaps '_gomad' to a different directory,
+    // re-introduce the branch here and document the asymmetry explicitly.
+    const rootAbs = path.join(workspaceRoot, installRoot);
     const relNative = path.relative(rootAbs, resolved);
     const relative_path = relNative.split(path.sep).join('/');
 
