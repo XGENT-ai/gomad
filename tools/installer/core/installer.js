@@ -768,6 +768,10 @@ class Installer {
         columns: true,
         skip_empty_lines: true,
         bom: true, // Phase 7 D-33: strip leading U+FEFF silently (normalization, not corruption)
+        // Phase 7 WR-01: pin strict parse semantics so the corrupt-quote / corrupt-arity
+        // fixtures trigger MANIFEST_CORRUPT independent of csv-parse default drift.
+        relax_quotes: false, // enforce RFC 4180 quote balance — unterminated quotes throw
+        relax_column_count: false, // arity mismatch → CsvError rather than silent pad/truncate
       });
     } catch (error) {
       // Phase 7 D-33: csv-parse throw → whole-manifest corrupt. Log MANIFEST_CORRUPT
