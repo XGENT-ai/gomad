@@ -55,6 +55,7 @@
     "prepare": "command -v husky >/dev/null 2>&1 && husky || exit 0",
     "quality": "npm run format:check && npm run lint && npm run lint:md && npm run docs:build && npm run test:install && npm run validate:refs && npm run validate:skills",
     "test": "npm run test:refs && npm run test:install && npm run lint && npm run lint:md && npm run format:check",
+    "test:cleanup-all": "node test/test-cleanup-planner.js && node test/test-manifest-corruption.js && node test/test-cleanup-execute.js && node test/test-legacy-v11-upgrade.js && node test/test-dry-run.js",
     "test:e2e": "node test/test-e2e-install.js",
     "test:gm-surface": "node test/test-gm-command-surface.js",
     "test:install": "node test/test-installation-components.js",

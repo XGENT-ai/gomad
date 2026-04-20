@@ -517,12 +517,30 @@ class Installer {
       const allowedRoots = new Set(['_gomad', '.claude', ...ideRoots]);
       const isV11 = await cleanupPlanner.isV11Legacy(workspaceRoot, paths.gomadDir);
 
-      // newInstallSet: conservative posture for v1.2 — pass an empty set so every prior
-      // entry is classified as "potentially stale" and containment/hash-checked. Downstream
-      // install then overwrites whatever it rewrites; to_remove + subsequent copy is a net
-      // no-op on identical file content. Future iteration may pre-compute the exact write
-      // set by walking the to-be-installed source tree.
+      // newInstallSet: realpath-resolve every prior manifest entry that still exists on
+      // disk. This preserves Phase 7 SC1 (idempotent re-install — no new backup, no
+      // manifest change) because buildCleanupPlan's still-needed guard
+      //   `if (newInstallSet.has(resolved)) continue;`
+      // skips entries that are already in the intended write set. Files the new install
+      // will NOT re-install (stale entries from an older manifest, e.g. a removed skill)
+      // are absent from this set and correctly flow into to_snapshot + to_remove.
+      //
+      // If the prior manifest entry is missing on disk (ENOENT — Pitfall 22), realpath
+      // throws ENOENT and we skip that row — the file is already gone, no snapshot
+      // needed. buildCleanupPlan handles the same ENOENT case identically.
       const newInstallSet = new Set();
+      for (const entry of existingFilesManifest) {
+        const installRoot = entry.install_root || '_gomad';
+        const joined = entry.absolutePath || path.join(workspaceRoot, installRoot, entry.path || '');
+        try {
+          const resolved = await fs.realpath(joined);
+          newInstallSet.add(resolved);
+        } catch (error) {
+          if (error.code !== 'ENOENT') throw error;
+          // ENOENT: file already deleted; nothing to preserve. Matches
+          // buildCleanupPlan's own ENOENT handling for the same entry.
+        }
+      }
 
       const plan = await cleanupPlanner.buildCleanupPlan({
         priorManifest: existingFilesManifest,
@@ -539,7 +557,10 @@ class Installer {
       }
 
       if (plan.to_snapshot.length > 0 || plan.to_remove.length > 0) {
-        const pkgVersion = require('../../package.json').version;
+        // Use getProjectRoot() to resolve package.json — the bare '../../package.json'
+        // relative require fails in tarball installs (landing at tools/installer/package.json
+        // which doesn't exist). This matches the pattern used elsewhere in this file (L1439).
+        const pkgVersion = require(path.join(getProjectRoot(), 'package.json')).version;
         const backupRoot = await cleanupPlanner.executeCleanupPlan(plan, workspaceRoot, pkgVersion);
         if (backupRoot) {
           await prompts.log.info(
