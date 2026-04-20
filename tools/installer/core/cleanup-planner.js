@@ -309,6 +309,198 @@ async function buildCleanupPlan(input) {
   return plan;
 }
 
+/**
+ * Snapshot files into backupRoot/<install_root>/<relative_path>, preserving
+ * the install-root tree structure per D-36. Sequential; if any copy fails,
+ * the returned promise rejects BEFORE the next iteration runs.
+ *
+ * `preserveTimestamps: true` is best-effort per D-36 — mtime is preserved
+ * within a few-second tolerance on most filesystems.
+ *
+ * @param {Array<{src: string, install_root: string, relative_path: string}>} toSnapshot
+ * @param {string} backupRoot — absolute path to the backup dir root
+ * @returns {Promise<void>}
+ */
+async function snapshotFiles(toSnapshot, backupRoot) {
+  for (const item of toSnapshot) {
+    const backupPath = path.join(backupRoot, item.install_root, ...item.relative_path.split('/'));
+    await fs.ensureDir(path.dirname(backupPath));
+    await fs.copy(item.src, backupPath, { preserveTimestamps: true });
+  }
+}
+
+/**
+ * Write the D-38 mandatory metadata.json file into backupRoot.
+ *
+ * Schema (D-38):
+ *   gomad_version — string, from package.json version
+ *   created_at    — ISO 8601 with timezone (new Date().toISOString())
+ *   reason        — 'manifest_cleanup' | 'legacy_v1_cleanup'
+ *   files[]       — per-file record (install_root, relative_path, orig_hash, was_modified)
+ *   recovery_hint — one-line shell command for quick restore
+ *
+ * Hash-at-plan-time invariant: orig_hash + was_modified are preserved
+ * VERBATIM from plan.to_snapshot[] — no re-hashing at execute time.
+ *
+ * @param {string} backupRoot — absolute path to the backup dir root
+ * @param {{gomadVersion: string, plan: object}} opts
+ * @returns {Promise<void>}
+ */
+async function writeMetadata(backupRoot, { gomadVersion, plan }) {
+  const metadata = {
+    gomad_version: gomadVersion,
+    created_at: new Date().toISOString(),
+    reason: plan.reason,
+    files: plan.to_snapshot.map((item) => ({
+      install_root: item.install_root,
+      relative_path: item.relative_path,
+      orig_hash: item.orig_hash === undefined ? null : item.orig_hash,
+      was_modified: item.was_modified === undefined ? null : item.was_modified,
+    })),
+    recovery_hint: `Restore with: cp -R $(pwd)/_gomad/_backups/${path.basename(backupRoot)}/* ./`,
+  };
+  await fs.writeFile(path.join(backupRoot, 'metadata.json'), JSON.stringify(metadata, null, 2) + '\n');
+}
+
+/**
+ * Write the auto-generated README.md into backupRoot. Co-located with
+ * metadata.json; points users at the full recovery docs
+ * (docs/upgrade-recovery.md in the gomad package).
+ *
+ * @param {string} backupRoot — absolute path to the backup dir root
+ * @param {{gomadVersion: string}} opts
+ * @returns {Promise<void>}
+ */
+async function writeBackupReadme(backupRoot, { gomadVersion }) {
+  const ts = path.basename(backupRoot);
+  const body = [
+    `# GoMad Upgrade Backup — ${ts}`,
+    '',
+    `This directory was created by \`gomad install\` (v${gomadVersion}) on ${new Date().toISOString()}.`,
+    '',
+    "## What's here",
+    '',
+    '- `metadata.json` — machine-readable backup manifest (see `files[]` for file list)',
+    '- `<install_root>/...` — snapshots of files that were removed during upgrade',
+    '',
+    '## How to restore',
+    '',
+    '```bash',
+    `cp -R $(pwd)/_gomad/_backups/${ts}/* ./`,
+    '```',
+    '',
+    'Exclude `metadata.json` and this README if you only want the file content back:',
+    '',
+    '```bash',
+    'rsync -a --exclude=metadata.json --exclude=README.md \\',
+    `  $(pwd)/_gomad/_backups/${ts}/ ./`,
+    '```',
+    '',
+    'See `docs/upgrade-recovery.md` in the gomad package for full documentation,',
+    'including a version compat check on `metadata.json.gomad_version` before recovery.',
+    '',
+  ].join('\n');
+  await fs.writeFile(path.join(backupRoot, 'README.md'), body);
+}
+
+/**
+ * Faithful executor for the cleanup plan. Consumes the plan object from
+ * `buildCleanupPlan` verbatim — no branching on dry-run state (dry-run is
+ * handled at the caller site structurally via `process.exit(0)` BEFORE this
+ * function is reached).
+ *
+ * Order (D-34 snapshot-before-remove invariant):
+ *   1. snapshot all files → backupRoot/<install_root>/<relative_path>
+ *   2. writeMetadata      → backupRoot/metadata.json
+ *   3. writeBackupReadme  → backupRoot/README.md
+ *   4. fs.remove loop     → remove each plan.to_remove entry
+ *
+ * NO try/catch around the chain. If snapshotFiles rejects (ENOSPC, EACCES,
+ * ENOTDIR parent blocker), the `await` propagates and fs.remove NEVER runs.
+ * Original data intact.
+ *
+ * @param {object} plan — from buildCleanupPlan
+ * @param {string} workspaceRoot — realpath-resolved workspace root
+ * @param {string} gomadVersion — from package.json version
+ * @returns {Promise<string|null>} — absolute path to backup dir, or null if
+ *   plan was empty (no snapshot + no remove ⇒ no work ⇒ no dir created)
+ */
+async function executeCleanupPlan(plan, workspaceRoot, gomadVersion) {
+  if (plan.to_snapshot.length === 0 && plan.to_remove.length === 0) {
+    return null;
+  }
+  const baseTs = formatTimestamp(new Date());
+  const backupRoot = await uniqueBackupDir(workspaceRoot, baseTs);
+  await fs.ensureDir(backupRoot);
+  await snapshotFiles(plan.to_snapshot, backupRoot);
+  await writeMetadata(backupRoot, { gomadVersion, plan });
+  await writeBackupReadme(backupRoot, { gomadVersion });
+  for (const target of plan.to_remove) {
+    await fs.remove(target);
+  }
+  return backupRoot;
+}
+
+/**
+ * Render the plan as a human-readable table per D-40. Pure — no side effects.
+ *
+ * Output shape:
+ *   TO SNAPSHOT (N files)
+ *     <install_root>/<relative_path>    (annotation)
+ *   TO REMOVE (N files)
+ *     <same list — snapshot is prerequisite>
+ *   TO WRITE (N files)
+ *     <absolute-path>
+ *   Summary: S snapshotted, R removed, W written
+ *   Refused: X entries (only if plan.refused.length > 0)
+ *
+ * Annotations (D-40):
+ *   was_modified === true  → '(user-modified, hash-diff)'
+ *   was_modified === false → '(from files-manifest.csv)'
+ *   was_modified === null  → '(legacy v1.1, hash unknown)'
+ *
+ * @param {object} plan — from buildCleanupPlan
+ * @returns {string} multi-line human-readable table
+ */
+function renderPlan(plan) {
+  const lines = [];
+  if (plan.to_snapshot.length > 0) {
+    lines.push(`TO SNAPSHOT (${plan.to_snapshot.length} files)`);
+    for (const item of plan.to_snapshot) {
+      const display = `${item.install_root}/${item.relative_path}`;
+      let tag;
+      if (item.was_modified === true) {
+        tag = '(user-modified, hash-diff)';
+      } else if (item.was_modified === false) {
+        tag = '(from files-manifest.csv)';
+      } else {
+        tag = '(legacy v1.1, hash unknown)';
+      }
+      lines.push(`  ${display}    ${tag}`);
+    }
+    lines.push('');
+  }
+  if (plan.to_remove.length > 0) {
+    lines.push(`TO REMOVE (${plan.to_remove.length} files)`);
+    lines.push('  <same list — snapshot is prerequisite>');
+    lines.push('');
+  }
+  if (plan.to_write.length > 0) {
+    lines.push(`TO WRITE (${plan.to_write.length} files)`);
+    for (const p of plan.to_write) {
+      lines.push(`  ${p}`);
+    }
+    lines.push('');
+  }
+  lines.push(
+    `Summary: ${plan.to_snapshot.length} snapshotted, ${plan.to_remove.length} removed, ${plan.to_write.length} written`,
+  );
+  if (plan.refused && plan.refused.length > 0) {
+    lines.push(`Refused: ${plan.refused.length} entries (see logs above)`);
+  }
+  return lines.join('\n');
+}
+
 module.exports = {
   isContained,
   isV11Legacy,
@@ -317,4 +509,9 @@ module.exports = {
   LEGACY_AGENT_SHORT_NAMES,
   ManifestCorruptError,
   buildCleanupPlan,
+  executeCleanupPlan,
+  snapshotFiles,
+  writeMetadata,
+  writeBackupReadme,
+  renderPlan,
 };
