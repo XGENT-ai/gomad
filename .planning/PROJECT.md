@@ -140,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-18 after Phase 5 (foundations & command-surface validation) complete — CMD-05, REF-03, REL-01 closed; launcher-form architecture locked; dev-repo pollution guard shipped*
+*Last updated: 2026-04-20 after Phase 7 (upgrade safety — manifest-driven cleanup) complete — INSTALL-05/06/07/08/09 closed; `buildCleanupPlan` + `executeCleanupPlan` + `--dry-run` shipped with snapshot-before-remove, realpath containment, v1.1 legacy cleanup, `docs/upgrade-recovery.md`, and 223 Phase 7 assertions green*
