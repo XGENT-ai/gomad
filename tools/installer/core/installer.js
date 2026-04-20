@@ -9,6 +9,7 @@ const { FileOps } = require('../file-ops');
 const { Config } = require('./config');
 const { getProjectRoot, getSourcePath } = require('../project-root');
 const { ManifestGenerator } = require('./manifest-generator');
+const cleanupPlanner = require('./cleanup-planner');
 const { AgentCommandGenerator } = require('../ide/shared/agent-command-generator');
 const prompts = require('../prompts');
 const { GOMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
@@ -504,6 +505,60 @@ class Installer {
   async _prepareUpdateState(paths, config, existingInstall, officialModules) {
     // Detect custom and modified files BEFORE updating (compare current files vs files-manifest.csv)
     const existingFilesManifest = await this.readFilesManifest(paths.gomadDir);
+
+    // ========== Phase 7: manifest-driven cleanup (INSTALL-05/06/07/08/09) ==========
+    // Compute the cleanup plan as a pure function on the prior manifest + workspace state.
+    // Then either print (dry-run) or execute it, BEFORE normal install begins.
+    // MANIFEST_CORRUPT errors are caught + logged + suppressed — install proceeds idempotently (D-33).
+    // The legacy v1.1 `_backupUserFiles` + `detectCustomFiles` flow below is PRESERVED UNTOUCHED (D-41).
+    try {
+      const workspaceRoot = await fs.realpath(paths.projectRoot);
+      const ideRoots = await this._collectIdeRoots();
+      const allowedRoots = new Set(['_gomad', '.claude', ...ideRoots]);
+      const isV11 = await cleanupPlanner.isV11Legacy(workspaceRoot, paths.gomadDir);
+
+      // newInstallSet: conservative posture for v1.2 — pass an empty set so every prior
+      // entry is classified as "potentially stale" and containment/hash-checked. Downstream
+      // install then overwrites whatever it rewrites; to_remove + subsequent copy is a net
+      // no-op on identical file content. Future iteration may pre-compute the exact write
+      // set by walking the to-be-installed source tree.
+      const newInstallSet = new Set();
+
+      const plan = await cleanupPlanner.buildCleanupPlan({
+        priorManifest: existingFilesManifest,
+        newInstallSet,
+        workspaceRoot,
+        allowedRoots,
+        isV11Legacy: isV11,
+      });
+
+      if (config.dryRun) {
+        // D-41 dry-run: print plan and exit without touching disk.
+        await prompts.log.info('\n' + cleanupPlanner.renderPlan(plan) + '\n');
+        process.exit(0);
+      }
+
+      if (plan.to_snapshot.length > 0 || plan.to_remove.length > 0) {
+        const pkgVersion = require('../../package.json').version;
+        const backupRoot = await cleanupPlanner.executeCleanupPlan(plan, workspaceRoot, pkgVersion);
+        if (backupRoot) {
+          await prompts.log.info(
+            `Phase 7 cleanup: ${plan.to_snapshot.length} files snapshotted to ${path.relative(workspaceRoot, backupRoot)}, ${plan.to_remove.length} removed` +
+              (isV11 ? ' (legacy v1.1 upgrade)' : ''),
+          );
+        }
+      }
+    } catch (error) {
+      if (error instanceof cleanupPlanner.ManifestCorruptError || error.code === 'MANIFEST_CORRUPT') {
+        await prompts.log.error(`MANIFEST_CORRUPT: ${error.message}`);
+        await prompts.log.warn('Skipping Phase 7 cleanup; install will proceed idempotently.');
+        // Do NOT re-throw; fall through to v1.1 detect-custom-files + _backupUserFiles flow.
+      } else {
+        throw error; // unexpected — propagate (e.g. ENOSPC during snapshot, missing platform-codes.yaml)
+      }
+    }
+    // ========== End Phase 7 cleanup ==========
+
     const { customFiles, modifiedFiles } = await this.detectCustomFiles(paths.gomadDir, existingFilesManifest);
 
     // Preserve existing core configuration during updates
