@@ -247,6 +247,47 @@ function makeRealWs(prefix) {
     assert(fs.readFileSync(resolvedSrc, 'utf8') === 'this must survive', 'Original file contents unchanged');
   }
 
+  // ─── WR-03: mid-snapshot failure rolls back partial backup dir ────────
+  {
+    const ws = makeRealWs('gomad-exec-wr03-rollback-');
+    // Real file 1 (copies successfully), ghost file 2 (snapshot rejects with ENOENT
+    // mid-loop). Forces snapshotFiles to create backupRoot, copy item 0, then fail
+    // on item 1. Without WR-03 rollback, backupRoot stays on disk as an orphan.
+    const realFile = path.join(ws, '.claude', 'real.md');
+    await fs.ensureDir(path.dirname(realFile));
+    await fs.writeFile(realFile, 'real-file-content');
+    const rReal = await fs.realpath(realFile);
+    const ghostSrc = path.join(ws, '.claude', 'ghost-never-created.md'); // does NOT exist
+
+    const backupsBaseDir = path.join(ws, '_gomad', '_backups');
+
+    const plan = {
+      to_snapshot: [
+        { src: rReal, install_root: '.claude', relative_path: 'real.md', orig_hash: null, was_modified: false },
+        { src: ghostSrc, install_root: '.claude', relative_path: 'ghost.md', orig_hash: null, was_modified: false },
+      ],
+      to_remove: [rReal],
+      to_write: [],
+      refused: [],
+      reason: 'manifest_cleanup',
+    };
+
+    let threw = false;
+    try {
+      await executeCleanupPlan(plan, ws, '1.2.0');
+    } catch {
+      threw = true;
+    }
+    assert(threw, 'WR-03: executeCleanupPlan rejects when mid-snapshot fails on a missing source');
+    assert(fs.existsSync(rReal), 'WR-03: original (real) file SURVIVES mid-snapshot failure');
+    // Rollback invariant: no orphaned partial backup dir remains.
+    const remainingBackups = fs.existsSync(backupsBaseDir) ? fs.readdirSync(backupsBaseDir) : [];
+    assert(
+      remainingBackups.length === 0,
+      `WR-03: partial backup dir rolled back (no orphans under _gomad/_backups/, found: ${JSON.stringify(remainingBackups)})`,
+    );
+  }
+
   // ─── Two invocations same second → <ts> and <ts>-2 ─────────────────────
   {
     const ws = makeRealWs('gomad-exec-collide-');

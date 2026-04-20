@@ -431,10 +431,22 @@ async function executeCleanupPlan(plan, workspaceRoot, gomadVersion) {
   }
   const baseTs = formatTimestamp(new Date());
   const backupRoot = await uniqueBackupDir(workspaceRoot, baseTs);
-  await fs.ensureDir(backupRoot);
-  await snapshotFiles(plan.to_snapshot, backupRoot);
-  await writeMetadata(backupRoot, { gomadVersion, plan });
-  await writeBackupReadme(backupRoot, { gomadVersion });
+
+  // Phase 7 WR-03: wrap the pre-remove phase (ensureDir → snapshot → metadata →
+  // README) in a rollback. If any step rejects, best-effort remove the partial
+  // backup dir so the user doesn't accumulate orphaned half-snapshots in
+  // `_gomad/_backups/` over time. D-34 is preserved because fs.remove never
+  // runs — originals stay intact regardless of rollback success.
+  try {
+    await fs.ensureDir(backupRoot);
+    await snapshotFiles(plan.to_snapshot, backupRoot);
+    await writeMetadata(backupRoot, { gomadVersion, plan });
+    await writeBackupReadme(backupRoot, { gomadVersion });
+  } catch (error) {
+    await fs.remove(backupRoot).catch(() => {}); // best-effort; do not mask the original error
+    throw error;
+  }
+
   for (const target of plan.to_remove) {
     await fs.remove(target);
   }
