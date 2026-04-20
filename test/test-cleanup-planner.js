@@ -86,7 +86,10 @@ function resetLogs() {
   assert(!isContained(`${sep}etc${sep}passwd`, `${sep}ws`), 'isContained: /etc/passwd vs /ws returns false (sibling parent)');
   assert(isContained(`${sep}ws`, `${sep}ws`), 'isContained: root itself (rel === "") returns true');
   assert(!isContained(`${sep}ws2${sep}foo`, `${sep}ws`), 'isContained: sibling root returns false');
-  assert(!isContained(`${sep}ws-suffix${sep}foo`, `${sep}ws`), 'isContained: prefix-collision sibling (/ws-suffix) returns false (defends against startsWith bug)');
+  assert(
+    !isContained(`${sep}ws-suffix${sep}foo`, `${sep}ws`),
+    'isContained: prefix-collision sibling (/ws-suffix) returns false (defends against startsWith bug)',
+  );
 
   // ─── formatTimestamp ──────────────────────────────────────────────────
   const { formatTimestamp } = cleanupPlanner;
@@ -94,17 +97,23 @@ function resetLogs() {
   assert(ts1 === '20260420-143052', `formatTimestamp: April 20 2026 14:30:52 → 20260420-143052 (got ${ts1})`);
   const ts2 = formatTimestamp(new Date(2026, 0, 5, 3, 7, 9)); // Jan 5, 2026 03:07:09 local — zero-pad
   assert(ts2 === '20260105-030709', `formatTimestamp: Jan 5 2026 03:07:09 → 20260105-030709 (got ${ts2})`);
-  assert(/^\d{8}-\d{6}$/.test(ts1) && /^\d{8}-\d{6}$/.test(ts2), 'formatTimestamp: matches /^\\d{8}-\\d{6}$/');
+  assert(/^\d{8}-\d{6}$/.test(ts1) && /^\d{8}-\d{6}$/.test(ts2), String.raw`formatTimestamp: matches /^\d{8}-\d{6}$/`);
 
   // ─── LEGACY_AGENT_SHORT_NAMES ─────────────────────────────────────────
   const { LEGACY_AGENT_SHORT_NAMES } = cleanupPlanner;
   assert(Array.isArray(LEGACY_AGENT_SHORT_NAMES), 'LEGACY_AGENT_SHORT_NAMES: is an array');
   assert(LEGACY_AGENT_SHORT_NAMES.length === 7, `LEGACY_AGENT_SHORT_NAMES: has exactly 7 entries (got ${LEGACY_AGENT_SHORT_NAMES.length})`);
   const expected = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev'];
-  assert(JSON.stringify(LEGACY_AGENT_SHORT_NAMES) === JSON.stringify(expected), `LEGACY_AGENT_SHORT_NAMES: matches expected order (got ${JSON.stringify(LEGACY_AGENT_SHORT_NAMES)})`);
+  assert(
+    JSON.stringify(LEGACY_AGENT_SHORT_NAMES) === JSON.stringify(expected),
+    `LEGACY_AGENT_SHORT_NAMES: matches expected order (got ${JSON.stringify(LEGACY_AGENT_SHORT_NAMES)})`,
+  );
   // Verify it's derived from AgentCommandGenerator (NOT duplicated)
   const derived = AgentCommandGenerator.AGENT_SOURCES.map((a) => a.shortName);
-  assert(JSON.stringify(LEGACY_AGENT_SHORT_NAMES) === JSON.stringify(derived), 'LEGACY_AGENT_SHORT_NAMES: derived from AgentCommandGenerator.AGENT_SOURCES (not hardcoded)');
+  assert(
+    JSON.stringify(LEGACY_AGENT_SHORT_NAMES) === JSON.stringify(derived),
+    'LEGACY_AGENT_SHORT_NAMES: derived from AgentCommandGenerator.AGENT_SOURCES (not hardcoded)',
+  );
 
   // ─── isV11Legacy ──────────────────────────────────────────────────────
   const { isV11Legacy } = cleanupPlanner;
@@ -209,7 +218,10 @@ function resetLogs() {
     assert(plan.reason === 'manifest_cleanup', `buildCleanupPlan empty: reason='manifest_cleanup' (got ${plan.reason})`);
     // Plan keys exactly match expected shape
     const keys = Object.keys(plan).sort();
-    assert(JSON.stringify(keys) === JSON.stringify(['reason', 'refused', 'to_remove', 'to_snapshot', 'to_write']), `buildCleanupPlan: plan has exact keys (got ${JSON.stringify(keys)})`);
+    assert(
+      JSON.stringify(keys) === JSON.stringify(['reason', 'refused', 'to_remove', 'to_snapshot', 'to_write']),
+      `buildCleanupPlan: plan has exact keys (got ${JSON.stringify(keys)})`,
+    );
   }
 
   // Case B: still-needed entry preserved
@@ -278,9 +290,15 @@ function resetLogs() {
     assert(plan.to_snapshot.length === 1, 'buildCleanupPlan stale: to_snapshot has 1');
     assert(plan.to_snapshot[0].src === realFilePath, 'buildCleanupPlan stale: snapshot.src is realpath');
     assert(plan.to_snapshot[0].install_root === '_gomad', 'buildCleanupPlan stale: snapshot.install_root preserved');
-    assert(plan.to_snapshot[0].relative_path === 'gomad/agents/old-agent.md', `buildCleanupPlan stale: relative_path posix-normalized (got ${plan.to_snapshot[0].relative_path})`);
+    assert(
+      plan.to_snapshot[0].relative_path === 'gomad/agents/old-agent.md',
+      `buildCleanupPlan stale: relative_path posix-normalized (got ${plan.to_snapshot[0].relative_path})`,
+    );
     assert(plan.to_snapshot[0].orig_hash === actualHash, 'buildCleanupPlan stale: orig_hash preserved from manifest');
-    assert(plan.to_snapshot[0].was_modified === false, `buildCleanupPlan stale: was_modified=false when on-disk hash matches (got ${plan.to_snapshot[0].was_modified})`);
+    assert(
+      plan.to_snapshot[0].was_modified === false,
+      `buildCleanupPlan stale: was_modified=false when on-disk hash matches (got ${plan.to_snapshot[0].was_modified})`,
+    );
   }
 
   // Case D: stale entry with hash mismatch → was_modified=true
@@ -310,7 +328,10 @@ function resetLogs() {
       isV11Legacy: false,
     });
     assert(plan.to_snapshot.length === 1, 'buildCleanupPlan hash-mismatch: to_snapshot has 1');
-    assert(plan.to_snapshot[0].was_modified === true, `buildCleanupPlan hash-mismatch: was_modified=true (got ${plan.to_snapshot[0].was_modified})`);
+    assert(
+      plan.to_snapshot[0].was_modified === true,
+      `buildCleanupPlan hash-mismatch: was_modified=true (got ${plan.to_snapshot[0].was_modified})`,
+    );
   }
 
   // Case E: absolute escape → ManifestCorruptError
@@ -339,13 +360,19 @@ function resetLogs() {
         allowedRoots: new Set(['_gomad', '.claude']),
         isV11Legacy: false,
       });
-    } catch (e) {
+    } catch (error) {
       threw = true;
-      err = e;
+      err = error;
     }
     assert(threw && err instanceof cleanupPlanner.ManifestCorruptError, 'buildCleanupPlan absolute-escape: throws ManifestCorruptError');
-    assert(err && /CONTAINMENT_FAIL/.test(err.message), `buildCleanupPlan absolute-escape: message has CONTAINMENT_FAIL (got ${err && err.message})`);
-    assert(warnLog.some((m) => /^SYMLINK_ESCAPE:/.test(m)), 'buildCleanupPlan absolute-escape: SYMLINK_ESCAPE logged before throw');
+    assert(
+      err && /CONTAINMENT_FAIL/.test(err.message),
+      `buildCleanupPlan absolute-escape: message has CONTAINMENT_FAIL (got ${err && err.message})`,
+    );
+    assert(
+      warnLog.some((m) => m.startsWith('SYMLINK_ESCAPE:')),
+      'buildCleanupPlan absolute-escape: SYMLINK_ESCAPE logged before throw',
+    );
   }
 
   // Case F: traversal that lands on an EXISTING file outside ws → ManifestCorruptError
@@ -362,9 +389,7 @@ function resetLogs() {
     const escapePath = path.join(ws, '_gomad', ups + 'etc/passwd');
     // Ensure the escape target actually exists; if /etc/passwd is unreadable
     // the realpath will still resolve (it requires existence not readability).
-    if (!fs.existsSync('/etc/passwd')) {
-      console.log(`${colors.yellow}skip${colors.reset} buildCleanupPlan traverse-escape: /etc/passwd not present (probably non-POSIX host)`);
-    } else {
+    if (fs.existsSync('/etc/passwd')) {
       const priorManifest = [
         {
           type: 'file',
@@ -386,10 +411,14 @@ function resetLogs() {
           allowedRoots: new Set(['_gomad', '.claude']),
           isV11Legacy: false,
         });
-      } catch (e) {
-        threw = e instanceof cleanupPlanner.ManifestCorruptError;
+      } catch (error) {
+        threw = error instanceof cleanupPlanner.ManifestCorruptError;
       }
       assert(threw, 'buildCleanupPlan traverse-escape: throws ManifestCorruptError when traversal lands on /etc/passwd');
+    } else {
+      console.log(
+        `${colors.yellow}skip${colors.reset} buildCleanupPlan traverse-escape: /etc/passwd not present (probably non-POSIX host)`,
+      );
     }
   }
 
@@ -428,8 +457,8 @@ function resetLogs() {
         allowedRoots: new Set(['_gomad', '.claude']),
         isV11Legacy: false,
       });
-    } catch (e) {
-      threw = e instanceof cleanupPlanner.ManifestCorruptError;
+    } catch (error) {
+      threw = error instanceof cleanupPlanner.ManifestCorruptError;
     }
     assert(threw, 'buildCleanupPlan symlink-escape: throws ManifestCorruptError when realpath escapes ws');
   }
@@ -460,11 +489,14 @@ function resetLogs() {
         allowedRoots: new Set(['_gomad', '.claude']),
         isV11Legacy: false,
       });
-    } catch (e) {
+    } catch {
       threw = true;
     }
     assert(!threw, 'buildCleanupPlan ENOENT: does NOT throw when manifest entry file is missing (idempotency)');
-    assert(plan && plan.to_remove.length === 0 && plan.to_snapshot.length === 0, 'buildCleanupPlan ENOENT: entry silently skipped (no remove/snapshot)');
+    assert(
+      plan && plan.to_remove.length === 0 && plan.to_snapshot.length === 0,
+      'buildCleanupPlan ENOENT: entry silently skipped (no remove/snapshot)',
+    );
   }
 
   // Case I: install_root not in allowedRoots → refused
@@ -494,7 +526,10 @@ function resetLogs() {
       isV11Legacy: false,
     });
     assert(plan.refused.length === 1, `buildCleanupPlan unknown-root: 1 refused (got ${plan.refused.length})`);
-    assert(plan.refused[0].reason === 'UNKNOWN_INSTALL_ROOT', `buildCleanupPlan unknown-root: reason=UNKNOWN_INSTALL_ROOT (got ${plan.refused[0].reason})`);
+    assert(
+      plan.refused[0].reason === 'UNKNOWN_INSTALL_ROOT',
+      `buildCleanupPlan unknown-root: reason=UNKNOWN_INSTALL_ROOT (got ${plan.refused[0].reason})`,
+    );
     assert(plan.to_remove.length === 0, 'buildCleanupPlan unknown-root: not added to to_remove');
   }
 
@@ -517,9 +552,18 @@ function resetLogs() {
     assert(plan.reason === 'legacy_v1_cleanup', `buildCleanupPlan legacy: reason=legacy_v1_cleanup (got ${plan.reason})`);
     assert(plan.to_snapshot.length === 7, `buildCleanupPlan legacy: 7 snapshots (got ${plan.to_snapshot.length})`);
     assert(plan.to_remove.length === 7, 'buildCleanupPlan legacy: 7 removals');
-    assert(plan.to_snapshot.every((s) => s.was_modified === null), 'buildCleanupPlan legacy: was_modified=null on every entry (no v1.1 hash)');
-    assert(plan.to_snapshot.every((s) => s.install_root === '.claude'), 'buildCleanupPlan legacy: install_root=.claude on every entry');
-    assert(plan.to_snapshot.every((s) => /^skills\/gm-agent-/.test(s.relative_path)), 'buildCleanupPlan legacy: relative_path posix-normalized under skills/');
+    assert(
+      plan.to_snapshot.every((s) => s.was_modified === null),
+      'buildCleanupPlan legacy: was_modified=null on every entry (no v1.1 hash)',
+    );
+    assert(
+      plan.to_snapshot.every((s) => s.install_root === '.claude'),
+      'buildCleanupPlan legacy: install_root=.claude on every entry',
+    );
+    assert(
+      plan.to_snapshot.every((s) => /^skills\/gm-agent-/.test(s.relative_path)),
+      'buildCleanupPlan legacy: relative_path posix-normalized under skills/',
+    );
   }
 
   // Case K: legacy branch with only 3 of 7 dirs present
@@ -673,7 +717,7 @@ function resetLogs() {
     // returns '' on missing files (existing behavior at manifest-generator.js:643).
     // The point of this assertion: the path-prefix filter rejects the path
     // BEFORE attempting to read it.
-    const winSepBackupPath = '\\ws\\_gomad\\_backups\\20260420\\meta.json';
+    const winSepBackupPath = String.raw`\ws\_gomad\_backups\20260420\meta.json`;
 
     const gen = new ManifestGenerator();
     gen.gomadDir = gomadDir;
@@ -685,13 +729,13 @@ function resetLogs() {
     const csvContent = fs.readFileSync(csvPath, 'utf8');
 
     assert(/a\.md/.test(csvContent), 'D-39 native-sep: good file included');
-    assert(!/meta\.json/.test(csvContent), 'D-39 native-sep: backslash _gomad\\_backups\\ path EXCLUDED');
+    assert(!/meta\.json/.test(csvContent), String.raw`D-39 native-sep: backslash _gomad\_backups\ path EXCLUDED`);
   }
 
   // ─── Final ─────────────────────────────────────────────────────────────
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed > 0 ? 1 : 0);
-})().catch((e) => {
-  console.error(`${colors.red}FATAL:${colors.reset}`, e);
+})().catch((error) => {
+  console.error(`${colors.red}FATAL:${colors.reset}`, error);
   process.exit(2);
 });

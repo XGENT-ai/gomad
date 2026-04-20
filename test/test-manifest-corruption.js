@@ -124,7 +124,11 @@ function resetLogs() {
     assert(errorLog.length === 0, 'BOM fixture → no error log (BOM is normalization)', `errorLog: ${errorLog.join('; ')}`);
     assert(warnLog.length === 0, 'BOM fixture → no warn log', `warnLog: ${warnLog.join('; ')}`);
     // First row's `type` field MUST be `file` not `\uFEFFfile` — the BOM was stripped
-    assert(rows[0] && rows[0].type === 'file', 'BOM fixture → first column header is `type` (not BOM-prefixed)', `Got type=${JSON.stringify(rows[0] && rows[0].type)}`);
+    assert(
+      rows[0] && rows[0].type === 'file',
+      'BOM fixture → first column header is `type` (not BOM-prefixed)',
+      `Got type=${JSON.stringify(rows[0] && rows[0].type)}`,
+    );
     assert(rows[0] && rows[0].install_root === '_gomad', 'BOM fixture → install_root parsed correctly');
   }
 
@@ -145,7 +149,7 @@ function resetLogs() {
     const rows = await installer.readFilesManifest(gomadDir);
     assert(rows.length === 0, 'unclosed-quote fixture → returns []');
     assert(
-      errorLog.some((m) => /^MANIFEST_CORRUPT:/.test(m)),
+      errorLog.some((m) => m.startsWith('MANIFEST_CORRUPT:')),
       'unclosed-quote fixture → emits MANIFEST_CORRUPT: log',
       `errorLog: ${JSON.stringify(errorLog)}`,
     );
@@ -158,7 +162,7 @@ function resetLogs() {
     const rows = await installer.readFilesManifest(gomadDir);
     assert(rows.length === 0, 'wrong-arity fixture → returns []');
     assert(
-      errorLog.some((m) => /^MANIFEST_CORRUPT:/.test(m)),
+      errorLog.some((m) => m.startsWith('MANIFEST_CORRUPT:')),
       'wrong-arity fixture → emits MANIFEST_CORRUPT: log',
       `errorLog: ${JSON.stringify(errorLog)}`,
     );
@@ -171,7 +175,7 @@ function resetLogs() {
     const rows = await installer.readFilesManifest(gomadDir);
     assert(rows.length === 0, 'malformed-header fixture → returns []');
     assert(
-      errorLog.some((m) => /^MANIFEST_CORRUPT:/.test(m)),
+      errorLog.some((m) => m.startsWith('MANIFEST_CORRUPT:')),
       'malformed-header fixture → emits MANIFEST_CORRUPT: log',
       `errorLog: ${JSON.stringify(errorLog)}`,
     );
@@ -183,7 +187,11 @@ function resetLogs() {
     const gomadDir = await makeTempGomadFromFixture('corrupt-row-missing.csv');
     const rows = await installer.readFilesManifest(gomadDir);
     // 3 rows in fixture; middle row has empty `name` — that one is skipped
-    assert(rows.length === 2, 'row-missing-required fixture → returns 2 valid rows (1 skipped)', `Got ${rows.length}: ${JSON.stringify(rows.map(r => r.name))}`);
+    assert(
+      rows.length === 2,
+      'row-missing-required fixture → returns 2 valid rows (1 skipped)',
+      `Got ${rows.length}: ${JSON.stringify(rows.map((r) => r.name))}`,
+    );
     assert(
       warnLog.some((m) => /^CORRUPT_ROW: row \d+: missing column/.test(m)),
       'row-missing-required fixture → emits CORRUPT_ROW: log',
@@ -191,8 +199,8 @@ function resetLogs() {
     );
     assert(errorLog.length === 0, 'row-missing-required fixture → no MANIFEST_CORRUPT (per-row, not whole-manifest)');
     // Confirm the surviving rows are the right ones
-    const names = rows.map((r) => r.name).sort();
-    assert(names.includes('pm') && names.includes('agent-pm'), 'row-missing-required fixture → surviving rows are `pm` and `agent-pm`');
+    const names = new Set(rows.map((r) => r.name).sort());
+    assert(names.has('pm') && names.has('agent-pm'), 'row-missing-required fixture → surviving rows are `pm` and `agent-pm`');
   }
 
   // ─── Test: row with empty path value → CORRUPT_ROW ───────────────────
@@ -240,13 +248,17 @@ function resetLogs() {
     assert(allValid, 'valid-v2 fixture → every row has type, name, path, install_root, schema_version=2.0, absolutePath');
     // Verify install_root values
     const roots = rows.map((r) => r.install_root).sort();
-    assert(JSON.stringify(roots) === JSON.stringify(['.claude', '.cursor', '_gomad']), 'valid-v2 fixture → install_root values cover _gomad, .claude, .cursor', `Got ${JSON.stringify(roots)}`);
+    assert(
+      JSON.stringify(roots) === JSON.stringify(['.claude', '.cursor', '_gomad']),
+      'valid-v2 fixture → install_root values cover _gomad, .claude, .cursor',
+      `Got ${JSON.stringify(roots)}`,
+    );
   }
 
   // ─── Final ─────────────────────────────────────────────────────────────
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed > 0 ? 1 : 0);
-})().catch((e) => {
-  console.error(`${colors.red}FATAL:${colors.reset}`, e);
+})().catch((error) => {
+  console.error(`${colors.red}FATAL:${colors.reset}`, error);
   process.exit(2);
 });

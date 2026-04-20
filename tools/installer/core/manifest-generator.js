@@ -688,11 +688,7 @@ class ManifestGenerator {
       for (const filePath of this.allInstalledFiles) {
         // Phase 7 D-39 exclusion filter — at the TOP of the loop so excluded
         // paths never hit the install_root detection or hash computation.
-        if (
-          filePath.includes(BACKUP_PREFIX_POSIX) ||
-          filePath.includes(BACKUP_PREFIX_WIN) ||
-          filePath.includes(BACKUP_PREFIX_NATIVE)
-        ) {
+        if (filePath.includes(BACKUP_PREFIX_POSIX) || filePath.includes(BACKUP_PREFIX_WIN) || filePath.includes(BACKUP_PREFIX_NATIVE)) {
           continue;
         }
 

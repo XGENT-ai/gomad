@@ -219,9 +219,9 @@ async function buildCleanupPlan(input) {
       let resolved;
       try {
         resolved = await fs.realpath(legacyDir);
-      } catch (e) {
-        if (e.code === 'ENOENT') continue; // race: removed between pathExists and realpath
-        throw e;
+      } catch (error) {
+        if (error.code === 'ENOENT') continue; // race: removed between pathExists and realpath
+        throw error;
       }
 
       if (!isContained(resolved, workspaceRoot)) {
@@ -260,13 +260,13 @@ async function buildCleanupPlan(input) {
     let resolved;
     try {
       resolved = await fs.realpath(joined);
-    } catch (e) {
-      if (e.code === 'ENOENT') {
+    } catch (error) {
+      if (error.code === 'ENOENT') {
         // Pitfall 22: user manually deleted between installs. Normal
         // idempotency case — skip silently, do NOT classify as corrupt.
         continue;
       }
-      throw e;
+      throw error;
     }
 
     // D-32 containment check on resolved (realpath'd) path.
@@ -275,9 +275,7 @@ async function buildCleanupPlan(input) {
       // batch (D-33 conservatism). The log captures the offending entry
       // even when the batch poison short-circuits processing.
       await prompts.log.warn('SYMLINK_ESCAPE: ' + joined + ' → ' + resolved + ', refusing to touch');
-      throw new ManifestCorruptError(
-        'CONTAINMENT_FAIL: row ' + idx + ' escapes workspace: ' + resolved,
-      );
+      throw new ManifestCorruptError('CONTAINMENT_FAIL: row ' + idx + ' escapes workspace: ' + resolved);
     }
 
     // Still-needed entry — preserved (no snapshot, no remove).
@@ -294,10 +292,7 @@ async function buildCleanupPlan(input) {
 
     // D-26 + D-36: relative_path is forward-slash normalized for
     // serialization (metadata.json files[].relative_path).
-    const rootAbs =
-      installRoot === '_gomad'
-        ? path.join(workspaceRoot, '_gomad')
-        : path.join(workspaceRoot, installRoot);
+    const rootAbs = installRoot === '_gomad' ? path.join(workspaceRoot, '_gomad') : path.join(workspaceRoot, installRoot);
     const relNative = path.relative(rootAbs, resolved);
     const relative_path = relNative.split(path.sep).join('/');
 
