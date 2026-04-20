@@ -481,9 +481,7 @@ function renderPlan(plan) {
     lines.push('');
   }
   if (plan.to_remove.length > 0) {
-    lines.push(`TO REMOVE (${plan.to_remove.length} files)`);
-    lines.push('  <same list — snapshot is prerequisite>');
-    lines.push('');
+    lines.push(`TO REMOVE (${plan.to_remove.length} files)`, '  <same list — snapshot is prerequisite>', '');
   }
   if (plan.to_write.length > 0) {
     lines.push(`TO WRITE (${plan.to_write.length} files)`);
@@ -492,9 +490,7 @@ function renderPlan(plan) {
     }
     lines.push('');
   }
-  lines.push(
-    `Summary: ${plan.to_snapshot.length} snapshotted, ${plan.to_remove.length} removed, ${plan.to_write.length} written`,
-  );
+  lines.push(`Summary: ${plan.to_snapshot.length} snapshotted, ${plan.to_remove.length} removed, ${plan.to_write.length} written`);
   if (plan.refused && plan.refused.length > 0) {
     lines.push(`Refused: ${plan.refused.length} entries (see logs above)`);
   }

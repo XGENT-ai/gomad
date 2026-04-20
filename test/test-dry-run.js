@@ -150,10 +150,12 @@ function parseSummaryCounts(stdout) {
 
     const before = computeWorkspaceHash(ctx1.tempDir);
     console.log(`${colors.dim}Running gomad install --dry-run ...${colors.reset}`);
-    const dryrunOutput = execSync(
-      `"${ctx1.gomadBin}" install --yes --directory "${ctx1.tempDir}" --tools claude-code --dry-run`,
-      { cwd: ctx1.tempDir, stdio: 'pipe', timeout: 120_000, encoding: 'utf8' },
-    );
+    const dryrunOutput = execSync(`"${ctx1.gomadBin}" install --yes --directory "${ctx1.tempDir}" --tools claude-code --dry-run`, {
+      cwd: ctx1.tempDir,
+      stdio: 'pipe',
+      timeout: 120_000,
+      encoding: 'utf8',
+    });
     const after = computeWorkspaceHash(ctx1.tempDir);
     assert(
       before === after,
@@ -174,10 +176,7 @@ function parseSummaryCounts(stdout) {
       /Summary:\s*\d+\s*snapshotted,\s*\d+\s*removed,\s*\d+\s*written/.test(dryrunOutput),
       'Dry-run stdout contains Summary line matching expected shape (includes "written" count)',
     );
-    assert(
-      !fs.existsSync(path.join(ctx1.tempDir, '_gomad', '_backups')),
-      '--dry-run did NOT create _gomad/_backups/ directory',
-    );
+    assert(!fs.existsSync(path.join(ctx1.tempDir, '_gomad', '_backups')), '--dry-run did NOT create _gomad/_backups/ directory');
 
     // ─── Test 2: dry-run-equals-actual identity ───────────────────────
     console.log(`\n${colors.cyan}Test 2 — dry-run-equals-actual (identity of Summary counts)${colors.reset}`);
@@ -189,10 +188,12 @@ function parseSummaryCounts(stdout) {
     seedV11Workspace(ctx2b.tempDir);
 
     console.log(`${colors.dim}Running --dry-run on workspace A...${colors.reset}`);
-    const dryA = execSync(
-      `"${ctx2a.gomadBin}" install --yes --directory "${ctx2a.tempDir}" --tools claude-code --dry-run`,
-      { cwd: ctx2a.tempDir, stdio: 'pipe', timeout: 120_000, encoding: 'utf8' },
-    );
+    const dryA = execSync(`"${ctx2a.gomadBin}" install --yes --directory "${ctx2a.tempDir}" --tools claude-code --dry-run`, {
+      cwd: ctx2a.tempDir,
+      stdio: 'pipe',
+      timeout: 120_000,
+      encoding: 'utf8',
+    });
     const dryACounts = parseSummaryCounts(dryA);
 
     console.log(`${colors.dim}Running real install on workspace B, then --dry-run on B...${colors.reset}`);
@@ -203,10 +204,12 @@ function parseSummaryCounts(stdout) {
     // produce identical Summary counts — that IS the dry-run-equals-actual
     // invariant in action (renderPlan and executeCleanupPlan consume the
     // same Plan object from the pure buildCleanupPlan).
-    const dryB = execSync(
-      `"${ctx2b.gomadBin}" install --yes --directory "${ctx2b.tempDir}" --tools claude-code --dry-run`,
-      { cwd: ctx2b.tempDir, stdio: 'pipe', timeout: 120_000, encoding: 'utf8' },
-    );
+    const dryB = execSync(`"${ctx2b.gomadBin}" install --yes --directory "${ctx2b.tempDir}" --tools claude-code --dry-run`, {
+      cwd: ctx2b.tempDir,
+      stdio: 'pipe',
+      timeout: 120_000,
+      encoding: 'utf8',
+    });
     const dryBCounts = parseSummaryCounts(dryB);
 
     assert(dryACounts !== null, 'Workspace A --dry-run emits parseable Summary line');
@@ -238,10 +241,12 @@ function parseSummaryCounts(stdout) {
     let freshExit = -1;
     let freshStdout = '';
     try {
-      freshStdout = execSync(
-        `"${ctx3.gomadBin}" install --yes --directory "${ctx3.tempDir}" --tools claude-code --dry-run`,
-        { cwd: ctx3.tempDir, stdio: 'pipe', timeout: 120_000, encoding: 'utf8' },
-      );
+      freshStdout = execSync(`"${ctx3.gomadBin}" install --yes --directory "${ctx3.tempDir}" --tools claude-code --dry-run`, {
+        cwd: ctx3.tempDir,
+        stdio: 'pipe',
+        timeout: 120_000,
+        encoding: 'utf8',
+      });
       freshExit = 0;
     } catch (error) {
       freshExit = error.status || -1;
@@ -251,10 +256,7 @@ function parseSummaryCounts(stdout) {
     const freshCounts = parseSummaryCounts(freshStdout);
     assert(freshCounts !== null, 'Fresh-workspace --dry-run emits parseable Summary line');
     if (freshCounts) {
-      assert(
-        freshCounts.snapshotted === 0,
-        `Fresh workspace has nothing to snapshot (got ${freshCounts.snapshotted})`,
-      );
+      assert(freshCounts.snapshotted === 0, `Fresh workspace has nothing to snapshot (got ${freshCounts.snapshotted})`);
       assert(freshCounts.removed === 0, `Fresh workspace has nothing to remove (got ${freshCounts.removed})`);
     }
     assert(

@@ -158,7 +158,7 @@ function sha256File(p) {
     assert(fs.existsSync(manifestPath), 'files-manifest.csv written');
     const manifestContent = fs.readFileSync(manifestPath, 'utf8');
     assert(!manifestContent.includes('_gomad/_backups/'), 'manifest excludes _gomad/_backups/ per D-39');
-    assert(!manifestContent.includes('_gomad\\_backups\\'), 'manifest excludes Windows-sep _gomad\\_backups\\ per D-39');
+    assert(!manifestContent.includes('_gomad\\_backups\\'), String.raw`manifest excludes Windows-sep _gomad\_backups\ per D-39`);
 
     // metadata.json shape
     const metaPath = path.join(backupRoot, 'metadata.json');
@@ -178,10 +178,7 @@ function sha256File(p) {
       Array.isArray(meta.files) && meta.files.every((f) => f.was_modified === null),
       'all files[] have was_modified === null (D-43 legacy-v1 signal)',
     );
-    assert(
-      typeof meta.recovery_hint === 'string' && meta.recovery_hint.includes('cp -R'),
-      'recovery_hint contains cp -R',
-    );
+    assert(typeof meta.recovery_hint === 'string' && meta.recovery_hint.includes('cp -R'), 'recovery_hint contains cp -R');
 
     // README.md present
     assert(fs.existsSync(path.join(backupRoot, 'README.md')), 'README.md co-located with metadata.json');
@@ -189,9 +186,7 @@ function sha256File(p) {
     // ─── Test 2: recovery round-trip ──────────────────────────────────
     const recoveryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gomad-recovery-'));
     fs.ensureDirSync(path.join(recoveryDir, '.claude', 'skills', 'gm-agent-pm'));
-    execSync(
-      `cp -R "${backupRoot}/.claude/skills/gm-agent-pm/custom.md" "${recoveryDir}/.claude/skills/gm-agent-pm/custom.md"`,
-    );
+    execSync(`cp -R "${backupRoot}/.claude/skills/gm-agent-pm/custom.md" "${recoveryDir}/.claude/skills/gm-agent-pm/custom.md"`);
     const restored = fs.readFileSync(path.join(recoveryDir, '.claude', 'skills', 'gm-agent-pm', 'custom.md'), 'utf8');
     assert(restored === CUSTOM_MARKER, 'Recovery via cp -R restores custom.md byte-for-byte (identical to pre-install)');
 
