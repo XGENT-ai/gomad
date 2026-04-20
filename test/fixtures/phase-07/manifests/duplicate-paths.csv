@@ -1,0 +1,3 @@
+type,name,module,path,hash,schema_version,install_root
+file,pm,gomad,gomad/agents/pm.md,abc123,2.0,_gomad
+file,pm-dup,gomad,gomad/agents/pm.md,abc123,2.0,_gomad

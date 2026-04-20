@@ -1,0 +1,4 @@
+type,name,module,path,hash,schema_version,install_root
+file,pm,gomad,gomad/agents/pm.md,abc123,2.0,_gomad
+file,architect,gomad,,def456,2.0,_gomad
+md,agent-pm,commands,commands/gm/agent-pm.md,ghi789,2.0,.claude

@@ -676,35 +676,69 @@ class Installer {
       return [];
     }
 
+    let content;
     try {
-      const content = await fs.readFile(filesManifestPath, 'utf8');
-      const records = csv.parse(content, {
-        columns: true,
-        skip_empty_lines: true,
-      });
-      // WR-01: resolve absolute paths based on install_root so detectCustomFiles can
-      // match scanned IDE-target files (e.g. .claude/commands/gm/agent-pm.md). Without
-      // absolutePath, every v2 row whose install_root != '_gomad' would map to a bogus
-      // path under gomadDir, so launcher edits would be silently undetected.
-      const workspaceRoot = path.dirname(gomadDir);
-      return records.map((r) => {
-        const installRoot = r.install_root || '_gomad';
-        const rootPath = installRoot === '_gomad' ? gomadDir : path.join(workspaceRoot, installRoot);
-        return {
-          type: r.type,
-          name: r.name,
-          module: r.module,
-          path: r.path,
-          hash: r.hash || null, // v1 compat: hash column always present since Phase 3
-          schema_version: r.schema_version || null, // D-23: v1 rows → null (implicit v1)
-          install_root: installRoot, // D-25: default for v1 rows
-          absolutePath: path.join(rootPath, r.path || ''), // WR-01: install_root-aware absolute path
-        };
-      });
+      content = await fs.readFile(filesManifestPath, 'utf8');
     } catch (error) {
-      await prompts.log.warn('Could not read files-manifest.csv: ' + error.message);
+      // Phase 7 D-33: I/O failure on the manifest file is treated as MANIFEST_CORRUPT
+      // (whole-manifest skip-cleanup signal). Installer continues with idempotent install.
+      await prompts.log.error('MANIFEST_CORRUPT: IO_ERROR: ' + error.message);
       return [];
     }
+
+    let records;
+    try {
+      records = csv.parse(content, {
+        columns: true,
+        skip_empty_lines: true,
+        bom: true, // Phase 7 D-33: strip leading U+FEFF silently (normalization, not corruption)
+      });
+    } catch (error) {
+      // Phase 7 D-33: csv-parse throw → whole-manifest corrupt. Log MANIFEST_CORRUPT
+      // and return [] so the cleanup step is skipped; installer continues with
+      // idempotent copy-over (no deletions).
+      const code = error.code || 'PARSE_ERROR';
+      await prompts.log.error('MANIFEST_CORRUPT: ' + code + ': ' + error.message);
+      return [];
+    }
+
+    // Phase 7 D-33: per-row validation. A row missing required columns → CORRUPT_ROW
+    // (skip that row, keep the rest). install_root MAY be empty for legacy v1 rows
+    // (Phase 6 D-23 compat) — only required when schema_version === '2.0' (RESEARCH.md
+    // §Pitfall 15 extended).
+    const REQUIRED_ALWAYS = ['type', 'name', 'path'];
+    const validRows = [];
+    for (const [idx, row] of records.entries()) {
+      const missing = REQUIRED_ALWAYS.filter((k) => !row[k] || row[k] === '');
+      if (!row.install_root && row.schema_version === '2.0') {
+        missing.push('install_root');
+      }
+      if (missing.length > 0) {
+        await prompts.log.warn('CORRUPT_ROW: row ' + idx + ': missing column(s) ' + missing.join(','));
+        continue;
+      }
+      validRows.push(row);
+    }
+
+    // WR-01: resolve absolute paths based on install_root so detectCustomFiles can
+    // match scanned IDE-target files (e.g. .claude/commands/gm/agent-pm.md). Without
+    // absolutePath, every v2 row whose install_root != '_gomad' would map to a bogus
+    // path under gomadDir, so launcher edits would be silently undetected.
+    const workspaceRoot = path.dirname(gomadDir);
+    return validRows.map((r) => {
+      const installRoot = r.install_root || '_gomad';
+      const rootPath = installRoot === '_gomad' ? gomadDir : path.join(workspaceRoot, installRoot);
+      return {
+        type: r.type,
+        name: r.name,
+        module: r.module,
+        path: r.path,
+        hash: r.hash || null, // v1 compat: hash column always present since Phase 3
+        schema_version: r.schema_version || null, // D-23: v1 rows → null (implicit v1)
+        install_root: installRoot, // D-25: default for v1 rows
+        absolutePath: path.join(rootPath, r.path || ''), // WR-01: install_root-aware absolute path
+      };
+    });
   }
 
   /**
