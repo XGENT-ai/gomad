@@ -77,7 +77,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   6. A manifest corrupted with BOM, CRLF, quoted-field edge cases, or malformed rows does NOT cause mass-deletion — installer logs `MANIFEST_CORRUPT`, skips cleanup, and proceeds with idempotent install
 **Plans**: 2 plans
 - [x] 07-01-PLAN.md — Pure cleanup-planner module + manifest reader hardening (BOM/CORRUPT_ROW) + D-39 backup exclusion (INSTALL-05, INSTALL-06)
-- [ ] 07-02-PLAN.md — Executor + --dry-run flag + v1.1 legacy cleanup + recovery docs + E2E tests (INSTALL-05, INSTALL-07, INSTALL-08, INSTALL-09)
+- [x] 07-02-PLAN.md — Executor + --dry-run flag + v1.1 legacy cleanup + recovery docs + E2E tests (INSTALL-05, INSTALL-07, INSTALL-08, INSTALL-09)
 
 ### Phase 8: PRD + Product-Brief Content Refinement
 **Goal**: Retune `gm-create-prd` and `gm-product-brief` for coding-agent consumers — strip human-founder framing (time windows, "why now?", business/operational metrics, persona demographics, go-to-market language), amplify aggressive vision + MVP scope, sharpen dev-ready requirement density (machine-verifiable acceptance criteria, stable REQ-IDs, explicit out-of-scope, feature boundaries). Refinement is strictly additive/stripping — structural sections consumed by `gm-validate-prd`, `gm-create-architecture`, `gm-create-epics-and-stories`, and `gm-check-implementation-readiness` are preserved so the downstream pipeline stays compatible without lockstep updates.
