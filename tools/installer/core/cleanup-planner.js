@@ -25,6 +25,8 @@
 const path = require('node:path');
 const fs = require('fs-extra');
 const { AgentCommandGenerator } = require('../ide/shared/agent-command-generator');
+const { ManifestGenerator } = require('./manifest-generator');
+const prompts = require('../prompts');
 
 /**
  * D-42 source of truth — the 7 known v1.1 agent skill short names. Derived
@@ -153,6 +155,165 @@ async function isV11Legacy(workspaceRoot, gomadDir) {
   return false;
 }
 
+/**
+ * Build a cleanup plan describing what the installer will snapshot, remove,
+ * and write. PURE function — no filesystem WRITES. Performs realpath READS
+ * and SHA-256 hash READS only.
+ *
+ * The plan object is consumed by:
+ *   - Plan 07-02 executor (executeCleanupPlan): snapshot → metadata → remove
+ *   - Plan 07-02 dry-run renderer (renderPlan): print to stdout, exit 0
+ *
+ * The dry-run-equals-actual invariant (D-41) depends on this function being
+ * a pure function on its inputs.
+ *
+ * @param {Object} input
+ * @param {Array<Object>} input.priorManifest — rows from installer.readFilesManifest
+ *   (each: { type, name, module, path, hash, schema_version, install_root, absolutePath })
+ * @param {Set<string>} input.newInstallSet — absolute realpath-resolved paths
+ *   the new install will write
+ * @param {string} input.workspaceRoot — realpath-resolved workspace root
+ *   (caller's responsibility to fs.realpath this BEFORE invoking)
+ * @param {Set<string>} input.allowedRoots — install_root values from
+ *   platform-codes.yaml + ['_gomad', '.claude'] sentinels
+ * @param {boolean} input.isV11Legacy — true if no prior manifest AND ≥1 of
+ *   the 7 legacy gm-agent-* dirs (use isV11Legacy() to compute)
+ * @param {ManifestGenerator} [input.manifestGen] — optional injected hash
+ *   computer (defaults to a fresh ManifestGenerator instance for D-34
+ *   was_modified detection)
+ *
+ * @returns {Promise<{
+ *   to_snapshot: Array<{src: string, install_root: string, relative_path: string, orig_hash: string|null, was_modified: boolean|null}>,
+ *   to_remove: Array<string>,
+ *   to_write: Array<string>,
+ *   refused: Array<{idx: number|null, entry: object, reason: string}>,
+ *   reason: 'manifest_cleanup' | 'legacy_v1_cleanup'
+ * }>}
+ *
+ * @throws {ManifestCorruptError} when any prior-manifest entry's resolved
+ *   realpath escapes workspaceRoot (D-32 + D-33 poison-batch posture).
+ *   Per-entry SYMLINK_ESCAPE log is emitted BEFORE the throw so the
+ *   specific failing entry is captured.
+ */
+async function buildCleanupPlan(input) {
+  const { priorManifest, newInstallSet, workspaceRoot, allowedRoots, isV11Legacy: v11, manifestGen } = input;
+  const hashGen = manifestGen || new ManifestGenerator();
+
+  const plan = {
+    to_snapshot: [],
+    to_remove: [],
+    to_write: [...newInstallSet],
+    refused: [],
+    reason: v11 ? 'legacy_v1_cleanup' : 'manifest_cleanup',
+  };
+
+  if (v11) {
+    // D-42 + D-43: 7 known dirs only; snapshot whole dir; was_modified=null
+    // (v1.1 had no hash manifest, so modification status is unknown).
+    // Conservatively realpath + containment-check each legacy dir so a
+    // symlinked legacy dir doesn't escape via the snapshot side door.
+    for (const shortName of LEGACY_AGENT_SHORT_NAMES) {
+      const legacyDir = path.join(workspaceRoot, '.claude', 'skills', `gm-agent-${shortName}`);
+      if (!(await fs.pathExists(legacyDir))) continue;
+
+      let resolved;
+      try {
+        resolved = await fs.realpath(legacyDir);
+      } catch (e) {
+        if (e.code === 'ENOENT') continue; // race: removed between pathExists and realpath
+        throw e;
+      }
+
+      if (!isContained(resolved, workspaceRoot)) {
+        // SYMLINK_ESCAPE on a legacy dir is non-fatal per D-35 (legacy branch
+        // tolerates rogue per-entry); refuse this entry and continue.
+        await prompts.log.warn('SYMLINK_ESCAPE: ' + legacyDir + ' → ' + resolved + ', refusing to touch');
+        plan.refused.push({ idx: null, entry: { path: legacyDir }, reason: 'SYMLINK_ESCAPE' });
+        continue;
+      }
+
+      plan.to_snapshot.push({
+        src: resolved,
+        install_root: '.claude',
+        relative_path: path.posix.join('skills', 'gm-agent-' + shortName),
+        orig_hash: null,
+        was_modified: null,
+      });
+      plan.to_remove.push(resolved);
+    }
+    return plan;
+  }
+
+  // ─── Standard manifest-diff branch ──────────────────────────────────
+  for (const [idx, entry] of priorManifest.entries()) {
+    const installRoot = entry.install_root || '_gomad';
+
+    // D-32 allow-list check: install_root must be in the configured set.
+    if (!allowedRoots.has(installRoot)) {
+      plan.refused.push({ idx, entry, reason: 'UNKNOWN_INSTALL_ROOT' });
+      continue;
+    }
+
+    const joined = entry.absolutePath || path.join(workspaceRoot, installRoot, entry.path || '');
+
+    // Realpath BEFORE containment per D-32 + RESEARCH.md Pattern 2.
+    let resolved;
+    try {
+      resolved = await fs.realpath(joined);
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        // Pitfall 22: user manually deleted between installs. Normal
+        // idempotency case — skip silently, do NOT classify as corrupt.
+        continue;
+      }
+      throw e;
+    }
+
+    // D-32 containment check on resolved (realpath'd) path.
+    if (!isContained(resolved, workspaceRoot)) {
+      // D-32 + D-35: log per-entry SYMLINK_ESCAPE before poisoning the
+      // batch (D-33 conservatism). The log captures the offending entry
+      // even when the batch poison short-circuits processing.
+      await prompts.log.warn('SYMLINK_ESCAPE: ' + joined + ' → ' + resolved + ', refusing to touch');
+      throw new ManifestCorruptError(
+        'CONTAINMENT_FAIL: row ' + idx + ' escapes workspace: ' + resolved,
+      );
+    }
+
+    // Still-needed entry — preserved (no snapshot, no remove).
+    if (newInstallSet.has(resolved)) continue;
+
+    // Stale entry — D-34 hash-mismatch check feeds was_modified marker
+    // (consumed by metadata.json in plan 07-02 + dry-run renderer).
+    const orig_hash = entry.hash || null;
+    let was_modified = false;
+    if (orig_hash) {
+      const currentHash = await hashGen.calculateFileHash(resolved);
+      was_modified = currentHash !== orig_hash;
+    }
+
+    // D-26 + D-36: relative_path is forward-slash normalized for
+    // serialization (metadata.json files[].relative_path).
+    const rootAbs =
+      installRoot === '_gomad'
+        ? path.join(workspaceRoot, '_gomad')
+        : path.join(workspaceRoot, installRoot);
+    const relNative = path.relative(rootAbs, resolved);
+    const relative_path = relNative.split(path.sep).join('/');
+
+    plan.to_snapshot.push({
+      src: resolved,
+      install_root: installRoot,
+      relative_path,
+      orig_hash,
+      was_modified,
+    });
+    plan.to_remove.push(resolved);
+  }
+
+  return plan;
+}
+
 module.exports = {
   isContained,
   isV11Legacy,
@@ -160,5 +321,5 @@ module.exports = {
   uniqueBackupDir,
   LEGACY_AGENT_SHORT_NAMES,
   ManifestCorruptError,
-  // buildCleanupPlan: added in Task 3
+  buildCleanupPlan,
 };

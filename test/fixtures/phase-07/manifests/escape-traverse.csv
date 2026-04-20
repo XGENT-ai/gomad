@@ -1,0 +1,2 @@
+type,name,module,path,hash,schema_version,install_root
+file,passwd,gomad,../../../etc/passwd,abc,2.0,_gomad
