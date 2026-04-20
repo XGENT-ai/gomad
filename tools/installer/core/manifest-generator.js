@@ -670,8 +670,32 @@ class ManifestGenerator {
       const ideRootSet = new Set(['.claude', ...(this.ideRoots || [])]);
       const ideRootCandidates = [...ideRootSet].map((r) => ({ name: r, abs: path.join(workspaceRoot, r) }));
 
+      // Phase 7 D-39: never include _gomad/_backups/** in the manifest.
+      // Prevents (a) the next cleanup pass marking old backups as "stale"
+      // and deleting them, and (b) recursive backup-of-backup growth on
+      // re-install. Symmetric POSIX (`/`) + Windows (`\`) check so a path
+      // recorded with the wrong separator (e.g., a v1 manifest copied
+      // verbatim, per Pitfall 19) is still rejected. Leading + trailing
+      // separator discipline means `_backupstemp` (prefix collision) is
+      // correctly INCLUDED.
+      const BACKUP_PREFIX_POSIX = '/_gomad/_backups/';
+      const BACKUP_PREFIX_WIN = '\\_gomad\\_backups\\';
+      // Also include the runtime-native form for completeness — on POSIX
+      // it equals BACKUP_PREFIX_POSIX, on Windows it equals BACKUP_PREFIX_WIN.
+      const BACKUP_PREFIX_NATIVE = path.sep + '_gomad' + path.sep + '_backups' + path.sep;
+
       // Process all installed files
       for (const filePath of this.allInstalledFiles) {
+        // Phase 7 D-39 exclusion filter — at the TOP of the loop so excluded
+        // paths never hit the install_root detection or hash computation.
+        if (
+          filePath.includes(BACKUP_PREFIX_POSIX) ||
+          filePath.includes(BACKUP_PREFIX_WIN) ||
+          filePath.includes(BACKUP_PREFIX_NATIVE)
+        ) {
+          continue;
+        }
+
         // Determine install_root by checking which standard root the path falls under.
         // Phase 6 (D-25): paths under _gomad/ → install_root='_gomad' (default);
         // paths under any IDE root → install_root='<ide-root>'.

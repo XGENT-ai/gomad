@@ -605,6 +605,89 @@ function resetLogs() {
     }
   }
 
+  // ─── D-39: writeFilesManifest excludes _gomad/_backups/** ─────────────
+  // Task 4 — exclude any path containing /_gomad/_backups/ from the
+  // generated files-manifest.csv. Symmetric POSIX + native separator
+  // check to handle Windows separators per Pitfall 19.
+  resetLogs();
+  {
+    // Build a workspace tempdir with a real _gomad/_config/ directory so
+    // writeFilesManifest can write into it.
+    const ws = makeRealWs('gomad-d39-exclusion-');
+    const gomadDir = path.join(ws, '_gomad');
+    fs.ensureDirSync(path.join(gomadDir, '_config'));
+
+    // Create a few real files under both expected and excluded paths.
+    fs.ensureDirSync(path.join(gomadDir, 'gomad', 'agents'));
+    const includedFile1 = path.join(gomadDir, 'gomad', 'agents', 'pm.md');
+    fs.writeFileSync(includedFile1, 'persona-pm');
+
+    fs.ensureDirSync(path.join(ws, '.claude', 'commands', 'gm'));
+    const includedFile2 = path.join(ws, '.claude', 'commands', 'gm', 'agent-pm.md');
+    fs.writeFileSync(includedFile2, 'launcher-pm');
+
+    fs.ensureDirSync(path.join(gomadDir, '_backups', '20260420-143052'));
+    const excludedBackup1 = path.join(gomadDir, '_backups', '20260420-143052', 'metadata.json');
+    fs.writeFileSync(excludedBackup1, '{}');
+
+    fs.ensureDirSync(path.join(gomadDir, '_backups', '20260420-143052', '.claude', 'commands', 'gm'));
+    const excludedBackup2 = path.join(gomadDir, '_backups', '20260420-143052', '.claude', 'commands', 'gm', 'agent-pm.md');
+    fs.writeFileSync(excludedBackup2, 'old-launcher');
+
+    // Prefix-collision case (must NOT be excluded): _backupstemp ≠ _backups
+    fs.ensureDirSync(path.join(gomadDir, '_backupstemp'));
+    const collisionFile = path.join(gomadDir, '_backupstemp', 'x.md');
+    fs.writeFileSync(collisionFile, 'not-a-backup');
+
+    const gen = new ManifestGenerator();
+    gen.gomadDir = gomadDir;
+    gen.gomadFolderName = '_gomad';
+    gen.ideRoots = ['.claude'];
+    gen.allInstalledFiles = [includedFile1, includedFile2, excludedBackup1, excludedBackup2, collisionFile];
+
+    const csvPath = await gen.writeFilesManifest(path.join(gomadDir, '_config'));
+    const csvContent = fs.readFileSync(csvPath, 'utf8');
+
+    assert(/agents\/pm\.md/.test(csvContent), 'D-39 exclusion: gomad/agents/pm.md included in manifest');
+    assert(/agent-pm\.md/.test(csvContent), 'D-39 exclusion: .claude/commands/gm/agent-pm.md included');
+    assert(!/_backups\/20260420/.test(csvContent), 'D-39 exclusion: _gomad/_backups/* path is EXCLUDED from manifest');
+    assert(!/_backups\/20260420-143052\/metadata\.json/.test(csvContent), 'D-39 exclusion: metadata.json under _backups EXCLUDED');
+    assert(!/_backups\/20260420-143052\/\.claude/.test(csvContent), 'D-39 exclusion: nested .claude under _backups EXCLUDED');
+    assert(/_backupstemp/.test(csvContent), 'D-39 exclusion: _backupstemp (prefix collision, no trailing slash match) is INCLUDED');
+  }
+
+  // D-39 native-separator check: synthesize Windows-style paths and verify
+  // the writer skips them too (defensive — on POSIX this is a no-op since
+  // path.sep === '/', but on Windows the native separator is '\').
+  resetLogs();
+  {
+    const ws = makeRealWs('gomad-d39-native-sep-');
+    const gomadDir = path.join(ws, '_gomad');
+    fs.ensureDirSync(path.join(gomadDir, '_config'));
+    fs.ensureDirSync(path.join(gomadDir, 'gomad', 'agents'));
+    const goodFile = path.join(gomadDir, 'gomad', 'agents', 'a.md');
+    fs.writeFileSync(goodFile, 'a');
+
+    // Synthesize a Windows-style path for the include list. On POSIX the
+    // file doesn't exist at this literal name; that's fine — calculateFileHash
+    // returns '' on missing files (existing behavior at manifest-generator.js:643).
+    // The point of this assertion: the path-prefix filter rejects the path
+    // BEFORE attempting to read it.
+    const winSepBackupPath = '\\ws\\_gomad\\_backups\\20260420\\meta.json';
+
+    const gen = new ManifestGenerator();
+    gen.gomadDir = gomadDir;
+    gen.gomadFolderName = '_gomad';
+    gen.ideRoots = [];
+    gen.allInstalledFiles = [goodFile, winSepBackupPath];
+
+    const csvPath = await gen.writeFilesManifest(path.join(gomadDir, '_config'));
+    const csvContent = fs.readFileSync(csvPath, 'utf8');
+
+    assert(/a\.md/.test(csvContent), 'D-39 native-sep: good file included');
+    assert(!/meta\.json/.test(csvContent), 'D-39 native-sep: backslash _gomad\\_backups\\ path EXCLUDED');
+  }
+
   // ─── Final ─────────────────────────────────────────────────────────────
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed > 0 ? 1 : 0);
