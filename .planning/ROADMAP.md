@@ -76,7 +76,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Before any destructive removal, files-to-be-removed are snapshotted into `_gomad/_backups/<timestamp>/` preserving relative-path structure; a documented recovery procedure restores from the backup
   6. A manifest corrupted with BOM, CRLF, quoted-field edge cases, or malformed rows does NOT cause mass-deletion — installer logs `MANIFEST_CORRUPT`, skips cleanup, and proceeds with idempotent install
 **Plans**: 2 plans
-- [ ] 07-01-PLAN.md — Pure cleanup-planner module + manifest reader hardening (BOM/CORRUPT_ROW) + D-39 backup exclusion (INSTALL-05, INSTALL-06)
+- [x] 07-01-PLAN.md — Pure cleanup-planner module + manifest reader hardening (BOM/CORRUPT_ROW) + D-39 backup exclusion (INSTALL-05, INSTALL-06)
 - [ ] 07-02-PLAN.md — Executor + --dry-run flag + v1.1 legacy cleanup + recovery docs + E2E tests (INSTALL-05, INSTALL-07, INSTALL-08, INSTALL-09)
 
 ### Phase 8: PRD + Product-Brief Content Refinement
