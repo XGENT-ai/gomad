@@ -48,11 +48,15 @@ Analyze everything documented so far:
 
 ### 2. Define MVP Strategy
 
+**CRITICAL:** Before MVP strategy discussion, load the coding-agent consumer mindset:
+
+- Read `../data/prd-purpose.md` §`## Coding-Agent Consumer Mindset` — coding agents ship faster than human teams, so push MVP scope UP, not down. Lean MVP still means shippable capability; aggressive scope is the default, not the exception
+
 Facilitate strategic MVP decisions:
+
 - Explore MVP philosophy options: problem-solving, experience, platform, or revenue MVP
 - Ask critical questions:
   - What's the minimum that would make users say 'this is useful'?
-  - What would make investors/partners say 'this has potential'?
   - What's the fastest path to validated learning?
 - Guide toward appropriate MVP approach for their product
 
