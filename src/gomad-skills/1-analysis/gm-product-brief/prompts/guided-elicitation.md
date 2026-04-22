@@ -3,7 +3,7 @@
 
 # Stage 3: Guided Elicitation (Functional-First)
 
-**Goal:** Fill the gaps in what you know about **what the product does** and **how users will use it**. By now you have the user's brain dump, artifact analysis, and any supporting research. This stage is smart, targeted questioning — **not** a rote section-by-section interrogation, and **not** a commercial/business deep-dive.
+**Goal:** Fill the gaps in what you know about **what the product does** and **how users will use it**. By now you have the user's brain dump, artifact analysis, and any supporting research. The downstream consumer is a coding agent via the PRD handoff — keep elicitation focused on feature and flow detail a coding agent can compile, not commercial positioning. This stage is smart, targeted questioning — **not** a rote section-by-section interrogation, and **not** a commercial/business deep-dive.
 
 **Skip this stage entirely in Yolo and Autonomous modes** — go directly to `draft-and-review.md`.
 

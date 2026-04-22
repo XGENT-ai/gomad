@@ -65,7 +65,7 @@ After all reviews complete:
 
 1. **Triage findings** — group by theme, remove duplicates
 2. **Apply non-controversial improvements** directly to the draft (obvious gaps, unclear language, missing specifics)
-3. **Flag substantive suggestions** that need user input (strategic choices, scope questions, market positioning decisions)
+3. **Flag substantive suggestions** that need user input (strategic choices, scope questions, feature-prioritization decisions)
 
 ## Step 4: Present to User
 
