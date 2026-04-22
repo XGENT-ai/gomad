@@ -591,27 +591,27 @@ for (const line of oosLines) {
 
 **If this table is empty:** (N/A — 7 assumptions logged above; planner + discuss-phase should confirm A2 and A7 before execution.)
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `gm-validate-prd` have any step file that asserts a specific `FR\d+:` literal on the PRD side?**
    - What we know: step-v-10 and step-v-12 do not (read in full). step-v-10 generates `FR-001` labels in its own output reports, which D-44 correctly identifies as validator-internal.
    - What's unclear: I did not read step-v-01 through step-v-09, step-v-11, step-v-13 in full. There could be a regex elsewhere asserting legacy `FR\d+:` format.
-   - Recommendation: plan's first task includes `grep -n "FR\d*:" src/gomad-skills/2-plan-workflows/gm-validate-prd/steps-v/*.md` and categorizes each hit as (a) PRD-side assertion needing D-44 compat, (b) validator-internal output (safe), (c) prose example (safe but could be updated for consistency).
+   - Recommendation: RESOLVED: plan's first task includes `grep -n "FR\d*:" src/gomad-skills/2-plan-workflows/gm-validate-prd/steps-v/*.md` and categorizes each hit as (a) PRD-side assertion needing D-44 compat, (b) validator-internal output (safe), (c) prose example (safe but could be updated for consistency).
 
 2. **Do any planning artifacts in `.planning/` reference the refined PRD format and require updating?**
    - What we know: CONTEXT.md `<deferred>` notes "historical planning artifacts (.planning/, old milestone docs) are left untouched as archived history" but that's Phase 9's REF-01 scope, not Phase 8.
    - What's unclear: whether `.planning/REQUIREMENTS.md`'s `PRD-04` line or `PROJECT.md` needs an FR-NN reference update as part of Phase 8.
-   - Recommendation: Plan 08 treats `.planning/` as read-only; any downstream doc alignment happens in Phase 9 reference sweep.
+   - Recommendation: RESOLVED: Plan 08 treats `.planning/` as read-only; any downstream doc alignment happens in Phase 9 reference sweep.
 
 3. **Should the `## Coding-Agent Consumer Mindset` section in `data/prd-purpose.md` have its own banned-phrase checklist, or is that redundant with step-11's §2c?**
    - What we know: D-61 places the checklist in step-11-polish.md as an execution gate.
    - What's unclear: whether the mindset-section prose should enumerate the forbidden vocabulary as a "don't do" list, reinforcing step-11.
-   - Recommendation: keep the mindset section aspirational/positive ("do this") and leave the negative checklist in step-11. DRY by reference if the banned list later grows.
+   - Recommendation: RESOLVED: keep the mindset section aspirational/positive ("do this") and leave the negative checklist in step-11. DRY by reference if the banned list later grows.
 
 4. **Should `prd-template.md` add the `FR-01` / `NFR-01` / `OOS-01` placeholders as literal examples, or only section headers?**
    - What we know: Current template is minimal (frontmatter + title + author/date). D-58 adds `## Out of Scope` header.
    - What's unclear: whether the template should include example entries like `- FR-01: [capability]` under `## Functional Requirements` as a style primer for the LLM that's filling it in.
-   - Recommendation: Planner's discretion. Simpler = safer; step-09 content structure already documents the emission format, so template can stay header-only.
+   - Recommendation: RESOLVED: header-only placeholders, NO literal FR-01/NFR-01/OOS-01 example entries. This disposition coexists with D-58, which mandates the `## Out of Scope` H2 header itself in the template as a placeholder — the header goes into the template (per D-58), but no example rows are added beneath it. Step-09's Content Structure is the authoritative source of populated `- **OOS-NN**: ...` example lines; the template's job is the structural scaffold that the validator (step-v-12) header-scans.
 
 ## Environment Availability
 
