@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 5: Foundations & Command-Surface Validation** — De-risk subdirectory namespace resolution, log launcher-pattern decision, fix PROJECT.md factual error, gitignore generated command output before any installer changes proceed
 - [ ] **Phase 6: Installer Mechanics — Copy + Manifest + Stub Generation** — Swap symlink→copy, extend files-manifest.csv schema, revive agent-command-generator to produce `.claude/commands/gm/agent-*.md` launchers
 - [ ] **Phase 7: Upgrade Safety — Manifest-Driven Cleanup** — Read prior manifest on re-install, realpath-contain each entry, back up + remove stale files, one-time v1.1 legacy path cleanup, dry-run flag
-- [ ] **Phase 8: PRD + Product-Brief Content Refinement** — Strip human-founder framing from `gm-create-prd/steps-c/`, light pass on `gm-product-brief`, integration test preserving downstream PRD-pipeline compatibility
+- [x] **Phase 8: PRD + Product-Brief Content Refinement** — Strip human-founder framing from `gm-create-prd/steps-c/`, light pass on `gm-product-brief`, integration test preserving downstream PRD-pipeline compatibility (completed 2026-04-22)
 - [ ] **Phase 9: Reference Sweep + Verification + Release** — Migrate user-visible `gm-agent-*` → `gm:agent-*`, extend tarball verification, CHANGELOG with BREAKING callout, publish `@xgent-ai/gomad@1.2.0`, tag `v1.2.0`
 
 ## Phase Details
@@ -124,5 +124,5 @@ Phases execute in numeric order: 5 → 6 → 7 → 8 → 9. Phase 8 (content) is
 | 5. Foundations & Command-Surface Validation        | v1.2      | 0/3            | Not started | -          |
 | 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/3            | Not started | -          |
 | 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 0/2            | Not started | -          |
-| 8. PRD + Product-Brief Content Refinement          | v1.2      | 0/5            | Not started | -          |
+| 8. PRD + Product-Brief Content Refinement          | v1.2      | 5/5 | Complete    | 2026-04-22 |
 | 9. Reference Sweep + Verification + Release        | v1.2      | 0/TBD          | Not started | -          |
