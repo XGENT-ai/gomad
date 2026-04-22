@@ -102,6 +102,32 @@ Review the entire document with PRD purpose principles in mind:
 
 **Why this matters**: Brainstorming documents are often long, and the PRD's structured template has an implicit bias toward concrete/structural ideas. Soft ideas (tone, philosophy, interaction feel) frequently get silently dropped because they don't map cleanly to FR/NFR format.
 
+### 2c. Coding-Agent Readiness Review
+
+**Scan the PRD for residual human-founder framing that leaked past earlier steps.** Run the banned-phrase checklist below against every section of the PRD document loaded in step 1:
+
+**Banned phrases (flag every occurrence):**
+
+- "why now?"
+- "investor" / "investors"
+- "ARR" / "CAC" / "LTV" / "MRR" / "DAU" / "MAU" / "retention rate" / "churn"
+- "go-to-market" / "GTM"
+- "stakeholder pitch" / "elevator pitch"
+- persona demographic markers (e.g. "35-year-old", "mother of two", "emotional journey")
+- time-window estimation phrases ("in 3 months", "by Q4", "within 18 months")
+- "business hours uptime" (reframe to "system uptime")
+- "expert peer" (if referring to the user — reword to "product owner driving a coding-agent-built product")
+
+**For each occurrence found:**
+
+1. **Flag the exact line and section** to the user — quote the surrounding sentence
+2. **Propose strip-or-rephrase** — show the concrete edit you'd make (delete / reword / keep-with-rationale)
+3. **Wait for user approval** before applying — facilitator gates, user decides
+
+**If zero occurrences are found**, state this explicitly: "No banned phrases detected. PRD is coding-agent-ready."
+
+**Why this matters**: Earlier steps may have drifted. Coding-agent consumers parse the PRD without the human-PM context these phrases assume. §2c is the last gate before PRD finalization — it catches regressions and ensures the PRD reads as a specification for code, not a pitch deck.
+
 ### 3. Optimization Actions
 
 Make targeted improvements:
@@ -140,6 +166,7 @@ Make targeted improvements:
 - All user journey narratives
 - All scope decisions (MVP, Growth, Vision)
 - All non-functional requirements
+- Out of Scope block (OOS-NN entries)
 - Product differentiator and vision
 - Domain-specific requirements
 - Innovation analysis (if present)
@@ -197,6 +224,7 @@ When user selects 'C', replace the entire document content with the polished ver
 ✅ Document is more readable and professional
 ✅ A/P/C menu presented and handled correctly
 ✅ Brainstorming reconciliation completed (if brainstorming input exists)
+✅ Coding-Agent Readiness Review completed (banned phrases flagged or absence confirmed)
 ✅ Polished document saved when C selected
 
 ## FAILURE MODES:
@@ -207,6 +235,7 @@ When user selects 'C', replace the entire document content with the polished ver
 ❌ Changing content instead of improving presentation
 ❌ Not ensuring ## Level 2 headers for main sections
 ❌ Making arbitrary style changes instead of coherence improvements
+❌ Banned-phrase checklist skipped; residual human-founder framing ships in the final PRD
 ❌ Not presenting A/P/C menu for user approval
 ❌ Saving polished document without user selecting 'C'
 
