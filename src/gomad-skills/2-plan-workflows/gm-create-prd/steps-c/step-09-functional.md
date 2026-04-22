@@ -40,6 +40,10 @@
 - Epic breakdown will ONLY implement what's listed here
 - If a capability is missing from FRs, it will NOT exist in the final product
 
+## SCOPE BOUNDARY:
+
+Step 9 emits BOTH the functional-requirement inventory (FR-NN with inline AC sub-bullets) AND an explicit `## Out of Scope` section (OOS-NN entries). The validator (gm-validate-prd/step-v-12) scans for both headers. The architect uses OOS entries to prevent over-building. Keep OOS concise — capability + reason per entry.
+
 ## FUNCTIONAL REQUIREMENTS SYNTHESIS SEQUENCE:
 
 ### 1. Understand FR Purpose and Usage
@@ -93,17 +97,36 @@ Create complete functional requirements using this format:
 
 **Format:**
 
-- FR#: [Actor] can [capability] [context/constraint if needed]
-- Number sequentially (FR1, FR2, FR3...)
-- Aim for 20-50 FRs for typical projects
+Each FR is a top-level bullet with 2–4 inline AC sub-bullets in Given/When/Then form:
+
+````text
+- FR-NN: [Actor] can [capability] [context/constraint if needed]
+    - AC: Given [state], when [action], then [observable outcome]
+    - AC: Given [state], when [action], then [observable outcome]
+````
+
+**FR numbering rules:**
+
+- Use 2-digit zero-padded dash-separated IDs: `FR-01`, `FR-02`, ..., `FR-99`
+- Number sequentially across all capability areas (do not restart per area)
+- Aim for 20–50 FRs for typical projects
+
+**AC rules:**
+
+- Every FR MUST have ≥2 AC sub-bullets (floor: 2)
+- Every FR MUST have ≤4 AC sub-bullets (cap: 4 — more belongs in downstream stories)
+- AC wording is **Given / When / Then** (Gherkin-shaped, machine-verifiable by construction)
+- AC sub-bullets indent 4 spaces under the FR bullet (markdown list continuation)
 
 **Altitude Check:**
 Each FR should answer "WHAT capability exists?" NOT "HOW it's implemented?"
 
 **Examples:**
 
-- ✅ "Users can customize appearance settings"
-- ❌ "Users can toggle light/dark theme with 3 font size options stored in LocalStorage"
+- ✅ `- FR-01: Users can customize appearance settings`
+    - `- AC: Given a logged-in user on the settings page, when they toggle the theme, then the preference is persisted and applied immediately`
+    - `- AC: Given no user session, when /settings is accessed, then the UI presents read-only defaults`
+- ❌ `- FR1: Users can toggle light/dark theme with 3 font size options stored in LocalStorage` (implementation leakage; unpadded ID; missing AC)
 
 ### 5. Self-Validation Process
 
@@ -129,6 +152,8 @@ Before presenting to user, validate the FR list:
 1. "Is each FR clear enough that someone could test whether it exists?"
 2. "Is each FR independent (not dependent on reading other FRs to understand)?"
 3. "Did I avoid vague terms like 'good', 'fast', 'easy'?" (Use NFRs for quality attributes)
+4. "Does each FR have 2–4 AC sub-bullets in Given / When / Then form?"
+5. "Is there an `## Out of Scope` section with at least one `OOS-NN` entry?"
 
 ### 6. Generate Functional Requirements Content
 
@@ -143,16 +168,26 @@ When saving to document, append these Level 2 and Level 3 sections:
 
 ### [Capability Area Name]
 
-- FR1: [Specific Actor] can [specific capability]
-- FR2: [Specific Actor] can [specific capability]
-- FR3: [Specific Actor] can [specific capability]
+- FR-01: [Specific Actor] can [specific capability]
+    - AC: Given [state], when [action], then [observable outcome]
+    - AC: Given [state], when [action], then [observable outcome]
+
+- FR-02: [Specific Actor] can [specific capability]
+    - AC: Given [state], when [action], then [observable outcome]
+    - AC: Given [state], when [action], then [observable outcome]
 
 ### [Another Capability Area]
 
-- FR4: [Specific Actor] can [specific capability]
-- FR5: [Specific Actor] can [specific capability]
+- FR-03: [Specific Actor] can [specific capability]
+    - AC: Given [state], when [action], then [observable outcome]
+    - AC: Given [state], when [action], then [observable outcome]
 
 [Continue for all capability areas discovered in conversation]
+
+## Out of Scope
+
+- **OOS-01**: <excluded capability> — Reason: <why excluded>
+- **OOS-02**: <excluded capability> — Reason: <why excluded>
 ```
 
 ### 7. Present MENU OPTIONS
@@ -191,6 +226,8 @@ When user selects 'C', append the content directly to the document using the str
 ✅ Comprehensive coverage with 20-50 FRs typical
 ✅ Altitude validation ensures implementation-agnostic requirements
 ✅ Completeness check validates coverage of all discussed capabilities
+✅ Every FR has 2–4 AC sub-bullets in Given/When/Then form
+✅ ## Out of Scope section emitted with OOS-NN entries
 ✅ A/P/C menu presented and handled correctly
 ✅ Content properly appended to document when C selected
 
@@ -201,6 +238,8 @@ When user selects 'C', append the content directly to the document using the str
 ❌ Including implementation details or UI specifics in FRs
 ❌ Not achieving comprehensive coverage of discussed capabilities
 ❌ Using vague terms instead of testable capabilities
+❌ FRs missing AC sub-bullets or AC sub-bullets fewer than 2
+❌ ## Out of Scope section missing or empty
 ❌ Not presenting A/P/C menu after content generation
 ❌ Appending content without user selecting 'C'
 
