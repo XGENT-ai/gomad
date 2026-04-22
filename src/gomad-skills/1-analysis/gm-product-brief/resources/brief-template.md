@@ -2,7 +2,7 @@
 
 This is a flexible guide for a **feature- and function-first** product brief — adapt it to serve the product's story. Merge sections, add new ones, reorder as needed. The product determines the structure, not the template.
 
-**Focus of this brief:** what the product does, who it serves, and the core functional scope of the first version. Business/commercial concerns (pricing, GTM, financial metrics, investor narrative) are explicitly **not** the focus and belong in a separate business brief or the distillate.
+**Focus of this brief:** what the product does, who it serves, and the core functional scope of the first version. The downstream consumer is a coding agent (via the gm-create-prd handoff), so prose is concrete and capability-oriented — not a stakeholder pitch. Business/commercial concerns (pricing, GTM, financial metrics, investor narrative) are explicitly **not** the focus and belong in a separate business brief or the distillate.
 
 ## Sensible Default Structure
 
