@@ -237,7 +237,7 @@ const badFixture = [
 
 // Assertion: FR-NN negative guard MUST detect the legacy format.
 const legacyUnpadded = /^- FR\d+:/m.test(badFixture);
-assert(legacyUnpadded === true, String.raw`Negative-fixture detector: flags legacy unpadded FR\d+: format`);
+assert(legacyUnpadded, String.raw`Negative-fixture detector: flags legacy unpadded FR\d+: format`);
 
 // Assertion: our positive extractor MUST find zero FR-NN blocks in the bad fixture.
 const badBlocks = extractFRBlocks(badFixture);
