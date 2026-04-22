@@ -95,7 +95,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] 08-02-PLAN.md — Residual "expert peer" reword batch across workflow.md + 8 steps-c files + step-08 investors/partners strip + banned-phrase sweep on 7 residual files (PRD-02, PRD-03)
 - [x] 08-03-PLAN.md — step-04 action-oriented journey rewrite + step-09 FR-NN/Given-When-Then AC/OOS emission + step-11 §2c Coding-Agent Readiness Review + prd-template.md minimality verification (PRD-02, PRD-04)
 - [x] 08-04-PLAN.md — gm-product-brief light pass: SKILL.md + 4 prompts + brief-template.md voice alignment (preserve existing guardrails) (PRD-05)
-- [ ] 08-05-PLAN.md — Integration test: test/integration/prd-chain/ fixture + deterministic Node test + package.json quality-gate wiring (PRD-06 guard, PRD-07)
+- [x] 08-05-PLAN.md — Integration test: test/integration/prd-chain/ fixture + deterministic Node test + package.json quality-gate wiring (PRD-06 guard, PRD-07)
 
 ### Phase 9: Reference Sweep + Verification + Release
 **Goal**: Migrate every user-visible `gm-agent-*` reference to the `gm:agent-*` command form across source, docs (en + zh-cn), tests, manifests, and the Astro website — while preserving filesystem directory names and `skill-manifest.yaml` `name:` fields (colons aren't Windows-safe; the `name: gm:agent-*` form lives only in the generated launcher stubs). Extend tarball verification to assert `.claude/commands/gm/` presence and legacy `.claude/skills/gm-agent-*` absence. Ship `@xgent-ai/gomad@1.2.0` with a prominent BREAKING CHANGELOG callout and tag `v1.2.0` on main.
