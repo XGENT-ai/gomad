@@ -92,7 +92,10 @@ const body = fmMatch ? raw.slice(fmMatch[0].length) : raw;
 console.log(`\n${colors.cyan}Phase 1 — Structural sections${colors.reset}`);
 
 for (const header of REQUIRED_SECTIONS) {
-  assert(body.includes(header), `${header} present`);
+  const escaped = header.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+  const headerPattern = new RegExp(`^${escaped}$`, 'gm');
+  const matches = body.match(headerPattern) || [];
+  assert(matches.length === 1, `${header} present exactly once (found ${matches.length})`);
 }
 
 // Section order — Out of Scope MUST sit between Functional and Non-Functional Requirements
