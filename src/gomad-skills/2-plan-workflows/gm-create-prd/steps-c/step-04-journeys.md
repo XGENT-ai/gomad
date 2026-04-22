@@ -32,7 +32,7 @@
 
 ## YOUR TASK:
 
-Create compelling narrative user journeys that leverage existing personas from product briefs and identify additional user types needed for comprehensive coverage.
+Create action-oriented user journeys with minimal personas (name + role + goal), identifying all user types needed for comprehensive capability coverage.
 
 ## JOURNEY MAPPING SEQUENCE:
 
@@ -57,35 +57,36 @@ Start with comprehensive user type discovery:
 - Ask what user types should be mapped for this specific product
 - Ensure comprehensive coverage of all system interactions
 
-### 2. Create Narrative Story-Based Journeys
+### 2. Create Action-Oriented Journeys
 
-For each user type, create compelling narrative journeys that tell their story:
+For each user type, create action-oriented journeys with **name + role + goal** only. Persona framework is minimal — coding agents implement observable behaviors, not narrative storytelling.
 
-#### Narrative Journey Creation Process:
+#### Journey Creation Process:
+
+**Persona fields (minimal):**
+- **Name** — identifier only (no demographic markers, no backstory, no personality traits)
+- **Role** — how they relate to the system (e.g., "admin", "end-user", "API consumer")
+- **Goal** — observable outcome they need from the system
 
 **If Using Existing Persona from Input Documents:**
-Guide narrative journey creation:
-- Use persona's existing backstory from brief
-- Explore how the product changes their life/situation
-- Craft journey narrative: where do we meet them, how does product help them write their next chapter?
+Extract name + role + goal only; discard any backstory, narrative-storytelling probes, or demographic markers from the source material. If the input persona has no explicit role, derive it from the user's relationship to the system in the brief.
 
 **If Creating New Persona:**
-Guide persona creation with story framework:
-- Name: realistic name and personality
-- Situation: What's happening in their life/work that creates need?
-- Goal: What do they desperately want to achieve?
-- Obstacle: What's standing in their way?
-- Solution: How does the product solve their story?
+Define name, role, and goal in a single line each. Do NOT prompt the user for personality, situation, obstacle, or solution-narrative — those are implementation-agnostic and belong in FRs downstream.
 
-**Story-Based Journey Mapping:**
+**Journey prose shape (mandatory form):**
 
-Guide narrative journey creation using story structure:
-- **Opening Scene**: Where/how do we meet them? What's their current pain?
-- **Rising Action**: What steps do they take? What do they discover?
-- **Climax**: Critical moment where product delivers real value
-- **Resolution**: How does their situation improve? What's their new reality?
+"Actor performs X, system responds Y, outcome Z."
 
-Encourage narrative format with specific user details, emotional journey, and clear before/after contrast
+For each journey:
+- Describe the triggering action (what the actor does)
+- Describe the system's observable response
+- Describe the resulting state / outcome
+- Flag edge cases and error paths as separate journey entries (not narrative asides)
+
+This form maps 1:1 to FR acceptance-criteria candidates in step 9 (Given/When/Then).
+
+**Why this shape:** Downstream coding agents extract capability requirements from journey prose. Narrative structure (opening, middle, ending arcs) adds noise; action-oriented prose maps directly to testable behaviors.
 
 ### 3. Guide Journey Exploration
 
@@ -93,7 +94,7 @@ For each journey, facilitate detailed exploration:
 - What happens at each step specifically?
 - What could go wrong? What's the recovery path?
 - What information do they need to see/hear?
-- What's their emotional state at each point?
+- What is the observable system state at each point?
 - Where does this journey succeed or fail?
 
 ### 4. Connect Journeys to Requirements
@@ -161,10 +162,10 @@ When user selects 'C', append the content directly to the document using the str
 
 ✅ Existing personas from product briefs leveraged when available
 ✅ All user types identified (not just primary users)
-✅ Rich narrative storytelling for each persona and journey
-✅ Complete story-based journey mapping with emotional arc
+✅ Action-oriented journey prose for each persona (Actor performs X, system responds Y, outcome Z)
+✅ Complete action-oriented journey mapping covering all user types
 ✅ Journey requirements clearly connected to capabilities needed
-✅ Minimum 3-4 compelling narrative journeys covering different user types
+✅ Minimum 3-4 journeys covering different user types per the Minimum Coverage list
 ✅ A/P/C menu presented and handled correctly
 ✅ Content properly appended to document when C selected
 
@@ -172,8 +173,6 @@ When user selects 'C', append the content directly to the document using the str
 
 ❌ Ignoring existing personas from product briefs
 ❌ Only mapping primary user journeys and missing secondary users
-❌ Creating generic journeys without rich persona details and narrative
-❌ Missing emotional storytelling elements that make journeys compelling
 ❌ Missing critical decision points and failure scenarios
 ❌ Not connecting journeys to required capabilities
 ❌ Not having enough journey diversity (admin, support, API, etc.)
