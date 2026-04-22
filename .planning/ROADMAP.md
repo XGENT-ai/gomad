@@ -90,7 +90,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. `gm-product-brief` receives a light pass: voice aligned with refined `gm-create-prd`, lingering human-founder framing in prompts and template stripped, existing scope discipline preserved
   5. An automated integration test runs `gm-create-prd` → `gm-validate-prd` → `gm-create-architecture` → `gm-create-epics-and-stories` on a sample project using the refined skills and all four exit successfully without "missing context" or validator-false-positive failures; `gm-check-implementation-readiness` reports alignment
   6. No changes are made to `gm-validate-prd`, `gm-create-architecture`, `gm-create-epics-and-stories`, or `gm-check-implementation-readiness` skills (structural compatibility preserved as scope-locked decision)
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 08-01-PLAN.md — Explicit SC#1 strips in step-02b/02c/03/10 + new `## Coding-Agent Consumer Mindset` section in data/prd-purpose.md (PRD-01, PRD-03)
+- [ ] 08-02-PLAN.md — Residual "expert peer" reword batch across workflow.md + 8 steps-c files + step-08 investors/partners strip + banned-phrase sweep on 7 residual files (PRD-02, PRD-03)
+- [ ] 08-03-PLAN.md — step-04 action-oriented journey rewrite + step-09 FR-NN/Given-When-Then AC/OOS emission + step-11 §2c Coding-Agent Readiness Review + prd-template.md minimality verification (PRD-02, PRD-04)
+- [ ] 08-04-PLAN.md — gm-product-brief light pass: SKILL.md + 4 prompts + brief-template.md voice alignment (preserve existing guardrails) (PRD-05)
+- [ ] 08-05-PLAN.md — Integration test: test/integration/prd-chain/ fixture + deterministic Node test + package.json quality-gate wiring (PRD-06 guard, PRD-07)
 
 ### Phase 9: Reference Sweep + Verification + Release
 **Goal**: Migrate every user-visible `gm-agent-*` reference to the `gm:agent-*` command form across source, docs (en + zh-cn), tests, manifests, and the Astro website — while preserving filesystem directory names and `skill-manifest.yaml` `name:` fields (colons aren't Windows-safe; the `name: gm:agent-*` form lives only in the generated launcher stubs). Extend tarball verification to assert `.claude/commands/gm/` presence and legacy `.claude/skills/gm-agent-*` absence. Ship `@xgent-ai/gomad@1.2.0` with a prominent BREAKING CHANGELOG callout and tag `v1.2.0` on main.
@@ -119,5 +124,5 @@ Phases execute in numeric order: 5 → 6 → 7 → 8 → 9. Phase 8 (content) is
 | 5. Foundations & Command-Surface Validation        | v1.2      | 0/3            | Not started | -          |
 | 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/3            | Not started | -          |
 | 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 0/2            | Not started | -          |
-| 8. PRD + Product-Brief Content Refinement          | v1.2      | 0/TBD          | Not started | -          |
+| 8. PRD + Product-Brief Content Refinement          | v1.2      | 0/5            | Not started | -          |
 | 9. Reference Sweep + Verification + Release        | v1.2      | 0/TBD          | Not started | -          |
