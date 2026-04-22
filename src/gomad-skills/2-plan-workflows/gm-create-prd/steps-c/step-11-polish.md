@@ -1,6 +1,6 @@
 # Step 11: Document Polish
 
-**Progress: Step 11 of 12** - Next: Complete PRD
+**Progress: Step 11 of 13** - Next: Complete PRD
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -196,7 +196,7 @@ Present the polished document for review, then display menu:
 - Ask if they'd like to refine further, get other perspectives, or proceed
 - Present menu options naturally as part of conversation
 
-Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Complete PRD (Step 12 of 12)"
+Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Complete PRD (Step 12 of 13)"
 
 #### Menu Handling Logic:
 - IF A: Invoke the `gm-advanced-elicitation` skill with the polished document, process the enhanced refinements that come back, ask user "Accept these polish improvements? (y/n)", if yes update content with improvements then redisplay menu, if no keep original polish then redisplay menu

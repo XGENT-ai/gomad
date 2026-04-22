@@ -1,6 +1,6 @@
 # Step 8: Scoping Exercise - MVP & Future Features
 
-**Progress: Step 8 of 11** - Next: Functional Requirements
+**Progress: Step 8 of 13** - Next: Functional Requirements
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -172,7 +172,7 @@ Present the scoping decisions for review, then display menu:
 - Ask if they'd like to refine further, get other perspectives, or proceed
 - Present menu options naturally as part of conversation
 
-Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Functional Requirements (Step 9 of 11)"
+Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Functional Requirements (Step 9 of 13)"
 
 #### Menu Handling Logic:
 - IF A: Invoke the `gm-advanced-elicitation` skill with the current scoping analysis, process the enhanced insights that come back, ask user if they accept the improvements, if yes update content then redisplay menu, if no keep original content then redisplay menu

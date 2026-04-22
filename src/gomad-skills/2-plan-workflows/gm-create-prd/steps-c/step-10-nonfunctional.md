@@ -1,6 +1,6 @@
 # Step 10: Non-Functional Requirements
 
-**Progress: Step 10 of 12** - Next: Polish Document
+**Progress: Step 10 of 13** - Next: Polish Document
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -152,7 +152,7 @@ Present the non-functional requirements for review, then display menu:
 - Ask if they'd like to refine further, get other perspectives, or proceed
 - Present menu options naturally as part of conversation
 
-Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Polish Document (Step 11 of 12)"
+Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Polish Document (Step 11 of 13)"
 
 #### Menu Handling Logic:
 - IF A: Invoke the `gm-advanced-elicitation` skill with the current NFR content, process the enhanced quality attribute insights that come back, ask user if they accept the improvements, if yes update content then redisplay menu, if no keep original content then redisplay menu

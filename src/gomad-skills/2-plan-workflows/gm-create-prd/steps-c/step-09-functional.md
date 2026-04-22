@@ -1,6 +1,6 @@
 # Step 9: Functional Requirements Synthesis
 
-**Progress: Step 9 of 11** - Next: Non-Functional Requirements
+**Progress: Step 9 of 13** - Next: Non-Functional Requirements
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -201,7 +201,7 @@ Present the functional requirements for review, then display menu:
 
 **What would you like to do?**"
 
-Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Non-Functional Requirements (Step 10 of 11)"
+Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Non-Functional Requirements (Step 10 of 13)"
 
 #### Menu Handling Logic:
 - IF A: Invoke the `gm-advanced-elicitation` skill with the current FR list, process the enhanced capability coverage that comes back, ask user if they accept the additions, if yes update content then redisplay menu, if no keep original content then redisplay menu

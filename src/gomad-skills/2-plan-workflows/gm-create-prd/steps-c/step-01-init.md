@@ -1,6 +1,6 @@
 # Step 1: Workflow Initialization
 
-**Progress: Step 1 of 11** - Next: Project Discovery
+**Progress: Step 1 of 13** - Next: Project Discovery
 
 ## STEP GOAL:
 
@@ -134,7 +134,7 @@ Do you have any other documents you'd like me to include, or shall we continue t
 
 Display menu after setup report:
 
-"[C] Continue - Save this and move to Project Discovery (Step 2 of 11)"
+"[C] Continue - Save this and move to Project Discovery (Step 2 of 13)"
 
 #### Menu Handling Logic:
 

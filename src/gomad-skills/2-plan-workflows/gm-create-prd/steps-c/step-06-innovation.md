@@ -1,6 +1,6 @@
 # Step 6: Innovation Discovery
 
-**Progress: Step 6 of 11** - Next: Project Type Analysis
+**Progress: Step 6 of 13** - Next: Project Type Analysis
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -137,7 +137,7 @@ Present the innovation content for review, then display menu:
 - Ask if they'd like to refine further, get other perspectives, or proceed
 - Present menu options naturally as part of conversation
 
-Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Project Type Analysis (Step 7 of 11)"
+Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Project Type Analysis (Step 7 of 13)"
 
 #### Menu Handling Logic:
 - IF A: Invoke the `gm-advanced-elicitation` skill with the current innovation content, process the enhanced innovation insights that come back, ask user "Accept these improvements to the innovation analysis? (y/n)", if yes update content with improvements then redisplay menu, if no keep original content then redisplay menu
@@ -157,7 +157,7 @@ If no genuine innovation signals are found after exploration:
 - Note this is fine - many successful products are excellent executions of existing concepts
 - Ask if they'd like to try finding innovative angles or proceed
 
-Display: "**Select:** [A] Advanced Elicitation - Let's try to find innovative angles [C] Continue - Skip innovation section and move to Project Type Analysis (Step 7 of 11)"
+Display: "**Select:** [A] Advanced Elicitation - Let's try to find innovative angles [C] Continue - Skip innovation section and move to Project Type Analysis (Step 7 of 13)"
 
 ### Menu Handling Logic:
 - IF A: Proceed with content generation anyway, then return to menu

@@ -1,6 +1,6 @@
 # Step 7: Project-Type Deep Dive
 
-**Progress: Step 7 of 11** - Next: Scoping
+**Progress: Step 7 of 13** - Next: Scoping
 
 ## MANDATORY EXECUTION RULES (READ FIRST):
 
@@ -154,7 +154,7 @@ Present the project-type content for review, then display menu:
 
 **What would you like to do?**"
 
-Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Scoping (Step 8 of 11)"
+Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Scoping (Step 8 of 13)"
 
 #### Menu Handling Logic:
 - IF A: Invoke the `gm-advanced-elicitation` skill with the current project-type content, process the enhanced technical insights that come back, ask user "Accept these improvements to the technical requirements? (y/n)", if yes update content with improvements then redisplay menu, if no keep original content then redisplay menu
