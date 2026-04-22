@@ -34,9 +34,11 @@
 
 ## YOUR TASK:
 
-Define comprehensive success criteria that cover user success, business success, and technical success, using input documents as a foundation while allowing user refinement.
+Define comprehensive success criteria that cover user success and technical success, using input documents as a foundation while allowing user refinement.
 
 ## SUCCESS DISCOVERY SEQUENCE:
+
+Success is functional completion plus user outcomes observable from code behavior. Business KPIs and revenue metrics are out of scope for this PRD — see `../data/prd-purpose.md` §`## Coding-Agent Consumer Mindset`.
 
 ### 1. Begin Success Definition Conversation
 
@@ -69,25 +71,14 @@ Listen for specific user outcomes and help make them measurable:
 - Identify success moments: "What's the 'aha!' moment?"
 - Define completion scenarios: "What does 'done' look like for the user?"
 
-### 3. Define Business Success
+### 3. Challenge Vague Metrics
 
-Transition to business metrics:
-- Guide conversation to business perspective on success
-- Explore timelines: What does 3-month success look like? 12-month success?
-- Identify key business metrics: revenue, user growth, engagement, or other measures?
-- Ask what specific metric would indicate "this is working"
-- Understand business success from their perspective
+Push for specificity on metrics:
 
-### 4. Challenge Vague Metrics
-
-Push for specificity on business metrics:
-
-- "10,000 users" → "What kind of users? Doing what?"
 - "99.9% uptime" → "What's the real concern - data loss? Failed payments?"
 - "Fast" → "How fast, and what specifically needs to be fast?"
-- "Good adoption" → "What percentage adoption by when?"
 
-### 5. Connect to Product Differentiator
+### 4. Connect to Product Differentiator
 
 Tie success metrics back to what makes the product special:
 - Connect success criteria to the product's unique differentiator
@@ -99,7 +90,7 @@ Tie success metrics back to what makes the product special:
   - Regulated: Compliance, safety, validation
   - GovTech: Government compliance, accessibility, procurement
 
-### 6. Smart Scope Negotiation
+### 5. Smart Scope Negotiation
 
 Guide scope definition through success lens:
 - Help user distinguish MVP (must work to be useful) from growth (competitive) and vision (dream)
@@ -110,7 +101,7 @@ Guide scope definition through success lens:
 - Challenge scope creep conversationally: Could this wait until after launch? Is this essential for MVP?
 - For complex domains: Ensure compliance minimums are included in MVP
 
-### 7. Generate Success Criteria Content
+### 6. Generate Success Criteria Content
 
 Prepare the content to append to the document:
 
@@ -124,10 +115,6 @@ When saving to document, append these Level 2 and Level 3 sections:
 ### User Success
 
 [Content about user success criteria based on conversation]
-
-### Business Success
-
-[Content about business success metrics based on conversation]
 
 ### Technical Success
 
@@ -152,11 +139,11 @@ When saving to document, append these Level 2 and Level 3 sections:
 [Content about future vision based on conversation]
 ```
 
-### 8. Present MENU OPTIONS
+### 7. Present MENU OPTIONS
 
 Present the success criteria content for user review, then display menu:
 
-- Show the drafted success criteria and scope definition (using structure from section 7)
+- Show the drafted success criteria and scope definition (using structure from section 6)
 - Ask if they'd like to refine further, get other perspectives, or proceed
 - Present menu options naturally as part of the conversation
 
@@ -175,12 +162,11 @@ Display: "**Select:** [A] Advanced Elicitation [P] Party Mode [C] Continue to Us
 
 ## APPEND TO DOCUMENT:
 
-When user selects 'C', append the content directly to the document using the structure from step 7.
+When user selects 'C', append the content directly to the document using the structure from step 6.
 
 ## SUCCESS METRICS:
 
 ✅ User success criteria clearly identified and made measurable
-✅ Business success metrics defined with specific targets
 ✅ Success criteria connected to product differentiator
 ✅ Scope properly negotiated (MVP, Growth, Vision)
 ✅ A/P/C menu presented and handled correctly

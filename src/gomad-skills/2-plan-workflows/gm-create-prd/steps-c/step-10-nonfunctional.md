@@ -84,7 +84,6 @@ Explore security requirements:
 
 Explore scalability requirements:
 - How many users do we expect initially? Long-term?
-- Are there seasonal or event-based traffic spikes?
 - What happens if we exceed our capacity?
 - What growth scenarios should we plan for?
 

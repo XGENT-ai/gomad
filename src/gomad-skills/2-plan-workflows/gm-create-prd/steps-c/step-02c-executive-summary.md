@@ -66,7 +66,7 @@ Generate the Executive Summary section using the content structure below. Apply 
 - High information density — every sentence carries weight
 - Zero fluff — no filler phrases or vague language
 - Precise and actionable — clear, specific statements
-- Dual-audience optimized — readable by humans, consumable by LLMs
+- Dual-audience optimized — readable by humans, consumable by coding agents
 
 ### 3. Present Draft for Review
 

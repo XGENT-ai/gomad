@@ -70,11 +70,14 @@ Guide the conversation to uncover the product's unique value:
 
 ### 3. Understand the Vision
 
-Dig deeper into the product vision:
+**CRITICAL:** Before this discovery, load the coding-agent consumer mindset:
+
+- Read `../data/prd-purpose.md` §`## Coding-Agent Consumer Mindset` — vision is 1–2 declarative sentences, not a hedge; MVP scope pushes UP, not down because coding agents ship faster than human teams
+
+Then dig deeper into the product vision:
 
 - **Problem framing:** "What's the real problem you're solving — not the surface symptom, but the deeper need?"
 - **Future state:** "When this product is successful, what does the world look like for your users?"
-- **Why now:** "Why is this the right time to build this?"
 
 ### 4. Validate Understanding
 
