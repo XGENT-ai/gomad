@@ -30,6 +30,18 @@ Every sentence must carry information weight. LLMs consume precise, dense conten
 
 ---
 
+## Coding-Agent Consumer Mindset
+
+**The downstream consumers of this PRD are coding agents, not human development teams.**
+
+Coding agents ship faster than human teams. Push MVP scope UP, not down. Vision is 1–2 declarative sentences, not a hedge. Requirements are testable capabilities machine-consumable without stakeholder context.
+
+Omit business-KPI / go-to-market / investor framing. Keep code-behavior-observable outcomes. A PRD authored for coding agents reads like a specification, not a pitch deck — the reader is compiling intent into code, not evaluating an opportunity.
+
+When the facilitator is tempted to probe for "why now?", "who are the competitors?", or "what's the business case?", the answer is the same: not in this document. Capture only what shapes code behavior.
+
+---
+
 ## The Traceability Chain
 
 **PRD starts the chain:**
@@ -96,7 +108,7 @@ Vision → Success Criteria → User Journeys → Functional Requirements → (f
 
 **Examples:**
 - ✅ "The system shall respond to API requests in under 200ms for 95th percentile as measured by APM monitoring"
-- ✅ "The system shall maintain 99.9% uptime during business hours as measured by cloud provider SLA"
+- ✅ "The system shall maintain 99.9% system uptime as measured by cloud provider SLA"
 - ✅ "The system shall support 10,000 concurrent users as measured by load testing"
 
 ### NFR Anti-Patterns
