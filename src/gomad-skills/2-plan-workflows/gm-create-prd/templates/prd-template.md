@@ -8,5 +8,3 @@ workflowType: 'prd'
 
 **Author:** {{user_name}}
 **Date:** {{date}}
-
-## Out of Scope
