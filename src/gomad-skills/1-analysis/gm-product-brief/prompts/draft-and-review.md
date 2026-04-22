@@ -69,7 +69,7 @@ After all reviews complete:
 
 ## Step 4: Present to User
 
-**Headless mode:** Skip to `finalize.md` — no user interaction. Save the improved draft directly.
+**Headless mode:** Skip to `finalize.md` — no user interaction. Save the improved draft directly. (In autonomous mode, Stage 3 guided elicitation is skipped entirely; the flow is `SKILL → contextual-discovery → draft-and-review → finalize`.)
 
 **Yolo and Guided modes:**
 
