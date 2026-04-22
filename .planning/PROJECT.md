@@ -140,4 +140,6 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-20 after Phase 7 (upgrade safety — manifest-driven cleanup) complete — INSTALL-05/06/07/08/09 closed; `buildCleanupPlan` + `executeCleanupPlan` + `--dry-run` shipped with snapshot-before-remove, realpath containment, v1.1 legacy cleanup, `docs/upgrade-recovery.md`, and 223 Phase 7 assertions green*
+*Last updated: 2026-04-22 after Phase 8 (PRD + product-brief content refinement) complete — PRD-01..PRD-07 closed; founder framing stripped from `gm-create-prd` steps 02b/02c/03/10 + residual sweep of 9 other steps; `## Coding-Agent Consumer Mindset` installed in `data/prd-purpose.md`; FR-NN + Given/When/Then AC + `## Out of Scope` contract emitted by step-09; `gm-product-brief` voice aligned (guardrails preserved); new `test/integration/prd-chain/test-prd-chain.js` (97 assertions) wired into `npm run quality`.*
+
+*Previously: 2026-04-20 after Phase 7 (upgrade safety — manifest-driven cleanup) complete — INSTALL-05/06/07/08/09 closed; `buildCleanupPlan` + `executeCleanupPlan` + `--dry-run` shipped with snapshot-before-remove, realpath containment, v1.1 legacy cleanup, `docs/upgrade-recovery.md`, and 223 Phase 7 assertions green*
