@@ -166,8 +166,9 @@ assert(Boolean(oosBlockMatch), 'Out of Scope block extractable');
 if (oosBlockMatch) {
   const oosLines = oosBlockMatch[1].split('\n').filter((l) => l.trim().startsWith('- '));
   assert(oosLines.length > 0, `Out of Scope has >=1 entry (found ${oosLines.length})`);
-  // Accept en-dash (U+2013), em-dash (U+2014), or regular hyphen as separator (Reason marker)
-  const OOS_ENTRY_REGEX = /^- \*\*OOS-\d{2}\*\*: .+ (—|-|–) Reason: .+/;
+  // Accept en-dash (U+2013), em-dash (U+2014), or regular hyphen as separator (Reason marker).
+  // Character class tightens the marker anchor; trailing \S rejects empty Reason values.
+  const OOS_ENTRY_REGEX = /^- \*\*OOS-\d{2}\*\*: .+ [—–-] Reason: \S/;
   for (const line of oosLines) {
     assert(OOS_ENTRY_REGEX.test(line), 'OOS line format: `- **OOS-NN**: <capability> — Reason: <why>`', line);
   }
