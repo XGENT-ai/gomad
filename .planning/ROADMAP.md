@@ -110,7 +110,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   6. `v1.2.0` tag is applied on `main` and the milestone is marked complete
 **Plans**: 3 plans
 - [x] 09-01-PLAN.md — Prose sweep + installer simplification: gm-sprint-agent/workflow.md, gm-epic-demo-story/SKILL.md, module-help.csv colon-form migration, installer.js transform-helper deletion (REF-01, REF-02, REF-04)
-- [ ] 09-02-PLAN.md — Verification gates: test-orphan-refs.js + allowlist + test-gm-command-surface.js Phase C hard-assertion + verify-tarball.js Phase 3 + npm-scripts wiring (REF-01, REF-04, REF-05, REL-03, REL-04)
+- [x] 09-02-PLAN.md — Verification gates: test-orphan-refs.js + allowlist + test-gm-command-surface.js Phase C hard-assertion + verify-tarball.js Phase 3 + npm-scripts wiring (REF-01, REF-04, REF-05, REL-03, REL-04)
 - [ ] 09-03-PLAN.md — CHANGELOG v1.2.0 + version bump + gate-stack + human-verify npm publish + v1.2.0 tag + smoke-test (REL-02, REL-04, REL-05, REL-06)
 
 ## Progress
