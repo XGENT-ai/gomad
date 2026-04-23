@@ -1,0 +1,78 @@
+[
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-analyst/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-analyst/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-tech-writer/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-tech-writer/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-pm/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-pm/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-ux-designer/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-ux-designer/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/3-solutioning/gm-agent-architect/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/3-solutioning/gm-agent-architect/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-sm/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-sm/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-dev/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-dev/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
+    "path": "tools/installer/ide/shared/agent-command-generator.js",
+    "reason": "Shipped installer module that legitimately references gm-agent-* filesystem dirs (7 agent paths + legacy cleanup code); filesystem-path refs per REF-02."
+  },
+  {
+    "path": "tools/installer/ide/_config-driven.js",
+    "reason": "Shipped installer module; comments and log string describe legacy .claude/skills/gm-agent-*/ cleanup target (D-29, REF-02)."
+  },
+  {
+    "path": "tools/installer/core/cleanup-planner.js",
+    "reason": "Shipped installer module; legacy v1.1 cleanup code referring to .claude/skills/gm-agent-<shortName>/ dirs (D-42, REF-02)."
+  },
+  {
+    "path": "tools/installer/core/manifest-generator.js",
+    "reason": "Shipped installer module; dash↔colon transform helpers + JSDoc explaining D-63 filesystem invariant (REF-02)."
+  },
+  {
+    "path": "tools/installer/core/installer.js",
+    "reason": "Shipped installer module; single comment at line 294 references src/gomad-skills/*/gm-agent-*/ persona source path (D-14/D-15, REF-02)."
+  }
+]

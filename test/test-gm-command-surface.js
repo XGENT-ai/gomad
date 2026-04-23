@@ -6,19 +6,17 @@
  *     name: gm:agent-<name>
  *     description: <non-empty string>
  *
- * Phase A: In-repo self-check (no-op in Phase 5 baseline; meaningful once
- *          Phase 6 generator populates .claude/commands/gm/ in the dev tree
- *          via --self install, if ever; otherwise stays no-op because
- *          .gitignore ignores .claude/commands/gm/ per Plan 05-02).
+ * Phase A: In-repo self-check (no-op in the dev tree because .gitignore
+ *          ignores .claude/commands/gm/ per Plan 05-02; meaningful only
+ *          if the agent-command-generator has populated the dev tree via
+ *          --self install).
  * Phase B: Fixture-based negative test (validates the structural assertion
  *          itself correctly detects drift — runs always).
- * Phase C: Install-smoke (LIVE in Phase 5). Packs the tarball, installs it
- *          into a tempDir fixture, invokes `gomad install` non-interactively,
- *          asserts clean exit, and conditionally asserts structural layout
- *          on any .claude/commands/gm/agent-*.md the installer produces.
- *          Phase 6 will flip the conditional structural assertion into a
- *          hard assertion — once agent-command-generator.js lands, a missing
- *          .claude/commands/gm/ MUST fail the test.
+ * Phase C install-smoke — structural assertions on installer output:
+ *   - Hard assertion: all 7 .claude/commands/gm/agent-<name>.md launchers present
+ *     with valid YAML frontmatter (name: gm:agent-<name>, non-empty description).
+ *   - Negative assertion: no legacy .claude/skills/gm-agent-<name>/ directory
+ *     present in the installed output (REL-03, Phase 9 D-69).
  *
  * Usage: node test/test-gm-command-surface.js
  */
@@ -64,11 +62,11 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 console.log(`\n${colors.cyan}gm-Command Surface Test${colors.reset}\n`);
 
 // ─── Phase A — In-repo structural self-check ────────────────────────────
-// Phase A runs against the dev repo's working tree. In Phase 5 baseline
-// (before Phase 6 ships agent-command-generator.js), .claude/commands/gm/
-// does not yet exist in the repo and this phase is a no-op with an INFO log.
-// In Phase 6 and beyond, the generator populates it and these structural
-// assertions become load-bearing.
+// Phase A runs against the dev repo's working tree. By default,
+// .claude/commands/gm/ is gitignored (Plan 05-02), so this phase is a
+// no-op with an INFO log. If a developer has run --self install, the
+// generator populates it and these structural assertions become
+// load-bearing.
 console.log(`${colors.cyan}Phase A — in-repo self-check${colors.reset}`);
 const gmDir = path.join(REPO_ROOT, '.claude', 'commands', 'gm');
 const gmDirExists = fs.existsSync(gmDir);
@@ -99,7 +97,7 @@ if (gmDirExists) {
 } else {
   console.log(
     `${colors.yellow}\u26A0${colors.reset} .claude/commands/gm/ not present in repo ` +
-      `(Phase 5 baseline — Phase 6 generator will populate it). Skipping in-repo structural assertions.`,
+      `(expected — .gitignore hides it unless --self install has been run). Skipping in-repo structural assertions.`,
   );
 }
 
@@ -210,47 +208,43 @@ try {
     assert(false, 'gomad install --yes --directory <tempDir> --tools claude-code exits 0', error.message);
   }
 
-  // Conditional structural assertion on installed output.
-  // Phase 5 baseline: installer does NOT yet emit .claude/commands/gm/ —
-  // the directory's absence is expected and we log a neutral INFO.
-  // Phase 6 MUST flip this conditional into a hard assertion:
-  //   assert(fs.existsSync(installedGmDir), '.claude/commands/gm/ present in installed output');
+  // D-69 (Phase 9): hard assertion replaces the Phase 5 conditional.
+  // Installer MUST now emit .claude/commands/gm/ with all 7 agent launchers.
   const installedGmDir = path.join(installTempDir, '.claude', 'commands', 'gm');
-  if (fs.existsSync(installedGmDir)) {
-    const stubs = globSync('agent-*.md', { cwd: installedGmDir });
-    assert(
-      stubs.length > 0,
-      `Installer produced .claude/commands/gm/agent-*.md stubs (count: ${stubs.length})`,
-      'Expected at least one agent-*.md file',
-    );
-    for (const file of stubs) {
-      const stubPath = path.join(installedGmDir, file);
-      const raw = fs.readFileSync(stubPath, 'utf8');
-      const match = raw.match(/^---\n([\s\S]*?)\n---/);
-      assert(Boolean(match), `(C) ${file} has YAML frontmatter`);
-      if (!match) continue;
+  assert(fs.existsSync(installedGmDir), '.claude/commands/gm/ present in installed output', `Checked: ${installedGmDir}`);
 
-      let fm;
-      try {
-        fm = yaml.load(match[1]);
-      } catch (error) {
-        assert(false, `(C) ${file} frontmatter parses as YAML`, error.message);
-        continue;
-      }
-      const agentName = path.basename(file, '.md').replace(/^agent-/, '');
-      assert(
-        fm && fm.name === `gm:agent-${agentName}`,
-        `(C) ${file} frontmatter name matches gm:agent-${agentName}`,
-        `Got: ${fm ? fm.name : '<no name>'}`,
-      );
-      assert(fm && typeof fm.description === 'string' && fm.description.length > 0, `(C) ${file} has non-empty description`);
+  // D-69: enumerate all 7 explicitly (not globSync) so a silently-missing 1-of-7 fails.
+  const EXPECTED_AGENTS = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev'];
+  for (const shortName of EXPECTED_AGENTS) {
+    const stubPath = path.join(installedGmDir, `agent-${shortName}.md`);
+    assert(fs.existsSync(stubPath), `(C) agent-${shortName}.md present in installed output`);
+    if (!fs.existsSync(stubPath)) continue;
+
+    const raw = fs.readFileSync(stubPath, 'utf8');
+    const match = raw.match(/^---\n([\s\S]*?)\n---/);
+    assert(Boolean(match), `(C) agent-${shortName}.md has YAML frontmatter`);
+    if (!match) continue;
+
+    let fm;
+    try {
+      fm = yaml.load(match[1]);
+    } catch (error) {
+      assert(false, `(C) agent-${shortName}.md frontmatter parses as YAML`, error.message);
+      continue;
     }
-  } else {
-    console.log(
-      `${colors.yellow}\u26A0${colors.reset} Installed .claude/commands/gm/ not present (Phase 5 baseline — ` +
-        `expected before Phase 6 ships agent-command-generator.js). Structural assertion skipped.`,
+    assert(
+      fm && fm.name === `gm:agent-${shortName}`,
+      `(C) agent-${shortName}.md frontmatter name matches gm:agent-${shortName}`,
+      `Got: ${fm ? fm.name : '<no name>'}`,
     );
-    console.log(`${colors.dim}  Phase 6 will flip this conditional into a hard assertion.${colors.reset}`);
+    assert(fm && typeof fm.description === 'string' && fm.description.length > 0, `(C) agent-${shortName}.md has non-empty description`);
+  }
+
+  // D-69: negative assertion — fresh install must NOT leave any legacy skills dir.
+  const LEGACY_AGENTS = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev'];
+  for (const shortName of LEGACY_AGENTS) {
+    const legacyDir = path.join(installTempDir, '.claude', 'skills', `gm-agent-${shortName}`);
+    assert(!fs.existsSync(legacyDir), `(C) no legacy .claude/skills/gm-agent-${shortName}/ present after fresh install`);
   }
 } catch (error) {
   console.log(`${colors.red}\u2717${colors.reset} Unexpected error during install-smoke`);

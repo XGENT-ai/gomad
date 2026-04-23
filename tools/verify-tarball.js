@@ -4,12 +4,15 @@
  * Validates npm tarball hygiene before publishing:
  * 1. Forbidden path check - ensures no .planning/, test/, .github/, docs/, website/, or banner-bmad files leak into tarball
  * 2. Grep-clean check - ensures no bmad/bmm references remain in shipped files (VFY-03)
+ * 3. gm-agent- grep-clean check - ensures no user-visible gm-agent- residuals in shipped content (Phase 9 D-71)
  *
  * Usage: node tools/verify-tarball.js
  *        npm run test:tarball
  */
 
 const { execSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // ANSI colors for output
 const colors = {
@@ -86,6 +89,38 @@ function checkGrepClean() {
   return { passed: failures.length === 0, failures };
 }
 
+/**
+ * Phase 3: Grep-clean check for gm-agent- references in shipped files
+ * (Phase 9 D-71). Uses narrow allowlist at tools/fixtures/tarball-grep-allowlist.json
+ * for legitimate filesystem path refs and frontmatter name lines.
+ * @returns {{ passed: boolean, failures: string[] }}
+ */
+function checkGmAgentGrepClean() {
+  let grepOutput = '';
+  try {
+    grepOutput = execSync(
+      `grep -rlE "gm-agent-" src/ tools/installer/ ` +
+        `--include="*.js" --include="*.yaml" --include="*.md" --include="*.json" --include="*.csv" ` +
+        `2>/dev/null`,
+      { encoding: 'utf8' },
+    );
+  } catch {
+    return { passed: true, failures: [] };
+  }
+
+  const allowlistPath = path.join(__dirname, 'fixtures', 'tarball-grep-allowlist.json');
+  const allowlist = fs.existsSync(allowlistPath) ? JSON.parse(fs.readFileSync(allowlistPath, 'utf8')) : [];
+  const allowedPaths = new Set(allowlist.map((entry) => entry.path));
+
+  const failures = grepOutput
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .filter((line) => !allowedPaths.has(line));
+
+  return { passed: failures.length === 0, failures };
+}
+
 // Main execution
 let hasFailures = false;
 
@@ -125,9 +160,21 @@ if (grepCheck.passed) {
   console.log(`${colors.red}FAIL: residual bmad/bmm references found in: ${grepCheck.failures.join(', ')}${colors.reset}`);
 }
 
+// Phase 3: gm-agent- grep-clean check (D-71)
+console.log(`${colors.cyan}Phase 3: Checking for residual gm-agent- references...${colors.reset}`);
+const gmAgentCheck = checkGmAgentGrepClean();
+if (gmAgentCheck.passed) {
+  console.log(`${colors.green}PASS: no unallowlisted gm-agent- residuals in shipped files${colors.reset}`);
+} else {
+  hasFailures = true;
+  console.log(`${colors.red}FAIL: residual gm-agent- references in: ${gmAgentCheck.failures.join(', ')}${colors.reset}`);
+}
+
 // Exit
 if (hasFailures) {
   process.exit(1);
 }
 
-console.log(`\n${colors.green}OK: ${tarballFiles.length} files in tarball, no forbidden paths, no bmad/bmm residuals${colors.reset}`);
+console.log(
+  `\n${colors.green}OK: ${tarballFiles.length} files in tarball, no forbidden paths, no bmad/bmm residuals, no unallowlisted gm-agent- residuals${colors.reset}`,
+);
