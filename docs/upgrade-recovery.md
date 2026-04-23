@@ -1,4 +1,7 @@
-# Upgrade Recovery
+---
+title: "Upgrade Recovery"
+description: How manifest-driven cleanup snapshots work and how to restore from them
+---
 
 Starting with gomad v1.2, every `gomad install` that removes files takes a snapshot of those files into a timestamped directory under `_gomad/_backups/<YYYYMMDD-HHMMSS>/`. This document explains how those snapshots are structured and how to restore from them.
 
