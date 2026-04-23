@@ -1,0 +1,139 @@
+[
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-analyst/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-analyst",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-analyst/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-analyst",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-tech-writer/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-tech-writer",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/1-analysis/gm-agent-tech-writer/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-tech-writer",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-pm/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-pm",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-pm/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-pm",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-ux-designer/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-ux-designer",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/2-plan-workflows/gm-agent-ux-designer/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-ux-designer",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/3-solutioning/gm-agent-architect/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-architect",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/3-solutioning/gm-agent-architect/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-architect",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-sm/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-sm",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-sm/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-sm",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-dev/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-dev",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-dev/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-dev",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "tools/validate-skills.js",
+    "lineContainsPattern": "gm-agent-tech-writer",
+    "reason": "Validator-allowlist comment + WF_SKIP_SKILLS set referencing sub-skill dir name (filesystem path ref, REF-02)."
+  },
+  {
+    "path": "tools/installer/ide/shared/agent-command-generator.js",
+    "reason": "Entire file legitimately references gm-agent-* filesystem dirs (7 agent paths + legacy cleanup code); filesystem-path refs are invariant per REF-02."
+  },
+  {
+    "path": "tools/installer/ide/_config-driven.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "Installer comments/log describing legacy .claude/skills/gm-agent-*/ cleanup target (D-29); filesystem-path ref."
+  },
+  {
+    "path": "tools/installer/core/cleanup-planner.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "Legacy v1.1 cleanup code + comments referring to .claude/skills/gm-agent-<shortName>/ dir names (D-42, REF-02)."
+  },
+  {
+    "path": "tools/installer/core/manifest-generator.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "Dash↔colon transform helpers + JSDoc explaining D-63 filesystem invariant; source-tree form is gm-agent-* by contract."
+  },
+  {
+    "path": "tools/installer/core/installer.js",
+    "lineContainsPattern": "src/gomad-skills/*/gm-agent-*/",
+    "reason": "Phase 6 traceability comment referring to the filesystem persona source path (D-14/D-15); filesystem-path ref."
+  },
+  {
+    "path": "test/test-legacy-v11-upgrade.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "Test seeds a v1.1-style workspace using legacy .claude/skills/gm-agent-<shortName>/ dirs to prove upgrade cleanup works (REF-02 filesystem-path refs, test assertions on legacy cleanup)."
+  },
+  {
+    "path": "test/test-cleanup-execute.js",
+    "lineContainsPattern": "gm-agent-pm",
+    "reason": "Cleanup-execute fixture paths referring to legacy .claude/skills/gm-agent-pm/ dir (REF-02, test assertion on legacy-cleanup path)."
+  },
+  {
+    "path": "test/test-dry-run.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "Dry-run test seeds legacy .claude/skills/gm-agent-<shortName>/ dirs for upgrade-plan-generation test (REF-02)."
+  },
+  {
+    "path": "test/test-installer-self-install-guard.js",
+    "lineContainsPattern": "gm-agent-analyst",
+    "reason": "Self-install-guard fixture creates src/gomad-skills/1-analysis/gm-agent-analyst dir to trigger guard detection (REF-02 filesystem-path ref)."
+  },
+  {
+    "path": "test/test-cleanup-planner.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "Cleanup-planner tests seed legacy .claude/skills/gm-agent-<shortName>/ dirs and assert snapshot/remove plan correctness (REF-02, test assertions on legacy cleanup)."
+  },
+  {
+    "path": "test/fixtures/phase-07/manifests/valid-v2.csv",
+    "lineContainsPattern": "gm-agent-architect",
+    "reason": "Phase-07 manifest fixture row referring to legacy skills/gm-agent-architect/SKILL.md path (REF-02 filesystem-path ref; test fixture frozen)."
+  },
+  {
+    "path": "test/test-orphan-refs.js",
+    "reason": "This file IS the orphan-refs gate itself; it documents/matches the `gm-agent-` pattern by design (self-reference in comments, grep command, error messages)."
+  },
+  {
+    "path": "test/fixtures/orphan-refs/allowlist.json",
+    "reason": "This file IS the allowlist; its own entries reference `gm-agent-*` by design — every `path` and `lineContainsPattern` encodes a legitimate hit."
+  }
+]
