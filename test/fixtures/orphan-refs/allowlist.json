@@ -147,5 +147,9 @@
   {
     "path": "test/test-gm-command-surface.js",
     "reason": "Install-smoke test; Phase C header comment + LEGACY_AGENTS negative-assertion loop legitimately reference `.claude/skills/gm-agent-*/` as the absence target (D-69, REL-03)."
+  },
+  {
+    "path": "CHANGELOG.md",
+    "reason": "Release-notes migration narrative: v1.2.0 BREAKING section documents the `gm-agent-*` → `/gm:agent-*` skill→command pivot, which requires retaining both before-form (`gm-agent-`, `.claude/skills/gm-agent-*/`, `pre-v1.2 dash-form`) and after-form (`/gm:agent-*`, `.claude/commands/gm/agent-*.md`) tokens so the upgrade diff is unambiguous (warning #7 invariant, D-73). Historical entries may also reference the before-form."
   }
 ]
