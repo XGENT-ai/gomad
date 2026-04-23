@@ -108,7 +108,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. CHANGELOG entry for v1.2 includes a prominent BREAKING callout (agent invocation surface change: `gm-agent-*` skills → `/gm:agent-*` commands) with concrete upgrade guidance for v1.1-installed users
   5. `@xgent-ai/gomad@1.2.0` is published to npm with the `latest` dist-tag; `v1.1.0` is retained as a prior stable (no deprecation unless issues emerge)
   6. `v1.2.0` tag is applied on `main` and the milestone is marked complete
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 09-01-PLAN.md — Prose sweep + installer simplification: gm-sprint-agent/workflow.md, gm-epic-demo-story/SKILL.md, module-help.csv colon-form migration, installer.js transform-helper deletion (REF-01, REF-02, REF-04)
+- [ ] 09-02-PLAN.md — Verification gates: test-orphan-refs.js + allowlist + test-gm-command-surface.js Phase C hard-assertion + verify-tarball.js Phase 3 + npm-scripts wiring (REF-01, REF-04, REF-05, REL-03, REL-04)
+- [ ] 09-03-PLAN.md — CHANGELOG v1.2.0 + version bump + gate-stack + human-verify npm publish + v1.2.0 tag + smoke-test (REL-02, REL-04, REL-05, REL-06)
 
 ## Progress
 
@@ -125,4 +128,4 @@ Phases execute in numeric order: 5 → 6 → 7 → 8 → 9. Phase 8 (content) is
 | 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/3            | Not started | -          |
 | 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 0/2            | Not started | -          |
 | 8. PRD + Product-Brief Content Refinement          | v1.2      | 5/5 | Complete    | 2026-04-22 |
-| 9. Reference Sweep + Verification + Release        | v1.2      | 0/TBD          | Not started | -          |
+| 9. Reference Sweep + Verification + Release        | v1.2      | 0/3            | Not started | -          |
