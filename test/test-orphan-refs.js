@@ -48,6 +48,8 @@ function assert(condition, message) {
 
 function runGrep() {
   // Grep scope per D-67: exclude node_modules, .git, archived planning, milestones.
+  // Also exclude .claude (gitignored tooling directory — holds ephemeral runtime
+  // state including agent worktrees that snapshot past/parallel working copies).
   // Include all file types relevant to the user-visible surface (README.md,
   // README_CN.md, docs/, website/ are intentionally IN scope per REF-05 — the
   // gate must bite any future `gm-agent-` regression in user-facing docs).
@@ -56,6 +58,7 @@ function runGrep() {
     grepOutput = execSync(
       `grep -rn 'gm-agent-' . ` +
         `--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.planning ` +
+        `--exclude-dir=.claude ` +
         `--exclude-dir='old-milestone-*' --exclude-dir=dist --exclude-dir=coverage ` +
         `2>/dev/null`,
       { cwd: REPO_ROOT, encoding: 'utf8' },
