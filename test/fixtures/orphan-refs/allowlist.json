@@ -135,5 +135,17 @@
   {
     "path": "test/fixtures/orphan-refs/allowlist.json",
     "reason": "This file IS the allowlist; its own entries reference `gm-agent-*` by design — every `path` and `lineContainsPattern` encodes a legitimate hit."
+  },
+  {
+    "path": "tools/verify-tarball.js",
+    "reason": "Shipped verifier module; Phase 3 checkGmAgentGrepClean docs + code + log strings legitimately contain `gm-agent-` as the target pattern (D-71)."
+  },
+  {
+    "path": "tools/fixtures/tarball-grep-allowlist.json",
+    "reason": "This file IS the tarball allowlist; its own `path` entries reference shipped `gm-agent-*` filesystem-path refs by design (REF-02)."
+  },
+  {
+    "path": "test/test-gm-command-surface.js",
+    "reason": "Install-smoke test; Phase C header comment + LEGACY_AGENTS negative-assertion loop legitimately reference `.claude/skills/gm-agent-*/` as the absence target (D-69, REL-03)."
   }
 ]
