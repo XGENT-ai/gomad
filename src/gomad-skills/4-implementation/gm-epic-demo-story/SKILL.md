@@ -17,7 +17,7 @@ Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 
 ### Step 1: Activate Scrum Master
 
-Spawn a subagent and invoke `/gm-agent-pm` to load the Scrum Master (Bob) persona. All subsequent steps operate through Bob's persona.
+Spawn a subagent and invoke `/gm:agent-pm` to load the Scrum Master (Bob) persona. All subsequent steps operate through Bob's persona.
 
 ### Step 2: Identify Target Epic
 

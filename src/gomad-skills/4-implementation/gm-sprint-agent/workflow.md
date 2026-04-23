@@ -87,7 +87,7 @@ When subagent workflows ask questions or need decisions, apply these rules:
    ```
    Your task: create story {story-key}. Follow these steps in order:
 
-   Step 1: Load your agent profile by invoking the `gm-agent-pm` skill (via the Skill tool). This sets up your identity, expertise, and working style as the Scrum Master. Follow any activation instructions it provides.
+   Step 1: Load your agent profile by invoking the `/gm:agent-pm` slash command. This sets up your identity, expertise, and working style as the Scrum Master. Follow any activation instructions it provides.
 
    Step 1.5 (UI Detection): Read the story description for {story-key} from {planning_artifacts}/epics.md. Determine if this story involves Web UI development. It is a "UI story" if ANY of the following are true:
    - Story title or description mentions: UI, frontend, 前端, page, component, layout, sidebar, navigation, dashboard, form, modal, dialog, button, input, view, screen, responsive, CSS, Tailwind, React component
@@ -173,7 +173,7 @@ When subagent workflows ask questions or need decisions, apply these rules:
       ```
       Your task: revise story {story-key} based on Product Manager review feedback.
 
-      Step 1: Load your agent profile by invoking the `gm-agent-pm` skill (via the Skill tool) to adopt the Scrum Master identity.
+      Step 1: Load your agent profile by invoking the `/gm:agent-pm` slash command to adopt the Scrum Master identity.
 
       Step 2: Read the current story file at {implementation_artifacts}/{story-key}.md so you have full context. Also cross-reference {planning_artifacts}/epics.md, {planning_artifacts}/prd.md, and {planning_artifacts}/architecture.md as needed.
 
@@ -242,7 +242,7 @@ When subagent workflows ask questions or need decisions, apply these rules:
    ```
    Your task: implement story {story-key}. Follow these steps in order:
 
-   Step 1: Load your agent profile by invoking the `gm-agent-dev` skill (via the Skill tool). This sets up your identity, expertise, and working style as the Senior Developer. Follow any activation instructions it provides.
+   Step 1: Load your agent profile by invoking the `/gm:agent-dev` slash command. This sets up your identity, expertise, and working style as the Senior Developer. Follow any activation instructions it provides.
 
    Step 2 (UI Detection): Read the story file at {implementation_artifacts}/{story-key}.md. Determine if this story involves Web UI development. It is a "UI story" if ANY of the following are true:
    - Story title or description mentions: UI, frontend, 前端, page, component, layout, sidebar, navigation, dashboard, form, modal, dialog, button, input, view, screen, responsive, CSS, Tailwind, React component
@@ -288,7 +288,7 @@ When subagent workflows ask questions or need decisions, apply these rules:
    ```
    Your task: perform a fresh-context code review for story {story-key}. Follow these steps in order:
 
-   Step 1: Load your agent profile by invoking the `gm-agent-dev` skill (via the Skill tool). This sets up your identity, expertise, and working style as the Senior Developer. Follow any activation instructions it provides.
+   Step 1: Load your agent profile by invoking the `/gm:agent-dev` slash command. This sets up your identity, expertise, and working style as the Senior Developer. Follow any activation instructions it provides.
 
    Step 1.5 (UI Detection): Check git diff for story {story-key} changes. If the diff includes `.tsx`, `.jsx`, `.css`, `.scss` files or modifies UI components/pages:
    - Invoke the `frontend-design` skill (via the Skill tool) for design review context.
