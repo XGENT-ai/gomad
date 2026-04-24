@@ -20,6 +20,7 @@ class InstallPaths {
 
     const configDir = path.join(gomadDir, '_config');
     const agentsDir = path.join(configDir, 'agents');
+    const kbDir = path.join(configDir, 'kb');
     const customCacheDir = path.join(configDir, 'custom');
     const coreDir = path.join(gomadDir, 'core');
 
@@ -27,6 +28,7 @@ class InstallPaths {
       [gomadDir, 'gomad directory'],
       [configDir, 'config directory'],
       [agentsDir, 'agents config directory'],
+      [kbDir, 'domain-kb directory'],
       [customCacheDir, 'custom modules cache'],
       [coreDir, 'core module directory'],
     ]) {
@@ -40,6 +42,7 @@ class InstallPaths {
       gomadDir,
       configDir,
       agentsDir,
+      kbDir,
       customCacheDir,
       coreDir,
       isUpdate,
@@ -62,6 +65,9 @@ class InstallPaths {
   }
   helpCatalog() {
     return path.join(this.configDir, 'gomad-help.csv');
+  }
+  kbRoot() {
+    return this.kbDir;
   }
   moduleDir(name) {
     return path.join(this.gomadDir, name);
