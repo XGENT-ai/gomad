@@ -4,13 +4,13 @@ milestone: v1.3
 milestone_name: Docs, Story Context & Agent Relocation
 status: executing
 stopped_at: Phase 10 context gathered
-last_updated: "2026-04-25T17:30:00.000Z"
-last_activity: 2026-04-25 -- Phase 10 wave 1 complete (10-01, 10-03, 10-05)
+last_updated: "2026-04-25T17:45:00.000Z"
+last_activity: 2026-04-25 -- Phase 10 waves 1-2 complete (10-01..10-05)
 progress:
   total_phases: 3
   completed_phases: 0
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 5
   percent: 0
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-24 after marketplace workstream dropp
 ## Current Position
 
 Phase: 10 (story-creation-enhancements) — EXECUTING
-Plan: Wave 1 complete (3/6) — 10-01, 10-03, 10-05 done; Wave 2 next (10-02, 10-04)
-Status: Executing Phase 10 — Wave 2 pending
-Last activity: 2026-04-25 -- Phase 10 wave 1 complete
+Plan: Waves 1-2 complete (5/6) — 10-01..10-05 done; Wave 4 next (10-06)
+Status: Executing Phase 10 — Wave 4 pending
+Last activity: 2026-04-25 -- Phase 10 waves 1-2 complete
 
 Progress: [░░░░░░░░░░] 0% (0/3 v1.3 phases complete)
 
