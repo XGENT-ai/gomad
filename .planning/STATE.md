@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-24 after v1.2 milestone close)
 Phase: — (no active milestone)
 Plan: —
 Status: v1.2 shipped 2026-04-24 and archived; v1.3 not yet scoped
-Last activity: 2026-04-24 -- v1.2 milestone closed and archived
+Last activity: 2026-04-24 - Completed quick task 260424-fvb: rename bmad-agent-solo-dev → gm-agent-solo-dev
 
 Progress: v1.2 complete ✓ — see MILESTONES.md for historical record
 
@@ -60,6 +60,12 @@ None.
 ### Blockers/Concerns
 
 None carried from v1.2. Fresh slate for v1.3.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260424-fvb | Rename bmad-agent-solo-dev → gm-agent-solo-dev; swap bmad-* refs → gm-* | 2026-04-24 | 12251e8 | [260424-fvb-bmad-agent-solo-dev-gm-agent-solo-dev-bm](./quick/260424-fvb-bmad-agent-solo-dev-gm-agent-solo-dev-bm/) |
 
 ## Deferred Items
 
