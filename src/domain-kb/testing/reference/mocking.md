@@ -39,7 +39,7 @@ Prefer fakes when the dependency has enough behaviour that building one fake pay
 
 An assertion like "we called `emailService.send` with arguments X" is an *interaction* assertion. It is fragile: any refactor that keeps the behaviour correct but calls a slightly different method will break the test.
 
-Prefer *state* assertions where the mock behaves as a fake: "after calling `signup`, the in-memory outbox contains one email addressed to alice@example.com". This is easier to read, easier to refactor under, and catches real bugs (missing email, wrong recipient) rather than incidental ones.
+Prefer *state* assertions where the mock behaves as a fake: "after calling `signup`, the in-memory outbox contains one email addressed to `alice@example.com`". This is easier to read, easier to refactor under, and catches real bugs (missing email, wrong recipient) rather than incidental ones.
 
 Use interaction assertions sparingly — only when the side effect has no observable state (e.g. a fire-and-forget metric).
 
