@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Docs, Story Context & Agent Relocation
-status: roadmap_complete
-stopped_at: ""
-last_updated: "2026-04-24T17:00:00.000Z"
-last_activity: 2026-04-24 -- marketplace workstream dropped; v1.3 renamed; Phases 11/12/13 renumbered to 10/11/12; 34 requirements mapped to Phases 10-12; ready to plan Phase 10
+status: planning
+stopped_at: Phase 10 context gathered
+last_updated: "2026-04-24T15:44:00.160Z"
+last_activity: 2026-04-24 — marketplace workstream dropped; v1.3 ROADMAP.md updated, 34 requirements mapped
 progress:
   total_phases: 3
   completed_phases: 0
@@ -87,6 +87,6 @@ Items carried beyond v1.2 close, not in v1.3 scope:
 
 ## Session Continuity
 
-Last session: 2026-04-24 — marketplace workstream dropped; v1.3 roadmap re-scoped to 3 phases
-Stopped at: Roadmap updated; 34 v1.3 requirements mapped to Phases 10-12 (marketplace MARKET-01..05 removed)
+Last session: --stopped-at
+Stopped at: Phase 10 context gathered
 Resume: Run `/gsd-discuss-phase 10` then `/gsd-plan-phase 10` to begin planning Story-Creation Enhancements. For Phase 12, run `/gsd-research-phase 12` first (flagged in ROADMAP.md — open design questions on `newInstallSet` + `_config/agents/` collision).
