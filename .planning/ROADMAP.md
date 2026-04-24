@@ -59,7 +59,14 @@ See [milestones/v1.2-ROADMAP.md](./milestones/v1.2-ROADMAP.md) for full phase de
   3. Developer running `gm-domain-skill testing "how do I write a flaky test detector?"` returns content from `<installRoot>/_config/kb/testing/` ranked by BM25-normalized scoring; a typo slug (e.g., `testig`) produces a "did you mean: testing, architecture" fallback via Levenshtein; truly empty result returns an explicit "no match" (not silent weak hit).
   4. Fresh `gomad install` lands `<installRoot>/_config/kb/testing/` + `<installRoot>/_config/kb/architecture/` populated from `src/domain-kb/`, every file tracked in `files-manifest.csv` under `install_root="_gomad"`; re-install is idempotent.
   5. Developer running `npm run quality` sees `validate-kb-licenses.js` exit 0 — every KB file has `source:`, `license:`, `last_reviewed:` frontmatter; any pack missing attribution blocks the release.
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 10-01-PLAN.md — KB license validator + npm run quality wire (release gate; STORY-10)
+- [ ] 10-02-PLAN.md — Installer _installDomainKb() + install-paths.js kbDir + test-domain-kb-install (STORY-11)
+- [ ] 10-03-PLAN.md — gm-discuss-story skill (5 files; STORY-01, STORY-02, STORY-03)
+- [ ] 10-04-PLAN.md — gm-domain-skill (5 files; STORY-06, STORY-07)
+- [ ] 10-05-PLAN.md — Seed KB packs: testing/ + architecture/ (18 files; STORY-08, STORY-09)
+- [ ] 10-06-PLAN.md — Patch gm-create-story (discover-inputs.md + workflow.md; STORY-04, STORY-05, STORY-12)
 
 ### Phase 11: Docs Site Content Authoring
 **Goal**: Visitors to `gomad.xgent.ai` can read tutorials (install, quick-start), reference pages (agents, skills), explanation (architecture), and contributing guide in both English and Chinese — content deployed automatically by the existing Starlight GH Actions pipeline on push to main.
