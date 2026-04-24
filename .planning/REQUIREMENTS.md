@@ -4,6 +4,7 @@
 **Defined:** 2026-04-24
 **Core Value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
 **Research summary:** `.planning/research/SUMMARY.md`
+**Roadmap:** `.planning/ROADMAP.md` (Phases 10-13)
 
 ## v1.3 Requirements
 
@@ -115,56 +116,62 @@ Explicitly excluded from v1.3. Documented to prevent scope creep.
 
 ## Traceability
 
-Updated by the roadmapper during Phase creation. Every v1.3 requirement maps to exactly one phase; coverage must be 100%.
+Populated by the roadmapper during Phase creation. Every v1.3 requirement maps to exactly one phase; coverage is 100%.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MARKET-01 | TBD | Pending |
-| MARKET-02 | TBD | Pending |
-| MARKET-03 | TBD | Pending |
-| MARKET-04 | TBD | Pending |
-| MARKET-05 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| DOCS-04 | TBD | Pending |
-| DOCS-05 | TBD | Pending |
-| DOCS-06 | TBD | Pending |
-| DOCS-07 | TBD | Pending |
-| STORY-01 | TBD | Pending |
-| STORY-02 | TBD | Pending |
-| STORY-03 | TBD | Pending |
-| STORY-04 | TBD | Pending |
-| STORY-05 | TBD | Pending |
-| STORY-06 | TBD | Pending |
-| STORY-07 | TBD | Pending |
-| STORY-08 | TBD | Pending |
-| STORY-09 | TBD | Pending |
-| STORY-10 | TBD | Pending |
-| STORY-11 | TBD | Pending |
-| STORY-12 | TBD | Pending |
-| AGENT-01 | TBD | Pending |
-| AGENT-02 | TBD | Pending |
-| AGENT-03 | TBD | Pending |
-| AGENT-04 | TBD | Pending |
-| AGENT-05 | TBD | Pending |
-| AGENT-06 | TBD | Pending |
-| AGENT-07 | TBD | Pending |
-| AGENT-08 | TBD | Pending |
-| AGENT-09 | TBD | Pending |
-| AGENT-10 | TBD | Pending |
-| AGENT-11 | TBD | Pending |
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| REL-03 | TBD | Pending |
-| REL-04 | TBD | Pending |
+| MARKET-01 | Phase 10 | Pending |
+| MARKET-02 | Phase 10 | Pending |
+| MARKET-03 | Phase 10 | Pending |
+| MARKET-04 | Phase 10 | Pending |
+| MARKET-05 | Phase 10 | Pending |
+| DOCS-01 | Phase 12 | Pending |
+| DOCS-02 | Phase 12 | Pending |
+| DOCS-03 | Phase 12 | Pending |
+| DOCS-04 | Phase 12 | Pending |
+| DOCS-05 | Phase 12 | Pending |
+| DOCS-06 | Phase 12 | Pending |
+| DOCS-07 | Phase 13 | Pending |
+| STORY-01 | Phase 11 | Pending |
+| STORY-02 | Phase 11 | Pending |
+| STORY-03 | Phase 11 | Pending |
+| STORY-04 | Phase 11 | Pending |
+| STORY-05 | Phase 11 | Pending |
+| STORY-06 | Phase 11 | Pending |
+| STORY-07 | Phase 11 | Pending |
+| STORY-08 | Phase 11 | Pending |
+| STORY-09 | Phase 11 | Pending |
+| STORY-10 | Phase 11 | Pending |
+| STORY-11 | Phase 11 | Pending |
+| STORY-12 | Phase 11 | Pending |
+| AGENT-01 | Phase 13 | Pending |
+| AGENT-02 | Phase 13 | Pending |
+| AGENT-03 | Phase 13 | Pending |
+| AGENT-04 | Phase 13 | Pending |
+| AGENT-05 | Phase 13 | Pending |
+| AGENT-06 | Phase 13 | Pending |
+| AGENT-07 | Phase 13 | Pending |
+| AGENT-08 | Phase 13 | Pending |
+| AGENT-09 | Phase 13 | Pending |
+| AGENT-10 | Phase 13 | Pending |
+| AGENT-11 | Phase 13 | Pending |
+| REL-01 | Phase 13 | Pending |
+| REL-02 | Phase 13 | Pending |
+| REL-03 | Phase 13 | Pending |
+| REL-04 | Phase 13 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 39 total (5 MARKET + 7 DOCS + 12 STORY + 11 AGENT + 4 REL)
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 39 ⚠️ — roadmapper must reach 100% coverage
+- Mapped to phases: 39 ✓
+- Unmapped: 0 ✓
+
+**Phase distribution:**
+- Phase 10 (Marketplace Refresh): 5 reqs
+- Phase 11 (Story-Creation Enhancements): 12 reqs
+- Phase 12 (Docs Site Content Authoring): 6 reqs
+- Phase 13 (Agent Dir Relocation + Release): 16 reqs
 
 ---
 
 *Requirements defined: 2026-04-24*
-*Last updated: 2026-04-24 after initial definition post-research*
+*Last updated: 2026-04-24 after roadmap creation — 39/39 requirements mapped to Phases 10-13; traceability table populated.*

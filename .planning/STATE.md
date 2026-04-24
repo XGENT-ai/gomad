@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Marketplace, Docs & Story Context
-status: defining_requirements
+status: roadmap_complete
 stopped_at: ""
-last_updated: "2026-04-24T00:00:00.000Z"
-last_activity: 2026-04-24 -- v1.3 milestone started; scoping requirements
+last_updated: "2026-04-24T16:00:00.000Z"
+last_activity: 2026-04-24 -- v1.3 roadmap created; 39 requirements mapped to Phases 10-13; ready to plan Phase 10
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-24 after v1.3 milestone scoping)
 
 **Core value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
-**Current focus:** v1.3 — Marketplace, Docs & Story Context (defining requirements).
+**Current focus:** v1.3 Phase 10 — Marketplace Refresh (pending start).
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-24 — Milestone v1.3 started
+Phase: 10 of 13 (Marketplace Refresh) — pending start
+Plan: — (planning not yet begun)
+Status: Roadmap complete; ready to plan Phase 10
+Last activity: 2026-04-24 — v1.3 ROADMAP.md authored, 39 requirements mapped
 
-Progress: v1.3 just started — 6 Active requirements staged in PROJECT.md; REQUIREMENTS.md + ROADMAP.md pending.
+Progress: [░░░░░░░░░░] 0% (0/4 v1.3 phases complete)
 
 ## Performance Metrics
 
@@ -45,13 +45,18 @@ Progress: v1.3 just started — 6 Active requirements staged in PROJECT.md; REQU
 
 ### Decisions
 
-All v1.2 decisions now logged in PROJECT.md Key Decisions table with ✓ Good outcomes. Carried forward for v1.3 planning:
+v1.3 roadmap decisions (2026-04-24):
 
-- **Launcher-form slash commands** — `.claude/commands/gm/agent-*.md` thin stubs load persona from `_gomad/gomad/agents/*.md` at runtime. Pattern validated in v1.2; reusable for future slash-command work.
-- **Generate-don't-move** — `gm-*` source directories stay canonical; generated surfaces (launchers, manifests) emitted at install time.
-- **Filesystem dir names keep dash form** (`gm-agent-*`); colon form (`gm:agent-*`) only for user-visible invocation surface (Windows-safe).
-- **Zero new runtime deps policy** — v1.2 shipped 16 plans adding no new npm deps; establish as default posture for v1.3.
-- **Manifest-driven cleanup with realpath containment + backup snapshots** — pattern is now foundational for any future file-level upgrade surgery.
+- **4-phase structure (coarse granularity)** — Phases 10 (Marketplace), 11 (Story-Creation), 12 (Docs), 13 (Agent Relocation + Release). 4-phase justified over 5-phase split because AGENT-* and REL-* are tightly coupled (REL-02 quality gate depends on every AGENT-* test; AGENT-10 extends the release tarball-verify gate itself; CHANGELOG BREAKING is specifically about agent-dir).
+- **Phase 13 is last with exclusive lock** — riskiest change (runtime pointer + cleanup-planner + namespace collision + latent `newInstallSet` bug). Needs Phase 10 harness green, Phase 11 `_config/<subdir>/` pattern proven, Phase 12 docs ready for path finalization.
+- **DOCS-07 assigned entirely to Phase 13** — not split. Path-examples linter (`tools/validate-doc-paths.js`) enforces against real post-v1.3 layout.
+
+Carried forward from v1.2 (logged in PROJECT.md Key Decisions):
+
+- **Launcher-form slash commands** — thin stubs load persona at runtime; v1.3 relocation changes the pointer target, not the pattern.
+- **Generate-don't-move** — source dirs canonical; installed surfaces emitted at install time.
+- **Zero new runtime deps policy** — load-bearing for v1.3 (BM25 hand-rolled, Levenshtein hand-rolled).
+- **Manifest-driven cleanup + backup snapshots** — foundation for v1.2 → v1.3 agent-dir migration.
 
 ### Pending Todos
 
@@ -59,7 +64,7 @@ None.
 
 ### Blockers/Concerns
 
-None carried from v1.2. Fresh slate for v1.3.
+- **Phase 13 research flag** — before `/gsd-plan-phase 13`, run `/gsd-research-phase 13` to resolve two open design questions: (a) `newInstallSet` derivation fix (AGENT-04) choice has cascading `buildCleanupPlan` effects; (b) `_config/agents/` collision resolution (AGENT-05) — Option 2 (detector tweak) is smallest-diff but confirm.
 
 ### Quick Tasks Completed
 
@@ -70,18 +75,17 @@ None carried from v1.2. Fresh slate for v1.3.
 
 ## Deferred Items
 
-Items carried beyond v1.2 close, candidates for v1.3 scope:
+Items carried beyond v1.2 close, not in v1.3 scope:
 
 | Category            | Item                                                                      | Status   | Deferred At |
 | ------------------- | ------------------------------------------------------------------------- | -------- | ----------- |
 | Custom agents       | CUSTOM-01/02/03 (new gomad-specific agents/skills + installer support)    | Deferred | v1.1 close  |
 | Command surface     | CMD-F1 (task-skill → slash-command aliases, e.g. `/gm:create-prd`)        | Deferred | v1.2 close  |
 | Release ops         | REL-F1 (backup rotation/pruning policy for `_gomad/_backups/<timestamp>/`) | Deferred | v1.2 close  |
-| Deployment          | GitHub Pages deploy of `gomad.xgent.ai`                                   | Deferred | v1.1 close  |
-| Quick task          | 260416-j8h (fix-gm-agent-dev-skill) — work shipped 2026-04-16 (commit 1ff1a7b); audit flagged 'missing' due to metadata only | Acknowledged | v1.2 close |
+| Quick task          | 260416-j8h (fix-gm-agent-dev-skill) — metadata-only audit flag             | Acknowledged | v1.2 close |
 
 ## Session Continuity
 
-Last session: 2026-04-24 — v1.2 closed and archived
-Stopped at: v1.2 milestone close (pre-v1.3 planning)
-Resume: Run `/gsd:new-milestone` to begin v1.3 scoping (questioning → research → requirements → roadmap).
+Last session: 2026-04-24 — v1.3 ROADMAP.md created
+Stopped at: Roadmap complete; 39 v1.3 requirements mapped to Phases 10-13
+Resume: Run `/gsd-plan-phase 10` to begin planning Marketplace Refresh. For Phase 13, run `/gsd-research-phase 13` first (flagged in ROADMAP.md — open design questions on `newInstallSet` + `_config/agents/` collision).
