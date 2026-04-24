@@ -8,7 +8,7 @@ const { getSourcePath } = require('../../project-root');
  * Generates launcher command files for each agent
  */
 class AgentCommandGenerator {
-  // The 7 canonical agent personas — source-of-truth mapping
+  // The 8 canonical agent personas — source-of-truth mapping
   // Short name → source skill directory under src/gomad-skills/
   // Plus a hand-authored one-line purpose for D-17 description formatting.
   static AGENT_SOURCES = [
@@ -43,6 +43,11 @@ class AgentCommandGenerator {
       purpose: 'Scrum mastery, story creation, sprint facilitation, implementation planning',
     },
     { shortName: 'dev', dir: '4-implementation/gm-agent-dev', purpose: 'Development, implementation, coding, refactoring' },
+    {
+      shortName: 'solo-dev',
+      dir: '4-implementation/gm-agent-solo-dev',
+      purpose: 'Quick flow spec-to-implementation, lean artifacts, minimum ceremony',
+    },
   ];
 
   constructor(gomadFolderName = GOMAD_FOLDER_NAME) {

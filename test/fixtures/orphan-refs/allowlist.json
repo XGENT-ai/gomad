@@ -86,7 +86,7 @@
   },
   {
     "path": "tools/installer/ide/shared/agent-command-generator.js",
-    "reason": "Entire file legitimately references gm-agent-* filesystem dirs (7 agent paths + legacy cleanup code); filesystem-path refs are invariant per REF-02."
+    "reason": "Entire file legitimately references gm-agent-* filesystem dirs (8 agent paths + legacy cleanup code); filesystem-path refs are invariant per REF-02."
   },
   {
     "path": "tools/installer/ide/_config-driven.js",

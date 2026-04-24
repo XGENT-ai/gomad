@@ -34,7 +34,7 @@ const prompts = require('../prompts');
  * an agent flows through automatically (one source of truth per CLAUDE.md
  * common rules — no duplicated lists).
  *
- * Order: ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev']
+ * Order: ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev', 'solo-dev']
  *
  * @type {ReadonlyArray<string>}
  */

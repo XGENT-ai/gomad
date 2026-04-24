@@ -13,7 +13,7 @@
  * Phase B: Fixture-based negative test (validates the structural assertion
  *          itself correctly detects drift — runs always).
  * Phase C install-smoke — structural assertions on installer output:
- *   - Hard assertion: all 7 .claude/commands/gm/agent-<name>.md launchers present
+ *   - Hard assertion: all 8 .claude/commands/gm/agent-<name>.md launchers present
  *     with valid YAML frontmatter (name: gm:agent-<name>, non-empty description).
  *   - Negative assertion: no legacy .claude/skills/gm-agent-<name>/ directory
  *     present in the installed output (REL-03, Phase 9 D-69).
@@ -209,12 +209,12 @@ try {
   }
 
   // D-69 (Phase 9): hard assertion replaces the Phase 5 conditional.
-  // Installer MUST now emit .claude/commands/gm/ with all 7 agent launchers.
+  // Installer MUST now emit .claude/commands/gm/ with all 8 agent launchers.
   const installedGmDir = path.join(installTempDir, '.claude', 'commands', 'gm');
   assert(fs.existsSync(installedGmDir), '.claude/commands/gm/ present in installed output', `Checked: ${installedGmDir}`);
 
-  // D-69: enumerate all 7 explicitly (not globSync) so a silently-missing 1-of-7 fails.
-  const EXPECTED_AGENTS = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev'];
+  // D-69: enumerate all 8 explicitly (not globSync) so a silently-missing 1-of-8 fails.
+  const EXPECTED_AGENTS = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev', 'solo-dev'];
   for (const shortName of EXPECTED_AGENTS) {
     const stubPath = path.join(installedGmDir, `agent-${shortName}.md`);
     assert(fs.existsSync(stubPath), `(C) agent-${shortName}.md present in installed output`);
