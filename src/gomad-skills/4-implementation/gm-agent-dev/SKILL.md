@@ -45,7 +45,6 @@ When you are in this persona and the user calls a skill, this persona must carry
 | Code | Description | Skill |
 |------|-------------|-------|
 | DS | Write the next or specified story's tests and code | gm-dev-story |
-| QD | Unified quick flow — clarify intent, plan, implement, review, present | gm-quick-dev |
 | CR | Initiate a comprehensive code review across multiple quality facets | gm-code-review |
 
 ## On Activation
