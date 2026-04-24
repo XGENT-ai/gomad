@@ -243,6 +243,10 @@ class Installer {
             installedModuleNames,
           });
 
+          // STORY-11 (Plan 10-02): copy src/domain-kb/* → <gomadDir>/_config/kb/*
+          // and track every copied file so manifest-v2 records install_root='_gomad'.
+          await this._installDomainKb(paths, addResult, { message });
+
           return `${allModules.length} module(s) ${isQuickUpdate ? 'updated' : 'installed'}`;
         },
       });
@@ -712,6 +716,49 @@ class Installer {
 
       addResult(`Module: ${moduleName}`, 'ok', isQuickUpdate ? 'updated' : 'installed');
     }
+  }
+
+  /**
+   * STORY-11 (Plan 10-02): Copy src/domain-kb/* → <gomadDir>/_config/kb/* and track
+   * every copied file in this.installedFiles so writeFilesManifest records
+   * install_root='_gomad' with schema_version='2.0'. Greenfield path (`_config/kb/`
+   * has no prior collision per ARCHITECTURE §4.6). No-op when src/domain-kb/ is
+   * empty or absent.
+   *
+   * Idempotency: fs.copy overwrites with identical content (same hash); manifest-v2
+   * cleanup-planner sees identical-hash entries and produces zero remove/snapshot work.
+   *
+   * @param {Object} paths - InstallPaths instance (expects paths.kbDir + paths.srcDir)
+   * @param {Function} addResult - Callback to record installation results
+   * @param {Object} ctx - Shared context: { message }
+   */
+  async _installDomainKb(paths, addResult, ctx) {
+    const { message } = ctx;
+    const srcKbDir = path.join(paths.srcDir, 'src', 'domain-kb');
+
+    if (!(await fs.pathExists(srcKbDir))) {
+      addResult('Domain KB', 'skip', 'no source packs');
+      return;
+    }
+
+    const entries = await fs.readdir(srcKbDir);
+    if (entries.length === 0) {
+      addResult('Domain KB', 'skip', 'source directory empty');
+      return;
+    }
+
+    message('Installing domain-kb packs...');
+    await fs.ensureDir(paths.kbDir);
+    await fs.copy(srcKbDir, paths.kbDir, { overwrite: true });
+
+    // Track every copied .md file so writeFilesManifest assigns install_root='_gomad'
+    const { globSync } = require('glob');
+    const copiedFiles = globSync('**/*.md', { cwd: paths.kbDir, absolute: true });
+    for (const filePath of copiedFiles) {
+      this.installedFiles.add(filePath);
+    }
+
+    addResult('Domain KB', 'ok', `${copiedFiles.length} file(s) installed`);
   }
 
   /**
