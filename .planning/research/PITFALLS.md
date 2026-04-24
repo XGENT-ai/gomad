@@ -1,486 +1,794 @@
-# Pitfalls Research — GoMad v1.2
+# Pitfalls Research — v1.3 Marketplace, Docs & Story Context
 
-**Domain:** Agent → slash-command migration, copy-only installer with manifest-tracked upgrade cleanup, PRD content refinement for coding-agent consumers
-**Researched:** 2026-04-18
-**Confidence:** HIGH for tool/installer pitfalls (direct code evidence), MEDIUM for Claude Code behavioral pitfalls (official docs retrieved live, but two contradictory GitHub issues), MEDIUM for PRD-refinement pitfalls (derived from current skill structure)
+**Domain:** GoMad installer + skills framework — adding marketplace refresh, docs site, agent dir relocation, and story-context enhancements to shipped `@xgent-ai/gomad@1.2.0`
+**Researched:** 2026-04-24
+**Confidence:** HIGH (grounded in direct read of `cleanup-planner.js`, `verify-tarball.js`, `test-gm-command-surface.js`, `agent-command-template.md`, `marketplace.json`, v1.1/v1.2 RETROSPECTIVE.md, MILESTONES.md)
 
-**Reading order:** The ordering below is by *blast radius if ignored* — Critical pitfalls can ship broken, Moderate are usually caught in QA, Minor are polish. Phase-to-Pitfall Mapping at the end is the roadmap's consumption point.
+**Scope note:** These are pitfalls specific to ADDING these features to THIS codebase. Generic "write good code" advice is excluded. Every pitfall cites a concrete file, test, or prior-milestone lesson it derives from.
 
 ---
 
-## Critical Pitfalls
+## Workstream 1 — Agent Dir Relocation (`gomad/agents/` → `_config/agents/`)
 
-### Pitfall 1: `/gm:agent-*` subdirectory namespace silently doesn't work on the user's Claude Code version
+### Pitfall 1-A: Partial-update drift between template and path-utils
 
 **What goes wrong:**
-User installs v1.2, runs `/gm:agent-pm`, nothing happens. No error, no autocomplete, no fallback to another command. The files at `.claude/commands/gm/agent-pm.md` are on disk but unreachable.
+`tools/installer/ide/templates/agent-command-template.md` line 16 hard-codes `{project-root}/_gomad/gomad/agents/{{shortName}}.md` as the runtime persona path. `tools/installer/ide/shared/path-utils.js` + `agent-command-generator.js` compute install-time agent destinations. Both reference the same logical `gomad/agents/` path but in different formats. If you update the template body string but miss the generator (or the reverse), the installer writes launchers that reference a directory the installer never populated.
 
 **Why it happens:**
-Subdirectory-based slash-command namespacing in Claude Code has a turbulent history:
-- Issue [#2422](https://github.com/anthropics/claude-code/issues/2422) (closed "not planned") documents that `.claude/commands/<dir>/<name>.md` → `/user:<dir>:<name>` *does not work* on v1.0.31
-- Issue [#44678](https://github.com/anthropics/claude-code/issues/44678) (opened 2026-04-07, still open) re-requests the feature with the `/dir:name` syntax the user chose
-- [The live docs as of 2026-04-18](https://code.claude.com/docs/en/slash-commands) explicitly describe `.claude/commands/db/migrate.md` → `/db:migrate` as working
-
-The feature appears to have shipped very recently (between April 7 and April 18, 2026) or the docs are ahead of the implementation. Either way, users on older Claude Code versions will find the commands *silently* non-functional. And unlike the `gm-*` skills which are discoverable via `/` menu autocomplete, invalid-subdirectory commands don't even appear in autocomplete — there is no user-facing failure signal.
+The path is physically duplicated — it's a string literal in the template, but also an assembled path in generator code, and also shows up in `docs/upgrade-recovery.md` line 19, `installer.js:295` comments, `manifest-generator.js:351`, and `artifacts.js:55`. No single source-of-truth constant. The `GOMAD_FOLDER_NAME = '_gomad'` constant in `path-utils.js` exists, but there is no equivalent `AGENTS_SUBPATH = 'gomad/agents'` constant.
 
 **How to avoid:**
-- Require a minimum Claude Code version in installer messaging and `README` (research the exact version that shipped namespacing — likely the April 2026 release). Gate the install with a check: `claude --version`-style detection isn't guaranteed possible from the installer, so at minimum add a pre-flight note.
-- Provide a **fallback flat name** per agent in addition to the namespaced file — e.g., ship both `.claude/commands/gm/agent-pm.md` AND `.claude/commands/gm-agent-pm.md` (latter invoked as `/gm-agent-pm`) during a deprecation window. Users on older CC versions get the flat one; users on new versions get both, with the namespaced one preferred (docs say skill > command if same name, but flat-command vs namespaced-command of the same agent is not a conflict).
-- Add an E2E test that does NOT rely on Claude Code invocation — test only the on-disk layout. A "does it actually resolve?" test requires a live Claude Code process in TTY, which we already established (from v1.1 E2E) is impractical.
-- Treat the feature as **LOW confidence until proven** — call it out in `CHANGELOG.md` as "requires Claude Code ≥ X.Y".
+Before touching any path:
+1. Run `grep -rn "gomad/agents" tools/installer/ docs/ src/` and inventory every hit.
+2. Introduce a single exported constant (e.g., `AGENTS_SUBPATH = '_config/agents'`) in `path-utils.js`, then import everywhere. Convert every hit to use the constant.
+3. Do the template substitution via `.replaceAll()` at generator time (not via hand-edit of the template) so the template becomes a `{{agentsPath}}` placeholder filled from the constant.
 
-**Warning signs:**
-- Early-adopter report "I ran `/gm:agent-pm` and Claude asked me what I meant" or "the command isn't in my `/` menu"
-- `/` autocomplete shows flat `/gm-agent-pm`-style commands but not the namespaced `/gm:agent-pm` form
-- CI on GitHub Actions uses a pinned or older CC CLI version that behaves differently from local dev
+**Warning sign (detection):**
+Grep `grep -rn "gomad/agents" tools/ src/ docs/` AFTER the edit should return ZERO hits outside archived changelog entries. Any hit = drift.
 
 **Phase to address:**
-Phase 1 (research/planning) — validate namespacing works today on current CC before committing to the `/gm:agent-pm` syntax. Phase 2 (command migration) — implement the fallback-flat-name safety net. Phase 5 (verification/release) — document the minimum CC version.
+Early phase — before any other agent-relocation work. Extract the constant FIRST (similar to how v1.1 extracted `GOMAD_FOLDER_NAME`).
 
 ---
 
-### Pitfall 2: Manifest-driven cleanup deletes user files because manifest lies, is stale, or is mis-parsed
+### Pitfall 1-B: `test:gm-surface` cannot detect launcher-body runtime-path drift
 
 **What goes wrong:**
-On re-install, installer reads `_gomad/_config/files-manifest.csv` to know what to remove, then writes fresh files. If the manifest contains a path that the user has hand-edited to hold their own work, or if a CSV parse error returns bogus paths, or if the install target was relocated and the manifest points into the *previous* location, `fs.remove` deletes real work. Unlike v1.1's current approach — which backs up custom files detected by hash-diff against the manifest — the proposed v1.2 flow *trusts the manifest as the deletion list*.
+`test/test-gm-command-surface.js` asserts (Phase C, lines 224–240): launcher file exists, has YAML frontmatter, `name: gm:agent-<shortName>`, non-empty description. It does **not** grep the launcher BODY for the runtime path (`_gomad/gomad/agents/` vs `_gomad/_config/agents/`). Meaning: a launcher pointing at the OLD path will pass every current test but silently break at `/gm:agent-pm` invocation time.
 
 **Why it happens:**
-Several plausible causes:
-1. **CSV quoting drift.** The current writer (`manifest-generator.js` line 642) emits `"type","name","module","path","hash"` with naive `"..."` wrapping but the reader (`installer.js` line 620-632) hand-rolls CSV parsing with a toggle-state quote flag. A path containing a literal quote, or CRLF injected by Windows editors, or a BOM prepended by Excel, will parse incorrectly — and incorrect parse produces paths that either (a) miss the file that should be removed (orphans lingering) or (b) point at a neighbor directory entry with catastrophic rm consequences.
-2. **Path-with-spaces.** Paths like `_gomad/gomad/What I'm Building.md` (yes, apostrophes; CSV rules for escaping single and double quotes differ) break the hand-rolled parser.
-3. **Absolute-vs-relative ambiguity.** The manifest stores paths *relative to* `gomadDir`, but `readFilesManifest` reconstructs absolute paths by `path.join(gomadDir, entry.path)`. If a malformed entry has a leading slash, on POSIX `path.join('/foo', '/bar/baz')` returns `/bar/baz` — traversal outside `_gomad/`.
-4. **Manifest inherited from a different install location.** User moves `_gomad/` to a new project. Manifest still lists paths relative to old dir; cleanup tries to delete ghosts, possibly with errors that are swallowed.
-5. **User edited manifest by mistake** (opened it in Excel which reformatted dates, re-saved; or git merge conflict).
-6. **Hashes missing from old manifest.** Existing code has a `manifestHasHashes` flag for backward-compat with v1.0-era manifests. If hashes are missing we can't detect modifications — and the proposed v1.2 upgrade-cleanup flow needs hashes to make "safe to delete" decisions.
+Phase C was written in v1.2 to lock the launcher CONTRACT (frontmatter shape). It assumes the template body is static. v1.3 breaks that assumption by changing the body.
 
 **How to avoid:**
-- Switch from hand-rolled CSV to `csv-parse/sync` (already a dependency; already used in `manifest-generator.js` for reading agent manifest). Validate each row has the expected column count; reject and log the manifest as corrupt if not.
-- **Require a BOM/CRLF normalization pass** on read: strip leading U+FEFF and normalize `\r\n` → `\n`.
-- Enforce **path containment**: before any `fs.remove(pathJoin(gomadDir, entry.path))`, verify `fs.realpath(target)` is a prefix-descendant of `fs.realpath(gomadDir)`. Refuse to remove otherwise. This defeats absolute-path and `../` shenanigans.
-- Enforce **hash match before delete**. If manifest has a hash, compute current hash; if it differs, the file is user-modified — rename to `.bak` rather than delete (mirrors v1.1's existing modified-files-as-.bak pattern at `installer.js` line 397). If hash missing, fall through to v1.1 behavior (detect custom files, back up, restore).
-- Treat a **corrupt manifest as a recoverable failure**: log `MANIFEST_CORRUPT`, skip the cleanup phase, proceed with install (idempotent copy-over), leave residual files — do NOT assume "corrupt manifest means no files to keep" and mass-delete.
-- Fail-safe **dry-run mode** for upgrades: `gomad install --dry-run` prints "would delete N files: …" without touching disk. Consider making it default-visible for upgrades ("Proceed? [y/N]") when >N files would be removed, N=20 or similar.
-- **Atomic swap** where practical: stage new files in `_gomad.new/`, validate, then rename. Full atomic swap is impractical for partial updates, but the *manifest file itself* should be written via tempfile+rename so a partial write can't leave a truncated manifest that parses as "zero files installed" (which would be catastrophic next run).
-- Keep a **rotating backup** `_gomad/_config/files-manifest.csv.1` (previous install's manifest) so we can detect "are we about to delete something that was never ours?".
+Extend `test/test-gm-command-surface.js` Phase C with a body-regex assertion:
+```js
+assert(
+  /\{project-root\}\/_gomad\/_config\/agents\//.test(raw),
+  `(C) agent-${shortName}.md body references new _config/agents/ path`
+);
+assert(
+  !/_gomad\/gomad\/agents\//.test(raw),
+  `(C) agent-${shortName}.md body does NOT reference legacy gomad/agents/ path`
+);
+```
+Wire this into Phase C on installer output AND Phase A on the in-repo dev stubs.
 
-**Warning signs:**
-- User report "after `gomad install --update` my `planning/` notes disappeared"
-- Test that writes a malformed CSV (missing closing quote, embedded newline, BOM) and confirms installer handles gracefully
-- Stack trace mentions `ENOENT` with absolute path outside the project root
-- Manifest contains zero rows after a successful install (sign of a swallowed write error)
+**Warning sign (detection):**
+Manually `/gm:agent-pm` post-install — Claude reports "file not found" for `_gomad/gomad/agents/pm.md`.
 
 **Phase to address:**
-Phase 3 (installer rework) — hardening. **This is the single highest-severity pitfall in v1.2** because it can destroy user work, and the current installer design has no path-containment guard. Design docs for this phase must include an explicit "safety" subsection.
+Same phase as the relocation itself. The test MUST gain the body assertion in the same commit that changes the template.
 
 ---
 
-### Pitfall 3: Symlinked existing installs break silently or keep working (wrong) after v1.2 upgrade
+### Pitfall 1-C: v1.2→v1.3 upgrade — cleanup plan doesn't model the MOVE semantically
 
 **What goes wrong:**
-v1.1 installs create relative symlinks: `.claude/skills/<canonicalId>` → `../../_gomad/<module>/<path>` (see `_config-driven.js` line 171, `fs.ensureSymlink`). A developer or user who installed from a git checkout may have _gomad/ symlinked somewhere, or individual skills symlinked from the checkout for live-edit during skill development.
+`cleanup-planner.js:buildCleanupPlan` produces `{to_snapshot, to_remove, to_write}`. It does this by taking `newInstallSet` (paths the new install will write) and diffing against `priorManifest` entries. An entry in priorManifest whose realpath is NOT in newInstallSet → stale → removed. This is correct for "agent moved from `.../gomad/agents/pm.md` to `.../_config/agents/pm.md`" because:
+- Old path `gomad/agents/pm.md` is in priorManifest but NOT newInstallSet → scheduled for remove (snapshotted first).
+- New path `_config/agents/pm.md` is in newInstallSet but NOT priorManifest → scheduled for write.
 
-Two failure modes:
-1. **Symlink leftovers persist.** v1.2 copy-only installer writes directory `.claude/skills/<id>/` containing real files. If the old symlink at the same path isn't explicitly removed, `fs.ensureDir(skillDir)` inside a symlink may traverse the link and write into the *source* tree (polluting the git checkout). If `fs.copy` is used naively, it may refuse (EEXIST) or clobber the target of the symlink.
-2. **Silent "works" via dangling link.** Migration removes `_gomad/` from the user's repo during upgrade but leaves the symlink in `.claude/skills/<id>`. User's IDE now loads nothing (dangling link) but doesn't fail loudly — just "skill not found" in Claude Code's `/` menu.
-
-Additionally, v1.1's cleanup at `_config-driven.js` line 309 catches `gomad*` at target root, but skill *directories* at `.claude/skills/<canonicalId>/` don't start with `gomad` — they start with `gm-` (or `gomad-quick-*`, or arbitrary canonicalIds). The existing `fs.remove` of `skillDir` on line 166 only works because the skill directory IS a known canonicalId already being re-created. If a canonicalId *renames* across versions (which v1.2 does — `gm-agent-pm` → `gm:agent-pm` command), the old `gm-agent-pm/` skill dir becomes an **orphan** that the install loop never touches.
+BUT — the user's custom edits to the v1.2 file (`gomad/agents/pm.md`) will be snapshotted (flagged `was_modified=true` via D-34 hash compare) and then removed, and the new v1.3 file will be written to a different location, losing their edits unless they manually re-apply from backup. There is no `to_move_and_preserve_user_edits` semantic.
 
 **Why it happens:**
-- Developer dogfooded v1.1 from a git checkout; installed via our dev-mode script (if one exists) or manually symlinked; now v1.2 sees an existing install they want to upgrade.
-- Users who ran `npm link` or `npm install -g` and then pointed a project at their cloned `_gomad/` via symlink.
-- `fs.ensureSymlink` vs `fs.copy` race: `fs.ensureSymlink` is a no-op if the link exists with the right target; but `fs.copy` into an existing symlinked directory has different semantics — it follows the link by default.
+v1.2's cleanup was designed for "skills/gm-agent-*/ no longer installed" (true delete). It was not designed for renames/moves.
 
 **How to avoid:**
-- **Explicit symlink detection step during upgrade.** Before touching any target path: `const stat = await fs.lstat(target); if (stat.isSymbolicLink()) { /* unlink, then proceed */ }`. Apply to both `.claude/skills/<id>/` entries and `_gomad/` itself.
-- **Remove orphaned skill directories** by comparing the new `skill-manifest.csv` canonicalId set against what's currently at `<target_dir>/*` — anything that starts with `gomad` or exists-but-isn't-in-manifest gets removed. This addresses the v1.1 `gm-agent-*` → v1.2 renamed-away-skill orphan problem. (v1.1 already removes files starting with `gomad`; this needs to extend to `gm-*` skill *directories*, OR the skill-manifest.csv needs to drive orphan detection directly.)
-- **Do not use `fs.copy` on a target that is a symlink.** Always `fs.remove` first, then `fs.copy` or `fs.ensureDir` + write files. `fs.copy`'s default behavior of following links is a foot-gun here.
-- Changelog/RELEASE NOTES should warn v1.1 users: "If you installed via symlink from a git checkout, run `gomad uninstall` and then re-install." Provide an explicit `gomad uninstall` that knows about symlinks.
-- E2E test: set up a pre-v1.2 state with symlinks, run upgrade, assert real files present and no link-following pollution of sources.
+1. Before Phase-X relocation work, write a dedicated upgrade test (`test/test-v12-to-v13-upgrade.js`) that:
+   - Sets up a simulated v1.2 workspace with a files-manifest.csv containing `_gomad/gomad/agents/pm.md`.
+   - Modifies one of those files (simulates user edit).
+   - Runs a mocked v1.3 install.
+   - Asserts the modified file is snapshotted with `was_modified: true` in metadata.json AND that the new path gets written.
+   - Asserts `docs/upgrade-recovery.md` explicitly documents the move and tells the user to review `_backups/<ts>/_gomad/gomad/agents/` against `_gomad/_config/agents/` to re-apply edits.
+2. Consider adding a preflight warning to `gomad install` when v1.2→v1.3 is detected: *"Your agent files at `_gomad/gomad/agents/` will be moved to `_gomad/_config/agents/`. A backup snapshot will be written to `_gomad/_backups/<ts>/`. If you customized agent files, review the backup and re-apply changes to the new location."*
 
-**Warning signs:**
-- After upgrade, `.claude/skills/<id>` is a symlink (use `ls -la` in QA)
-- User's source-of-truth `src/gomad-skills/` files change unexpectedly after `gomad install` (symlink traversal polluted source)
-- Skills invoked by Claude Code return "file not found"
+**Warning sign (detection):**
+Manual upgrade test: stash v1.2 workspace, run v1.3 install, `diff _gomad/_backups/<ts>/_gomad/gomad/agents/ _gomad/_config/agents/` — any diff is lost work.
 
 **Phase to address:**
-Phase 3 (installer rework). Must be done in the same phase as the copy-only switch — cannot be deferred without leaving users stuck.
+Relocation phase, BEFORE installer code changes land. Write the upgrade test first (TDD RED/GREEN — our standard pattern per RETROSPECTIVE v1.2 Lesson 4).
 
 ---
 
-### Pitfall 4: Orphan references to `gm-agent-*` linger across source/tests/docs/manifests after the rename sweep
+### Pitfall 1-D: Hardcoded `_gomad` / `_config` strings bypassing the `<installRoot>` variable
 
 **What goes wrong:**
-Like v1.1 taught us (see v1.1 issues-resolved: "`validate-skills.js NAME_REGEX` hardcoded `bmad-` prefix — updated during Phase 2 rename" and "`findBmadDir` function references in additional files beyond Plan 04-01 scope — renamed"), a rename sweep has a **long tail** of missed references. For v1.2, the targets are:
-
-- `src/gomad-skills/module-help.csv` — contains `gm-agent-tech-writer` as the `skill` column for multiple capability codes (WD, US, MG, VD, EC). These rows will need to be either renamed or restructured (since the replacement is a command, not a skill). [Verified: `grep` found 4+ rows].
-- `docs/reference/agents.md` and `docs/zh-cn/reference/agents.md` — still say `` `gomad-agent-dev` `` etc. Users reading docs will copy-paste command names that don't exist.
-- `docs/reference/commands.md`, `docs/tutorials/getting-started.md` — reference skill-form agent names in example code.
-- The 7 `gm-agent-*/skill-manifest.yaml` files contain `name: gm-agent-*` and `module: gomad` — need to decide: delete these directories entirely (since they become commands), or keep them as skills-that-bootstrap-the-command, or keep as bridge for IDEs that don't support slash commands (e.g., Cursor uses `.cursor/skills` with no command concept).
-- `tools/installer/ide/shared/path-utils.js` has `toDashName`, `toDashPath`, `parseDashName` — all assuming `gomad-agent-*` flat naming. The path-utils logic still needs to exist for *other IDEs* but not for Claude Code.
-- `tools/installer/ide/shared/agent-command-generator.js` — its whole purpose is generating `gomad-agent-*.md` flat launchers. For Claude Code it should produce `gm/agent-*.md` namespaced files instead.
-- `.planning/PROJECT.md`, `.planning/MILESTONES.md`, `.planning/quick/260416-*-fix-gm-agent-dev-skill-*` — historical references that should be left alone but *documented as archived naming*.
-- `src/gomad-skills/4-implementation/gm-sprint-agent/workflow.md` and `src/gomad-skills/4-implementation/gm-epic-demo-story/SKILL.md` reference agent names — verify these are behavioral references (they invoke the persona) vs presentational (doc links).
-- `src/core-skills/gm-distillator/resources/distillate-format-reference.md` — distillate format reference, probably historical example, but check.
-
-Downstream, user-visible breakage:
-- A skill step like "Invoke the `gm-agent-pm` skill" (see `gm-create-prd/steps-c/step-02b-vision.md` line 104: "Invoke the `gm-advanced-elicitation` skill" — same pattern) may say "Invoke the `gm-agent-pm`". Post-migration this is ambiguous: there's a command now, not a skill. The instruction text to the LLM should say "Invoke the `/gm:agent-pm` slash command" or, more robustly, "Embody the PM persona from `.claude/commands/gm/agent-pm.md`".
+`<installRoot>` is user-chosen (PROJECT.md line 24: *"`<installRoot>` is user-chosen (`_gomad` by convention); no hardcoded install paths"*). If a dev writes `'_gomad/_config/agents'` directly (not `path.join(gomadFolder, '_config', 'agents')`), then a user who customizes to `my-gomad/` gets broken behavior.
 
 **Why it happens:**
-- Rename sweeps rely on a text-search regex; `gm-agent-` occurs in both machine-checked code paths (validate-skills.js, path-utils.js) and human-written documentation — the former error when the regex updates, the latter silently lingers.
-- Documentation in `zh-cn/` trails English docs by convention; easy to update English and forget the Chinese translation.
-- Capability tables in agent persona files (see `gm-agent-pm/SKILL.md`) list capabilities *by skill name*. Those tables are semantic, not pattern-matched by ripgrep.
-- Tests assert specific names; fixture files contain specific names.
+Copy-paste from existing code (which already hardcodes `_gomad/gomad/agents/` in several spots — see `installer.js:295`, `upgrade-recovery.md:19`, template line 16, `manifest-generator.js:351`). The bad pattern is already entrenched; relocation risks propagating it.
 
 **How to avoid:**
-- Use a **catalogue of locations** as the sweep's source of truth. Run `grep -rn 'gm-agent-\|gomad-agent-'` at the start and end of the phase. Final list must be 0 matches (or explicitly-annotated allowlist of historical/archival hits).
-- **Distinguish behavioral vs presentational references.** Behavioral (code, skills that invoke agents as a menu action, workflow steps that say "load the PM persona") must migrate to the new command form. Presentational (docs explaining what the system is) must use the new form in marketing copy. Historical (`.planning/`, changelog, old milestone docs) must be left untouched and labeled as historical.
-- **Update the tests alongside the rename.** v1.1 hit the `validate-skills.js NAME_REGEX` issue; v1.2 has an equivalent landmine in `path-utils.js` regex-based parsing (`parseDashName` assumes `gomad-agent-*` flat form).
-- **Update docs/zh-cn in the same commit** as docs/en, not a later catch-up PR.
-- **Consider what to do with the 7 `gm-agent-*` directories on disk.** Options: (a) delete entirely and replace with command files; (b) keep as compat shim for non-CC IDEs; (c) keep as internal reference data that the command file loads. Choice (b) is cleanest for multi-IDE support but forks the story; choice (a) is cleaner but breaks Cursor/Codex users.
+During relocation edits, audit each hit from Pitfall 1-A's grep. Classify each:
+- Documentation / example (OK to hardcode `_gomad` as conventional default): docs/, changelog, README.
+- Runtime code (MUST use `gomadFolder` variable): anything under `tools/installer/`.
+- Template (MUST use `{project-root}/{{gomadFolder}}/_config/agents/`): `agent-command-template.md`.
 
-**Warning signs:**
-- User runs `gomad install` with Cursor (not Claude Code) and gets zero agents.
-- `grep -n gm-agent- docs/` returns any matches after phase completion.
-- A skill tells the user "run the `gm-agent-pm` skill" and Claude Code searches `.claude/skills/gm-agent-pm/` → 404.
-- Chinese-language user reports broken docs.
+The template line 16 today reads `{project-root}/_gomad/gomad/agents/...` — the `_gomad` literal there is actually a bug carried from v1.2 (it should have been a placeholder). Fix the root cause during relocation, don't re-ship the bug.
+
+**Warning sign (detection):**
+Add a lint rule or grep test: `grep -rn "'_gomad/" tools/installer/ | grep -v 'GOMAD_FOLDER_NAME\|test/\|fixtures/'` should return zero hits.
 
 **Phase to address:**
-Phase 2 (rename sweep / content migration). Explicit success criterion: zero `gm-agent-` matches in non-historical files after phase completion.
+Same phase as relocation — one atomic fix, not piecemeal.
 
 ---
 
-### Pitfall 5: `_preserveModules` and `detectCustomFiles` logic assumes legacy file locations that v1.2 changes
+### Pitfall 1-E: `verify-tarball.js` grep-clean does NOT cover new path
 
 **What goes wrong:**
-The current `installer.js` has intricate logic (lines 660-766) to preserve user customizations across upgrades — it walks `gomadDir`, compares every file against `files-manifest.csv` hashes, and classifies files as `customFiles` (user-added) vs `modifiedFiles` (gomad-owned but user-edited). v1.2 adds slash-command files at `.claude/commands/gm/*` which are *outside* `gomadDir` — they live in `.claude/commands/` under the *project root*. 
-
-Two problems:
-1. **Scope confusion.** The scan only covers `gomadDir` (`_gomad/`). Slash command files at `.claude/commands/gm/` are unmanaged by `detectCustomFiles`. If a user hand-edits `.claude/commands/gm/agent-pm.md` (quite plausible — "I want John to speak in French"), the next `gomad install` blows it away without detection-or-backup logic. v1.1's cleanup pattern at `_config-driven.js` line 305 iterates `targetPath` entries and removes any starting with `gomad` — it will happily remove the whole `gm/` subdirectory if we extend that pattern, or leave it entirely if we don't.
-2. **Preservation asymmetry.** Inside `_gomad/` modifications are preserved as `.bak`; inside `.claude/commands/gm/` they're silently overwritten. Users will notice the inconsistency and feel gaslit.
-
-Additionally, the existing `_preserveModules` codepath (`installer.js` line 273) preserves modules the user didn't re-select. This has no meaning for slash commands — but its intent (don't nuke unrelated work) does.
+`tools/verify-tarball.js` Phase 2 greps for `\b(bmad|bmm)\b` and Phase 3 greps for `gm-agent-`. Neither checks that `_gomad/gomad/agents/` references are absent from shipped content post-migration. After v1.3, any stray `gomad/agents/` reference in shipped source will not fail the release.
 
 **Why it happens:**
-Slash commands are a *new kind of artifact* for the installer. Existing preserve/detect logic was designed for the single-root `_gomad/` tree.
+v1.2's grep-clean covered v1.1→v1.2 residuals (bmad, gm-agent-). v1.3 introduces a new residual to sweep (`gomad/agents` → `_config/agents`) that isn't gated.
 
 **How to avoid:**
-- Extend `files-manifest.csv` to include IDE-tree files (`.claude/commands/gm/*`, `.claude/skills/*`, and platform equivalents). Track them with hashes. Apply the same `custom/modified → backup` logic to those files.
-- Alternatively, treat **everything under `.claude/commands/gm/`** as gomad-owned and document it: "Do not hand-edit this directory; changes are lost on upgrade. To customize, edit the source in `_gomad/gomad/commands/gm/` and reinstall." (The source may need to exist for this model to work; currently it doesn't.)
-- Add a **pre-upgrade diff**: before cleanup, enumerate all files the installer is about to clobber; if any have changed from their manifest hash, list them to the user with a confirmation prompt. This is an explicit opt-in to potentially destructive upgrade.
-- Document the model clearly: "Files in `_gomad/` can be edited; files in `.claude/commands/gm/` cannot. Customization goes in `_gomad/_memory/` sidecars."
+Add Phase 4 to `verify-tarball.js`:
+```js
+function checkLegacyAgentPathClean() {
+  // Search for the old path in shipped source (src/ + tools/installer/)
+  const out = execSync('grep -rlE "_gomad/gomad/agents|[^a-z]gomad/agents/" src/ tools/installer/ ... 2>/dev/null');
+  // Allowlist: CHANGELOG.md, upgrade-recovery.md archived references
+}
+```
+Wire Phase 4 into `test:tarball`.
 
-**Warning signs:**
-- User complaint: "I customized the PM agent's greeting, upgrade wiped it"
-- QA scenario: edit `.claude/commands/gm/agent-pm.md`, run `gomad install`, verify edit is either preserved as `.bak` or at minimum loudly reported
+**Warning sign (detection):**
+Ship an intentional regression (re-add `gomad/agents/` to one file) and verify `npm run test:tarball` now fails.
 
 **Phase to address:**
-Phase 3 (installer rework) — this needs to be solved same-phase as the copy-only switch.
+Relocation phase, before the first `npm publish`.
 
 ---
 
-### Pitfall 6: PRD refinement strips context that downstream skills (`gm-validate-prd`, `gm-create-architecture`, `gm-create-epics-and-stories`) structurally depend on
+### Pitfall 1-F: `docs/upgrade-recovery.md` still shows `gomad/agents/` in backup tree
 
 **What goes wrong:**
-v1.2 plans to drop human-founder framing — "why now?", time windows, business/operational metrics — from `gm-create-prd` and `gm-product-brief`. But `gm-validate-prd` has 13 step files that check specific PRD sections. If a section is removed from creation but still validated, the validator flags it missing. Conversely, `gm-create-architecture` discovers PRD content from `{planning_artifacts}/*prd*.md` and reads "ALL discovered files completely" (see `gm-create-architecture/steps/step-01-init.md` line 77). The architecture workflow then draws on "vision" and "product differentiator" content in the PRD — content that may be thinned in v1.2.
-
-Specific risks identified by inspection:
-- `gm-validate-prd/steps-v/step-v-04-brief-coverage-validation.md` maps "brief content to PRD sections and identif[ies] gaps" — if the brief's business-metrics section is dropped but the PRD preserves them, or vice versa, this check either flags spurious gaps or false-passes.
-- `gm-validate-prd/steps-v/step-v-07-implementation-leakage-validation.md` scans PRDs for tech names and flags "leakage." If v1.2 "sharpens dev-ready requirements," the refinement may intentionally include tech names that the validator will then reject.
-- `gm-create-prd/steps-c/step-02b-vision.md` asks "Why now?" as one of three "deeper vision" questions (line 78). Removing it changes the document, which affects downstream semantic expectations.
-- `gm-agent-pm/SKILL.md`'s menu lists `gm-edit-prd` and `gm-check-implementation-readiness` — readiness checker presumably has its own assumptions about PRD structure.
-
-Risk: we refine the PRD content but don't refine the validator + architecture + readiness skills that consume it. Result: a new PRD passes creation but fails validation, or validation fails to catch genuine issues because the rubric no longer matches the document.
+`docs/upgrade-recovery.md` line 19 shows:
+```
+└── _gomad/                 # snapshots of files that were installed under _gomad/
+    └── gomad/agents/pm.md
+```
+Post-v1.3, backups for users upgrading FROM v1.2 will genuinely contain `gomad/agents/pm.md` (that was the old path at snapshot time). So this doc is actually correct for v1.2→v1.3 upgrade. BUT a user doing v1.3→v1.4 upgrade will see `_config/agents/pm.md` in their backup, and the doc will be stale.
 
 **Why it happens:**
-The v1.2 scope frames PRD refinement as a content task (change the create workflow's prompts), but PRDs are inputs to a **pipeline**. Content changes are API changes for every downstream consumer.
+Doc captures a snapshot of a specific version's install tree. Doesn't generalize.
 
 **How to avoid:**
-- Treat PRD template as a schema. Enumerate every downstream consumer (`gm-validate-prd`, `gm-create-architecture`, `gm-create-epics-and-stories`, `gm-check-implementation-readiness`, `gm-edit-prd`, `gm-correct-course`). For each, identify which PRD sections it references or expects.
-- For each dropped section: either (a) also drop the validator check, or (b) make the validator's check conditional on the section existing, or (c) stage the change across phases — v1.2 drops the section in the creation flow, v1.3 removes the validator check.
-- For each new/amplified section: ensure downstream skills consume it. "Aggressive MVP scope" content needs a place to land in the architecture workflow.
-- Write an integration test: generate a PRD with v1.2 `gm-create-prd`, run `gm-validate-prd` against it, require all validations to pass (or be intentionally skipped).
-- Keep validator backward-compatible: mark dropped sections as "optional — skip if absent."
+Rewrite line 19 with both paths explicitly:
+```
+└── _gomad/
+    ├── gomad/agents/pm.md         # for v1.2-vintage workspaces (pre-relocation)
+    └── _config/agents/pm.md       # for v1.3+ workspaces (post-relocation)
+```
+OR better: use a generic `<agent-dir>/pm.md` placeholder and link to the version-at-install-time constant.
 
-**Warning signs:**
-- User creates a PRD with v1.2, runs `VP` (validate PRD) from the PM menu, gets "missing business metrics" error
-- Architecture workflow asks "what's the vision?" and finds the PRD doesn't answer (the user already answered it but the new PRD doesn't capture it)
-- `gm-check-implementation-readiness` reports "misalignment" between artifacts that are both internally consistent
+**Warning sign (detection):**
+Docs review checklist: every hardcoded path in `docs/` that references the install tree → must be either generic placeholder OR version-qualified.
 
 **Phase to address:**
-Phase 4 (PRD refinement). Explicit acceptance criteria: downstream pipeline (`CP → VP → CA → CE → IR`) runs clean against a sample project using v1.2 templates.
+Docs-site phase (same milestone, likely later — but must run AFTER the relocation phase to reflect final state).
 
 ---
 
-### Pitfall 7: `.claude/commands/` in the dev repo gets polluted and committed, violating "installer-produces-output-not-repo-ships-output"
+## Workstream 2 — Plugin Marketplace Refresh
+
+### Pitfall 2-A: marketplace.json schema version drift from Claude Code spec
 
 **What goes wrong:**
-During v1.2 development, a contributor working on the slash-command migration tests the commands locally by running `gomad install` in the gomad git checkout itself. The installer writes `.claude/commands/gm/agent-pm.md` et al into the *dev repo's* `.claude/commands/`. They forget to `.gitignore` it (or it's already committed because `/gsd/` is already tracked there), and the files ship in the tarball OR at least pollute PRs.
+`.claude-plugin/marketplace.json` currently uses `{name, owner, description, plugins: [{name, skills: [...]}]}` — fields we made up as best-match for BMAD's fork. The Claude Code plugin marketplace schema evolves independently. If Claude Code drops support for a field or requires a new one (e.g., `pluginVersion`, `compatibility`), our manifest silently stops resolving.
 
 **Why it happens:**
-- `.claude/commands/gsd/` is already committed (dev tooling for GoMad contributors).
-- Installer's default target is cwd, which during dev testing is the gomad repo.
-- `package.json` `files` allowlist does NOT include `.claude/` — so strictly speaking the tarball is safe. But `git status` and code review still show polluted diffs.
-- If a contributor ever *adds* `.claude/` to files allowlist (maybe because they also want to ship `.claude/settings.json` or similar), this becomes a live ship-it problem.
+No version floor pinned on Claude Code (Key Decision: "No Claude Code version floor pinned"). No test that validates our marketplace.json against a schema. The file is hand-authored.
 
 **How to avoid:**
-- Add `.claude/commands/gm/` to `.gitignore` of the dev repo (while keeping `.claude/commands/gsd/` tracked). Explicit negative-match: `.claude/commands/*` with `!.claude/commands/gsd/`.
-- Installer should emit a warning when target dir is the gomad source repo itself (detect via presence of `src/gomad-skills/` in cwd) and refuse to install without `--self` flag. Keeps contributors from accidentally self-installing.
-- Tarball verification script (`verify-tarball.js` from v1.1) must reject any `.claude/commands/` content in the tarball.
+1. During marketplace restructure, check the current Claude Code marketplace documentation (via Context7 or official docs) and compare the JSON shape against current schema.
+2. Add a schema file (e.g., `.claude-plugin/marketplace.schema.json`) and validate via a short Node script. Per zero-new-deps policy, avoid `ajv` — use Node built-in `JSON.parse` + hand-rolled assertions.
+3. Add `test/test-marketplace-schema.js` wired into `npm run quality`.
 
-**Warning signs:**
-- `git status` shows new `.claude/commands/gm/*.md` files after running a local install test
-- PR diffs include `.claude/commands/gm/` file changes
-- `npm pack` output lists `.claude/commands/gm/`
+**Warning sign (detection):**
+Install in Claude Code, attempt to enable the plugin, silent failure or "plugin not found" error.
 
 **Phase to address:**
-Phase 2 (command migration) — `.gitignore` update when command-gen is implemented. Phase 5 (verification) — tarball check extended.
+Marketplace refresh phase, first plan. Schema validation test is the foundation.
 
 ---
 
-## Moderate Pitfalls
-
-### Pitfall 8: Colon-in-filenames is Windows-hostile; the `gm/` directory approach is correct but must be preserved against regressions
+### Pitfall 2-B: Dead references / renamed skill paths in marketplace.json
 
 **What goes wrong:**
-The `/gm:agent-pm` invocation uses a colon as namespace separator, but the *file* is at `.claude/commands/gm/agent-pm.md` (subdirectory, not `gm:agent-pm.md`). This is correct and intentional — Windows FAT/NTFS forbid `:` in filenames (alternate data streams). A regression would be if someone "simplified" the writer to emit flat `gm:agent-pm.md` files (mirroring the invocation). The current code (`path-utils.js toUnderscorePath` comment: "underscore format (Windows-compatible)") shows the team already hit this lesson once.
+The current `marketplace.json` has entries like `./src/bmm-skills/1-analysis/bmad-product-brief`. The v1.1 rename renamed the directory to `src/gomad-skills/1-analysis/gm-product-brief`. The marketplace.json was never updated — it still references `bmm-skills/` + `bmad-*`. Every single path is dead.
 
 **Why it happens:**
-Intuition: "invocation is `/gm:agent-pm`, so the file should be named `gm:agent-pm.md`." Wrong — Claude Code's docs clearly describe subdirectory = namespace.
+v1.1 focused on the shipped tarball + installer. `.claude-plugin/marketplace.json` is shipped but wasn't part of the rename sweep — confirm: it's not listed in `files:` allowlist in package.json which means it may not even ship in the tarball, but it IS in the repo as the GitHub-discovered plugin surface.
 
 **How to avoid:**
-- Unit-test command file generation to assert files are *directories*, not colon-embedded filenames.
-- Document in `path-utils.js` (or equivalent command-gen module) why we use subdirectories.
-- CI job on Windows runner to confirm installer works (we likely don't have this; v1.1 tests presumably ran on macOS).
+During restructure:
+1. Write a test (`test/test-marketplace-paths.js`): for each `plugins[].skills[].path`, assert `fs.existsSync(path + '/SKILL.md')`. Zero hits OK for workflow-type entries but MUST catch typo paths.
+2. Regenerate the skill list programmatically from `src/gomad-skills/` + `src/core-skills/` via a small helper script (`tools/generate-marketplace.js`), DO NOT hand-curate. Treat `marketplace.json` as generated output, not hand-authored input.
+3. Run the generator in `npm run quality` and diff against committed version — drift = fail.
 
-**Warning signs:**
-Windows user reports: "`gomad install` exits with `EINVAL` on my machine."
+**Warning sign (detection):**
+Manual install from GitHub Pages marketplace URL → "skill not found" errors in Claude Code logs.
 
 **Phase to address:**
-Phase 2 (command migration). Add Windows-path test case.
+Marketplace refresh phase. Generator + path-existence test before restructure.
 
 ---
 
-### Pitfall 9: Permission bits and executable files lost on copy; or opposite — installed files get the source's `u+x` erroneously
+### Pitfall 2-C: Duplicated skill listings across plugin groups
 
 **What goes wrong:**
-Switching from symlink to copy changes the semantics of file permissions. `fs-extra`'s `fs.copy` by default *preserves* mode bits. Two failure modes:
-1. **Missing `u+x`.** If any installer-consumed script (e.g., `tools/installer/gomad-cli.js` is `0755` in the repo) gets copied without preserving the executable bit, the consumer's `gomad` binary fails to execute.
-2. **Unwanted `u+x`.** A source file marked `0755` in the repo (e.g., `src/gomad-skills/*/scripts/foo.sh` — if any exist) gets copied with that bit, which on shared filesystems (Docker mounts, umask 002) could be a security concern or lint concern.
-
-Less critical: **symlinks in source**. If `src/` contains any internal symlinks, `fs.copy` follows them by default. If there's a `fixtures/` symlink to a shared fixture, copy duplicates it rather than linking — increases install size.
+v1.3 plans to restructure into 3 groups: `gm-agent-*` launchers / `gomad-skills` workflow / `core-skills`. If the same skill is listed in two groups (e.g., `gm-brainstorming` under both `gomad-method-lifecycle` and `gomad-pro-skills`), Claude Code may register it twice, causing duplicate menu entries or resolve-conflict errors.
 
 **Why it happens:**
-Symlinks don't modify file attributes; copies do. Changing link→copy inherits source attributes that the user may not want.
+Copy-paste + lack of uniqueness assertion. BMAD's current file has this structure; it's easy to miss a dupe during group restructure.
 
 **How to avoid:**
-- Audit source tree for any `0755` files that should not be executable post-install: `find src -perm -u+x -type f`.
-- Explicitly set mode bits on copy where determinable: config files, data files → `0644`; scripts → `0755`.
-- Use `fs-extra`'s `preserveTimestamps: true` only if we care (usually we don't; fresh install date is fine).
-- E2E test: after install, `find _gomad -perm -u+x -type f` should return a known allowlist (probably empty; no skill needs exec bit).
+In the same test as Pitfall 2-B:
+```js
+const allPaths = plugins.flatMap(p => p.skills);
+const uniq = new Set(allPaths);
+assert(allPaths.length === uniq.size, 'No duplicated skill paths across plugin groups');
+```
 
-**Warning signs:**
-- Post-install, `gomad` command fails "Permission denied"
-- Security scanner flags installed files with unexpected exec bits
+**Warning sign (detection):**
+Count: `jq '[.plugins[].skills[]] | length' marketplace.json` vs `jq '[.plugins[].skills[]] | unique | length'` — must match.
 
 **Phase to address:**
-Phase 3 (installer rework). Include a permissions test.
+Marketplace refresh phase.
 
 ---
 
-### Pitfall 10: File-watching and dev loops that relied on symlink live-edit break for contributors and users
+### Pitfall 2-D: Missing entries for new v1.3 skills
 
 **What goes wrong:**
-Developers working on GoMad skills (our own team, or third-party contributors forking) may have been relying on the v1.1 symlink install: edit `src/gomad-skills/*/SKILL.md`, the change is immediately visible to Claude Code because `.claude/skills/foo/` is a symlink into `src/`. v1.2 copy-only breaks this — every edit now requires re-running `gomad install`.
-
-Additionally, Claude Code's "live change detection" (per docs: "Claude Code watches skill directories for file changes") monitors the copied files, not the source. Edits to source have no effect until re-install.
+v1.3 adds 3 skills: `gm-discuss-story`, `gm-domain-skill`, and modifies `gm-create-story`. If the marketplace.json is restructured BEFORE these new skills are built, or if the restructure happens in a different phase than the skill additions, the final marketplace will miss them.
 
 **Why it happens:**
-Symlink was inadvertently providing a dev-loop feature; copy removes it.
+Phase ordering. Marketplace is tempting to restructure "first" as cleanup, but it's actually DOWNSTREAM of skill creation.
 
 **How to avoid:**
-- Add `gomad install --watch` or a separate `gomad dev` command that symlinks (restoring old behavior) explicitly for contributor workflows. Document as "for GoMad contributors, not end users."
-- OR document: "When developing a new skill, edit in `_gomad/gomad/<skill>/` directly, not in `src/`. Run `gomad install` to sync back." (Messy, but works.)
-- Release notes must call out the dev-loop regression so contributors aren't surprised.
+Phase ordering rule: marketplace restructure MUST be the LAST phase before release (after all skill additions). Alternatively, if using the generator from Pitfall 2-B, just regenerate as a bookkeeping step — no hand-sync needed.
 
-**Warning signs:**
-- Contributor PR: "I edited the skill, Claude Code doesn't pick up my changes"
-- Slow perceived iteration speed on our own skill development
+**Warning sign (detection):**
+Checklist before release: for each skill in `src/gomad-skills/` with a `SKILL.md`, confirm it appears in `marketplace.json`. If using the generator, this is automatic.
 
 **Phase to address:**
-Phase 3 (installer rework) — but likely a Phase 3 *follow-up* or a deliberate "known trade-off" documented in release notes.
+Release / wrap-up phase. Run the generator.
 
 ---
 
-### Pitfall 11: Agent command template still says "load agent file from `{project-root}/_gomad/...`" which makes no sense for a slash command
+### Pitfall 2-E: Semver confusion — `plugins[].version` vs root `package.json` version
 
 **What goes wrong:**
-`tools/installer/ide/templates/agent-command-template.md` currently contains:
-> LOAD the FULL agent file from `{project-root}/_gomad/{{module}}/agents/{{path}}`
-
-The v1.1 flow is: the flat `gomad-agent-pm.md` file in `.claude/commands/` is a *launcher* that tells Claude to go load the real agent persona from `_gomad/gomad/agents/pm.md`. In v1.2, if the agent content *moves into* `.claude/commands/gm/agent-pm.md` (becomes self-contained), the template instruction to "load from `_gomad/...`" is wrong — the persona IS the command file.
-
-If the template isn't updated, post-migration slash commands will instruct Claude to go load a file that either doesn't exist (because we deleted the `_gomad/gomad/agents/` directory) or is empty / a stub.
-
-Alternatively, if we keep the two-file model — command file dispatches to `_gomad/`-hosted persona — then the previous concern doesn't apply, but we've added a layer of indirection that slash commands didn't need. The colon-namespaced commands aren't launchers; they can BE the persona.
+`plugins[].version` in the current marketplace.json is `"6.3.0"` (BMAD's upstream). Root `package.json` is `1.2.0`. Claude Code may use `plugins[].version` for compatibility checks — stale value reports the wrong version.
 
 **Why it happens:**
-Inherited template designed for launcher-pattern; v1.2 conceptually changes the relationship.
+BMAD's version number got carried into our fork unchanged. v1.1 rename missed this field.
 
 **How to avoid:**
-- Decide explicitly: **self-contained command file** (persona inline) vs **launcher pattern preserved** (command loads from `_gomad/`). Document the decision in an ADR.
-- If self-contained, update template and ensure the `_gomad/gomad/agents/` tree either goes away (cleanup in upgrade) or is kept as data-source for NON-Claude-Code IDEs (which don't have slash commands and still need flat launchers).
-- If launcher-pattern, verify Claude Code's slash command lifecycle (see docs: "rendered SKILL.md content enters the conversation as a single message and stays"): does a launcher-pattern work, or will Claude only see "go load X" once and then forget the persona?
+1. Pin `plugins[].version` to mirror root `package.json` version — read it at generator-time via `require('../../package.json').version`.
+2. Assert equality in the marketplace test: `assert(plugin.version === pkg.version, 'plugin version matches package version')`.
 
-**Warning signs:**
-- `/gm:agent-pm` responds with "I'll load the agent file..." and then doesn't follow through
-- The persona content isn't present in the command file
+**Warning sign (detection):**
+`jq '.plugins[].version' marketplace.json` vs `jq '.version' package.json` — must match.
 
 **Phase to address:**
-Phase 2 (command migration). Architecture decision upfront, then template update.
+Marketplace refresh phase.
 
 ---
 
-### Pitfall 12: "Aggressive MVP scope" amplification produces plans that are actually under-specified for coding agents
+## Workstream 3 — GitHub Pages Docs Site
+
+### Pitfall 3-A: Astro `base` / `site` misconfiguration on custom subdomain
 
 **What goes wrong:**
-The PRD refinement goals include "amplify aggressive vision + MVP scope." Applied wrong, this becomes "drop requirements detail because the MVP scope is small." Coding agents fail worst on under-specified tasks — they fabricate interfaces, pick arbitrary tech choices, and produce plausible-but-wrong implementations. Stripping human-founder framing should not strip *dev-actionable specificity*.
-
-Symptom: v1.2 PRDs read like pitch decks; downstream agents build the wrong thing fast.
+Astro's `astro.config.mjs` uses `site: 'https://example.com'` + optional `base: '/path'` for subpath deployments. On a custom subdomain (`gomad.xgent.ai` — root path), `base` should be unset or `/`. If set incorrectly (e.g., `base: '/gomad'` inherited from a previous config), all asset URLs render as `/gomad/_astro/...` resulting in 404s.
 
 **Why it happens:**
-- "Aggressive" and "MVP" are both compression signals; without a floor on requirement density, compression goes too far.
-- Removing business metrics is safe (coding agents don't use them); removing acceptance criteria is dangerous (coding agents need them).
-- PM persona prompt currently says "ship the smallest thing that validates the assumption" — if this is the main guidance, output defaults to thin.
+GitHub Pages project sites (`<org>.github.io/<repo>/`) require `base: '/<repo>'`; user sites and custom domains don't. Config often starts from a project-site template.
 
 **How to avoid:**
-- Define the "density floor" explicitly: a v1.2 PRD must have per-feature acceptance criteria, explicit in-scope/out-of-scope lists, named user flows, and a testability statement. Remove only framing, not detail.
-- Add a companion section to the create workflow: "for coding agents, include: inputs/outputs, error cases, data-model sketch, boundary conditions." This is new *for* coding agents, not removed from humans.
-- Validate with a real coding-agent experiment: feed a v1.2 PRD into `gm-create-architecture` and then `gm-create-epics-and-stories` and inspect whether the generated epics are well-formed or fabricated.
+1. Explicit config in `website/astro.config.mjs`: `site: 'https://gomad.xgent.ai', base: '/'` (or omit `base`).
+2. After deploy, `curl -I https://gomad.xgent.ai/_astro/<hash>.css` → 200 OK (not 404).
+3. Add a post-deploy smoke test: `node tools/docs-smoke.js` fetches index + one asset URL.
 
-**Warning signs:**
-- A v1.2 PRD is shorter than a v1.1 PRD for a comparable product.
-- Epics generated from v1.2 PRDs are shorter or missing concrete acceptance checks.
-- `gm-validate-prd` passes PRDs that `gm-check-implementation-readiness` later rejects.
+**Warning sign (detection):**
+Open deployed site in browser, F12 Network tab → all asset requests return 404.
 
 **Phase to address:**
-Phase 4 (PRD refinement). Include a "density audit" as an acceptance criterion.
+Docs-site phase, first plan (setup before content).
 
 ---
 
-### Pitfall 13: Breaking change shipped under minor-version bump will blindside users
+### Pitfall 3-B: CNAME file lost on deploy, domain reverts to github.io
 
 **What goes wrong:**
-User explicitly chose v1.2.0 (minor) over v2.0.0 (major) mirroring the v1.1 choice. Semver says minor is backward-compatible — it isn't for v1.2: anyone scripting `/gm-agent-pm` (v1.1 invocation) will find it broken post-upgrade unless they re-install.
+GitHub Pages reads `CNAME` file at the docroot of the deployed branch to pin the custom domain. If the build output doesn't include a `CNAME` file, next deploy silently reverts to the default `<org>.github.io/<repo>` URL. `gomad.xgent.ai` stops resolving.
 
 **Why it happens:**
-- v1.1 had "effectively zero users" so minor bump was safe.
-- v1.1.0 now has SOME users (even if mostly internal). Each additional minor release accrues more users; eventually the "blast radius near zero" argument stops holding.
-- npm's `^1.1.0` range happily accepts 1.2.0; upgrade is automatic for users with ranged deps.
+Astro clears `dist/` on build. If `CNAME` lives in `website/public/CNAME` it's auto-copied to `dist/CNAME`; if it only exists in the gh-pages branch root (committed once, forgotten), `astro build` will overwrite it.
 
 **How to avoid:**
-- `CHANGELOG.md` entry for 1.2.0 with prominent **BREAKING** callout at the top. Document migration: "`gm-agent-*` invocations no longer work; use `/gm:agent-*` slash commands. Run `gomad install` to upgrade; old skills auto-removed."
-- Consider marking the old `gm-agent-*` skill directories as installable for one release (1.2) as a *compatibility shim*, removing them in 1.3. This matches user's stated "minor bump is deliberate, but call out user-comms implications."
-- README banner for 1.2 release describing the change.
-- If a post-install hook or version-check is feasible: detect v1.1 state, print migration note, offer `--migrate` flag.
-- `deprecate`-style messages for prior version on npm (as v1.0 was handled for v1.1): publish a v1.1.2 that `console.warn`s about the upcoming change, so users running v1.1 see a prompt before they upgrade. (Optional; may be overkill for a small-audience project.)
-- Consider whether the `@xgent-ai/gomad@1.1.x` line should continue to get patches for users not ready to upgrade.
+1. Put `CNAME` in `website/public/CNAME` (contents: `gomad.xgent.ai`) — Astro's `public/` dir is copied verbatim to build output.
+2. Deploy script asserts `dist/CNAME` exists before `git push origin gh-pages`.
+3. DNS smoke test post-deploy: `dig +short gomad.xgent.ai` should return xgent.ai's GitHub Pages IP, not the repo default.
 
-**Warning signs:**
-- Issue report: "installed v1.2 via `npm update`, now `/gm-agent-pm` doesn't work"
-- Search traffic for "gomad gm-agent-pm not found" post-release
+**Warning sign (detection):**
+`curl https://gomad.xgent.ai` returns the generic github.io HTTP 301 to `xgent-ai.github.io/gomad/`.
 
 **Phase to address:**
-Phase 5 (release). CHANGELOG + README + migration-guide content.
+Docs-site phase, deployment plan (before first push to gh-pages).
 
 ---
 
-### Pitfall 14: Tarball file-allowlist drift silently adds or removes shipped files
+### Pitfall 3-C: Manual deploy missed — docs drift from published npm
 
 **What goes wrong:**
-v1.1's `files: ["src/", "tools/installer/", "LICENSE", "README.md", ...]` allowlist is tight — 320 files. v1.2 changes the installer (more files) and may add new content (migration docs, etc.). If someone adds a file outside the allowlist (e.g., adds tarball support for slash-command templates in a new directory), it won't ship. Or, someone unwittingly expands the allowlist and ships internal-only planning docs.
+PROJECT.md is explicit: *"No CI auto-deploy in v1.3"*. Manual deploy after each release. Natural failure mode: release `1.3.0` with new skills, forget to regenerate docs, users visiting `gomad.xgent.ai` see `1.2.0` docs.
 
 **Why it happens:**
-Allowlists rot silently; the default mode ("everything not in `.npmignore`") doesn't apply.
+Manual step is easy to skip. Release checklist doesn't enforce it.
 
 **How to avoid:**
-- Keep `verify-tarball.js` strict. Add assertions for v1.2: every new artifact type (command templates, migration scripts) has an explicit expected-file test.
-- Snapshot the tarball contents in a committed file (e.g., `test/fixtures/expected-tarball-files.txt`); CI diffs against it.
-- Document any `files` allowlist change with a clear rationale in the PR.
+1. Extend the release runbook (part of the milestone close workflow): "Before `npm publish`, run `npm run docs:build && npm run docs:deploy` and verify `curl https://gomad.xgent.ai | grep <new-version>` returns the new version."
+2. Embed the shipped version into docs site footer at build time (from `package.json`) so drift is visually obvious.
+3. Wire a `prepublishOnly` script in package.json that reminds or actively runs the doc build (still manual on the git-push to gh-pages side — but the build output is always current).
 
-**Warning signs:**
-- v1.1.x tarball: 320 files. v1.2.0 tarball: 250 files (something was accidentally excluded) or 1200 files (something internal leaked).
-- User reports missing functionality after install; investigation reveals missing template file.
+**Warning sign (detection):**
+Visit `gomad.xgent.ai` footer → "v1.2.0" when npm shows `1.3.0` published.
 
 **Phase to address:**
-Phase 5 (verification). Extend `verify-tarball.js`.
+Release phase. Part of the milestone close runbook.
 
 ---
 
-### Pitfall 15: Existing v1.1 `_gomad/_config/` manifest files collide with v1.2 schema changes
+### Pitfall 3-D: Docs content hand-authored → immediately stale
 
 **What goes wrong:**
-v1.2 implies the `files-manifest.csv` gains new semantics (it's now the deletion list, not just a passive record). Existing v1.1 manifests have the same name but older content: may lack certain columns, may have stale hashes, may omit slash-command files. If v1.2 installer reads a v1.1 manifest and treats it as authoritative, either:
-- Deletes files v1.1 wrote but v1.2 still wants to keep, because v1.2's logic expects them to be re-written anyway (benign).
-- Does NOT delete orphans that v1.2 would want to clean up (stale `gm-agent-*` skill directories), because those entries are in the v1.1 manifest with matching hashes → "file is fine, keep it."
+If the docs site pages for skills ("available skills", "agent personas") are hand-typed lists, they drift from `src/gomad-skills/` the moment a new skill lands. v1.1 RETROSPECTIVE noted this class: *"`findBmadDir` rename leaked beyond plan scope... incomplete Phase 2 sweep."*
 
 **Why it happens:**
-No schema version field in manifest. `manifestHasHashes` check exists but is coarse.
+Copy-pasting skill names feels fast. Generating from source feels like premature automation.
 
 **How to avoid:**
-- Add a schema-version column or header comment to `files-manifest.csv`. v1.2 writer emits v2 schema; reader detects and handles both.
-- On first v1.2 install over a v1.1 install, **ignore the v1.1 manifest for deletion purposes** and instead do a full fresh-install sweep (removing any non-manifest files conservatively — e.g., only under `_gomad/gomad/agents/` where we *know* the old structure lived). Log "migrating from v1.1" clearly.
-- Test migration path: install v1.1, upgrade to v1.2, verify orphans cleaned up.
+1. Docs site skill pages generated from `src/*/SKILL.md` frontmatter at build time via an Astro content collection or a pre-build script.
+2. `npm run docs:build` fails if any skill directory lacks a valid `SKILL.md` frontmatter.
+3. CI (even if deploy is manual) runs `docs:build` on PR merge to main so broken docs never land.
 
-**Warning signs:**
-- Post-upgrade, `_gomad/gomad/agents/` still exists with the 7 old agent files plus new command structure.
-- `/gm-agent-pm` AND `/gm:agent-pm` both work (or both are broken).
+**Warning sign (detection):**
+Add a new skill locally, `npm run docs:build` — new skill should appear automatically in the generated skill index. If not, docs are hand-authored.
 
 **Phase to address:**
-Phase 3 (installer rework). Call out v1.1-to-v1.2 migration as an explicit test case.
+Docs-site phase. Content generation plumbing BEFORE writing content.
 
 ---
 
-## Minor Pitfalls
+### Pitfall 3-E: Docs reference pre-v1.3 state (still documents `gomad/agents/`)
 
-### Pitfall 16: Case sensitivity inconsistency between `gm:agent-pm`, `gm/agent-pm`, `gm-agent-pm`, and GoMad/gomad
+**What goes wrong:**
+Docs ship examples like `Edit _gomad/gomad/agents/pm.md to customize the PM persona`. Post-relocation, that example is wrong — path is now `_gomad/_config/agents/pm.md`.
 
-Already strongly documented project constraint (display "GoMad", paths "gomad", acronym "GOMAD"), but the new slash-command form introduces three additional variants. Pick one invocation form per agent, document it, and never drift.
+**Why it happens:**
+Docs authored once, never re-swept after code changes. Same failure mode as v1.1 Phase 2 sweep gap.
 
-**Phase:** Phase 2 (naming decisions); Phase 5 (doc consistency review).
+**How to avoid:**
+1. Add `tools/validate-doc-paths.js` (or extend `tools/validate-doc-links.js` which already exists): grep docs for `gomad/agents/` and fail.
+2. Wire into `npm run quality` BEFORE the docs-site phase lands.
+3. Pair with Pitfall 1-A's constant — docs examples can reference the constant in Astro templates (e.g., `<code>{AGENTS_INSTALL_PATH}</code>`).
 
----
+**Warning sign (detection):**
+`grep -rn "gomad/agents" docs/ website/` → any hit is stale.
 
-### Pitfall 17: `$ARGUMENTS` vs `$1`/`$ARGUMENTS[0]` inconsistency in command files
-
-Per docs, Claude Code supports both. If v1.2 agents take args (e.g., `/gm:agent-pm "focus on auth"`), pick one style and stick with it. Inconsistency across the 7 agents means users who learn one form fail on another.
-
-**Phase:** Phase 2 (command design); Phase 4 (PRD refinement — if PRD-creating agent takes args, template uses `$1`).
-
----
-
-### Pitfall 18: Agent persona frontmatter fields (`displayName`, `title`, `icon`, `capabilities` from `skill-manifest.yaml`) have no home in slash-command files
-
-Slash-command frontmatter per docs supports `name`, `description`, `argument-hint`, `disable-model-invocation`, `user-invocable`, `allowed-tools`, `model`, `effort`, `context`, `agent`, `hooks`, `paths`, `shell`. That's it. Current `skill-manifest.yaml` for agents carries rich metadata (see `gm-agent-analyst/skill-manifest.yaml`) including `displayName: Mary`, `title: Business Analyst`, `icon: "📊"`, `capabilities`, `role`, `identity`, `communicationStyle`, `principles`. These fields have **no frontmatter home in slash-command files** — they must move into the command body prose.
-
-If not handled, the manifest-generator writes `agent-manifest.csv` entries that are used by `gomad-help.csv` generation (see `installer.js mergeModuleHelpCatalogs`) — the persona metadata feeds a help catalog that users browse. Losing this metadata in transition means the help catalog becomes thinner.
-
-**Phase:** Phase 2 (command design). Preserve `agent-manifest.csv` generation even without skill-manifest.yaml sidecars; derive metadata from command file frontmatter (e.g., `description`) + body parsing.
+**Phase to address:**
+Docs-site phase, AFTER relocation phase. Phase ordering is critical here.
 
 ---
 
-### Pitfall 19: Windows path separators in files-manifest.csv (`\` vs `/`)
+### Pitfall 3-F: Build artifact bloat — shipping source maps to public
 
-Manifest stores paths like `gomad/agents/pm.md` (forward slash). `detectCustomFiles` already uses `path.normalize` when building the map. But if a Windows install writes `gomad\agents\pm.md` into the CSV, cross-platform comparisons (or a Windows → macOS sync via git) breaks. Normalize manifest paths to `/` always.
+**What goes wrong:**
+`astro build` by default emits `.css.map` / `.js.map` files. Deploying the full `dist/` to gh-pages ships them. Source maps reveal source structure, bloat the repo, can leak internal comments.
 
-**Phase:** Phase 3 (installer rework).
+**Why it happens:**
+Astro defaults. Not a safety-critical leak for a docs site, but wasteful.
+
+**How to avoid:**
+`astro.config.mjs`: `vite: { build: { sourcemap: false } }` for production. Or deploy script `find dist -name "*.map" -delete` before push.
+
+**Warning sign (detection):**
+`curl https://gomad.xgent.ai/_astro/<hash>.js.map` → returns 200 with source.
+
+**Phase to address:**
+Docs-site phase, deployment plan.
 
 ---
 
-### Pitfall 20: `ancestor_conflict_check` false-positives for new command subdirectory
+### Pitfall 3-G: No index / search — users can't find anything
 
-`_config-driven.js` has `findAncestorConflict` (line 459) that refuses to install if a parent directory has GOMAD files. Currently matches files starting with `gomad`. After v1.2, the new `.claude/commands/gm/` directory starts with `gm` but contains `gomad*`... does the ancestor conflict logic still fire? Needs verification. If a user has gomad installed at `~/projects/foo/.claude/commands/gm/` and tries to install at `~/projects/foo/bar/`, behavior is undefined.
+**What goes wrong:**
+Ship a docs site with ~10 skill pages and 7 agent pages. No top-level index, no fulltext search. Users land on homepage, don't see what they want, leave.
 
-**Phase:** Phase 3 (installer rework).
+**Why it happens:**
+"Ship content first, polish later" mindset. Search feels like scope creep.
+
+**How to avoid:**
+1. Build a `/skills/` and `/agents/` top-level index page at minimum.
+2. Consider a static client-side search (Pagefind is Astro-friendly, Node-built, zero runtime deps) — but respect the zero-new-runtime-deps policy for the installer; docs site's buildtime deps are separate (already has Astro).
+3. Treat v1.3 docs site as MVP — single-page reference OK if indexed in `README.md`.
+
+**Warning sign (detection):**
+User testing: ask someone "find the gm-domain-skill docs" — if they take >30s, index is insufficient.
+
+**Phase to address:**
+Docs-site phase, content plan. MVP scope decision.
+
+---
+
+## Workstream 4 — Story-Creation Enhancements
+
+### Pitfall 4-A: `gm-discuss-story` Context.md bloats gm-create-story's context window
+
+**What goes wrong:**
+`gm-discuss-story` writes `{planning_artifacts}/{{story_key}}-context.md`. `gm-create-story` loads it. If the discuss output is 10KB of verbose dialogue, the story creation skill pays that in every future invocation — and if `gm-create-story` quotes it verbatim into the story template, the produced story balloons.
+
+**Why it happens:**
+LLM outputs are verbose by default. No length budget enforced.
+
+**How to avoid:**
+1. `gm-discuss-story` SKILL.md must specify a target output budget: *"Output MUST be ≤1500 tokens. If exceeded, compress into bulleted decisions + rejected alternatives. Do NOT include verbatim dialogue — only resolved conclusions."*
+2. Output structure: `## Resolved Decisions` (bullets), `## Rejected Alternatives` (bullets), `## Open Questions` (bullets). No prose paragraphs.
+3. Add a probe test: generate a context.md from a fixture dialogue, assert `fs.statSync(...).size < 8192` bytes.
+
+**Warning sign (detection):**
+Post-Phase story creation logs show high token usage. `wc -w _planning/story-context.md` >1500.
+
+**Phase to address:**
+Story-enhancements phase. Budget spec before prompt content.
+
+---
+
+### Pitfall 4-B: `gm-discuss-story` questions abstract / generic, not gray-area probes
+
+**What goes wrong:**
+First-pass prompts often produce generic interview questions: "What's your timeline? Who's the primary user? What's success look like?" These are fluff — the PRD already covers them. The skill's VALUE is probing ambiguity in the specific story input.
+
+**Why it happens:**
+Generic "good interview" templates are training-data-dense. Prompt engineering for surgical questioning is harder.
+
+**How to avoid:**
+1. SKILL.md must include explicit ban list: *"NEVER ask: timeline, success metrics, primary user — these are covered in PRD. ONLY ask about gray areas in THIS story's acceptance criteria that a coding agent would need resolved."*
+2. Include 3-5 concrete examples of good probes (e.g., *"The story says `validate input` — what counts as invalid? Empty string? Whitespace only? Script tags?"*).
+3. Fixture test: feed a known-ambiguous story input, assert output matches patterns like `/"what counts as|edge case|ambiguous|undefined behavior"/i`.
+
+**Warning sign (detection):**
+Sample output review: if the questions sound like any other PM intake form, the skill is broken.
+
+**Phase to address:**
+Story-enhancements phase. Iterate on prompt content via dogfood fixture.
+
+---
+
+### Pitfall 4-C: Re-running `gm-discuss-story` creates conflicting context files
+
+**What goes wrong:**
+User runs discuss → creates `STORY-042-context.md`. Reviews, doesn't like it. Runs again. Does the new output overwrite? Append? Create `STORY-042-context-2.md`? All three behaviors are common; all three break downstream `gm-create-story` auto-loading.
+
+**Why it happens:**
+Idempotency not specified in skill contract.
+
+**How to avoid:**
+1. SKILL.md specifies exact behavior: *"If `{story_key}-context.md` already exists, the skill MUST ask the user: overwrite, append, or abort. Default NO action."*
+2. `gm-create-story` precedence rule: always loads EXACTLY `{story_key}-context.md` (no `-2`, no `-latest`). If user has multiple versions, they're user-managed (like backup snapshots).
+
+**Warning sign (detection):**
+Run discuss twice without cleanup, observe behavior. Document the actual behavior and verify it matches spec.
+
+**Phase to address:**
+Story-enhancements phase.
+
+---
+
+### Pitfall 4-D: Output path mis-resolution when `{planning_artifacts}` unset
+
+**What goes wrong:**
+Template uses `{planning_artifacts}/{{story_key}}-context.md`. If the calling project has no `.planning/` directory, or if `{planning_artifacts}` resolves to `undefined`, the skill writes to `undefined/STORY-042-context.md` or silently no-ops.
+
+**Why it happens:**
+Template variables are string-substituted; undefined → literal `undefined` string. Common footgun in existing gomad skills (`data/prd-purpose.md` has similar placeholders).
+
+**How to avoid:**
+1. SKILL.md activation block: *"Resolve `{planning_artifacts}`. If unset, abort with error: 'Planning artifacts directory not configured. Run gm-create-prd first or set planning_artifacts in project config.'"*
+2. `gm-create-story` mirror-check: if `{planning_artifacts}` unset, skip context load silently (graceful degradation — don't block story creation if discuss wasn't run).
+3. Fixture test with both resolved and unresolved placeholder.
+
+**Warning sign (detection):**
+`ls` the working dir after a run → any `undefined*` file is a bug.
+
+**Phase to address:**
+Story-enhancements phase.
+
+---
+
+### Pitfall 4-E: `gm-create-story` silently no-ops on malformed context.md
+
+**What goes wrong:**
+Context.md exists but has YAML frontmatter corruption, missing required sections, or encoding issues. `gm-create-story` does `fs.readFile` → parse → swallow error → continue without context. User thinks context loaded; it didn't. Story is generic.
+
+**Why it happens:**
+Error-swallow pattern is easy to write; explicit validation is work.
+
+**How to avoid:**
+1. SKILL.md: *"If context.md exists but fails validation (missing `## Resolved Decisions` header OR unparseable), the skill MUST STOP and prompt the user to fix or delete the file. Do NOT continue silently."*
+2. Add a schema: minimal required sections `## Resolved Decisions` + `## Open Questions`.
+3. Validator function: `validateContextMd(raw) → {ok: bool, errors: string[]}`; log errors visibly.
+
+**Warning sign (detection):**
+Feed malformed context.md → story should fail fast with clear error. If story generated anyway, bug.
+
+**Phase to address:**
+Story-enhancements phase. Same plan as the load logic.
+
+---
+
+### Pitfall 4-F: Precedence ambiguity — context.md says X, user prompt says ¬X
+
+**What goes wrong:**
+Context.md: "validation rule: reject empty strings". User's story-creation prompt: "validate input, allow empty". Which wins? Unspecified behavior → LLM picks unpredictably.
+
+**Why it happens:**
+Precedence rules not stated in contract.
+
+**How to avoid:**
+SKILL.md must explicitly specify: *"User's current prompt ALWAYS overrides context.md. If conflict detected, emit a warning noting the override with both values quoted, then use the prompt value. Do NOT silently use the older context value."*
+
+**Warning sign (detection):**
+Craft a conflicting fixture, check story output reflects the newer value AND logs a visible warning.
+
+**Phase to address:**
+Story-enhancements phase. Contract specification.
+
+---
+
+### Pitfall 4-G: `gm-domain-skill` slug typos → silent empty result
+
+**What goes wrong:**
+User invokes `gm-domain-skill react-19-concurrent-rendaring` (typo). Skill greps `src/domain-kb/` (installed to `_config/kb/`), no match, returns empty or "no patterns found". User thinks there's no React 19 pack; actually there is (`react-19-concurrent-rendering`).
+
+**Why it happens:**
+Naive exact-match slug lookup. No fuzzy fallback, no "did you mean" suggestion.
+
+**How to avoid:**
+1. SKILL.md: *"If exact slug not found, list all available slugs sorted by Levenshtein distance (top 3). Do NOT return empty."*
+2. Node built-in Levenshtein (manual implementation ~15 LOC) satisfies zero-new-deps (no `fuse.js`).
+3. Print the full available slug list if no near-match.
+
+**Warning sign (detection):**
+Typo a slug, observe output. If "no match" with no suggestions → bug.
+
+**Phase to address:**
+Story-enhancements phase, domain-skill plan.
+
+---
+
+### Pitfall 4-H: "Top-1 best match" via keyword count = longest file wins
+
+**What goes wrong:**
+Naive ranking: count query-keyword occurrences per KB file, pick highest. Longer files have more occurrences by chance → "top match" is always the longest file.
+
+**Why it happens:**
+Raw frequency ranking without normalization. Classic BM25-without-idf mistake.
+
+**How to avoid:**
+1. Either normalize by file length (occurrences per 1k chars) OR use a title/filename heuristic first (exact slug match > title keyword > body keyword).
+2. If retrieval is truly keyword-based, document the algorithm in SKILL.md: *"Ranks by: (1) exact slug match, (2) title keyword match, (3) normalized body frequency."*
+3. Test fixture: 2 KB files, one short + relevant, one long + irrelevant. Assert the short one ranks higher.
+
+**Warning sign (detection):**
+Seed KB test: does the most relevant file actually come first?
+
+**Phase to address:**
+Story-enhancements phase, domain-skill retrieval plan.
+
+---
+
+### Pitfall 4-I: KB pack version drift (React 18 patterns shipped, React 19 lands)
+
+**What goes wrong:**
+Seed KB ships with `react-18-hooks-patterns.md`. React 19 ships, some patterns change (use of `use()` hook, async transitions). The KB pack now gives outdated advice. No versioning metadata in the pack, so consumers don't know to doubt it.
+
+**Why it happens:**
+KB packs are inherently time-stamped content treated as static reference.
+
+**How to avoid:**
+1. Every KB file frontmatter: `last_reviewed: YYYY-MM-DD`, `applies_to: ["react@18.x"]`, `confidence: HIGH|MEDIUM`.
+2. `gm-domain-skill` output MUST surface `last_reviewed` to the consumer: *"This pack was last reviewed 2026-03-15 and applies to React 18.x. Verify current library version."*
+3. Milestone review checklist: for each KB pack, confirm `last_reviewed` is within 6 months OR flag for refresh.
+
+**Warning sign (detection):**
+Retrieve a pack older than 6 months → output should flag with a staleness warning.
+
+**Phase to address:**
+Story-enhancements phase, KB seed content plan.
+
+---
+
+### Pitfall 4-J (CRITICAL): IP/licensing risk for borrowed seed KB content
+
+**What goes wrong:**
+If seed KB packs (`src/domain-kb/`) are copied or adapted from Claude-Cortex / vercel-labs / other open-source repos WITHOUT verifying license compatibility, GoMad ships unlicensed content. Consequences: DMCA takedown, npm unpublish, reputational damage.
+
+**Why it happens:**
+KB content feels like "public knowledge" — but curated docs and example patterns are copyrighted by their authors. MIT/Apache-2.0/CC-BY → OK with attribution. GPL → risk (copyleft propagates). Unlicensed repos → NOT OK to copy verbatim even if public.
+
+**How to avoid:**
+1. BEFORE copying any content, check source repo LICENSE. If MIT/Apache-2.0/CC-BY — OK with attribution (note source in KB file frontmatter: `source: "https://github.com/vercel/..., MIT"`). If GPL or unlicensed — re-author from scratch, no copying.
+2. Every KB pack: frontmatter `source: <URL> | original` + `license: MIT | Apache-2.0 | CC-BY-4.0 | original`.
+3. Add to `LICENSE` or `TRADEMARK.md` an attribution section for borrowed KB content (same pattern v1.1 used for BMAD preservation — RETROSPECTIVE v1.1 "canonical disclaimer" pattern).
+4. Write a checker (`tools/validate-kb-licenses.js`) asserting every KB file has a `source` + `license` frontmatter. Wire into `npm run quality`.
+5. Legal review at milestone close: enumerate every KB file, verify license cited matches source repo.
+
+**Warning sign (detection):**
+Any KB file without `source:` or `license:` frontmatter. Any KB file citing GPL source. Legal audit flag.
+
+**Phase to address:**
+Story-enhancements phase. BEFORE seeding content, set the licensing contract. This is load-bearing — do NOT ship unlicensed content.
+
+---
+
+### Pitfall 4-K: Wrong integration point — gm-domain-skill invoked at wrong lifecycle step
+
+**What goes wrong:**
+If `gm-domain-skill` is invoked from `gm-create-story`, patterns get baked into the story document — but at implementation time (`gm-dev-story`) the story is consumed by a different coding agent that re-reasons from scratch. Patterns should be retrieved at implementation time, not story-creation time. Conversely, if invoked only at dev-story time, the story doc doesn't know what patterns will apply → architectural decisions deferred too late.
+
+**Why it happens:**
+Retrieval timing isn't deeply thought through. The "skill retrieval protocol" is specified but the consumer integration isn't.
+
+**How to avoid:**
+1. Explicit design decision + rationale: *"gm-domain-skill is invoked at IMPLEMENTATION time by gm-dev-story, not at creation time. Story documents reference pack SLUGS (not pack content), so dev-time retrieval is fresh. Rationale: stale pack content in stories is worse than unresolved retrieval at dev time."*
+2. Integration test: dogfood a story → dev-story pipeline with a seeded pack; verify pack is consulted at the expected step.
+
+**Warning sign (detection):**
+Review gm-create-story output with a seeded pack available. If pack content is embedded verbatim in the story body, integration is at the wrong step.
+
+**Phase to address:**
+Story-enhancements phase, integration plan. Specify timing decision explicitly.
+
+---
+
+## Workstream 5 — Cross-Cutting Pitfalls
+
+### Pitfall 5-A: Merging v1.2→v1.3 without full `npm run quality`
+
+**What goes wrong:**
+v1.2 wired 7+ test suites into `npm run quality`: `format:check`, `lint`, `lint:md`, `docs:build`, `test:install`, `test:integration`, `validate:refs`, `validate:skills`, `test:orphan-refs`. Skipping any of these during v1.3 development masks regressions (e.g., orphan-refs would catch a stale `gm-agent-*` reference added in new docs).
+
+**Why it happens:**
+Partial test runs feel faster. `npm test` is shorter than `npm run quality`.
+
+**How to avoid:**
+1. Git hook via Husky (already configured per `package.json`): `pre-push` runs `npm run quality`. Already exists? Verify.
+2. Each phase's exit criteria: `npm run quality` exits 0.
+3. RETROSPECTIVE v1.2 established this pattern; enforce for v1.3.
+
+**Warning sign (detection):**
+PR merged with failing `quality` suite — should be blocked by branch protection.
+
+**Phase to address:**
+Every phase. Standing requirement.
+
+---
+
+### Pitfall 5-B: Missing CHANGELOG entry for BREAKING change (agent dir move)
+
+**What goes wrong:**
+v1.3 relocates `gomad/agents/` → `_config/agents/` — this is BREAKING for scripts that `cat _gomad/gomad/agents/pm.md`. v1.2's CHANGELOG has an explicit `### BREAKING CHANGES` section (lines 68-76). v1.3 must replicate.
+
+**Why it happens:**
+CHANGELOG authored hurriedly at release time. BREAKING callout forgotten.
+
+**How to avoid:**
+1. Release runbook item: *"CHANGELOG MUST include `### BREAKING CHANGES` section with migration instructions. Verify via `grep -A 5 'BREAKING CHANGES' CHANGELOG.md`."*
+2. Wire into pre-publish check: minimal Node assertion script if semver bump contains breaking content.
+3. Semver reconsideration: BREAKING change in a MINOR bump is technically valid under Key Decisions (v1.2 was `1.2.0` with a breaking launcher migration), but doc it explicitly so users aren't surprised.
+
+**Warning sign (detection):**
+User issue filed: "my script broke after upgrading from 1.2 to 1.3" → CHANGELOG search. If not found → this pitfall hit.
+
+**Phase to address:**
+Release phase.
+
+---
+
+### Pitfall 5-C: PROJECT.md / MILESTONES.md / STATE.md drift — one updated, others not
+
+**What goes wrong:**
+Four planning docs track milestone state: `PROJECT.md` (vision + active reqs), `MILESTONES.md` (historical record), `.planning/STATE.md` (current-milestone state), `.planning/REQUIREMENTS.md` (checkboxes). RETROSPECTIVE.md lesson: "Requirements checkbox drift is now a repeat offender" (v1.1 + v1.2 both closed with 0% checkbox sync).
+
+**Why it happens:**
+Manual multi-doc sync. Easy to update one, forget others.
+
+**How to avoid:**
+1. Accept the v1.2 RETROSPECTIVE conclusion: treat REQUIREMENTS.md checkboxes as bulk-flip-at-close bookkeeping. Don't pretend they'll stay in sync mid-flight.
+2. Phase SUMMARY.md is the ground truth; derive other docs from it.
+3. MILESTONES.md entry written ONCE at close, hand-curated (v1.2 RETROSPECTIVE lesson 3: concatenated accomplishments sections make bullet soup).
+4. STATE.md explicitly marked "current-milestone" — obsoleted at milestone close.
+
+**Warning sign (detection):**
+Milestone close audit: does REQUIREMENTS.md match shipped reality? Does MILESTONES.md cross-reference PROJECT.md Validated section?
+
+**Phase to address:**
+Every phase transition (for STATE.md), milestone close (for MILESTONES.md bulk curation).
+
+---
+
+### Pitfall 5-D: Zero-new-deps policy silently violated
+
+**What goes wrong:**
+PROJECT.md line 25: *"Zero new runtime deps (v1.2 policy carried forward). Domain-skill search uses Node built-ins or existing deps."* Tempting to add `fuse.js` for fuzzy slug match in `gm-domain-skill` (Pitfall 4-G). Tempting to add `marked` for docs rendering. Each feels small; cumulatively expands tarball.
+
+**Why it happens:**
+Familiar dep reflex. Cost of writing 20 LOC Levenshtein feels high relative to `npm install fuse.js`.
+
+**How to avoid:**
+1. Lint check: after `npm install`, assert `package.json` `dependencies` hasn't grown. `test/test-deps-count.js`: `assert(Object.keys(pkg.dependencies).length === <pinned>)`.
+2. PR review checklist: any new `require('<non-stdlib>')` → flag.
+3. v1.2 precedent: local `escapeCsv` (3 LOC) instead of `csv-stringify/sync`. Same discipline for v1.3.
+
+**Warning sign (detection):**
+`git diff package.json | grep dependencies` in any v1.3 commit.
+
+**Phase to address:**
+Every phase, gated via test.
+
+---
+
+### Pitfall 5-E: Phase ordering — docs site ships before relocation → docs go stale same milestone
+
+**What goes wrong:**
+Natural instinct: build docs site first (feels like setup), then do relocation. Problem: docs content captures `gomad/agents/` examples. After relocation in a later phase, docs are stale BEFORE the milestone even ships.
+
+**Why it happens:**
+Phases feel parallel. They're not — docs depend on final shape.
+
+**How to avoid:**
+Explicit phase ordering:
+1. **Relocation phase FIRST** (immediately after extract-the-constant prep).
+2. **Story-enhancements phase** next (independent of relocation).
+3. **Marketplace refresh** LATE (captures final skill list after story-enhancements).
+4. **Docs site LAST** (captures all prior state).
+5. **Release** after docs site.
+
+Alternative: if docs site MUST ship early for timeline reasons, stub it with placeholders + a `## Known stale content` warning.
+
+**Warning sign (detection):**
+Docs phase starts before relocation phase → flag in phase-sequencing review.
+
+**Phase to address:**
+Roadmap creation (milestone planning).
+
+---
+
+### Pitfall 5-F: RETROSPECTIVE v1.2 CLI/workflow drift hits again
+
+**What goes wrong:**
+v1.1 and v1.2 both hit: `gsd-tools audit-open` misclassifies complete tasks, `gsd-sdk query milestone.complete` doesn't exist (should be `gsd-tools.cjs milestone complete`), `gsd-sdk query progress bar --raw` flaky. v1.3 will hit the same.
+
+**Why it happens:**
+Workflow docs reference CLI commands that aren't integration-tested.
+
+**How to avoid:**
+1. Don't fix gsd-tools in v1.3 (out of scope per PROJECT.md: GSD is dev tooling, not shipped product).
+2. At milestone close, expect manual audit pass. Budget time.
+3. If gsd-tools is consumed heavily during v1.3, upstream a fix separately.
+
+**Warning sign (detection):**
+First use of `gsd-tools audit-open` → if output has inconsistencies, do manual.
+
+**Phase to address:**
+Milestone close (expect friction, allocate time).
 
 ---
 
@@ -488,186 +796,157 @@ Manifest stores paths like `gomad/agents/pm.md` (forward slash). `detectCustomFi
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Skip the v1.1→v1.2 orphan cleanup for `gm-agent-*` skill directories ("next install will clean it") | Saves a phase of careful logic | Users have stale skills showing up in `/` menu + resolving to dead targets; dev confusion about which naming is current | Never — must clean in v1.2 |
-| Hand-rolled CSV parse instead of `csv-parse/sync` | "It's already there in `readFilesManifest`" | Quote/escape edge cases cause wrong deletes; pitfall #2 made real | Never — use the parser that already exists in deps |
-| Skip `.bak`-style preservation for edits under `.claude/commands/gm/` | Simpler install logic | Loud user complaint; perceived data loss; reputational risk | Only if the command files are documented as non-editable AND a clear customization path exists in `_gomad/` |
-| Ship v1.2 as minor without a 1-release compat shim for `gm-agent-*` | Faster; cleaner final state | Breakage for every upgrading user; support load | If users confirmed to be internal-only (currently true); document as a deliberate cost |
-| Copy `fs.copy` defaults without thinking about symlinks + permissions | Fewer lines of installer code | Source-tree pollution via symlink traversal; security-scanner flags | Never — explicit options needed |
-| Drop "why now?" and business metrics from PRDs without updating validator | Faster content-only change | Validator reports false gaps; user confusion | Never — make validator backward-compatible first |
-| Leave `.claude/commands/gm/` unversioned (no schema in manifest, no ADR) | Ship faster | Next schema change has same v1.1→v1.2 migration pain (#15) | Acceptable if v1.2 is the last breaking change expected for a while; still advisable to add a schema version now |
-
----
+| Hand-curate marketplace.json skill list instead of generating | 30 min saved vs. writing generator | Every new skill requires manual addition; dead refs accumulate (already happened — BMAD paths still in file) | Never acceptable for v1.3+; generator is the fix |
+| Hardcode `_gomad/gomad/agents/` in template instead of placeholder | 5 min saved on template | Every path change requires multi-file edit (Pitfall 1-A manifested this cost in v1.2) | Never acceptable; use placeholder |
+| Swallow context.md parse errors silently in gm-create-story | 10 min saved vs. error-handling | User gets generic story, thinks context loaded (Pitfall 4-E) | Never acceptable |
+| Ship KB content without license attribution | 15 min saved per pack | Legal exposure, DMCA risk (Pitfall 4-J) | Never acceptable |
+| Deploy docs site without CNAME in `public/` | 5 min (relying on gh-pages branch CNAME) | Silent domain reversion (Pitfall 3-B) | Never acceptable |
+| Skip upgrade test for v1.2→v1.3 relocation | 2 hours saved | User data loss on upgrade (Pitfall 1-C); repro is costly after ship | Never acceptable |
+| Use `fuse.js` for fuzzy slug match | 20 LOC saved | Violates zero-new-deps policy (Pitfall 5-D) | Never — use manual Levenshtein |
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Claude Code `.claude/commands/` | Assume subdirectory namespacing works universally | Verify against current CC version; provide flat-name fallback; gate on min version |
-| Claude Code `.claude/skills/` | Forget skills take precedence over same-named commands | Namespace all skills with `gm-*` prefix (already the case); for command-shaped agents use `gm:agent-*` colon form |
-| Cursor `.cursor/skills/` | Assume Cursor understands `/gm:agent-*` slash syntax | Cursor ≠ Claude Code; keep flat `gomad-agent-*.md` for Cursor via `agent-command-generator.js` |
-| Codex `.agents/skills/` (global at `~/.codex/prompts`) | Assume project-local is the only target | Platform config `legacy_targets` includes `~/.codex/prompts` — global scope also needs cleanup logic |
-| npm `@xgent-ai/gomad` | Assume `^1.1.0` semver range is safe | It isn't, for v1.2; ranged users need explicit migration note |
-| fs-extra `fs.copy` | Assume safe defaults | Defaults follow symlinks (source pollution), preserve mode bits (unwanted exec); be explicit |
-| fs-extra `fs.ensureSymlink` → `fs.copy` swap | Forget to `fs.remove` stale symlinks first | Always detect-and-unlink before writing copy |
-| Node `path.join` with CSV-sourced paths | Trust manifest paths unconditionally | Enforce containment check with `realpath` prefix match |
-
----
+| Claude Code marketplace client | Use stale BMAD schema shape | Validate against current Claude Code plugin schema (Pitfall 2-A) |
+| GitHub Pages custom domain | Rely on gh-pages branch CNAME | `CNAME` in `website/public/` (Pitfall 3-B) |
+| Astro subdomain deploy | Inherit `base: '/repo'` from project-site template | `base: '/'` or unset (Pitfall 3-A) |
+| Cleanup-planner for moves | Model as delete-then-write | Acknowledge move-semantics gap: snapshot with `was_modified` + tell user to review backup (Pitfall 1-C) |
+| KB content reuse | Copy from OSS repos without license check | Attribute `source:` + `license:` frontmatter; re-author GPL content (Pitfall 4-J) |
+| Skill lifecycle integration | Invoke gm-domain-skill at story-creation | Invoke at dev-story time for fresh retrieval (Pitfall 4-K) |
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Install time grows from O(symlink count) to O(total file size) | `gomad install` takes minutes instead of seconds | Parallelize copies; consider hardlinks on same-filesystem as a compromise; measure baseline vs v1.1 | ~52 skill dirs × ~dozen files each = ~600 files. Probably fine. A 5-6x slowdown is unlikely to be user-noticeable but worth measuring. |
-| `detectCustomFiles` full-tree scan | Install slow on large projects (user has many non-gomad files under cwd? No, scan is scoped to `_gomad/`) | Confirm scope; `scanDirectory` is already scoped to `gomadDir` | Unlikely to break at realistic scale |
-| Hash computation on every file in upgrade | N hashes = N SHA-256 passes | Already in v1.1 code; acceptable for ~600 files | Breaks if user's `_gomad/` grows to thousands (not likely) |
-| Re-writing `skill-manifest.csv` regenerates every row's hash | Quadratic if manifests are also scanned for modifications | Already handled; same cost as v1.1 | Not a new v1.2 concern |
-
----
+| KB grep over all `_config/kb/**` on every domain-skill call | Slow response, high token usage | Cache slug-to-file index at startup; grep only matched file | >20 KB packs; >500KB total |
+| Context.md unbounded length feeds gm-create-story | Story creation slow, high token cost (Pitfall 4-A) | 1500-token budget in discuss output | First story with verbose discussion |
+| Marketplace generator re-scans entire `src/` tree | Slow build | Cache mtimes, only re-generate on source change | With >100 skills |
+| Docs site skill pages generated from source on every build | Slow `docs:build` | Astro content collections cache by default | With >50 skill files |
 
 ## Security Mistakes
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Trusting `files-manifest.csv` paths for `fs.remove` without containment check | Absolute-path or `../` entries delete files outside project | `realpath` containment assertion before any destructive op |
-| `fs.copy` following symlinks from source | If user's clone has unexpected symlinks, installer writes outside target | `dereference: false`-aware copy; explicit symlink handling |
-| Executable bit leaked from source on copy | Privilege escalation if copied-in script is later run with more privilege | Normalize mode to `0644` for data, `0755` only for known executables |
-| Pre-install hook / post-install hook without validation | Supply-chain attack vector | We don't have install hooks; keep it that way |
-| Hash comparisons without constant-time comparison | Not a real concern here (we use SHA-256 for content-integrity, not auth) | N/A |
-| Writing files to `.claude/` paths user provided via CLI arg without validation | Path-injection if `--directory` isn't sanitized | Already handled in v1.1; re-verify during Phase 3 |
-
----
+| Shipping KB packs with unlicensed content | DMCA takedown, npm unpublish, legal exposure | Pitfall 4-J — enforce `source:` + `license:` frontmatter |
+| `CNAME` lost on deploy, domain reverts | Users hit github.io URL, no HTTPS on custom domain | Pitfall 3-B — CNAME in `public/` |
+| Docs site source maps leaked | Minor IP leak, bloat | Pitfall 3-F — disable sourcemap in production |
+| Context.md YAML injection (if user-authored discuss output parsed) | Unlikely but: malicious frontmatter → parse failure | Strict YAML schema validation (Pitfall 4-E) |
+| Cleanup plan deleting outside install root (symlink escape) | User data loss, v1.2 already caught this with D-32/33 | Existing `cleanup-planner.js` realpath containment — do NOT weaken for relocation edge cases |
 
 ## UX Pitfalls
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Silent command discovery failure (`/gm:agent-pm` not found, no hint why) | User thinks install failed, reinstalls, same result | Ship install-time diagnostic: after install, attempt to validate expected command count vs installed; print a smoke-test checklist |
-| Backup files (`.bak`) left in project without explanation | User sees `pm.md.bak` and wonders "is this mine or theirs?" | Summary at end of install: "We preserved N customized files as `.bak`. Review them and delete once reconciled." |
-| Upgrade warning only in stdout | Users running `npm update` in CI miss it | Output on stderr too (or npm post-install script); add banner in README release notes |
-| PRD workflow feels robotic to users who still want the human-facing experience | Human product leads can't use gomad for their own planning | Keep a `--human` flag or a separate skill for the old framing; or document that GoMad's PRD creation is now coding-agent-first and suggest alternatives for human-facing PRDs |
-| New users don't know which form to invoke (`/gm:agent-pm` vs `/gm-agent-pm` vs `/gm-agent-pm.md`) | Friction; abandonment | Single canonical invocation per command, clearly named in docs + `/help` |
-
----
+| Silent upgrade with no warning about agent dir move | User's customizations lost, confusion | Pitfall 1-C — preflight warning + explicit upgrade docs |
+| "No match found" with no suggestions for typo'd slug | User gives up, thinks feature broken | Pitfall 4-G — Levenshtein "did you mean" |
+| Doc site footer shows wrong version | User sees stale docs, trust erodes | Pitfall 3-C — embed version from package.json |
+| Context.md malformed, story generated anyway | User thinks context loaded, story is generic | Pitfall 4-E — fail fast with clear error |
+| No way to know if KB pack is stale | User follows outdated patterns | Pitfall 4-I — `last_reviewed` surfaced in output |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Command migration:** All 7 agents have files at `.claude/commands/gm/agent-*.md` — verify each command actually resolves via Claude Code's `/` menu in a fresh CC session.
-- [ ] **Command migration:** Verify `/gm:agent-pm` works specifically on the minimum supported CC version, not just the latest.
-- [ ] **Reference sweep:** `grep -rn 'gm-agent-\|gomad-agent-'` returns only explicit historical/archival matches; every other match is resolved.
-- [ ] **Reference sweep:** `docs/zh-cn/` updated in same PR as `docs/en/`, not a follow-up.
-- [ ] **Installer:** `gomad install` on a fresh machine completes; `_gomad/` contains real files (not symlinks) — `ls -la` shows `-rw-` not `lrwx`.
-- [ ] **Installer:** `gomad install` run twice produces identical `_gomad/_config/files-manifest.csv` hashes (idempotence).
-- [ ] **Installer:** `gomad install` over a v1.1 install removes all `gm-agent-*` skill directories, adds `gm/` command directory.
-- [ ] **Installer:** Upgrade over symlinked v1.1 install completes without polluting source tree.
-- [ ] **Installer:** Malformed `files-manifest.csv` (manually corrupted) does NOT cause mass deletion; installer logs and skips cleanup.
-- [ ] **Installer:** User-modified file in `_gomad/` is preserved as `.bak`; end-of-install summary lists it.
-- [ ] **Installer:** User-modified file in `.claude/commands/gm/` is preserved (or loudly reported) — NOT silently overwritten.
-- [ ] **Installer:** Running installer from the gomad git checkout itself warns or refuses (prevents polluting dev repo).
-- [ ] **Installer:** Windows CI job (if available) completes an install without path errors.
-- [ ] **Manifest:** CSV contains no literal quotes in values; no BOM; LF line endings; all paths use `/` separators.
-- [ ] **Manifest:** Every row has 5 columns (type, name, module, path, hash).
-- [ ] **PRD refinement:** `gm-validate-prd` passes a v1.2-generated PRD.
-- [ ] **PRD refinement:** `gm-create-architecture` consuming a v1.2 PRD produces an architecture without "missing context" questions that the PRD should have answered.
-- [ ] **PRD refinement:** `gm-create-epics-and-stories` produces concrete epics from a v1.2 PRD (not pitch-deck epics).
-- [ ] **PRD refinement:** Per-feature acceptance criteria present; dev-actionable-spec density preserved or increased.
-- [ ] **Release:** `CHANGELOG.md` has prominent BREAKING callout for the agent invocation change.
-- [ ] **Release:** README has migration note ("if upgrading from v1.1, do X").
-- [ ] **Release:** `verify-tarball.js` asserts no `.claude/commands/gm/` in tarball (installer-generated only).
-- [ ] **Release:** Tarball file count is explicit and tested (v1.1 was 320; record v1.2's number).
-- [ ] **Release:** `package.json` `files` allowlist unchanged or changes are reviewed explicitly.
-- [ ] **Test infrastructure:** Existing v1.1 tests (`test-e2e-install.js`, `test-installation-components.js`, `test-file-refs-csv.js`) all pass OR are updated with explicit rationale.
-
----
+- [ ] **Agent dir relocation:** Constants extracted? (grep `gomad/agents` returns 0 non-changelog hits) — Pitfall 1-A
+- [ ] **Agent dir relocation:** test:gm-surface body assertion added? (regex check for `_config/agents/` in launcher body) — Pitfall 1-B
+- [ ] **Agent dir relocation:** v1.2→v1.3 upgrade test exists with `was_modified` assertion? — Pitfall 1-C
+- [ ] **Agent dir relocation:** `verify-tarball.js` Phase 4 legacy-path grep added? — Pitfall 1-E
+- [ ] **Agent dir relocation:** `docs/upgrade-recovery.md` shows BOTH old and new paths or is version-qualified? — Pitfall 1-F
+- [ ] **Marketplace:** Every `plugins[].skills[].path` resolves to real SKILL.md? — Pitfall 2-B
+- [ ] **Marketplace:** No duplicate skill paths across groups? — Pitfall 2-C
+- [ ] **Marketplace:** All v1.3 new skills (gm-discuss-story, gm-domain-skill) present? — Pitfall 2-D
+- [ ] **Marketplace:** `plugins[].version` equals `package.json` version? — Pitfall 2-E
+- [ ] **Marketplace:** Schema validated against current Claude Code spec? — Pitfall 2-A
+- [ ] **Docs site:** CNAME file in `website/public/`? — Pitfall 3-B
+- [ ] **Docs site:** Asset URLs resolve post-deploy (200 OK)? — Pitfall 3-A
+- [ ] **Docs site:** Version shown in footer matches published npm? — Pitfall 3-C
+- [ ] **Docs site:** Skill pages generated from `SKILL.md`, not hand-typed? — Pitfall 3-D
+- [ ] **Docs site:** `validate-doc-paths.js` grep for `gomad/agents/` returns 0? — Pitfall 3-E
+- [ ] **Docs site:** No `.map` files in deployed `dist/`? — Pitfall 3-F
+- [ ] **Story-enhancements:** gm-discuss-story output budget ≤1500 tokens enforced? — Pitfall 4-A
+- [ ] **Story-enhancements:** gm-discuss-story ban list on generic questions in SKILL.md? — Pitfall 4-B
+- [ ] **Story-enhancements:** Re-run behavior of gm-discuss-story specified (overwrite/append/abort)? — Pitfall 4-C
+- [ ] **Story-enhancements:** `{planning_artifacts}` unset handling specified? — Pitfall 4-D
+- [ ] **Story-enhancements:** gm-create-story fails fast on malformed context.md? — Pitfall 4-E
+- [ ] **Story-enhancements:** Precedence rule specified (prompt > context)? — Pitfall 4-F
+- [ ] **Story-enhancements:** gm-domain-skill has "did you mean" for typo slugs? — Pitfall 4-G
+- [ ] **Story-enhancements:** gm-domain-skill ranking normalized by file length? — Pitfall 4-H
+- [ ] **Story-enhancements:** Every KB pack has `last_reviewed` + `applies_to` frontmatter? — Pitfall 4-I
+- [ ] **Story-enhancements (CRITICAL):** Every KB pack has `source:` + `license:` frontmatter with license-compat verification? — Pitfall 4-J
+- [ ] **Story-enhancements:** gm-domain-skill integration point documented (story-time vs dev-time)? — Pitfall 4-K
+- [ ] **Cross-cutting:** `npm run quality` green on every phase exit? — Pitfall 5-A
+- [ ] **Cross-cutting:** CHANGELOG has `### BREAKING CHANGES` section with migration steps? — Pitfall 5-B
+- [ ] **Cross-cutting:** Zero new runtime deps in package.json? — Pitfall 5-D
+- [ ] **Cross-cutting:** Phase order is: relocation → story-enhancements → marketplace → docs site → release? — Pitfall 5-E
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| #1 Namespacing silently broken | LOW | Document min CC version; users can `rm -rf .claude/commands/gm && gomad install` after updating CC. If widespread, ship v1.2.1 with flat-name fallback. |
-| #2 Manifest-driven over-delete destroyed user files | HIGH | Git-tracked files recoverable via `git reflog`/`git checkout`. Non-git files gone — only `_gomad-*-backup-temp/` ephemeral dirs might still exist if they weren't cleaned up on the destructive run. Immediate hotfix: disable manifest-driven delete, fall back to fresh-install-over-existing. Post-mortem: add containment check. |
-| #3 Symlink leftovers causing source pollution | MEDIUM | Instruct users to `git clean -fdx src/` on GoMad repo; issue fix in v1.2.1. |
-| #4 Orphan references found post-release | LOW | Patch release (v1.2.1) with corrected references; no data impact. |
-| #5 User customizations to `.claude/commands/gm/` wiped | MEDIUM | Cannot recover without user's backup. Release note apology; add `.bak` preservation in v1.2.1. |
-| #6 PRD pipeline misaligned (validate fails new PRDs) | MEDIUM | Ship v1.2.1 with validator updates; users regenerate. Affects only projects with v1.2-created PRDs. |
-| #7 Dev repo `.claude/commands/gm/` committed | LOW | Revert commit; add to `.gitignore`; no user impact if not yet tarballed. |
-| #10 Dev-loop regression | LOW (contributors only) | Manual `gomad install` loops. Or implement `gomad dev --watch` follow-up. |
-| #13 Semver surprise (minor bump breaking) | LOW to MEDIUM depending on user count | Publish v1.1.2 with deprecation warning retroactively; v1.2 README migration note; social channel announcement. |
-| #15 v1.1→v1.2 migration orphans | LOW | Reinstall with `gomad uninstall && gomad install`. Document as migration step. |
-
----
+| 1-A (path constant not extracted, late-caught) | MEDIUM | Extract constant in a hotfix plan; grep-sweep; re-verify all hits; re-run test:gm-surface |
+| 1-C (user data loss on upgrade) | HIGH | Point user to `_gomad/_backups/<ts>/` — the snapshot was taken; user must `cp -R` from backup to new `_config/agents/` location manually |
+| 2-B (dead marketplace refs) | LOW | Run generator, commit the diff, republish (marketplace.json not in `files:` allowlist — may not need npm republish) |
+| 3-B (CNAME lost, domain reverted) | LOW | Re-add CNAME to `website/public/`, redeploy; DNS propagation ~5min |
+| 3-C (docs drift from npm) | LOW | Manual `docs:build && docs:deploy` — next release will refresh |
+| 4-J (unlicensed KB content shipped) | HIGH | Pull affected KB files; publish patch release; review all KB content for compliance; potential public notice if source licensing was serious (GPL) |
+| 5-B (missing BREAKING callout in CHANGELOG) | LOW | Append to CHANGELOG, no republish needed (it's Git-tracked, users can re-read) — but consider a pinned GitHub issue noting the breakage |
 
 ## Pitfall-to-Phase Mapping
 
-| Pitfall | Phase | Verification |
-|---------|-------|--------------|
-| #1 Namespacing may not work on user's CC version | Phase 1 (research) + Phase 2 (command migration) | Doc + test: verify against minimum supported CC version; optional flat-name fallback shipped. |
-| #2 Manifest-driven over-delete | Phase 3 (installer rework) | Containment-check test; malformed-CSV test; dry-run option demoed. |
-| #3 Symlink leftovers | Phase 3 (installer rework) | E2E test that starts from a symlinked v1.1 state and completes clean. |
-| #4 Orphan references | Phase 2 (rename sweep) | `grep -n gm-agent-` final pass returns zero non-historical matches. |
-| #5 `.claude/commands/gm/` customization destroyed | Phase 3 (installer rework) | Test: edit command file, re-install, verify preserved or reported. |
-| #6 PRD pipeline misalignment | Phase 4 (PRD refinement) | Integration test: CP→VP→CA→CE→IR all exit success against a v1.2-created sample PRD. |
-| #7 Dev repo pollution | Phase 2 (command migration) | `.gitignore` updated; installer refuses self-install. |
-| #8 Colon-in-filename regression | Phase 2 (command migration) | Unit test: generated path is dir + file, never contains `:` in filename. |
-| #9 Permission bit drift | Phase 3 (installer rework) | Post-install perm audit test. |
-| #10 Dev-loop regression | Phase 3 (installer rework) | Release note documents tradeoff; optional `--watch` follow-up. |
-| #11 Template still says "load from `_gomad/...`" | Phase 2 (command migration) | Template content review; ADR for launcher-vs-self-contained. |
-| #12 Aggressive MVP → under-spec | Phase 4 (PRD refinement) | Density audit; experiment feeding v1.2 PRD through pipeline. |
-| #13 Breaking change under minor bump | Phase 5 (release) | CHANGELOG + README + migration guide content review. |
-| #14 Tarball allowlist drift | Phase 5 (release) | `verify-tarball.js` extended assertions; expected-files snapshot. |
-| #15 v1.1→v1.2 manifest schema | Phase 3 (installer rework) | Migration test: install v1.1 → upgrade v1.2, verify no orphans + no over-deletes. |
-| #16 Case/namespace inconsistency | Phase 2 + Phase 5 | Name canonicalization review. |
-| #17 `$ARGUMENTS` vs `$1` inconsistency | Phase 2 | Convention doc + review across all 7 command files. |
-| #18 Agent metadata has no frontmatter home | Phase 2 | Confirm `agent-manifest.csv` still populates from new source; help catalog intact. |
-| #19 Windows path separators in manifest | Phase 3 | Normalization on write + test. |
-| #20 `ancestor_conflict_check` interaction | Phase 3 | Regression test against nested install layout. |
-
----
-
-## Cross-References to Other v1.2 Research
-
-- **STACK.md** (already present): tech choices influence which pitfalls apply — e.g., `csv-parse/sync` availability affects pitfall #2.
-- **CREDIT_AND_NPM.md** (from v1.1): release mechanics context for pitfall #13/#14.
-- **RENAME_MECHANICS.md** (from v1.1): lessons from the `bmad → gomad` rename directly inform pitfall #4.
-
----
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| 1-A Path constant drift | Relocation Phase, Plan 01 (before any edits) | `grep -rn "gomad/agents" tools/ src/` returns 0 non-changelog hits |
+| 1-B test:gm-surface body assertion | Relocation Phase, Plan 02 (test first, then code) | Intentional regression → test:gm-surface fails |
+| 1-C v1.2→v1.3 upgrade test | Relocation Phase, Plan 02 | Simulated upgrade preserves `was_modified` flag |
+| 1-D Hardcoded `_gomad` strings | Relocation Phase, Plan 03 | Lint grep for `'_gomad/'` in installer code |
+| 1-E verify-tarball Phase 4 | Relocation Phase, Plan 04 (release gate) | `npm run test:tarball` fails on stray `gomad/agents/` |
+| 1-F upgrade-recovery.md stale paths | Docs-Site Phase | Doc-link validator shows both paths |
+| 2-A Marketplace schema | Marketplace Phase, Plan 01 | test-marketplace-schema.js green |
+| 2-B Marketplace dead refs | Marketplace Phase, Plan 01 | test-marketplace-paths.js green; generator output matches committed |
+| 2-C Duplicate listings | Marketplace Phase, Plan 01 | Dedup assertion in test |
+| 2-D Missing new v1.3 skills | Marketplace Phase (LAST, after skill additions) | Generator auto-includes new skills |
+| 2-E Semver mismatch | Marketplace Phase | Equality assertion in test |
+| 3-A Astro base config | Docs-Site Phase, Plan 01 | Post-deploy asset 200 OK |
+| 3-B CNAME lost | Docs-Site Phase, Plan 01 | `CNAME` file exists in `public/` |
+| 3-C Manual deploy skipped | Release Phase | Version-embed in footer matches npm |
+| 3-D Hand-authored docs | Docs-Site Phase, Plan 01 (content plumbing first) | Regenerate on source change |
+| 3-E Docs stale to relocation | Docs-Site Phase (AFTER Relocation) | validate-doc-paths.js in quality |
+| 3-F Source maps | Docs-Site Phase, Plan 03 (deploy) | No `.map` in deployed dist |
+| 3-G No index | Docs-Site Phase, Plan 02 (content) | MVP index + generated pages |
+| 4-A Context.md bloat | Story-Enhancements Phase, gm-discuss-story plan | Fixture size test |
+| 4-B Abstract questions | Story-Enhancements Phase, gm-discuss-story plan | Fixture output review |
+| 4-C Re-run idempotency | Story-Enhancements Phase, gm-discuss-story plan | Manual re-run test |
+| 4-D Path resolution | Story-Enhancements Phase, discuss + create-story plans | Placeholder fixture test |
+| 4-E Malformed context.md | Story-Enhancements Phase, gm-create-story plan | Malformed fixture → fast fail |
+| 4-F Precedence | Story-Enhancements Phase, gm-create-story plan | Conflict fixture → prompt wins with warning |
+| 4-G Slug typos | Story-Enhancements Phase, gm-domain-skill plan | Typo fixture → "did you mean" |
+| 4-H Longest-file ranking | Story-Enhancements Phase, gm-domain-skill plan | 2-file ranking fixture |
+| 4-I KB pack version drift | Story-Enhancements Phase, KB seed plan | Every pack has `last_reviewed` |
+| 4-J IP/licensing (CRITICAL) | Story-Enhancements Phase, KB seed plan (FIRST step) | validate-kb-licenses.js green; legal review at close |
+| 4-K Wrong integration timing | Story-Enhancements Phase, gm-domain-skill plan | Integration test at dev-story time |
+| 5-A Quality gate | Every Phase | `npm run quality` exits 0 |
+| 5-B BREAKING CHANGELOG | Release Phase | Grep CHANGELOG for `BREAKING CHANGES` |
+| 5-C Planning docs drift | Every Phase Transition + Milestone Close | Accept bulk-flip pattern (v1.2 lesson) |
+| 5-D New deps | Every Phase | `git diff package.json` → no change to dependencies |
+| 5-E Phase ordering | Roadmap creation | Docs site is LAST phase before release |
+| 5-F gsd-tools drift | Milestone Close | Allocate time for manual audit |
 
 ## Sources
 
-Direct code evidence (HIGH confidence — all reviewed in-tree as of 2026-04-18):
-
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/installer.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/manifest-generator.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/existing-install.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/manifest.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/file-ops.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/_config-driven.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/agent-command-generator.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/path-utils.js`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/templates/agent-command-template.md`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/platform-codes.yaml`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/2-plan-workflows/gm-agent-pm/SKILL.md`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/2-plan-workflows/gm-create-prd/` (workflow + steps)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/2-plan-workflows/gm-validate-prd/` (workflow + steps)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/3-solutioning/gm-create-architecture/workflow.md`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/module-help.csv`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/.planning/PROJECT.md`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/.planning/MILESTONES.md`
-- `/Users/rockie/Documents/GitHub/xgent/gomad/.planning/milestones/v1.1-ROADMAP.md`
-
-External documentation (MEDIUM confidence — dated sources; live at time of research but may evolve):
-
-- [Claude Code slash commands docs](https://code.claude.com/docs/en/slash-commands) — retrieved 2026-04-18; describes subdirectory namespacing
-- [GitHub Issue #2422](https://github.com/anthropics/claude-code/issues/2422) — closed "not planned"; documents prior bug with subdirectory namespacing
-- [GitHub Issue #44678](https://github.com/anthropics/claude-code/issues/44678) — opened 2026-04-07; new feature request (open)
-- [Claude Code skills docs](https://code.claude.com/docs/en/skills) — context on skill/command precedence
-- Search result sources: [Claude Code slash commands guide (eesel.ai, 2026)](https://www.eesel.ai/blog/claude-code-slash-commands); [Claude Code commands cheat sheet (scriptbyai, 2026)](https://www.scriptbyai.com/claude-code-commands-cheat-sheet/); [Learnia Claude Code slash commands reference 2026](https://learn-prompting.fr/blog/claude-code-slash-commands-reference); [Anatomy of the .claude/ folder (dailydoseofds)](https://blog.dailydoseofds.com/p/anatomy-of-the-claude-folder); [Claude Code changelog 2026](https://claudefa.st/blog/guide/changelog)
-
-Internal knowledge (MEDIUM confidence — v1.1 shipped lessons):
-
-- v1.1 `issues-resolved` section of v1.1-ROADMAP.md: `NAME_REGEX` hardcoding, content-sweep glob misses, dangling `require` statements
-- v1.1 E2E testing approach: tarball-structural verification rather than interactive `gomad install` to avoid `@clack/prompts` hang
+- `tools/installer/core/cleanup-planner.js` — buildCleanupPlan semantics (Pitfall 1-C)
+- `tools/installer/ide/templates/agent-command-template.md` line 16 — hardcoded path (Pitfall 1-A, 1-D)
+- `tools/installer/ide/shared/path-utils.js` — existing `GOMAD_FOLDER_NAME` constant pattern (Pitfall 1-A)
+- `tools/verify-tarball.js` Phase 2 + Phase 3 — existing grep-clean infrastructure (Pitfall 1-E)
+- `test/test-gm-command-surface.js` Phase C lines 224–240 — frontmatter-only assertions (Pitfall 1-B)
+- `.claude-plugin/marketplace.json` — current BMAD-era content, dead refs (Pitfall 2-B, 2-E)
+- `docs/upgrade-recovery.md` line 19 — `gomad/agents/pm.md` in backup tree example (Pitfall 1-F)
+- `CHANGELOG.md` v1.2 section lines 68-76 — BREAKING CHANGES template (Pitfall 5-B)
+- `.planning/RETROSPECTIVE.md` v1.1 Lessons 1-5 — checkbox drift, sweep gaps, CLI drift (Pitfalls 5-C, 5-F)
+- `.planning/RETROSPECTIVE.md` v1.2 Lessons 1-7 — zero-new-deps discipline, de-risk patterns, dual-sided gates, word-boundary guards (Pitfalls 5-D, 5-E; test pattern for 1-E)
+- `.planning/MILESTONES.md` — v1.1 + v1.2 shipped scope, carry-forward constraints
+- `.planning/PROJECT.md` lines 22-26 — v1.3 constraints (installRoot, zero-deps, phase numbering)
+- `package.json` scripts section — `quality`, `test:tarball`, `test:gm-surface` composition (Pitfall 5-A)
 
 ---
-
-*Pitfalls research for: GoMad v1.2 — agent-to-slash-command migration + copy-only installer + PRD refinement*
-*Researched: 2026-04-18*
+*Pitfalls research for: GoMad v1.3 milestone (Marketplace + Docs Site + Agent Relocation + Story Enhancements)*
+*Researched: 2026-04-24*
+*Confidence: HIGH — grounded in direct file reads of the codebase, not web search; prior-milestone lessons carried forward per RETROSPECTIVE.md*

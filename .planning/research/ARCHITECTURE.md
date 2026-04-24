@@ -1,503 +1,652 @@
-# Architecture Research
+# Architecture Research — v1.3 Integration Map
 
-**Domain:** npm-distributed agentic-workflow framework (hard fork of BMAD Method). Source-of-truth on GitHub, installable artifact, consumed by Claude Code and ~20 other AI coding IDEs.
-**Researched:** 2026-04-18
-**Confidence:** HIGH (all findings grounded in the working tree at `/Users/rockie/Documents/GitHub/xgent/gomad`, not training data).
+**Domain:** CLI installer + skills framework (Node.js/CommonJS, published to npm as `@xgent-ai/gomad`)
+**Researched:** 2026-04-24
+**Confidence:** HIGH (every claim anchored to a file:line in the shipped v1.2 codebase)
 
-## v1.2 Scope Anchor
+---
 
-This document answers only the five questions the roadmapper needs. It does **not** re-describe v1.1 architecture — that was shipped, the layout is stable, and nothing in v1.2 crosses module boundaries that weren't already crossed. The scope is:
+## 1. System Context — What Already Exists
 
-1. Agent-as-slash-command migration (7 personas).
-2. Copy-only installer + `files-manifest.csv`-driven upgrade cleanup.
-3. Reference sweep from `gm-agent-*` to `gm:agent-*`.
-4. Content surgery on `gm-create-prd` and `gm-product-brief`.
-5. Build order / dependency graph.
-
-## System Overview — What Already Exists
+### Installer Pipeline (shipped v1.2)
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
-│  SOURCE TREE (src/)                                                  │
-│  ┌────────────────────────┐   ┌──────────────────────────────────┐   │
-│  │ src/core-skills/       │   │ src/gomad-skills/                │   │
-│  │   gm-help, gm-brain-   │   │   1-analysis/                    │   │
-│  │   storming, gm-party-  │   │   2-plan-workflows/              │   │
-│  │   mode, gm-shard-doc,  │   │   3-solutioning/                 │   │
-│  │   gm-distillator, …    │   │   4-implementation/              │   │
-│  └────────────────────────┘   │     gm-agent-{analyst,tech-      │   │
-│                               │     writer,pm,ux-designer,       │   │
-│                               │     architect,sm,dev}            │   │
-│                               │     gm-create-prd, gm-product-   │   │
-│                               │     brief, gm-create-story, …    │   │
-│                               └──────────────────────────────────┘   │
-├──────────────────────────────────────────────────────────────────────┤
-│  INSTALLER (tools/installer/)                                        │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                │
-│  │ gomad-cli.js │  │ commands/    │  │ core/        │                │
-│  │ (commander)  │→ │ install.js   │→ │ installer.js │                │
-│  │              │  │ uninstall.js │  │ 1700 lines   │                │
-│  └──────────────┘  │ status.js    │  └──────┬───────┘                │
-│                    └──────────────┘         │                        │
-│  ┌─────────────────────────────────┐   ┌────▼──────────────────┐     │
-│  │ modules/official-modules.js     │←──│ manifest-generator.js │     │
-│  │ modules/custom-modules.js       │   │ (scans installed tree,│     │
-│  │ file-ops.js                     │   │  writes 4 manifests)  │     │
-│  └─────────────────────────────────┘   └────┬──────────────────┘     │
-│                                             │                        │
-│  ┌──────────────────────────────────────────▼───────────┐            │
-│  │ ide/ — per-IDE install pipelines                     │            │
-│  │   platform-codes.yaml (24 IDEs, target_dir mapping)  │            │
-│  │   _config-driven.js  ←— THE FILE WITH THE SYMLINK    │            │
-│  │   shared/path-utils.js  (dash-naming helpers)        │            │
-│  │   shared/agent-command-generator.js  ←— DEAD CODE    │            │
-│  │   templates/agent-command-template.md ←— DEAD CODE   │            │
-│  └──────────────────────────────────────────────────────┘            │
-├──────────────────────────────────────────────────────────────────────┤
-│  INSTALL OUTPUT — at consumer's `<project>/` after `gomad install`   │
-│  ┌─────────────────────────────┐  ┌──────────────────────────────┐   │
-│  │ _gomad/                     │  │ .claude/skills/  (per IDE)   │   │
-│  │   _config/                  │  │   gm-agent-pm/   ← SYMLINK → │   │
-│  │     manifest.yaml           │  │   gm-create-prd/ ← SYMLINK → │   │
-│  │     skill-manifest.csv      │  │   …52 entries                │   │
-│  │     agent-manifest.csv      │  │                              │   │
-│  │     files-manifest.csv ★    │  │ .cursor/skills/, .opencode/  │   │
-│  │     gomad-help.csv          │  │   skills/, … same pattern    │   │
-│  │     agents/  custom/        │  └──────────────────────────────┘   │
-│  │   core/      agile/         │                                     │
-│  │     (copied skill sources)  │                                     │
-│  └─────────────────────────────┘                                     │
+│ tools/installer/gomad-cli.js            (bin entry — @xgent-ai/gomad)│
+└──────────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ core/installer.js                Installer.install()                 │
+│  ├─ InstallPaths.create()         creates _gomad/, _config/, agents/ │
+│  ├─ ExistingInstall.detect()                                          │
+│  ├─ _prepareUpdateState()         reads files-manifest.csv,           │
+│  │   ├─ cleanupPlanner.buildCleanupPlan()   PURE plan builder        │
+│  │   └─ cleanupPlanner.executeCleanupPlan() snapshot → remove         │
+│  ├─ _installAndConfigure()                                            │
+│  │   ├─ officialModules.install()  copies src/* → _gomad/<module>/   │
+│  │   ├─ AgentCommandGenerator.extractPersonas()  ← D-14/D-15         │
+│  │   │    writes _gomad/gomad/agents/<shortName>.md  (v1.2 path)     │
+│  │   └─ ManifestGenerator.generateManifests()                         │
+│  │       ├─ writeMainManifest       (_config/manifest.yaml)           │
+│  │       ├─ writeSkillManifest      (_config/skill-manifest.csv)      │
+│  │       ├─ writeAgentManifest      (_config/agent-manifest.csv)     │
+│  │       └─ writeFilesManifest      (_config/files-manifest.csv v2)  │
+│  ├─ _setupIdes()                                                      │
+│  │   └─ IdeManager → _config-driven.js                                │
+│  │       ├─ AgentCommandGenerator.writeAgentLaunchers()               │
+│  │       │    → .claude/commands/gm/agent-<shortName>.md              │
+│  │       └─ skill copies → .claude/skills/                            │
+│  └─ 2nd manifest pass (picks up IDE-root launchers)                   │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
-★ = `files-manifest.csv` already exists, already gets written, and already carries SHA-256 hashes per row (`type,name,module,path,hash`). `readFilesManifest()` and `detectCustomFiles()` in `core/installer.js` already read it on re-install to compute custom/modified file sets for backup. **The "upgrade cleanup" feature of v1.2 layers on top of existing infrastructure — it is not greenfield.**
+### Installed Target Layout (as of v1.2)
 
-## Component Responsibilities — Where Integration Happens
+```
+<workspaceRoot>/
+├── _gomad/                              install_root='_gomad'
+│   ├── _config/
+│   │   ├── manifest.yaml               version + install date + modules
+│   │   ├── skill-manifest.csv          skill catalog (user-visible gm:agent-* ids)
+│   │   ├── agent-manifest.csv          persona metadata
+│   │   ├── files-manifest.csv          v2 schema: schema_version,install_root
+│   │   └── agents/                     ← ALREADY EXISTS, holds .customize.yaml
+│   │                                     (user overrides, NOT persona bodies)
+│   ├── _backups/<ts>/                  excluded from manifest (D-39)
+│   ├── core/                           core module (skills)
+│   ├── gomad/                          gomad module
+│   │   ├── agents/                     ← v1.2 PERSONA BODIES LIVE HERE
+│   │   │   ├── analyst.md                (8 files, one per AGENT_SOURCE)
+│   │   │   ├── tech-writer.md
+│   │   │   ├── pm.md
+│   │   │   ├── ux-designer.md
+│   │   │   ├── architect.md
+│   │   │   ├── sm.md
+│   │   │   ├── dev.md
+│   │   │   └── solo-dev.md
+│   │   ├── workflows/                  ← STAYS PUT per PROJECT.md
+│   │   └── data/                       ← STAYS PUT per PROJECT.md
+│   └── <other-modules>/
+├── .claude/                             install_root='.claude'
+│   ├── commands/gm/
+│   │   ├── agent-analyst.md             launcher stubs (pointer refs)
+│   │   ├── agent-tech-writer.md           ... body says:
+│   │   ├── agent-pm.md                    "LOAD the FULL agent file from
+│   │   └── ...                            {project-root}/_gomad/gomad/agents/
+│   │                                       {{shortName}}.md"
+│   └── skills/                          native SKILL.md copies
+└── .claude-plugin/marketplace.json      source-of-truth for plugin ingestion
+                                          (at REPO root, not install target)
+```
 
-| Component | File | Current role | v1.2 change |
-|---|---|---|---|
-| Source of truth for agents | `src/gomad-skills/{phase}/gm-agent-*/` (7 dirs, each = `SKILL.md` + `skill-manifest.yaml`) | Loaded as skills; installed into IDE `.{ide}/skills/<dir>` via symlink; also registered in `agent-manifest.csv` with persona fields | **Dual-install**: keep behaving as a skill AND emit a slash-command `.md` stub at `.claude/commands/gm/agent-{name}.md`. See "Source-of-truth decision" below. |
-| IDE installer (symlink path) | `tools/installer/ide/_config-driven.js:136-189` `installVerbatimSkills()` | Calls `fs.ensureSymlink(relTarget, skillDir)` for every row of `skill-manifest.csv` | Replace `fs.ensureSymlink` with `fs.copy(sourceDir, skillDir, { overwrite: true, filter })`. Single-point change, ~5 lines. |
-| Manifest writer | `tools/installer/core/manifest-generator.js:587-647` `writeFilesManifest()` | Already iterates `this.allInstalledFiles` (a Set populated during install) and writes `files-manifest.csv` with hashes | Extend what the installer feeds into `this.installedFiles`. Add IDE-side writes (skills-target-dir copies, slash-command `.md` stubs) to the Set so they land in the CSV. |
-| Upgrade detection | `tools/installer/core/installer.js:602-766` `readFilesManifest()`, `detectCustomFiles()`, `_prepareUpdateState()` | On re-install: reads old CSV, diffs against current filesystem to find user-added ("custom") + user-modified files, backs them up, lets install run, restores at end | **Add a deletion phase** between "detection complete" and "install begins": for every path in the old `files-manifest.csv` that is NOT in the custom/modified set, delete it from the target. This ensures stale slash-command stubs and stale skill copies from a prior v1.2 install are removed. |
-| Slash-command installation | **(does not exist yet)** | n/a | New IDE-handler branch (Claude Code only, keyed on `platform-codes.yaml` having a new `commands_dir` alongside `target_dir`). Copies each `gm-agent-*/` launcher stub to `<projectRoot>/.claude/commands/gm/agent-{name}.md`. |
-| Launcher-stub template | `tools/installer/ide/templates/agent-command-template.md` **(currently dead code per artifacts.js L12-34)** | Used to be for old compiled agent format (`{{module}}/agents/{{path}}`). Now unused. | **Revive and rewrite**: new template that delegates to the installed skill dir (`_gomad/{module}/gm-agent-{name}/SKILL.md`) and declares frontmatter with `name: gm:agent-{name}` + description. |
-| Reference-sweep surface | 21 files with 54 occurrences of literal string `gm-agent-` (grep-verified) | String sprinkled through SKILL.md capability tables, skill-manifest.yaml `module:` values, module-help.csv, docs, .planning | Case-by-case rename: some to `gm:agent-*` (human-readable command form), some left as `gm-agent-*` (filesystem directory references). See "Reference sweep" section. |
-| PRD content | `src/gomad-skills/2-plan-workflows/gm-create-prd/steps-c/*.md` (12 files, ~8KB each) + `templates/prd-template.md` | Step-file architecture: step-01 through step-12, each enforces just-in-time loading. Step 02b explicitly asks "Why now?"; steps 03, 10 include business metrics; step 02c produces Executive Summary in human-founder voice | Surgery on steps 02b (vision/why-now), 02c (exec summary), 03 (success metrics), 10 (nonfunctional), plus prd-template.md. |
-| Product-brief content | `src/gomad-skills/1-analysis/gm-product-brief/SKILL.md` + `prompts/{contextual-discovery,guided-elicitation,draft-and-review,finalize}.md` + `resources/brief-template.md` + `agents/{opportunity,skeptic,web,artifact}-reviewer.md` | Already has "scope discipline" block explicitly declaring biz/commercial OUT. Already has "capture-don't-interrupt" for biz metrics. **Closer to coding-agent voice than the PRD.** Still has "What Makes This Different" and "Success Signals" sections aimed at humans. | Lighter surgery: tune resource template + `guided-elicitation.md` + SKILL.md scope-discipline wording. |
-
-## Source-of-Truth Decision: Generated Stubs, Not Moved Dirs
-
-**Question:** Do the 7 `gm-agent-*` skill directories get *moved* to a new `src/gomad-commands/` location, or are `.claude/commands/gm/agent-*.md` files *generated at install time* from the existing skill dirs?
-
-**Recommendation: GENERATE AT INSTALL TIME. Keep `src/gomad-skills/{phase}/gm-agent-*/` as the single source of truth.**
-
-### Reasoning
-
-1. **The 7 agent dirs are already minimal.** Each is just `SKILL.md` + `skill-manifest.yaml`. There's no step files, no templates, no sub-resources. They are pure persona metadata. Moving them buys nothing structurally.
-2. **They already participate in the skill pipeline.** `manifest-generator.js:collectSkills()` discovers them via `SKILL.md` frontmatter, writes them to `skill-manifest.csv`, and IDE installers copy/symlink them to `.{ide}/skills/gm-agent-{name}/`. This is how they show up in other IDEs (Cursor, Codex, OpenCode, etc.) that don't have Claude Code's `.claude/commands/` concept.
-3. **Slash commands are a Claude Code-specific surface.** Only Claude Code consumes `.claude/commands/<ns>/<cmd>.md`. If we *moved* the sources to a commands-shaped location, we'd break the cross-IDE skill installation for the other 23 platforms. Generating a Claude-Code-only `.md` stub alongside the existing skill copy keeps both surfaces working.
-4. **There's dead infrastructure ready to be revived.** `tools/installer/ide/templates/agent-command-template.md` + `shared/agent-command-generator.js` already implement "generate launcher markdown files from agent manifests, write them to a commands dir." Per the inline comments in `artifacts.js:12-34` the mechanism was retired when compiled-agent XML was dropped. The bones are there — re-target them at the Claude Code `.claude/commands/gm/` directory.
-5. **The `name:` frontmatter field decides the slash form, not the path.** Verified in this very repo: `.claude/commands/gsd/new-milestone.md` declares `name: gsd:new-milestone` in its frontmatter, and that's how `/gsd:new-milestone` works. Subdirectory auto-namespacing under `.claude/commands/` was historically buggy (anthropics/claude-code#2422) and per current docs `.claude/commands/` is a legacy surface being merged into skills. **The colon form is carried by the frontmatter `name:` field, not by directory nesting.** This means our stubs can live at `.claude/commands/gm/agent-pm.md` for filesystem tidiness, but the *invocation* `/gm:agent-pm` works because the stub declares `name: gm:agent-pm`.
-
-### What the Generated Stub Looks Like
-
-A minimal `gm-agent-pm.md` stub at install target `<projectRoot>/.claude/commands/gm/agent-pm.md`:
-
-```markdown
 ---
-name: gm:agent-pm
-description: Product manager persona for PRD creation and requirements discovery. Use when the user asks to talk to John or requests the product manager.
+
+## 2. Integration Map — Agent Dir Relocation `_gomad/gomad/agents/` → `_gomad/_config/agents/`
+
+### 2.1 Exhaustive Touchpoint Inventory
+
+Every reference to the source-path `gomad/agents/` in the v1.2 tree, with status:
+
+| File | Line | Current Reference | Status | Change Required |
+|------|------|-------------------|--------|-----------------|
+| `tools/installer/ide/shared/agent-command-generator.js` | 60 | JSDoc comment "into <gomadFolder>/gomad/agents/" | LIVE | Update doc + constant |
+| `tools/installer/ide/shared/agent-command-generator.js` | 71 | `path.join(workspaceRoot, this.gomadFolderName, 'gomad', 'agents')` — THE WRITE PATH | **LIVE, HOT** | Change to `'_config', 'agents'` |
+| `tools/installer/ide/shared/agent-command-generator.js` | 214, 241 | JSDoc: `gomad/agents/pm.md → gomad_gomad_pm.md` | DEAD (XML compiler legacy) | Leave (already flagged dead) |
+| `tools/installer/ide/shared/path-utils.js` | 57-82 | `toDashPath()` converts `gomad/agents/pm.md` → `gomad-agent-gomad-pm.md` | DEAD for v1.2 agents (agents ship as launcher stubs, not IDE-path artifacts) | Leave untouched |
+| `tools/installer/ide/templates/agent-command-template.md` | 16 | `LOAD the FULL agent file from {project-root}/_gomad/gomad/agents/{{shortName}}.md` | **LIVE, HOT — this is the runtime pointer** | Change to `_gomad/_config/agents/{{shortName}}.md` |
+| `tools/installer/core/installer.js` | 295 | Comment referring to `_gomad/gomad/agents/<shortName>.md` | LIVE (doc only) | Update comment |
+| `tools/installer/core/installer.js` | 1711 | `path.join(expandedPath, 'agents')` (custom-module scan) | ORTHOGONAL | Leave (custom-module workflow) |
+| `tools/installer/core/manifest-generator.js` | 351-356 | Scans `<gomadDir>/agents/` for standalone agents | ORTHOGONAL | Leave (standalone agent discovery) |
+| `tools/installer/core/manifest-generator.js` | 825 | `path.join(modulePath, 'agents')` (module-level) | ORTHOGONAL | Leave |
+| `tools/installer/ide/shared/artifacts.js` | 40-56 | `getAgentsFromBmad()` scans `core/agents/`, `<module>/agents/`, `<gomadDir>/agents/` | MARKED DEAD in source comment (lines 14-35) | Leave or drop with separate cleanup |
+| `tools/installer/core/install-paths.js` | 22, 29, 42 | `agentsDir = path.join(configDir, 'agents')` | **ALREADY EXISTS** — but for `.customize.yaml` (see §2.3) | Semantic collision — see Anti-Pattern 1 |
+
+### 2.2 Call Chain — How A Launcher Invocation Resolves Today
+
+```
+User types `/gm:agent-pm` in Claude Code
+    │
+    ▼
+Claude Code reads .claude/commands/gm/agent-pm.md  ← flat, dash-named stub
+    │
+    │  body says:
+    │    1. LOAD the FULL agent file from
+    │       {project-root}/_gomad/gomad/agents/pm.md
+    │
+    ▼
+Claude Code loads _gomad/gomad/agents/pm.md         ← persona body
+    │
+    ▼
+Claude Code embodies persona, runs activation steps
+```
+
+The launcher template is the **single source of truth** for the runtime path pointer. Nothing at runtime composes the path programmatically — it's a literal string in the template, resolved via `{{shortName}}` substitution in `AgentCommandGenerator.generateLauncherContent()` (`{project-root}` is a Claude-Code-resolved variable, not a GoMad template variable).
+
+### 2.3 Semantic Collision — `_config/agents/` Already Exists
+
+**This is the single most important discovery.** `InstallPaths.create()` at `install-paths.js:22` already creates `_gomad/_config/agents/` as **"agents config directory"** — and this directory has established semantics:
+
+- `installer.js:889` — `.customize.yaml` files under `_config/agents/` are **user overrides** tracked via `manifest.yaml > agentCustomizations[path] = hash`
+- `installer.js:923` — `.md` files under `_config/agents/` are classified as **custom user files** (opposite of generated)
+
+If v1.3 naively drops persona `.md` bodies into `_config/agents/` without reconciling, the custom-file detector at `installer.js:920-924` will flag them as user-created on every re-install and either back them up or fight the regenerator.
+
+**Required reconciliation options** (pick one):
+1. **Suffix partition** — put personas in `_config/agents/personas/<shortName>.md`, leave `.customize.yaml` at `_config/agents/<shortName>.customize.yaml`
+2. **Extend the custom-file filter** — teach `detectCustomFiles()` that `.md` files under `_config/agents/` matching an `AGENT_SOURCES.shortName` are **generated**, not custom (preserving `.customize.yaml` semantics unchanged)
+3. **Move customizations** — relocate `.customize.yaml` to `_config/agent-customizations/` and leave `_config/agents/` pure for personas
+
+Option 2 is smallest-diff. Option 1 changes two literals (writer + template). Option 3 is the largest surface change but cleanest semantics.
+
+### 2.4 Read-Order / Build Sequence (Critical)
+
+Anti-patterns first (what NOT to do):
+- **Don't change the launcher template before the write path.** A new launcher stub pointing to `_config/agents/<shortName>.md` with the extractor still writing to `gomad/agents/<shortName>.md` produces silent runtime failure: `/gm:agent-pm` fails to load.
+- **Don't change the write path before the cleanup planner knows.** `buildCleanupPlan()` reads `files-manifest.csv` entries; old v1.2 manifests have `path=gomad/gomad/agents/pm.md`, new extract writes to `_config/agents/pm.md`. If new install happens without cleanup logic updated, the old files stay at `gomad/gomad/agents/*.md` forever (orphaned, never removed — manifest-v2 cleanup only removes what's IN the prior manifest and NOT in the new one; the stale path IS in the prior manifest and IS NOT in the new install set, so cleanup WILL remove it correctly — but only if the install actually enumerates the new paths through `this.installedFiles.add()`). **Verification step required in phase plan.**
+
+Ordered sequence:
+1. **Define target path** as a single constant (new file or add to `path-utils.js`): `AGENTS_PERSONA_SUBPATH = '_config/agents'` (or `'_config/agents/personas'` per Option 1).
+2. **Write extractor first** — `agent-command-generator.js:71` — change to write to the new path.
+3. **Write template second** — `agent-command-template.md:16` — update the pointer to match.
+4. **Write launcher generator third** — `writeAgentLaunchers()` at `agent-command-generator.js:146` already uses the template verbatim via `generateLauncherContent()`; no code change needed if step 3 is done.
+5. **Verify manifest v2 cleanup** — install a v1.2 install into a test workspace, run v1.3 installer, assert:
+   - `files-manifest.csv` v1.2 had `path=gomad/gomad/agents/pm.md` (with `install_root=_gomad`)
+   - v1.3 install's `this.installedFiles` contains `<ws>/_gomad/_config/agents/pm.md`
+   - v1.3 install's `newInstallSet` (derived from v1.3 install — NOT from prior manifest) does NOT contain old path
+   - `plan.to_snapshot` includes old `gomad/gomad/agents/*.md` entries
+   - `plan.to_remove` includes old path
+   - Post-install, old `_gomad/gomad/agents/` is **gone** (or directory is empty — cleanup removes files, may leave dir)
+
+   Critical check — is `newInstallSet` derived from prior manifest or new install?
+
+   **Re-reading `installer.js:520-543`**: `newInstallSet` is built from `existingFilesManifest` (the PRIOR manifest), realpath-resolved. It represents "files that still exist on disk from the prior install". The cleanup guard at `cleanup-planner.js:282` says `if (newInstallSet.has(resolved)) continue;` — meaning "skip entries that are in the new install set" (i.e., being preserved).
+
+   **This is a latent bug for the relocation case.** `newInstallSet` is NOT populated from the CURRENT install's `this.installedFiles`. It's derived from the old manifest. So after relocation:
+   - Old manifest has `gomad/gomad/agents/pm.md` — that path STILL EXISTS on disk at the moment `_prepareUpdateState()` runs (nothing has been removed yet)
+   - `newInstallSet` adds it via `fs.realpath()`
+   - `buildCleanupPlan()` hits line 282: `newInstallSet.has(resolved)` is TRUE for the old path
+   - The entry is preserved, not removed
+   - **Result: orphaned old persona files survive the relocation**
+
+   This requires either (a) changing `newInstallSet` derivation to pull from the NEW install's planned outputs, or (b) adding relocation-specific cleanup analogous to `isV11Legacy` branch at `cleanup-planner.js:210-245`. The PROJECT.md entry "manifest-driven upgrade cleanup" assumes path (a) or (b) — the Phase planner must pick one.
+
+6. **Phase-agent cleanup: `collectIdeRoots()` and manifest pass-2** — no changes expected because persona files live under `_gomad/`, install_root stays `_gomad`, and the existing manifest pipeline picks them up automatically.
+
+### 2.5 Launcher Stub Regeneration — v1.2 Installs Upgrading to v1.3
+
+Does a v1.2 install upgrading to v1.3 need explicit launcher-rewrite logic? **No** — launcher stubs are regenerated on every install at `_config-driven.js` handoff time (invoked from `installer.js:_setupIdes` → `IdeManager.setup` → platform handler). `writeAgentLaunchers()` unconditionally overwrites `.claude/commands/gm/agent-*.md` from the current template. Templating change in step 3 above auto-applies to v1.2 upgraders.
+
+### 2.6 `files-manifest.csv` Migration Semantics — DELETE-old + ADD-new, not MOVE
+
+The cleanup contract at `cleanup-planner.js:248-311` operates entry-by-entry against the prior manifest:
+- If prior-manifest entry is NOT in new install set → `plan.to_snapshot` + `plan.to_remove` (DELETE-old)
+- New entries absent from the prior manifest → written normally by installer, recorded in manifest pass-2
+
+There is no `MOVE` primitive. A relocation is a (snapshot-old + remove-old + write-new + record-new) tuple, with the snapshot being the rollback safety net per D-34.
+
 ---
 
-You must fully embody this agent's persona and follow all activation instructions exactly as specified. NEVER break character until given an exit command.
+## 3. Integration Map — GitHub Pages Docs Site
 
-<agent-activation>
-1. LOAD the full agent persona from: `_gomad/gomad/2-plan-workflows/gm-agent-pm/SKILL.md`
-2. READ its entire contents — this is the complete persona, menu, and instructions.
-3. Execute ALL activation steps exactly as written.
-4. Follow the agent's persona and menu system precisely.
-5. Stay in character throughout the session.
-</agent-activation>
+### 3.1 Current State (fully shipped — not "to be built")
+
+**Key discovery**: The docs site **already exists and auto-deploys**. `PROJECT.md` calls it "Astro under-construction one-pager"; reality is richer.
+
+| Artifact | Status |
+|----------|--------|
+| `website/astro.config.mjs` | Full Starlight config with i18n (default + zh-CN), sidebar auto-gen from `tutorials/`, `how-to/`, `explanation/`, `reference/` | LIVE |
+| `website/src/content/docs` | **Symlink** to `<repo>/docs/` (per `website/README.md`) | LIVE |
+| `docs/index.md`, `docs/roadmap.mdx`, `docs/tutorials/`, `docs/how-to/`, `docs/explanation/`, `docs/reference/`, `docs/upgrade-recovery.md`, `docs/404.md`, `docs/zh-cn/` | Content tree, Diataxis structure | LIVE |
+| `website/public/` | Static assets: favicon, diagrams, workflow-map HTML | LIVE |
+| `CNAME` at repo root | Contents: `gomad.xgent.ai` | LIVE |
+| `.github/workflows/docs.yaml` | Auto-deploy on push to `main` that touches `docs/**`, `website/**`, or `tools/build-docs.mjs`; uses `actions/upload-pages-artifact@v3` + `actions/deploy-pages@v4` | LIVE |
+| `package.json` scripts: `docs:build`, `docs:dev`, `docs:fix-links`, `docs:preview`, `docs:validate-links` | wired to `tools/build-docs.mjs`, `tools/fix-doc-links.js`, `tools/validate-doc-links.js` | LIVE |
+| `npm run quality` includes `docs:build` | Build validation is part of release gate | LIVE |
+| DevDependencies: `astro@^5.16.0`, `@astrojs/starlight@^0.37.5`, `@astrojs/sitemap@^3.6.0` | Installed | LIVE |
+
+**Contradiction with PROJECT.md**: PROJECT.md says "Astro under-construction one-pager" and "GitHub Pages deployment deferred until project stabilizes". Reality: site is Starlight-based, actively deploying, CNAME set. PROJECT.md also has "GitHub Pages deployment — CNAME set to gomad.xgent.ai; actual deploy deferred" in Out of Scope. **The Out-of-Scope entry is stale.** The docs workflow already runs on push-to-main.
+
+### 3.2 Metadata Ingestion — How Docs Reference Skills/Agents
+
+Docs currently do NOT auto-generate from `skill-manifest.yaml` or `manifest.json`. Content is hand-authored Markdown under `docs/*`. Rehype plugins (`rehype-markdown-links.js`, `rehype-base-paths.js`) rewrite links at build time but do not pull structured data from source manifests.
+
+**v1.3 implications** (per milestone scope — "Initial content (install, agents, skills, architecture)"):
+- Content is authored manually in `docs/` subdirs.
+- If per-skill reference pages are desired later, a build-time step reading `src/**/skill-manifest.yaml` → generated `docs/reference/skills/*.md` would be the idiomatic Astro path — but that is **out of v1.3 scope**.
+
+### 3.3 Build → Deploy Flow
+
+```
+Developer pushes to main  (touching docs/** or website/**)
+    │
+    ▼
+GitHub Actions: .github/workflows/docs.yaml
+    ├─ build job:
+    │   ├─ actions/checkout@v4  (full history for lastUpdated)
+    │   ├─ actions/setup-node@v4  (Node from .nvmrc)
+    │   ├─ npm ci
+    │   ├─ SITE_URL from vars.SITE_URL  (override)
+    │   ├─ npm run docs:build         → tools/build-docs.mjs → astro build
+    │   │                               → output: build/site/
+    │   └─ actions/upload-pages-artifact@v3  (path: build/site)
+    └─ deploy job: actions/deploy-pages@v4  → gh-pages (via Pages API)
 ```
 
-Source fields come from existing `skill-manifest.yaml` (for `displayName`, `role`, `description`) and the skill's source directory path (for the load target). The `agent-command-generator.js` already does this templating; new work is ~20 lines of targeted edits.
+- **No `gh-pages` branch push**. Uses the modern GitHub Pages API artifact upload (not `gh-pages` npm / `peaceiris/actions-gh-pages` / `git subtree`).
+- **CNAME**: at repo root. Starlight's Astro build does not automatically copy CNAME; the `actions/deploy-pages` path generally handles custom domain via repo Pages settings + DNS, not via CNAME file propagation. **Verify in Phase** whether the root `CNAME` (15 bytes, content `gomad.xgent.ai`) is serving any purpose in the current deploy path — it may be a no-op that historically was needed for the legacy `gh-pages` branch flow.
+- **Concurrency guard**: `concurrency.group: "pages"` with `cancel-in-progress: false` — sensible default, avoids mid-flight deploy cancellation.
 
-## Installer Flow Rewrite — Integration Points
+### 3.4 v1.3 Docs Content — Actual Work
 
-### Current re-install flow (`core/installer.js install()`)
+Per PROJECT.md: "Build out initial docs content (install, agents, skills, architecture) and deploy manually to gomad.xgent.ai. No CI auto-deploy in v1.3."
+
+But auto-deploy already works. So the v1.3 work is:
+- **Author `docs/tutorials/install.md`** (or `docs/how-to/install.md`)
+- **Author `docs/reference/agents.md`** (list of 8 gm-agent-* personas)
+- **Author `docs/reference/skills.md`** (catalog of gm-* skills)
+- **Author `docs/explanation/architecture.md`**
+- Optionally update sidebar slugs + translations in `astro.config.mjs`
+
+The "deploy manually" phrasing in PROJECT.md appears to reflect caution — the CI pipeline runs on every push but the team may want content review before a push-to-main. No tooling change required.
+
+### 3.5 Build Order for Docs Workstream
+
+No dependency conflicts — content is additive. Docs workstream can run in **parallel** with the installer/relocation/skills workstreams provided no doc content describes paths that are in flux (e.g., don't write `docs/reference/agents.md` stating "personas live at `_gomad/gomad/agents/`" before agent relocation lands).
+
+---
+
+## 4. Integration Map — Story-Creation Enhancements
+
+### 4.1 Runtime Variable Resolution — Where Does `{planning_artifacts}` Come From?
+
+From `gm-create-story/workflow.md:19-26`:
 
 ```
-1. Config.build + InstallPaths.create      (line 38-40)
-2. ExistingInstall.detect(gomadDir)        (line 42 — reads manifest.yaml)
-3. if existing:
-     _removeDeselectedModules              (line 48 — removes per-module dirs)
-     _prepareUpdateState                   (line 49 — reads files-manifest.csv,
-                                            detects custom+modified, backs up)
-     _removeDeselectedIdes                 (line 50 — per-IDE cleanup() call)
-4. _cacheCustomModules                     (line 58)
-5. _installAndConfigure                    (line 65 — calls official-modules.install(),
-                                            populates this.installedFiles Set,
-                                            calls manifest-generator which writes all 4 manifests
-                                            including files-manifest.csv with fresh hashes)
-6. _setupIdes                              (line 67 — per-IDE setup() → installVerbatimSkills()
-                                            which SYMLINKS skill dirs into .{ide}/skills/)
-7. _restoreUserFiles                       (line 68 — restores backed-up custom + .bak modified)
+Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
+- `planning_artifacts`, `implementation_artifacts`
 ```
 
-### Required v1.2 changes (three integration points)
+`{planning_artifacts}` and `{implementation_artifacts}` are configured per-project in `_gomad/agile/config.yaml` (installed by the agile module at install time). They are **runtime** variables resolved by the agent workflow, NOT install-time template variables.
 
-**Point 1 — `_config-driven.js:171` symlink→copy.** Single replacement:
+Similarly, `{{story_key}}` is the hyphenated form `<epic_num>-<story_num>-<story_title>` (e.g., `1-2-user-authentication`), parsed from sprint-status.yaml or user input at `workflow.md:119-125, 176-182`.
 
-```js
-// Before:
-await fs.ensureSymlink(relTarget, skillDir);
+Example resolved path at runtime: `<workspaceRoot>/docs/agile/planning/1-2-user-authentication-context.md` (if `planning_artifacts: docs/agile/planning`).
 
-// After:
-await fs.copy(sourceDir, skillDir, {
-  overwrite: true,
-  errorOnExist: false,
-  filter: (src) => !this.fileOps.shouldIgnore(src),  // reuse FileOps.shouldIgnore
-});
-// Track every file written for manifest
-for (const f of await this.fileOps.getFileList(skillDir)) {
-  installedFilesCallback(path.join(skillDir, f));
+### 4.2 `gm-discuss-story` → `gm-create-story` → `gm-dev-story` Data Flow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ gm-discuss-story  (NEW in v1.3)                                 │
+│   - User manually invokes to surface gray areas                 │
+│   - Emits: {planning_artifacts}/{{story_key}}-context.md        │
+│   - Suggested structure: 5-file mirror of gm-create-story:      │
+│     SKILL.md, workflow.md, template.md, checklist.md,           │
+│     discover-inputs.md                                          │
+└────────────────────────┬────────────────────────────────────────┘
+                         │ writes context file
+                         ▼
+          {planning_artifacts}/{{story_key}}-context.md
+                         │
+                         │ auto-detected on next run
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ gm-create-story  (MODIFIED in v1.3)                             │
+│   - New auto-detect in discover-inputs.md OR Step 2             │
+│     (workflow.md:211-247)                                        │
+│   - If file exists: load into {story_context} variable          │
+│   - Feed into Step 5 template rendering as extra context        │
+└────────────────────────┬────────────────────────────────────────┘
+                         │ writes story with embedded context
+                         ▼
+       {implementation_artifacts}/{{story_key}}.md
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ gm-dev-story  (UNCHANGED in v1.3 by default)                    │
+│   - Reads story's Dev Notes section for context                 │
+│   - Context is already baked into story file by create-story    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 4.3 `gm-discuss-story` Structural Match
+
+`gm-create-story/` contents (existing v1.2):
+```
+SKILL.md           267 bytes — entrypoint (frontmatter + "Follow ./workflow.md")
+workflow.md        19937 bytes — step definitions with <workflow> XML
+template.md        948 bytes — story file template
+checklist.md       14349 bytes — validation checklist
+discover-inputs.md 3911 bytes — input-pattern resolution protocol
+```
+
+v1.3 `gm-discuss-story/` should mirror this — same 5 files, same `<workflow>` XML idiom. Integration is **additive** — drops a new skill directory under `4-implementation/`. No installer code change required (ManifestGenerator.collectSkills recursive walk picks up any new SKILL.md-bearing directory automatically — `manifest-generator.js:181-272`).
+
+### 4.4 `gm-create-story` Context-Load Patch
+
+Two possible insertion points:
+
+**Option A — Insert into `discover-inputs.md` (preferred)**: Add a new entry to the Input Files table concept — a "context" pattern with `SELECTIVE_LOAD` strategy that resolves `{{story_key}}` template variable. Uses the existing `SELECTIVE_LOAD` machinery (`discover-inputs.md:32-39`). Smallest code diff.
+
+**Option B — Insert into `workflow.md` Step 2**: After `workflow.md:215` (`<action>Read fully and follow ./discover-inputs.md to load all input files</action>`), add:
+```xml
+<action>Check if {planning_artifacts}/{{story_key}}-context.md exists</action>
+<check if="context file exists">
+  <action>Load file content into {story_context}</action>
+  <note>Incorporate {story_context} into Dev Notes + Architecture sections</note>
+</check>
+```
+
+Option A is more idiomatic to the existing discover-inputs protocol; Option B is more surgical and keeps discover-inputs generic. Recommend **Option A** for consistency.
+
+### 4.5 `gm-domain-skill` — Call Shape & Integration Points
+
+**Nature**: A skill with retrieval protocol — grep-based search over `<installRoot>/_config/kb/**/*.md`.
+
+**Invocation question — called from where?**
+
+Three candidates:
+1. **`gm-create-story`** calls it when loading context (augments Dev Notes with domain-specific patterns)
+2. **`gm-dev-story`** calls it when implementing tasks (just-in-time lookup for domain patterns)
+3. **Both** — gated by user skill level or explicit opt-in
+
+Evidence favoring **#2 (gm-dev-story)**: dev-story already loads project_context at `workflow.md:35, 177` and extracts developer guidance. A domain-KB lookup naturally fits alongside project_context loading. Just-in-time retrieval is also cheaper than baking all domain content into every story file.
+
+Evidence favoring **#1 (gm-create-story)**: story-authoring is where Dev Notes are written; retrieving domain patterns upfront and embedding them in story output means dev-story consumers get it "for free" without invoking the KB skill.
+
+Evidence favoring **#3**: symmetric coverage, but risks content duplication and race conditions (KB changes between story-creation and story-dev).
+
+**Recommend #1** (call from `gm-create-story`) based on the "pre-bake context into story file" pattern that v1.2 already established with `project-context.md`. This means:
+- `gm-create-story/workflow.md` Step 3 (architecture analysis) adds a substep invoking `gm-domain-skill` with the story's domain tags
+- `gm-domain-skill` greps `<installRoot>/_config/kb/` for matching content and returns top-N snippets
+- Snippets are embedded in the story's Dev Notes under a new "Domain Guidance" section
+
+Caller-side integration: `gm-create-story/workflow.md` needs a new `<action>` block; no manifest changes (new skill-as-sibling discovery is automatic).
+
+### 4.6 `src/domain-kb/` Install Pipeline
+
+**Current state**: `/Users/rockie/Documents/GitHub/xgent/gomad/src/domain-kb/` **exists as an empty directory**. v1.3 will populate it with 2 seed packs.
+
+**Install pipeline** — needs new code:
+
+- `src/domain-kb/` is **not** a module (no `module.yaml`, no `SKILL.md`). The existing `ManifestGenerator.scanInstalledModules()` (`manifest-generator.js:811-837`) requires `agents/` subdir or `SKILL.md` for a directory to count as a module. So automatic discovery will NOT pick this up.
+- Need a new copy step analogous to `officialModules.install()` but for a KB tree. Options:
+  1. **Extend official-modules**: treat `domain-kb` as a pseudo-module that installs to `_gomad/_config/kb/` instead of `_gomad/<module>/`. Requires touching `tools/installer/modules/official-modules.js` (not read, but name inferred from installer.js:5).
+  2. **Dedicated step in `installer.js`**: add `_installDomainKb(paths)` between `_installAndConfigure` and `_setupIdes`, copies `src/domain-kb/*` → `_gomad/_config/kb/*`, tracks via `this.installedFiles.add()` so manifest pass captures the files under `install_root='_gomad'`.
+  3. **Symlink in source tree**: impossible — the tarball publishes actual files, not symlinks. `package.json files: ["src/"]` covers `src/domain-kb/` automatically once populated.
+
+**Recommend Option 2** (dedicated installer step). Simplest, most explicit, doesn't overload the "module" concept.
+
+**Manifest tracking**: because every path added via `this.installedFiles.add()` is processed by `writeFilesManifest` (`manifest-generator.js:691-763`), each KB file lands in `files-manifest.csv` with correct `install_root=_gomad` and a SHA-256 hash. Cleanup planner handles add/remove/modify over successive installs automatically — the v1 → v2 path-rewrite invariant is already baked in.
+
+**Cross-reference with §2.3**: the semantic collision question is specific to `_config/agents/`. `_config/kb/` is a greenfield path; no collision. Scope this `_config/kb/` addition to `install-paths.js:22-34` the same way `agentsDir` is defined — adds to the auto-created directory set.
+
+### 4.7 Story-Creation Workstream Build Order
+
+1. **Add `_config/kb/` to InstallPaths** (`install-paths.js:22-34`) — one-line add; creates directory on every install, zero-risk additive.
+2. **Populate `src/domain-kb/`** with 2 seed packs (directories with `.md` files; structure TBD but simple).
+3. **Add `_installDomainKb()` step** to `installer.js` — copies `src/domain-kb/*` → `<gomadDir>/_config/kb/*`, adds each path to `this.installedFiles`. Insert BEFORE the first `ManifestGenerator.generateManifests()` call (`installer.js:324`) so KB files land in files-manifest.csv on first pass.
+4. **Write `gm-discuss-story/`** with 5-file mirror structure. Additive; no installer diff.
+5. **Write `gm-domain-skill/`** with SKILL.md + workflow.md defining the grep-retrieve protocol. Additive; no installer diff.
+6. **Patch `gm-create-story/discover-inputs.md`** (Option A from §4.4) to auto-load `{{story_key}}-context.md`. Additive.
+7. **Patch `gm-create-story/workflow.md`** Step 3 to call `gm-domain-skill`. Additive.
+
+Steps 4-7 can run in parallel with step 1-3 (installer changes don't depend on skill content and vice versa).
+
+---
+
+## 5. Integration Map — Plugin Marketplace Restructure
+
+### 5.1 Current `marketplace.json` (v1.2, still says `bmad-*` — this is the ONE file the v1.1 rename missed)
+
+```json
+{
+  "name": "bmad-method",                        ← WRONG: should be "gomad"
+  "owner": { "name": "Brian (BMad) Madison" },  ← WRONG: should be xgent-ai
+  "plugins": [
+    { "name": "bmad-pro-skills", "skills": [core-skills × 11] },
+    { "name": "bmad-method-lifecycle", "skills": [bmm-skills × ~27] }
+  ]
 }
 ```
 
-The `installedFilesCallback` is the existing `(filePath) => this.installedFiles.add(filePath)` that `official-modules.install` already uses. The IDE installer currently does NOT hook into this (symlinks don't need tracking — the source dir under `_gomad/` is already tracked). With copy, we MUST track.
+All 38 skill paths use `bmad-*` prefix and `bmm-skills/` directory name — both renamed in v1.1 to `gm-*` and `gomad-skills/`. **File is entirely stale.**
 
-**Point 2 — Add a "manifest-driven cleanup" step before `_installAndConfigure`.** New private method on `Installer`:
+### 5.2 Proposed v1.3 Layout — 3 Plugin Groups
 
-```js
-async _cleanStaleInstalledFiles(paths, existingInstall, updateState) {
-  if (!existingInstall.installed) return;
-  const oldEntries = await this.readFilesManifest(paths.gomadDir);
+Per PROJECT.md: "restructure of plugin groupings to match v1.2 layout (gm-agent-* launchers / gomad-skills workflow / core-skills)".
 
-  // Skip anything the user touched (already backed up in updateState)
-  const customSet = new Set(updateState.customFiles);
-  const modifiedSet = new Set(updateState.modifiedFiles.map(m => m.path));
-
-  for (const entry of oldEntries) {
-    const abs = path.isAbsolute(entry.path)
-      ? entry.path
-      : path.join(paths.gomadDir, entry.path);
-    if (customSet.has(abs) || modifiedSet.has(abs)) continue;
-    if (await fs.pathExists(abs)) {
-      await fs.remove(abs);
+```json
+{
+  "name": "gomad",
+  "owner": { "name": "xgent-ai / Rockie Guo" },
+  "license": "MIT",
+  "homepage": "https://gomad.xgent.ai",
+  "repository": "https://github.com/xgent-ai/gomad",
+  "keywords": ["gomad", "agile", "ai", ...],
+  "plugins": [
+    {
+      "name": "gomad-agents",
+      "description": "8 canonical agent personas (gm:agent-*) as slash-command launchers",
+      "skills": [
+        "./src/gomad-skills/1-analysis/gm-agent-analyst",
+        "./src/gomad-skills/1-analysis/gm-agent-tech-writer",
+        "./src/gomad-skills/2-plan-workflows/gm-agent-pm",
+        "./src/gomad-skills/2-plan-workflows/gm-agent-ux-designer",
+        "./src/gomad-skills/3-solutioning/gm-agent-architect",
+        "./src/gomad-skills/4-implementation/gm-agent-sm",
+        "./src/gomad-skills/4-implementation/gm-agent-dev",
+        "./src/gomad-skills/4-implementation/gm-agent-solo-dev"
+      ]
+    },
+    {
+      "name": "gomad-workflow",
+      "description": "Four-phase lifecycle workflow skills (analysis → plan → solutioning → implementation)",
+      "skills": [ /* all non-agent skills under src/gomad-skills/* */ ]
+    },
+    {
+      "name": "gomad-core",
+      "description": "Shared infrastructure skills (brainstorming, distillator, reviews, ...)",
+      "skills": [ /* all skills under src/core-skills/* */ ]
     }
-  }
-
-  // ALSO clean IDE targets that the old manifest tracked.
-  // Problem: files-manifest.csv today records paths relative to gomadDir,
-  // which won't cover .claude/commands/gm/*.md or .{ide}/skills/*.
-  // Fix: extend the manifest schema (or add a sibling CSV) to record
-  // absolute-or-project-relative paths for IDE-target files too.
+  ]
 }
 ```
 
-This is invoked right after `_prepareUpdateState`, before `_installAndConfigure`. Position matters: backup first (to preserve user work), clean second (to sweep stale product files), install third (to write fresh product files).
+### 5.3 Path Question — Source or Generated?
 
-**Point 3 — Extend `installedFiles` Set to include IDE-target writes.** Today `this.installedFiles` (populated by `official-modules.install()` callback) only contains paths under `_gomad/`. For v1.2 we must also add:
-- Every file copied into `.{ide}/skills/<dir>/` (from revised `installVerbatimSkills`).
-- Every generated slash-command stub at `.claude/commands/gm/agent-*.md`.
+**Source**. `marketplace.json` paths point at `./src/gomad-skills/*` source directories, not at installed launcher stubs at `.claude/commands/gm/agent-*.md`. This is Claude Code plugin marketplace semantics — the client reads source directories and handles its own installation on the user end. Launchers at `.claude/commands/gm/*` are a GoMad-internal install target, not a marketplace artifact.
 
-**Schema decision for `files-manifest.csv`:** Today path column stores paths *relative to `_gomad/`* (e.g., `gomad/2-plan-workflows/gm-create-prd/SKILL.md`). For IDE-target paths we need a representation that can escape `_gomad/`. Cleanest: change `path` to be relative to **project root** (so `_gomad/...`, `.claude/commands/gm/agent-pm.md`, `.cursor/skills/gm-agent-pm/` are all first-class). Migration: on first v1.2 install against a v1.1-manifest layout, the cleanup step may no-op (paths don't resolve), which is acceptable — user can re-install cleanly. On v1.2→v1.2 upgrades, cleanup works correctly.
+**Corroboration**: the v1.2 `marketplace.json` points at `./src/bmm-skills/*/bmad-agent-*/` source dirs, not at install targets. Same pattern applies.
 
-### Failure modes the roadmap must plan for
+### 5.4 Test Coverage for Marketplace Validity
 
-| Failure | Manifestation | Mitigation |
-|---|---|---|
-| Partial install | Installer crashes after writing half the files, before writing the new manifest | Write manifest last (already the case); rerun cleans stale partial files on next install |
-| Manifest schema drift (v1.1 → v1.2) | Old `files-manifest.csv` uses `_gomad/`-relative paths; new code expects project-root-relative | Sniff format on read (check if any path starts with `.claude/`, `.cursor/`, etc. — if not, treat as v1.1 format and prepend `_gomad/`) |
-| User deletes `_gomad/_config/files-manifest.csv` but leaves installed files | Cleanup can't run; next install appears fresh but stale files remain | Acceptable: matches current v1.1 behavior. Document in README. |
-| User moves project dir; symlinks-era install has broken symlinks | Pre-v1.2 installs will appear broken on `git clone <workspace>` | This is exactly what v1.2 solves. For users on v1.1 → v1.2 upgrade path, first `gomad install` after upgrade detects broken symlinks and replaces with copies. **Confirm during implementation**: does `fs.pathExists` return true for a broken symlink? (Likely no on most platforms — plan a sweep that force-removes the skill target before copying.) |
-| IDE cleanup deletes user customizations in `.claude/commands/gm/` | Files not in old manifest but under the managed target_dir get swept | Apply existing custom/modified-file detection at the IDE target level too, not just `_gomad/` |
+**Current state**: `grep -rln "marketplace.json" test/ tools/` returns **nothing**. Zero test coverage.
 
-## Reference Sweep — Scope and Mechanics
+**v1.3 gaps**:
+- No JSON schema validation
+- No assertion that every `./src/*/` path in the `skills` array resolves to a real directory
+- No assertion that marketplace path list matches the 8 agents at `AgentCommandGenerator.AGENT_SOURCES`
+- No tarball check that marketplace.json ships (currently `package.json files: ["src/", "tools/installer/", ...]` does NOT include `.claude-plugin/` — **marketplace.json is NOT shipped in the npm tarball**; users get it via `git clone` or from the GitHub repo, consistent with Claude Code plugin distribution)
 
-Grep of the working tree shows **54 occurrences of literal `gm-agent-` across 21 files.** Categorization:
+**Proposed test** (name suggestion: `test/test-marketplace-contract.js`, wired into `npm run quality`):
+1. Parse `.claude-plugin/marketplace.json`
+2. Validate required top-level keys: `name`, `owner`, `plugins`, `homepage`, `license`
+3. For every skill path: assert `fs.pathExists('./' + <path>)` and `fs.pathExists('./' + <path> + '/SKILL.md')`
+4. Cross-reference the `gomad-agents` plugin's skills with `AgentCommandGenerator.AGENT_SOURCES` — each `src.dir` in AGENT_SOURCES must appear in the skills array, and vice versa
+5. Validate no leftover `bmad-*` or `bmm-skills/` string tokens (anti-residual assertion consistent with v1.1 rename verification)
 
-### Category A: Must rename to `gm:agent-*` (user-facing command form)
+### 5.5 Marketplace Workstream Build Order
 
-These are places where a human/agent reads "talk to the PM" and should see the invocation form `/gm:agent-pm`:
+1. **Rewrite `marketplace.json`** — full content replacement (38 paths update, top-level rename, plugin regroup). Single-PR atomic change.
+2. **Write test** (§5.4) — pin the contract in CI so future skill additions/removals can't silently drift.
+3. **Wire into `npm run quality`** — add `node test/test-marketplace-contract.js` to the existing quality pipeline (`package.json:56`).
 
-| File | Count | Context |
-|---|---|---|
-| `src/gomad-skills/module-help.csv` | 5 | `skill` column: rows for `gm-agent-tech-writer` capabilities (WD, US, MG, VD, EC). These drive `gomad-help.csv` output. When a user runs `/gm:help` they should see invokable command strings. |
-| `src/gomad-skills/4-implementation/gm-sprint-agent/workflow.md` | 4 | Hand-off prose ("delegate to `gm-agent-dev`...") — should read as `/gm:agent-dev`. |
-| `src/gomad-skills/4-implementation/gm-epic-demo-story/SKILL.md` | 1 | Same pattern. |
-| `src/gomad-skills/**/gm-agent-*/SKILL.md` Capabilities tables | 7 (one per agent) | **KEEP as `gm-*` for the skill column** (these reference *skills* the agent invokes, which are still filesystem dirs like `gm-create-prd`). The *agent's own name* at the top of SKILL.md is already `gm-agent-pm` in the `name:` field — see Category C. |
-
-### Category B: Must NOT rename (filesystem/manifest references)
-
-| File | Count | Context | Why keep |
-|---|---|---|---|
-| `src/gomad-skills/**/gm-agent-*/skill-manifest.yaml` | 7 | `name: gm-agent-pm` field | `manifest-generator.js:parseSkillMd` validates `skillMeta.name === dirName`. Directory is still `gm-agent-pm/` on disk. The slash-command form lives in the *generated stub's* frontmatter, not here. |
-| `src/gomad-skills/**/gm-agent-*/SKILL.md` frontmatter `name:` | 7 | Same constraint | Same reason. |
-| `tools/validate-skills.js` | 2 | Validator probably hard-codes the pattern for the 7 agent dirs | Check but likely keep (it enforces the filesystem layout). |
-
-### Category C: Generated-stub output (net-new)
-
-The sweep itself doesn't touch these, but the new stubs will contain the `gm:agent-*` string. Install-target output:
-- `.claude/commands/gm/agent-analyst.md`
-- `.claude/commands/gm/agent-tech-writer.md`
-- `.claude/commands/gm/agent-pm.md`
-- `.claude/commands/gm/agent-ux-designer.md`
-- `.claude/commands/gm/agent-architect.md`
-- `.claude/commands/gm/agent-sm.md`
-- `.claude/commands/gm/agent-dev.md`
-
-Each carries `name: gm:agent-{role}` in frontmatter.
-
-### Category D: Docs / planning — judgment calls
-
-| File | Count | Recommendation |
-|---|---|---|
-| `.planning/PROJECT.md` | 5 | Keep as-is (historical: describes the migration in *past* / *active* form). |
-| `.planning/quick/260416-j8h-*/…` | 21 across 2 files | Keep as-is (historical quick-task artifact). |
-| `.planning/codebase/CONCERNS.md` | 1 | Review in context; likely update if it's forward-looking. |
-| `docs/reference/commands.md` | 1 | **Update to `gm:agent-*`.** This is user-facing docs. |
-| `docs/how-to/upgrade-to-v6.md`, `docs/zh-cn/how-to/upgrade-to-v6.md` | 2 | Review: if these docs are BMAD-legacy instructions, maybe delete. If they show user commands, update. |
-| `docs/zh-cn/explanation/why-solutioning-matters.md` | 2 | User-facing explanation — update. |
-| `tools/docs/native-skills-migration-checklist.md` | 2 | Internal doc — update if still live, otherwise remove. |
-
-### Sweep mechanics (v1.1 lineage)
-
-The v1.1 rename sweep used `test/test-rename-sweep.js` as the regression gate. For v1.2, either:
-- **Extend `test-rename-sweep.js`** to also assert no prose `gm-agent-` in user-facing docs / module-help / workflow.md (but still allow it in skill-manifest.yaml / SKILL.md frontmatter / filesystem dirs). This gives a hard failure on drift.
-- **Add `test/test-agent-command-refs.js`** as a new file focused only on the agent→command migration. Probably cleaner — v1.1's test can remain a "no bmad residual" test.
-
-## PRD + Product-Brief Content Architecture
-
-### gm-create-prd structure
-
-```
-src/gomad-skills/2-plan-workflows/gm-create-prd/
-├── SKILL.md                    # 6 lines: frontmatter + "Follow ./workflow.md"
-├── skill-manifest.yaml         # manifest for IDE install
-├── workflow.md                 # Workflow architecture + step-file loading rules + activation
-├── templates/
-│   └── prd-template.md         # Final PRD document template
-└── steps-c/                    # 12 step files (just-in-time loaded one at a time)
-    ├── step-01-init.md              # Init + project discovery
-    ├── step-01b-continue.md         # Continue existing PRD flow
-    ├── step-02-discovery.md         # Project classification
-    ├── step-02b-vision.md           # ★ "Why now?" + vision — HUMAN-FOUNDER VOICE
-    ├── step-02c-executive-summary.md # ★ Exec summary — HUMAN-STAKEHOLDER VOICE
-    ├── step-03-success.md           # ★ Success metrics — BIZ/OPERATIONAL METRICS
-    ├── step-04-journeys.md          # User journeys
-    ├── step-05-domain.md            # Domain context
-    ├── step-06-innovation.md        # What's innovative
-    ├── step-07-project-type.md      # Project type
-    ├── step-08-scoping.md           # Scope definition
-    ├── step-09-functional.md        # Functional requirements
-    ├── step-10-nonfunctional.md     # ★ Non-functional — likely TIME-WINDOW / BIZ mixed in
-    ├── step-11-polish.md            # Polish pass
-    └── step-12-complete.md          # Completion
-```
-
-**v1.2 surgery targets (★):**
-
-- `step-02b-vision.md` — lines 76-79 ask verbatim "Why is this the right time to build this?" Drop this prompt entirely. Keep future-state + problem-framing. Add "aggressive vision + MVP scope" framing: the goal of this step is to have the *coding agent* capture the product ambition, not to stress-test business timing.
-- `step-02c-executive-summary.md` — rewrite exec-summary template to be a *dev-ready spec summary*, not a human-stakeholder pitch.
-- `step-03-success.md` — drop ARR/CAC/LTV/DAU/retention-style metrics. Replace with feature-completion, acceptance-criteria-met, and functional-success signals that a coding agent can verify.
-- `step-10-nonfunctional.md` — audit for business SLAs that don't translate to code; keep only technical NFRs (perf, scale, security, accessibility).
-- `templates/prd-template.md` — align final document shape with revised steps.
-
-### gm-product-brief structure
-
-```
-src/gomad-skills/1-analysis/gm-product-brief/
-├── SKILL.md                    # 117 lines — Stage 1 (Understand Intent) lives here
-├── manifest.json               # small manifest
-├── prompts/
-│   ├── contextual-discovery.md    # Stage 2 — subagent fan-out
-│   ├── guided-elicitation.md      # Stage 3 — ★ asks questions potentially human-framed
-│   ├── draft-and-review.md        # Stage 4
-│   └── finalize.md                # Stage 5
-├── resources/
-│   └── brief-template.md       # ★ Functional-first but still has "What Makes This Different"
-└── agents/                     # Four subagents fanned out in Stage 2
-    ├── artifact-analyzer.md
-    ├── opportunity-reviewer.md
-    ├── skeptic-reviewer.md
-    └── web-researcher.md
-```
-
-**v1.2 surgery targets (★):**
-
-- The product-brief is **already closer to v1.2 intent than the PRD.** SKILL.md lines 14-18 explicitly declare biz/commercial metrics out of scope, and lines 102-104 say "do not probe for business/commercial metrics — only record what the user volunteers." **This is correct; don't break it.**
-- `guided-elicitation.md` — audit: if there are elicitation questions that target founder mindset (competitive positioning, GTM, pricing curiosity), prune. Keep questions that surface *functional* intent.
-- `resources/brief-template.md` — tune the "What Makes This Different" section: currently says "1-2 short paragraphs. The functional angle…" which is fine. But amplify: "Aggressive vision: state the full ambition in 1-2 sentences. Deliberately distinguish from MVP scope below."
-- SKILL.md lines 75-80 "Brief type detection" is good. Add an explicit "coding-agent consumer" lens: the brief's ultimate reader is a coding agent that will produce a PRD, not a human VP of Product.
-
-**Key content-architecture insight for the roadmap:** gm-product-brief is a *lighter* edit than gm-create-prd (fewer files, already-closer-to-target scope discipline). If the milestone risks falling behind, prioritize gm-create-prd first — it's where the bigger wins are.
-
-## Build Order — Dependency Graph
-
-```
-             ┌──────────────────────────────────────┐
-             │ F0. Source-of-truth decision         │
-             │    (document in PROJECT.md:          │
-             │     "generated stubs, not moved")    │
-             └──────────────┬───────────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-        ▼                   ▼                   ▼
-  ┌──────────┐      ┌───────────────┐    ┌──────────────┐
-  │ F1. Copy │      │ F3. Slash-cmd │    │ F5a. PRD     │
-  │   -only  │      │   generation  │    │   content    │
-  │ _config- │      │   (revive     │    │   surgery    │
-  │ driven   │      │    agent-cmd- │    │              │
-  │    .js   │      │    generator) │    │ F5b. Brief   │
-  └─────┬────┘      └───────┬───────┘    │   content    │
-        │                   │            │   surgery    │
-        ▼                   ▼            └──────────────┘
-  ┌───────────────────────────────┐       (fully parallel,
-  │ F2. Extend files-manifest     │        no deps on F1-F4)
-  │   schema (project-root paths) │
-  │   + installedFiles-Set plumb  │
-  └──────────────┬────────────────┘
-                 │
-                 ▼
-  ┌───────────────────────────────┐
-  │ F4. Upgrade cleanup           │
-  │   (_cleanStaleInstalledFiles) │
-  │   — reads F2 manifest,        │
-  │     deletes stale paths       │
-  └──────────────┬────────────────┘
-                 │
-                 ▼
-  ┌───────────────────────────────┐
-  │ F6. Reference sweep           │
-  │   (docs/module-help/workflow  │
-  │    .md) + test-agent-command- │
-  │    refs.js regression gate    │
-  └──────────────┬────────────────┘
-                 │
-                 ▼
-  ┌───────────────────────────────┐
-  │ F7. Verification              │
-  │   — fresh install             │
-  │   — upgrade install (v1.1 →)  │
-  │   — upgrade install (v1.2 →)  │
-  │   — tarball structural check  │
-  │   — E2E `/gm:agent-pm` works  │
-  │     in Claude Code            │
-  └───────────────────────────────┘
-```
-
-### Why this order
-
-- **F0 first** because it's 30 minutes of doc work and it unblocks F1+F3 from arguing about layout. Must be written into PROJECT.md Key Decisions before anyone writes code.
-- **F1 before F4.** Copy-only must land before manifest cleanup because the cleanup logic assumes copies (symlinks don't need cleanup — removing a symlink doesn't unroot the source). Also: F1's new tracking feeds F2.
-- **F2 between F1 and F4.** Schema extension (project-root paths) is the contract F4 relies on. Must land before F4's cleanup logic can target IDE-side paths.
-- **F3 parallel to F1.** Slash-command generation uses already-dead `agent-command-generator.js` + dead `agent-command-template.md`. Revives them, points at `.claude/commands/gm/`. Doesn't touch `_config-driven.js`. Can be built in parallel with F1 by a different worker, integrated together.
-- **F4 after F1+F2+F3.** All three produce outputs that must be tracked in the manifest; cleanup logic needs to know about all three output shapes.
-- **F5a/F5b fully parallel to F1-F4.** PRD + product-brief content surgery is pure-prose work in `src/gomad-skills/.../*.md`. Zero installer code involved. Could be done week 1 by a content-focused pass, merged cleanly regardless of installer work status.
-- **F6 after F1-F5.** Reference sweep runs last because the *rename targets* depend on decisions made in F1-F5 (e.g., if F3 decides the slash form is `/gm:agent-pm`, the sweep knows what to replace to). Doing F6 first risks churn.
-- **F7 last.** Verification gates the milestone.
-
-### Build-order risk flags for the roadmapper
-
-1. **F4's v1.1→v1.2 migration path.** The old `files-manifest.csv` has `_gomad/`-relative paths. Decide: (a) schema sniff + dual-parse or (b) force users to uninstall first. Option (a) is more polite; option (b) is simpler. Document the decision in F2.
-2. **F3's dead-code revival is deceptively scoped.** `agent-command-generator.js` has 180 lines of logic for three naming formats (dash / colon / underscore). Most of it is irrelevant to the new mission. Aggressively delete rather than preserve — do not let legacy format-detection logic leak into v1.2 code.
-3. **F5a surgery is the highest-content-risk item.** 12 step files, interdependent through the "stepsCompleted" frontmatter flow. Plan for a full read-through pass + a single-editor coherence pass (don't split step-02b and step-02c across two workers — they share the vision-to-summary handoff).
-4. **F6's test gate is load-bearing.** Without a regression test, the sweep drifts back in later PRs. Build the test early (can be F6a before the bulk edits) so sweep PRs have a gate.
-
-## Scaling Considerations
-
-Not applicable at v1.2. This is a CLI installer + skill source tree, not a server. The only "scale" question is **number of managed IDE targets** (currently 24 in `platform-codes.yaml`). All v1.2 changes are additive to the IDE pipeline, so scale is bounded by that existing matrix — adding v1.2 features to one IDE (Claude Code for slash commands, all 24 for copy-only) doesn't introduce N×M complexity.
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern 1: "Move the gm-agent-* dirs to a new src/gomad-commands/ location"
-
-**What this would look like:** `mv src/gomad-skills/2-plan-workflows/gm-agent-pm src/gomad-commands/pm`. Then update the installer to treat `gomad-commands/` as a sibling module root.
-
-**Why it's wrong:**
-- Breaks skill installation into the 23 non-Claude-Code IDEs that have no commands concept.
-- Loses the phase-based organization (which *workflow phase* each agent belongs to).
-- Doubles the source-of-truth surface: PM exists as both a skill and a command, users can't tell which is authoritative.
-- Forces parallel maintenance: a persona fix has to be applied in two trees.
-
-**Do this instead:** Keep skill dirs as single source of truth. Generate slash-command stubs at install time from the same YAML metadata.
-
-### Anti-Pattern 2: "Just delete symlinks and recreate as copies — the manifest already works"
-
-**What this would look like:** Change the one `fs.ensureSymlink` to `fs.copy` and ship.
-
-**Why it's wrong:**
-- The existing `files-manifest.csv` does NOT track IDE-target paths. It tracks `_gomad/...` paths only. If you copy into `.{ide}/skills/` but don't track those copies in the manifest, you've lost the cleanup primitive at the exact moment you needed it — copies pile up forever.
-- `detectCustomFiles()` flags any unknown file as "custom" and backs it up. If IDE-target copies aren't in the manifest, every one of them gets flagged as custom on re-install, causing N backup/restore cycles.
-
-**Do this instead:** Copy + track (extend `installedFiles` Set to include IDE targets) + clean (F4 uses the extended manifest).
-
-### Anti-Pattern 3: "Rename everything that matches /gm-agent-/"
-
-**What this would look like:** `sed -i '' 's/gm-agent-/gm:agent-/g'` across the tree.
-
-**Why it's wrong:**
-- Breaks filesystem dir references. `src/gomad-skills/.../gm-agent-pm/` is still a directory named `gm-agent-pm` on disk; `manifest-generator.js:parseSkillMd` validates that `skillMeta.name === dirName`.
-- Breaks YAML: `skill-manifest.yaml`'s `name: gm-agent-pm` is a filesystem contract.
-- Creates a split-personality sweep halfway through when someone realizes the renames must be reverted in half the files.
-
-**Do this instead:** Category-driven sweep (see "Reference Sweep" above). The literal string has three distinct meanings — rename by meaning, not by regex.
-
-### Anti-Pattern 4: "The product-brief is already done — ship what's there"
-
-**What this would look like:** Close the PRD gap in gm-create-prd and declare gm-product-brief untouched.
-
-**Why it's wrong:**
-- Brief has "Success Signals (qualitative)" and "What Makes This Different" sections still phrased for a human reader. A coding agent reading these will produce derivative content in the same voice.
-- Brief's SKILL.md line 87 suggests "Buyer vs User" for B2B — this is human-sales thinking.
-
-**Do this instead:** Light pass on brief template wording + guided-elicitation questions. Even if the structural scope discipline is correct, the voice needs to match PRD v1.2's voice so the downstream PRD stage stays consistent.
-
-## Integration Points
-
-### Internal boundaries
-
-| Boundary | Today's communication | v1.2 change |
-|---|---|---|
-| `src/gomad-skills/` ↔ `manifest-generator.js` | Generator walks the tree, reads SKILL.md frontmatter + skill-manifest.yaml, writes 4 manifests to `_gomad/_config/` | No change. Agent dirs are already discovered correctly. |
-| `installer.js` ↔ `ide/*.js` per-IDE handlers | `ideManager.setup(ide, projectRoot, gomadDir, { selectedModules })` called per IDE | Extend the handler contract: accept a `installedFilesCallback` (mirror of what `official-modules.install` already gets) so IDE-target writes can be tracked. |
-| `installer.js` ↔ `files-manifest.csv` | `readFilesManifest`, `detectCustomFiles` (read); `manifest-generator.writeFilesManifest` (write) | Add `_cleanStaleInstalledFiles` between read and write. |
-| `agent-command-generator.js` ↔ `ide/_config-driven.js` | Currently no wiring — generator is dead code | Add a wire from `_config-driven.js:setup()` (Claude Code branch only) that calls the generator to produce stubs into `.claude/commands/gm/`. |
-
-### External services
-
-None. Everything is local filesystem. No network calls at install time (there's a best-effort `npm view @xgent-ai/gomad@latest version` check in `gomad-cli.js:21-53` but it's purely informational).
-
-## Sources
-
-### Primary (verified from working tree)
-
-- `/Users/rockie/Documents/GitHub/xgent/gomad/.planning/PROJECT.md` — v1.2 milestone scope (lines 3-17, 42-45)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/gomad-cli.js` — CLI entry (lines 79-103 command registration)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/installer.js` — main install flow (lines 34-103), update prep (lines 460-491), file detection (lines 602-766)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/manifest-generator.js` — manifest write (lines 66-124, 587-647)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/_config-driven.js` — THE symlink call (line 171), install loop (lines 136-189)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/agent-command-generator.js` — dead launcher generator (ready for revival)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/artifacts.js` — dead-code inventory in header comments (lines 12-34)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/templates/agent-command-template.md` — dead stub template (ready for revival)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/path-utils.js` — dash-naming conventions (authoritative reference for how v1.1 formatted things)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/2-plan-workflows/gm-agent-pm/SKILL.md` + `skill-manifest.yaml` — representative agent persona (2 files, no sub-dirs)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/2-plan-workflows/gm-create-prd/steps-c/*.md` — 12-step file architecture with ★-marked surgery targets
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/1-analysis/gm-product-brief/SKILL.md` + subdirs — lighter-surgery content (scope discipline already in place)
-- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/module-help.csv` — 5 occurrences of `gm-agent-tech-writer` capability rows
-- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/platform-codes.yaml` — 24-IDE target_dir matrix
-- `/Users/rockie/Documents/GitHub/xgent/gomad/.claude/commands/gsd/new-milestone.md` frontmatter — in-repo proof that `name: <ns>:<cmd>` is how Claude Code slash-namespacing works in practice
-- Grep output on working tree: 54 occurrences of `gm-agent-` across 21 files
-
-### Secondary (external, verified 2026-04-18)
-
-- [Claude Code Slash Commands (current docs)](https://code.claude.com/docs/en/slash-commands) — custom commands merged into skills; `.claude/commands/` legacy but still works; `name:` frontmatter determines invocation form
-- [anthropics/claude-code#2422](https://github.com/anthropics/claude-code/issues/2422) — historical bug on subdirectory auto-namespacing in `.claude/commands/` (closed "not planned"). Explains why the `name:` frontmatter approach is the reliable path.
+This workstream is **fully independent** of agent relocation, docs, and story-creation. Can run in parallel. Only soft dependency: if the agent relocation changes the 8 AGENT_SOURCES directory layout (which the milestone does NOT — agent skill source paths stay at `src/gomad-skills/*/gm-agent-*/`), marketplace would need to match. Since relocation only changes installed-output paths, not source-tree paths, marketplace is decoupled.
 
 ---
 
-*Architecture research for: v1.2 agent-to-slash-command migration, copy-only installer with manifest-tracked cleanup, PRD + brief content refinement*
-*Researched: 2026-04-18*
+## 6. Recommended Phase Plan — Build Order
+
+Phases 10+ (continuing v1.2's Phase 9 baseline):
+
+### Phase 10 — Marketplace refresh (standalone, safe-first)
+- Rewrite `.claude-plugin/marketplace.json` with v1.3 groupings
+- Add `test/test-marketplace-contract.js` + quality wire-up
+- **Why first**: zero runtime risk, pure config file; validates that the other workstreams don't break the contract
+
+### Phase 11 — Docs content authoring (can run parallel with Phase 10)
+- Author 4 new doc pages under `docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/`
+- Update sidebar labels if needed in `astro.config.mjs`
+- Verify `npm run docs:build` passes
+- Reconcile PROJECT.md "Out of Scope" entry re: GitHub Pages deploy (already deploying)
+
+### Phase 12 — Story-creation additive surface (parallel with Phase 10/11)
+- Add `_config/kb/` to InstallPaths
+- Add `_installDomainKb()` step to installer.js
+- Write `gm-discuss-story/` skill (5 files)
+- Write `gm-domain-skill/` skill (grep protocol)
+- Populate `src/domain-kb/` with 2 seed packs
+- Patch `gm-create-story/discover-inputs.md` for context auto-load
+- Patch `gm-create-story/workflow.md` Step 3 for gm-domain-skill call
+- Test via install-smoke: assert `_config/kb/*.md` files exist, manifest tracks them, re-install preserves user-modified KB files (existing custom-file detection already handles this for `.md` under `_config/` via `installer.js:886-908`)
+
+### Phase 13 — Agent dir relocation (LAST — highest risk, exclusive lock)
+Must run after Phase 12 lands `_config/kb/` because that phase exercises the `_config/` subdirectory install pattern without persona-file collision risk.
+
+Sub-steps (strict order):
+1. **Decide semantic collision resolution** (§2.3): pick Option 1 vs 2 vs 3.
+2. **Update `agent-command-generator.js:71`** — new write path.
+3. **Update `agent-command-template.md:16`** — new pointer path (match step 2).
+4. **Fix the `newInstallSet` derivation bug** (§2.4 step 5) — choose (a) derive from current install or (b) add relocation-specific cleanup branch.
+5. **Run full install-smoke**:
+   - Fresh install → assert persona files at new path; no `.md` files at `_gomad/gomad/agents/`
+   - v1.2 → v1.3 upgrade → assert old files snapshotted in `_backups/`, removed from `gomad/agents/`, written to new path
+   - Idempotent re-install → no new backup, no change
+6. **Update docs** (`docs/reference/agents.md` from Phase 11) with new path
+7. **Update all internal refs** — `tools/installer/core/installer.js:295` comment, `agent-command-generator.js:60` JSDoc, any test fixtures
+
+### Why This Order
+
+- **Phase 10 first**: validates contract + provides automated regression coverage for changes in later phases that touch skill paths
+- **Phase 11 parallel**: independent content work, can be authored by a different agent
+- **Phase 12 before 13**: exercises `_config/` subdir install pattern on a greenfield path (kb/) before the collision-prone path (agents/)
+- **Phase 13 last**: relocation is the riskiest change (runtime pointer, cleanup planner interaction, custom-file detection semantics). Land it with the largest safety net.
+
+---
+
+## 7. Anti-Patterns (Project-Specific)
+
+### Anti-Pattern 1: Dropping persona files into `_config/agents/` without resolving the `.customize.yaml` collision
+
+**What people might do**: naive change of `path.join(..., 'gomad', 'agents')` to `path.join(..., '_config', 'agents')` at `agent-command-generator.js:71` + matching template change.
+**Why it's wrong**: `installer.js:886-908` classifies `.md` files under `_config/agents/` via a custom-file detector that predates this relocation. On re-install, the detector either (a) flags regenerated persona files as "user custom" (backup + preserve logic kicks in) or (b) silently skips them in cleanup (orphan risk). Also `manifest.yaml.agentCustomizations[...]` hashing machinery will misbehave if the persona files now share the namespace.
+**Do this instead**: pick one of Options 1/2/3 from §2.3 and land the reconciliation in the same PR as the path change.
+
+### Anti-Pattern 2: Trusting `newInstallSet` as "new install paths"
+
+**What people might do**: reading `installer.js:520-543` and assuming `newInstallSet` represents the v1.3 install's target paths.
+**Why it's wrong**: `newInstallSet` is derived from the PRIOR manifest, filtered to entries that still exist on disk — i.e., it's "paths we'd preserve from the old install". It has nothing to do with what the new install is about to write. A relocation that changes output paths won't trigger old-path cleanup automatically.
+**Do this instead**: either (a) construct `newInstallSet` from the running install's planned output list, or (b) add a relocation-specific arm to `buildCleanupPlan` analogous to the `isV11Legacy` branch.
+
+### Anti-Pattern 3: Assuming `src/domain-kb/` is a module
+
+**What people might do**: dropping content into `src/domain-kb/` and expecting `ManifestGenerator.scanInstalledModules()` to discover it.
+**Why it's wrong**: that scanner requires `agents/` subdir or a `SKILL.md` to classify a directory as a module (`manifest-generator.js:811-837`). KB content lacks both. Zero discovery happens.
+**Do this instead**: add an explicit `_installDomainKb()` step to `installer.js` that copies + tracks files; rely on the v2 manifest pipeline to record them.
+
+### Anti-Pattern 4: Auto-generating docs from skill manifests in v1.3
+
+**What people might do**: build a `tools/generate-skill-docs.mjs` that scans `src/**/skill-manifest.yaml` and produces `docs/reference/skills/*.md`.
+**Why it's wrong**: out of v1.3 scope per PROJECT.md Active requirements; adds a maintenance surface that must keep up with skill-manifest schema evolution; current docs are Diataxis-organized, not per-skill reference. Auto-gen breaks the structure.
+**Do this instead**: write curated prose content under `docs/reference/` by hand for v1.3. If later milestones want auto-gen, scope it as its own initiative.
+
+### Anti-Pattern 5: Treating `marketplace.json` paths as install targets
+
+**What people might do**: writing paths like `./.claude/commands/gm/agent-analyst.md` in `marketplace.json.plugins[].skills[]`.
+**Why it's wrong**: Claude Code's plugin marketplace ingests source SKILL.md directories, not launcher stubs or flattened install outputs. The current file (even in the stale BMAD form) already points at source trees (`./src/bmm-skills/*/bmad-agent-*/`). Swapping in launcher paths breaks marketplace semantics and ships zero skill content.
+**Do this instead**: point marketplace paths at `./src/gomad-skills/*/gm-agent-*/` source dirs containing `SKILL.md` + `skill-manifest.yaml`.
+
+---
+
+## 8. Data Flow — Install-Time Path Composition
+
+```
+INSTALL TIME
+────────────
+src/gomad-skills/4-implementation/gm-agent-dev/
+  ├── SKILL.md  (frontmatter: name: gm-agent-dev, description: ...)
+  │     body ... (persona activation text)
+  └── skill-manifest.yaml  (displayName: Developer, title: "Developer",
+                            icon: "⚙️", capabilities: "...")
+
+                            │
+                            │ AgentCommandGenerator.extractPersonas()
+                            │ (runs in installer.js:300)
+                            │
+                            ▼ strip SKILL.md frontmatter,
+                              prepend full skill-manifest as new frontmatter
+                            │
+                            ▼
+v1.2: _gomad/gomad/agents/dev.md       ← target changes in v1.3
+v1.3: _gomad/_config/agents/dev.md     (or _config/agents/personas/dev.md per §2.3)
+
+                            │
+                            │ writeAgentLaunchers() uses template
+                            │
+                            ▼
+.claude/commands/gm/agent-dev.md       (template substitutes {{shortName}}=dev)
+  frontmatter: name: 'gm:agent-dev'
+  body: "LOAD the FULL agent file from
+         {project-root}/_gomad/<RELOCATION-PATH>/dev.md"
+                            │
+                            │ every file-write calls this.installedFiles.add(path)
+                            │
+                            ▼
+ManifestGenerator.generateManifests() reads this.installedFiles
+                            │
+                            ▼
+_gomad/_config/files-manifest.csv  (v2: path + install_root + hash + schema_version)
+
+RUNTIME (User types /gm:agent-dev in Claude Code)
+─────────────────────────────────────────────────
+Claude Code reads .claude/commands/gm/agent-dev.md
+  ├─ parses YAML frontmatter (name, description)
+  ├─ reads instruction block
+  └─ executes "LOAD the FULL agent file from <path>"
+                            │
+                            ▼ literal path substitution (no programmatic lookup)
+                            │
+                            ▼
+loads file at _gomad/<path>/dev.md and embodies persona
+```
+
+**Critical invariant**: the path in `agent-command-template.md:16` MUST match the path in `agent-command-generator.js:71` (and the semantic resolution chosen in §2.3). These are the two sides of a literal string — if they drift, every `/gm:agent-*` invocation fails silently with "file not found" at the Claude Code side.
+
+---
+
+## 9. Sources (all HIGH confidence — direct file inspection)
+
+- `/Users/rockie/Documents/GitHub/xgent/gomad/.planning/PROJECT.md` — milestone scope, constraints, v1.2 shipped state
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/installer.js` — install orchestration, prepareUpdateState, _setupIdes, newInstallSet derivation at lines 520-543
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/install-paths.js:22` — `_config/agents/` pre-existing directory creation
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/manifest-generator.js` — skill/agent collection, v2 manifest write
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/core/cleanup-planner.js` — pure plan builder, LEGACY_AGENT_SHORT_NAMES=AGENT_SOURCES
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/agent-command-generator.js` — AGENT_SOURCES (8 agents), extractPersonas, writeAgentLaunchers
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/path-utils.js` — GOMAD_FOLDER_NAME='_gomad', dead toDashPath agent branch
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/shared/artifacts.js` — dead code with self-documenting TODO
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/templates/agent-command-template.md:16` — runtime pointer literal
+- `/Users/rockie/Documents/GitHub/xgent/gomad/tools/installer/ide/platform-codes.yaml` — target_dir / launcher_target_dir per IDE
+- `/Users/rockie/Documents/GitHub/xgent/gomad/.claude-plugin/marketplace.json` — stale BMAD-era plugin metadata
+- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/4-implementation/gm-create-story/{SKILL.md,workflow.md,discover-inputs.md,template.md}` — story-creation skill structure, `{planning_artifacts}`/`{{story_key}}` resolution
+- `/Users/rockie/Documents/GitHub/xgent/gomad/src/gomad-skills/4-implementation/gm-dev-story/workflow.md` — downstream consumer, project_context loading pattern
+- `/Users/rockie/Documents/GitHub/xgent/gomad/src/domain-kb/` — verified empty (no seed packs yet)
+- `/Users/rockie/Documents/GitHub/xgent/gomad/website/{astro.config.mjs,README.md,src/lib/site-url.mjs}` — Starlight config, symlink arch, SITE_URL cascade
+- `/Users/rockie/Documents/GitHub/xgent/gomad/.github/workflows/docs.yaml` — Pages deploy via `actions/deploy-pages@v4`
+- `/Users/rockie/Documents/GitHub/xgent/gomad/CNAME` — contents `gomad.xgent.ai`
+- `/Users/rockie/Documents/GitHub/xgent/gomad/package.json` — deps, scripts, quality gate wiring
+
+---
+
+*Architecture research for: GoMad v1.3 (Marketplace refresh + Docs + Agent relocation + Story context)*
+*Researched: 2026-04-24*

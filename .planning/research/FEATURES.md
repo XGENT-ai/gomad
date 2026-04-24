@@ -1,331 +1,559 @@
-# Feature Research
+# Feature Research — GoMad v1.3
 
-**Domain:** AI coding-agent tooling — slash-command distribution, installer portability, coding-agent-oriented planning artifacts
-**Researched:** 2026-04-18
-**Confidence:** HIGH (four features are each concrete refactors against an existing codebase; target UX for each is well-documented in Claude Code / upstream BMAD / npm tooling ecosystems)
+**Domain:** AI agent framework — plugin marketplace + docs site + config relocation + story-context enhancements
+**Researched:** 2026-04-24
+**Confidence:** HIGH (official Claude Code marketplace schema confirmed from docs; reference knowledge-pack implementations inspected directly; discuss-phase workflow read in full)
 
-## Scope
-
-This document covers v1.2 target features for `@xgent-ai/gomad`:
-
-1. **Agent → slash-command migration** — 7 `gm-agent-*` personas become `.claude/commands/gm/agent-*.md`, invoked as `/gm:agent-*`.
-2. **Reference sweep** — replace every `gm-agent-*` reference with `gm:agent-*` across source / docs / tests / manifests.
-3. **Copy-only installer + files-manifest.csv** — symlink mode removed; installer writes `_gomad/_config/files-manifest.csv`; re-install cleans files from prior manifest before writing new ones.
-4. **PRD / product-brief refinement for coding agents** — drop human-founder framing; amplify aggressive vision + MVP scope; sharpen dev-ready requirements.
-
-Each section identifies table stakes, differentiators, anti-features, and dependencies on existing gomad artifacts.
+This is a v1.3 subsequent-milestone research document. Table stakes / differentiators / anti-features are scoped ONLY to the four v1.3 workstreams. Existing shipped v1.2 features (7 `gm-agent-*` launchers, 15 implementation skills, PRD chain, copy-only installer with manifest v2) are NOT re-catalogued — see prior `.planning/research/FEATURES.md` git history or the Validated block in PROJECT.md.
 
 ---
 
-## Feature 1 — Agent-as-Slash-Command
+## Workstream 1 — Plugin Marketplace Refresh
 
-### Table Stakes (Users Expect These)
+**Artifact:** `.claude-plugin/marketplace.json`
+**Current state (HIGH confidence — file read):** Still carries pre-fork BMAD identity — `name: "bmad-method"`, `owner: Brian (BMad) Madison`, two plugins (`bmad-pro-skills`, `bmad-method-lifecycle`), all skill paths reference `bmm-skills/bmad-*`. Everything is stale w.r.t. v1.2 layout.
 
-| Feature | Why Expected | Complexity | Notes |
-|---|---|---|---|
-| File path `.claude/commands/gm/agent-*.md` produces invocation `/gm:agent-*` | Claude Code convention: subdirectory name becomes command namespace separated by colon. Exactly how Anthropic docs and every community command pack (wshobson/commands, Claude-Command-Suite, aj-geddes/claude-code-bmad-skills) structure namespaced commands. | LOW | Already validated by existing `AgentCommandGenerator.writeAgentLaunchers` which does `path.join(baseCommandsDir, artifact.module, 'agents', ...)` — we just need the directory layout `gm/agent-<role>.md` instead of `gomad/agents/<role>.md` and matching filenames. |
-| YAML frontmatter with `description` | Surfaces in `/help` and in the slash-command picker when the user types `/`. Without it, users can't tell commands apart. | LOW | Existing `agent-command-template.md` already emits `description`. Keep one-line descriptions (<100 chars) — full long text gets truncated in the 1,536-char picker budget. |
-| Flat file (no arguments, no bash execution) for persona activation | Agent personas are stateful sessions, not one-shot commands. Users expect `/gm:agent-analyst` to *become Mary*, not to take args or run `!git status`. | LOW | Current template is already argument-free and just embeds the agent-activation block. Do NOT add `argument-hint` or `$ARGUMENTS` to agent launchers — that's a different primitive (task commands). |
-| Command picker shows both `/gm:agent-analyst` and its description | Discovery UX — a user types `/gm:` and sees all seven personas with one-line roles. | LOW | Derive from `skill-manifest.yaml` `displayName` + `title` (e.g. "Mary — Business Analyst") rather than generic "analyst agent". Fits the 100-char description soft budget. |
-| `gm/` namespace prefix on every command | Prevents collision with user's own commands and other installed tools' commands (gsd, custom internal packs). | LOW | One directory nesting level under `.claude/commands/`. |
-| Deterministic file names: kebab-case, no suffixes, no versioning in filename | Matches Anthropic docs and every production command pack. Filenames become command names — `/gm:agent-analyst`, not `/gm:agent-analyst-v1`. | LOW | Rename map: `gm-agent-analyst` → `gm/agent-analyst.md`, `gm-agent-tech-writer` → `gm/agent-tech-writer.md`, etc. |
-| Uninstall removes the `.claude/commands/gm/` directory cleanly | Re-running `gomad install` or uninstalling should not leave orphan slash commands that error on invocation. | LOW | Ties into Feature 3 (files-manifest.csv). |
-
-### Differentiators (Competitive Advantage)
-
-| Feature | Value Proposition | Complexity | Notes |
-|---|---|---|---|
-| Persona identity embedded in launcher description: "Mary — Strategic Business Analyst" | Users recognize the persona name in the picker, not just a functional label. Builds mental model before invocation. | LOW | Pull from `skill-manifest.yaml` (`displayName`, `title`, `icon`). |
-| Agent file loaded on-activation via `{project-root}/_gomad/gomad/agents/...` reference | Decouples command launcher (lightweight, in `.claude/commands/`) from persona definition (full content, in `_gomad/`). Single source of truth; rebranding edits one file. | LOW | Already how `agent-command-template.md` works — keep it. Don't inline the whole persona in the launcher. |
-| One-line capability summary in description (e.g. "market research, competitive analysis, requirements elicitation") | Helps the model match user intent to the right persona when the user says "I need help with competitive analysis." | LOW | Pull from `skill-manifest.yaml` `capabilities` field. |
-
-### Anti-Features (Commonly Requested, Often Problematic)
-
-| Feature | Why Requested | Why Problematic | Alternative |
-|---|---|---|---|
-| Argument passing on agent launchers (`/gm:agent-analyst <topic>`) | "It would be nice to seed the session with a topic." | Personas are conversational. Arguments make the first turn stilted and break the agent's greeting/menu pattern. Upstream BMAD deliberately does NOT pass args to agent launchers. | User invokes `/gm:agent-analyst` → Mary greets → user describes topic naturally. |
-| Nesting launchers deeper than one level (`.claude/commands/gm/agents/analyst.md` → `/gm:agents:analyst`) | "More organization." | Three-segment slash commands are harder to type and inconsistent with ecosystem (Anthropic examples, wshobson/commands, Claude-Command-Suite all use 1-2 segments). Also breaks older Claude Code compatibility (issue bmad-code-org/BMAD-METHOD#773 — discovery in nested dirs was flaky). | Single `gm/` directory; put `agent-` prefix in the filename itself. |
-| Model override (`model: opus` / `model: haiku`) in frontmatter for agent launchers | "Let tech-writer use cheaper model." | Agent personas run full conversations; locking them to Haiku degrades quality unpredictably. User's global model config should win unless there's a measured reason. | Don't set `model`; let the user's session model flow through. |
-| `allowed-tools` restrictions on launcher frontmatter | "Scope down what each persona can do." | Personas need the full tool surface for their phase (Dev needs Write/Edit/Bash; Architect needs Read/Grep/WebSearch). Restricting creates puzzling "why can't Mary read this file?" failures. | Trust the persona's instructions to self-scope; don't enforce at the tool layer. |
-| Keeping BOTH `gm-agent-*` skills AND `/gm:agent-*` commands (dual surface) | "Backward compat." | Doubles the maintenance surface. Users on v1.1 won't auto-upgrade anyway (they'd re-run `gomad install`). Clean break is cheaper than a year of "which do I use?" questions. | Hard cut. Retain the skill file as the loaded persona body (referenced by `{project-root}/_gomad/gomad/agents/...`); remove it from `skill-manifest.yaml` discovery as a standalone skill. |
-| Inlining the full persona body into the launcher file | "One file to edit." | Violates single source of truth; the launcher is for Claude Code discovery, the persona definition is the skill content. Any update requires editing both. | Keep launcher minimal (template); persona stays in `src/gomad-skills/*/gm-agent-*/SKILL.md`. |
-
-### Real-World Precedent
-
-- **Upstream BMAD v6.3.0** (April 2026) has already migrated from `workflow.yaml` to native Claude Code `SKILL.md` format. The ecosystem is coalescing around native slash commands + skills, away from custom launcher formats.
-- **aj-geddes/claude-code-bmad-skills**, **PabloLION/bmad-plugin**, **24601/BMAD-AT-CLAUDE** — all three BMAD-for-Claude-Code ports use `.claude/commands/<namespace>/<name>.md` → `/<namespace>:<name>` exactly as proposed here.
-- **qdhenry/Claude-Command-Suite**, **wshobson/commands** — community packs standardize on one-level namespace (`/dev:code-review`, `/security:security-audit`).
-
----
-
-## Feature 2 — Reference Sweep (`gm-agent-*` → `gm:agent-*`)
+**Authoritative schema source:** `https://code.claude.com/docs/en/plugin-marketplaces` (HIGH confidence — read in full). Required fields are `name`, `owner`, `plugins[]`; per-plugin required are `name` + `source`. Optional per-plugin: `description`, `version`, `author`, `homepage`, `repository`, `license`, `keywords`, `category`, `tags`, `strict`, `skills`, `commands`, `agents`, `hooks`, `mcpServers`, `lspServers`. Top-level optional: `metadata.description`, `metadata.version`, `metadata.pluginRoot`, `allowCrossMarketplaceDependenciesOn`.
 
 ### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
-|---|---|---|---|
-| Every mention in `src/gomad-skills/*/SKILL.md`, `src/core-skills/*/SKILL.md` updated | Skills reference each other ("invoke `gm-agent-pm`"). Dangling refs break workflows. | LOW | Affects the capabilities tables in every agent SKILL.md and cross-references in task skills. ~17 files per grep. |
-| `module-help.csv` entries updated | The `gm-help` skill reads this catalog; a stale entry surfaces "run `gm-agent-analyst`" to users who no longer have that skill. | LOW | `src/gomad-skills/module-help.csv` and `src/core-skills/module-help.csv`. |
-| README.md, README_CN.md, `docs/`, website content updated | External-facing surface; stale instructions mislead new users. | LOW | "Use `/gm:agent-analyst` to talk to Mary" replaces "Invoke `gm-agent-analyst` skill." |
-| Test fixtures (`tests/`) reflecting new invocation format | CI fails on stale fixtures. | LOW | Likely thin — installer tests mostly check file layout, not invocation strings. |
-| Installer output templates (completion messages, next-steps prompts) updated | User-facing "you're ready; run `gm-agent-pm`" message points to the new command form. | LOW | `tools/installer/install-messages.yaml`. |
+|---------|--------------|------------|-------|
+| Marketplace identity matches package identity | `name: "bmad-method"` actively lies about who ships this. Users discover via `/plugin install <plugin>@bmad-method` when the package on npm is `@xgent-ai/gomad`. | LOW | Set `name: "gomad"`; `owner.name: "xgent-ai"`; `owner.email` optional. |
+| All plugin entries use current `gm-*` / `gomad-skills/` paths | Current file points at `bmm-skills/bmad-*/` — paths don't exist in v1.2 source tree. Full rename sweep. | LOW | Source tree confirmed: `src/gomad-skills/{1..4}/gm-*/`, `src/core-skills/gm-*/`. Agent skills have moved across phase dirs (`gm-agent-analyst` in 1, `gm-agent-pm`/`gm-agent-ux-designer` in 2, `gm-agent-architect` in 3, `gm-agent-dev`/`gm-agent-sm`/`gm-agent-solo-dev` in 4). |
+| Per-plugin `description` field | Users see this in `/plugin list` output and `/plugin marketplace` UI. Missing or copy-pasted = poor discoverability. | LOW | One sentence per plugin group: what it does, who it's for. |
+| Per-plugin `version` field pinned | Schema note: if `version` is absent AND `plugin.json` is absent, Claude Code falls back to git commit SHA, meaning every commit to main counts as a new release. For a published npm package with explicit release cadence, this is wrong. Pin to `1.3.0`. | LOW | Match `package.json` version. Bump in lockstep with npm publish. |
+| Per-plugin `author` + `license` | Legal/credit hygiene — same rationale that drove the canonical non-affiliation disclaimer (per v1.1 Key Decisions). `license: "MIT"` explicit (matches LICENSE file). | LOW | `author.name: "Rockie Guo"`, `author.email: "rockie@kitmi.com.au"` matches `package.json`. |
+| `kebab-case` plugin names | Claude Code marketplace validator warns on non-kebab-case; Claude.ai marketplace sync outright rejects them. | LOW | Already the convention — just verify during rename. |
+| `skills` path arrays resolve to existing dirs with `SKILL.md` | A stale path means the plugin loads broken. Schema requires: each path must contain `<name>/SKILL.md`. | LOW | Paths verified against filesystem. Add to `test:tarball` assertions. |
 
 ### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
-|---|---|---|---|
-| Migration note in CHANGELOG explaining the rename with before/after examples | Anyone upgrading from v1.1 needs one place that tells them `gm-agent-pm` is now `/gm:agent-pm`. | LOW | Single section in CHANGELOG.md. |
-| Runtime deprecation path: if a skill SKILL.md references `gm-agent-*`, emit a one-time warning linking to the new form | Safety net for any reference we miss. | MEDIUM | Optional; grep-driven sweep should catch everything statically. Skip unless sweep is incomplete. |
+|---------|-------------------|------------|-------|
+| Three-plugin group structure: `gm-agent-launchers` / `gomad-skills` / `gomad-core` | Maps cleanly onto v1.2's commit-form layout (`.claude/commands/gm/agent-*.md` vs `src/gomad-skills/` vs `src/core-skills/`). Users can install ONLY the launchers if that's all they need (e.g., embedding GoMad agents in a non-bmm workflow). | LOW-MED | This is the v1.3 structural win over current 2-plugin layout (`bmad-pro-skills` + `bmad-method-lifecycle`) — separating launchers gives users an à la carte entry point. |
+| `metadata.description` + `metadata.version` on the marketplace itself | Shows up in `/plugin marketplace list` — the thing users see first. `metadata.version` aligns marketplace catalog version with package version for release-channel parity. | LOW | Currently absent. Trivial add with real value. |
+| `keywords` / `tags` / `category` on each plugin entry | Feeds Claude.ai marketplace search + `/plugin` TUI filtering. `category: "development"` for launchers, `"productivity"` for gomad-skills, `"core"` for gomad-core is the natural slicing. | LOW | Not required, but keyword-indexing is how marketplaces become discoverable at scale. |
+| `homepage: "https://gomad.xgent.ai"` and `repository` filled | Points users straight at the docs site (W2 of this milestone) — self-reinforcing discovery loop. | LOW | Currently `homepage` points at BMAD's repo. |
+| CI assertion that manifest paths resolve to real dirs | Prevents the current-state failure mode (paths point at nonexistent `bmm-skills/bmad-*/`). Integrate into `test:tarball` (already extended with v1.2 presence/absence assertions). | MED | One Node script walks `plugins[].skills[]` and stat-s each path. Zero new deps. |
+| `strict: true` explicit per plugin | Default, but explicit-is-better-than-implicit defends against accidental `plugin.json` conflicts if any group grows its own manifest later. | LOW | One-line field. |
 
 ### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
-|---|---|---|---|
-| Automated `sed` sweep across entire `src/` | "Fast." | Catches false positives in code comments, documentation examples, legacy strings. Silent corruption risk. | Manual grep + targeted Edit. ~17 files — hand-verifiable. |
-| Leaving BMAD fork references (`.bmad`, `bmm-`, `bmad-`) in stale comments untouched | "Not in scope." | Confuses future contributors ("wait, do we still support bmad?"). Gomad is a hard fork — residual refs are technical debt. | Sweep these at the same time; it's one pass. |
-| Updating `skill-manifest.yaml` `name` field from `gm-agent-analyst` → `gm:agent-analyst` | "Name should match command." | Colons in skill names break filesystem conventions (colon is path separator on Windows; reserved in URLs). The command surface is `gm:agent-analyst`, but the *skill file* stays `gm-agent-analyst` for filesystem safety. | Command name (user-visible) uses colon. File/skill internal name (filesystem) uses dash. They are different identifiers. |
+|---------|---------------|-----------------|-------------|
+| Monolithic single-plugin listing all ~38 skills + 7 agents | "Simpler" — one install command gets everything. | Users can't install partial scope. Upgrading one plugin re-installs everything. Claude.ai marketplace UX shows a single ~500-line skill list that's impossible to scan. Echoes the BMAD monolith we just escaped. | Keep the 3-group split. |
+| Groups sliced by workflow phase (`1-analysis` / `2-plan` / `3-solutioning` / `4-implementation`) | Mirrors source-tree layout, feels "natural". | (a) Agents live across multiple phase dirs (`gm-agent-analyst` in 1, `gm-agent-pm` in 2, `gm-agent-architect` in 3), so phase grouping scatters them. (b) Phase grouping implies users pick phases à la carte — they don't; bmm is an end-to-end workflow. | Group by **role in v1.2 architecture**: launchers (entry points), bmm workflow skills (the workflow), core skills (shared primitives). |
+| Groups sliced by audience ("analyst-plugin" / "pm-plugin" / "dev-plugin") | Maps to user persona. | Overlap: `gm-code-review` serves both dev and reviewer audiences. Audience slicing creates duplicate skill entries across plugins. | Keep technical grouping; user picks their own entry agent via `/gm:agent-*`. |
+| Plugin dependencies declaring "gomad-skills requires gomad-core" | Prevents users from installing broken configurations. | Cross-plugin dependencies introduce semver-range management overhead (see `/en/plugin-dependencies` — `{plugin-name}--v{version}` git-tag convention). For three in-house plugins shipping from one npm package, overkill. | Document in homepage docs that all three are meant to be installed together. Defer real dependency metadata until/if any group ships standalone. |
+| Listing each skill as its own top-level plugin | Claude Code allows it; gives users granular control. | ~38+ plugin entries destroys the marketplace UI. `/plugin marketplace` becomes unreadable. Also means version bumps ripple across 38 entries per release. | Three-group split is the right granularity for this repo size. |
+| Populating `hooks` or `mcpServers` in marketplace entries for v1.3 | Unlocks PostToolUse validators etc. (see schema Advanced plugin entries example). | Zero hooks/MCP shipped in v1.2. Adding them in the marketplace manifest without source implementation is dead metadata that will drift. | Omit. Add if/when hook infrastructure ships. |
 
 ---
 
-## Feature 3 — Copy-Only Installer + Files-Manifest Tracking
+## Workstream 2 — GitHub Pages Docs Site (`gomad.xgent.ai`)
+
+**Constraint from PROJECT.md:** "GitHub Pages deployment — CNAME set to `gomad.xgent.ai`; actual deploy deferred until project stabilizes." v1.3 scope: **initial content**, manually deployed. No CI auto-deploy. Current site is an Astro under-construction one-pager.
+
+**Reference:** BMAD's own docs site (`docs.bmad-method.org`) uses Diátaxis IA (Tutorial / How-To / Explanation / Reference) — applicable shape for GoMad.
 
 ### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
-|---|---|---|---|
-| Copy-only mode (no symlinks) | npm's own default is copy (Issue npm/npm#12515 and symlink-or-copy package document that symlinks break on git clone, tarball archives, cross-platform sync, and read-only filesystems). Installed output must survive `git clone` of the target repo to another workstation. | LOW | Grep installer for `fs.symlink`, `fs.link`, `fs-extra.ensureSymlink`, `.lnk` — remove. Current code (`installer.js`) already uses `fs.copy`; verify no symlink path in custom-modules or IDE handlers. |
-| `_gomad/_config/files-manifest.csv` enumerating every written path | Every CMake install (`install_manifest.txt`), dotnet SDK uninstaller, dpkg `.list`, Homebrew `INSTALL_RECEIPT.json`, ML4W dotfiles, pip `RECORD` — all modern installers track what they wrote to enable clean uninstall. Without this, re-install leaves orphan files and upgrades accumulate cruft. | MEDIUM | Schema: one row per file. Columns: `path`, `hash` (sha256), `module`, `artifact_type` (skill/agent/command/config), `install_date`. Existing `this.installedFiles` Set in `Installer` class is the staging ground — currently passed to `ManifestGenerator.generateManifests` but manifest.js writes only module-level yaml, not per-file CSV. |
-| Re-install / upgrade cleans files listed in prior manifest before writing new ones | Without this, renamed files (e.g. `gm-agent-*` skills → `gm/agent-*.md` commands) accumulate. User ends up with stale v1.1 `.claude/skills/gm-agent-*/` AND new v1.2 `.claude/commands/gm/agent-*.md`. | MEDIUM | Algorithm: (1) Read existing `files-manifest.csv`; (2) Collect target file set for new install; (3) Diff — `to_delete = prior - new`; (4) Delete stale files, rmdir empty parents up to `.claude/` boundary; (5) Write new files; (6) Write new `files-manifest.csv`. |
-| Never delete files outside the gomad-managed set | Destroying the user's hand-edited `.claude/commands/<other-thing>.md` is catastrophic. | MEDIUM | The manifest is the allowlist of what `gomad` owns. Everything else is off-limits. Existing `_restoreUserFiles` logic already distinguishes "custom" from "installed" files — this extends it. |
-| Hash (sha256) per file in manifest | Enables detection of user-modified managed files on re-install (like `rpm --verify` or `.bak` preservation). | LOW | Existing code backs up modified files as `.bak` — keep that behavior. Hash lets us detect modification without needing to re-read on every install. |
-| Fresh install writes manifest (no prior to read) | First-time install must establish the manifest so subsequent upgrades can clean. | LOW | Null-object pattern: missing `files-manifest.csv` → `prior = []`, no cleanup, just write. |
-| Cross-platform path handling (Windows backslash vs POSIX forward-slash) | Manifest on a Windows machine must be readable on macOS if the repo is committed. | LOW | Store POSIX-form paths in CSV; convert at read/write boundaries. Existing `agent-command-generator.js` already does `replaceAll('\\', '/')`. |
+|---------|--------------|------------|-------|
+| Install page | First thing any user needs. Must cover: `npm install -g @xgent-ai/gomad`, running `gomad install`, `<installRoot>` choice, the v1.2→v1.3 upgrade note (`_config/agents/` relocation). | LOW | Single page. Markdown, copy-paste-able shell blocks. |
+| Quick Start page | Two-minute path from empty project to first `/gm:agent-analyst` invocation. Users give up on frameworks that don't deliver a "hello world" in the first 2 minutes. | LOW-MED | Links: install → run one command → see one agent respond. |
+| Agents Reference (one entry per `gm:agent-*`) | 7 launcher-form slash commands each need: what the agent does, which phase it belongs to, what skills it wraps, typical invocation context. | MED | 7 pages or one long page. Must match launcher-form naming (`/gm:agent-*`, NOT `gm-agent-*`). |
+| Skills Reference (grouped by phase) | Currently ~38 skills across `1-analysis` → `4-implementation` + `core-skills`. Reference must answer "what does this do, when do I call it directly vs. via agent". | MED | One page per phase with a table; OR one page per skill. Phase-grouped table is lighter-weight and v1.3-appropriate. |
+| Architecture page | Explains the "why" — launcher-form contract, persona-body runtime loading, manifest-driven installer, `_config/` relocation. Distills `.planning/ARCHITECTURE.md` for public consumption. | MED | Covers D-06 launcher contract, manifest v2, upgrade/recovery. |
+| Contributing page | For external contributors: repo layout, how to add a skill, `skill-manifest.yaml` schema, zero-new-deps policy. | MED | Mirrors the v1.1 BMAD-upstream-contribution path we explicitly rejected, but for GoMad. |
+| GitHub Pages deploy mechanics (manual) | CNAME record already points at `gomad.xgent.ai`. v1.3 delivers the content; human runs the deploy. | LOW | Plain `main`-branch + `/docs` folder + Pages enabled. No actions, no build step in v1.3. |
+| Bilingual parity (en + zh-cn) | Already established in v1.1 (`docs/` default + `zh-cn/`). Continuation rather than new policy. | MED | Mirror every page in `/zh-cn/`. |
 
 ### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
-|---|---|---|---|
-| `gomad install --dry-run` prints what would be written / deleted | Every modern installer supports this (dotnet uninstaller, rclone, ansible, apt, pip, astral-sh/uv issue #14194). Prevents "oh no I didn't want that" moments. | MEDIUM | Plumbs a `dryRun` flag through installer; skip `fs.writeFile`/`fs.remove` calls when set; log the intended operation. |
-| Install summary shows counts: "42 files written, 3 files removed, 2 files preserved as .bak" | Confidence-building; matches Homebrew / npm summary style. | LOW | Already partially present (`renderInstallSummary`); extend with file-level numbers. |
-| Backup stale files to `_gomad/_backups/<timestamp>/` instead of deleting | Safety hedge for first few v1.2 installs. Users can recover if we mis-computed the diff. | MEDIUM | Extra disk use. Worth it for one or two releases, then can be removed. |
-| Manifest version field (`schema_version: 1`) | Future-proofs against schema changes. | LOW | Trivial; add a header row or sidecar field. |
+|---------|-------------------|------------|-------|
+| Skills Reference generated from `skill-manifest.yaml` | Single source of truth. Prevents the "docs drifted from code" failure mode common in AI agent framework docs. `skill-manifest.yaml` already carries `name`, `description`, `keywords`, inputs — all the metadata a reference entry needs. | MED-HIGH | Small Node script parsing all `src/**/skill-manifest.yaml` → markdown. v1.3 can ship this as a one-shot script (manual `npm run docs:skills` before manual deploy). No CI in v1.3. |
+| Launcher stub examples inlined in Agents Reference | Shows users what the `.claude/commands/gm/agent-*.md` launcher body looks like (or at least the persona body at `_gomad/_config/agents/*.md` per W3). Demystifies the "how does `/gm:agent-*` actually work" question. | LOW | One code fence per agent. Copy-paste from source. |
+| Downloadable `.md` source per page | Agents read the docs. GitHub-Pages-by-default is HTML-only; shipping raw `.md` alongside means `gm-*` skills can cite the docs at `https://gomad.xgent.ai/skills/gm-create-story.md`. | LOW | GitHub Pages serves `.md` as text/plain by default if extension is preserved. |
+| Prominent "fork of BMAD" disclaimer on landing + every Reference page header | Continues the canonical non-affiliation posture. A docs site that hides its upstream is worse than one that doesn't exist. | LOW | One-line header include, reusing the canonical disclaimer. |
+| Version selector in nav | Indicates actively maintained docs vs. legacy. | HIGH | **Anti-feature for v1.3.** Plain flat docs; defer until v1.4+ when multiple active versions exist on npm. |
+| Anchor links for every FR-NN requirement (once sufficiently stable) | Lets PRD authors cite `gomad.xgent.ai/spec#FR-12` directly from their PRDs. | MED | Stretch for v1.3. Safer to ship reference-only first. |
 
 ### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
-|---|---|---|---|
-| Interactive "are you sure?" prompt on every file deletion during upgrade | "Safety." | 320+ files per install; user would mash Enter 320 times. They opted into upgrade by running the command. | Single pre-flight summary + one confirmation, or `--yes` to skip. Existing `-y/--yes` flag. |
-| Tracking every file the user touches in `.claude/commands/` (including user-owned) | "Helps on uninstall." | Gomad has no business tracking files it didn't write. Manifest must be scoped strictly to gomad-written paths. | Manifest tracks only paths written by `this.installedFiles.add(...)`. |
-| Keeping symlink mode behind a `--symlink` flag for "dev mode" | "Faster iteration for contributors." | Splits behavior across two install modes → bug reports that only reproduce in one mode. Contributor dev loop should use `npm link` globally, not a special install flag. | Single mode (copy). Contributors use `npm link @xgent-ai/gomad` + `gomad install` from a workspace. |
-| Content-addressable store (hash-named files in `_gomad/.store/` with symlinks into `.claude/`) | "pnpm does it." | pnpm can because it controls node_modules top-to-bottom. Our install surface is multiple IDEs (Claude Code, Cursor, Codex, etc.) — adding a store indirection explodes complexity. | Plain copy, manifest, diff-based cleanup. |
-| Deleting files only listed in previous `manifest.yaml` (the module-level manifest) | "Reuse what we have." | Current manifest only tracks module IDs — not individual file paths. Insufficient granularity; wouldn't detect renamed files. | New `files-manifest.csv` explicitly for per-file tracking. |
-| Git-based diff/clean (using `.gitignore` patterns to identify managed paths) | "Leverage git." | Target workspace may not be a git repo; managed paths may overlap with user-added entries to `.gitignore`. | File-list manifest is explicit and self-contained. |
-| Storing manifest as JSON | "JSON is standard." | CSV is human-readable line-by-line, diffable in git, append-appendable. Manifest has no nesting. JSON adds ceremony without benefit. | CSV (already what PROJECT.md calls for). |
-
-### Real-World Precedent
-
-- **CMake** — `install_manifest.txt` is a newline-delimited path list. Uninstall reads it, deletes each.
-- **pip** — `RECORD` file in `.dist-info/` is CSV: `path,hash,size`. Identical shape to what we need.
-- **dpkg** — `/var/lib/dpkg/info/<pkg>.list` is newline-delimited paths.
-- **Homebrew** — `INSTALL_RECEIPT.json` under Cellar tracks version + paths; `brew cleanup` removes prior versions.
-- **mise / asdf** — per-plugin shim tracking; upgrades rebuild shims (`asdf reshim`) to handle version-path mismatches.
-- **ML4W dotfiles uninstaller** (GitHub Wiki) — removes dotfiles folder, related symlinks, and desktop files; restores pre-install `.config` backups.
-
-Common thread: a canonical list of owned paths, checked before destructive operations.
+|---------|---------------|-----------------|-------------|
+| Hand-maintained skills list | "Just write it out — it's only 38 skills." | Guaranteed drift: a v1.4 skill rename breaks the list. Every BMAD-era artifact we've touched in this fork has had drift between source and docs. | Generate from `skill-manifest.yaml`. |
+| Deep multi-level nav (4+ levels) | "Mirror source-tree depth for accuracy." | Users scan, they don't browse. Anything past 2 levels gets skipped. Diátaxis model explicitly argues against deep hierarchies. | Flat: Docs → (Install / Quick Start / Agents / Skills / Architecture / Contributing). Within Agents and Skills, one level of grouping max. |
+| Auto-deployed from `main` via GitHub Actions in v1.3 | "Standard practice." | PROJECT.md explicitly defers CI deploy to when project stabilizes. Manual deploy is an intentional scope boundary for v1.3. Echo decision, don't re-litigate. | Manual deploy. Revisit for v1.4+. |
+| Doc-only features | "Document the aspirational roadmap alongside shipped state." | Forces users to reason about what's real vs. planned. Public docs must track `latest` dist-tag only. | Docs site documents what's in `@xgent-ai/gomad@latest`. Aspirational roadmap lives in internal `.planning/`. |
+| Marketing-heavy landing page | "Pitch the product." | Audience is internal xgent-ai + a small set of AI-assisted-dev adopters. Per PROJECT.md: "Public discoverability is secondary; correctness and credit are primary." A feature-ticker landing competes with the canonical disclaimer for surface area. | Utilitarian landing: what is GoMad, who it's for, where to start, credit to BMAD. |
+| Interactive playground / live agent demo | Common in modern docs sites. | Requires a hosted Claude Code session. Infra-heavy, zero v1.3 budget. | Link to `gm-help` skill from the Quick Start. |
+| Versioned docs at v1.3 | Parity with React/Next/Tailwind docs conventions. | Only one active version. Versioned docs are infrastructure for a problem we don't have yet. | Defer. Single `latest` view in v1.3. |
 
 ---
 
-## Feature 4 — Coding-Agent-Oriented PRD & Product-Brief
+## Workstream 3 — Agent Dir Relocation (`<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/`)
 
-### Current State (gm-create-prd, gm-product-brief)
+**Scope (from PROJECT.md):** "Agents-only; `gomad/workflows/` and `gomad/data/` stay put. v1.2→v1.3 upgrade via manifest-v2 cleanup with backup snapshots."
 
-Both skills today read as human-founder facilitation frameworks. Evidence in the code:
+**Prior-art context (MEDIUM confidence):** Node ecosystem has no binding standard for in-tree config location. XDG Base Directory Spec defines `~/.config/` for user-level config but doesn't govern in-tree runtime layouts. Existing in-the-wild patterns: `.claude/` (Claude Code itself), `.yarn/` (Yarn Berry), `node_modules/.cache/`, `.gitignore`-adjacent dotfiles. The `_config/` convention (single underscore prefix, non-hidden) is unusual — makes the directory visible in `ls` but sorts ahead of alphanumeric siblings. No universal standard to appeal to; the choice is a local gomad convention.
 
-- `gm-product-brief/SKILL.md` literally says "Act as a product-focused Business Analyst and peer collaborator" and lists "differentiation (1-2 sentences)", "rough qualitative success signals", "high-level vision" under *Lightly covered*.
-- "**Out of scope for this brief**" explicitly names ARR, CAC, LTV, pricing strategy, GTM plan, investor narrative — which suggests the prior version *did* include these and they've already been half-stripped. v1.2 finishes that work.
-- Rationale: "The user is the domain expert. You bring structured thinking, facilitation, and the ability to synthesize large volumes of input into a clear, implementable picture" — heavy on facilitation cues (pauses, "anything else?", option menus) more suited to a PM conversation than a coding-agent spec.
-
-### Table Stakes (What the Refactored PRD/Brief Must Have)
+### Table Stakes
 
 | Feature | Why Expected | Complexity | Notes |
-|---|---|---|---|
-| **Structured sections with stable headers** (Problem, Users, Features, Acceptance Criteria, Out of Scope, Tech Stack, Open Questions) | AGENTS.md-style specs are chunked by section; MCP and skill loaders pull `## Acceptance Criteria` directly. Predictable headers = clean retrieval. Consensus across chatprd.ai, ideaplan SCOPE method, Addy Osmani's "good spec" essay. | MEDIUM | Already mostly present in templates — formalize and name-check them. |
-| **Machine-verifiable acceptance criteria** (given/when/then or behavioral assertion format) | Coding agents need testable assertions, not "users should feel X." ideaplan.io SCOPE method and O'Reilly "good spec" essay both make this load-bearing. | MEDIUM | Replace qualitative language ("intuitive", "clean") with assertions ("clicking Publish POSTs `/api/articles` with body `{title, content}`; returns 201; redirects to `/articles/:id`"). |
-| **Explicit boundary constraints** ("always", "never", "ask first") | AI agents over-reach without them. Builder.io AGENTS.md guide and cursor rules docs emphasize boundary language. | LOW | Replace "consider" / "might want to" with imperative forms. |
-| **Out-of-scope section with reasoning** | Prevents scope creep and side-quests during agent execution. PROJECT.md already models this — promote it to PRD. | LOW | Copy the "Out of Scope" pattern from gomad's own PROJECT.md template. |
-| **Drop time-window estimation** ("MVP in 4 weeks", "Q2 launch") | Coding agents have no concept of calendar time; estimates are hallucination vectors. Human PMs need them for planning; agents do not. PROJECT.md explicitly lists time windows in the removal set. | LOW | Sweep any `{timeline}` / `{launch_date}` variables from templates. |
-| **Drop "why now?" market-timing challenge** | Market-timing is a human VC / founder frame. Irrelevant to an agent building the feature. | LOW | Remove from `gm-product-brief` prompts and steps. |
-| **Drop business/operational metrics** (ARR, CAC, LTV, conversion, retention targets) | Already partially out-of-scope; finish the job. Not dev-ready signal. | LOW | Remove placeholders and prompts asking for these. |
-| **Amplify aggressive vision + MVP scope statements** | The remaining "vision" should be sharp, opinionated, concrete — not a hedged elevator pitch. MVP scope should be a bulleted boundary list, not prose. | MEDIUM | Rewrite the Vision section prompt to force a 1-2 sentence declarative statement + 3-7 bulleted MVP items. |
-| **Dev-ready requirement statements** — each requirement has: id, summary, behavior, data, UI (if any), errors, non-goals | Standard spec shape for coding agents (Addy Osmani "good spec"; chatprd PRD-for-Claude-Code guide; johnnychauvet/prd-skill uses JTBD + component specs + acceptance criteria). | HIGH | Biggest structural change. Template update + step-file rewrites in `gm-create-prd/steps-c/`. |
-| **Explicit tech-stack section** or reference to `project-context.md` | AGENTS.md/CLAUDE.md standard pattern: agents need to know language, framework, versions before writing code. | LOW | Either a section in PRD or a requirement that PRD links to an existing `project-context.md` produced by `gm-generate-project-context`. |
+|---------|--------------|------------|-------|
+| Manifest-v2 path list cleanly reflects the new location | `files-manifest.csv` already tracks `type,name,module,path,hash`. v1.3 needs agent entries writing to `_config/agents/` and the v1.2 → v1.3 cleanup path removing old `_gomad/gomad/agents/*`. | LOW-MED | Manifest schema unchanged — only the `path` column values change. |
+| Realpath containment extended to `_config/` | v1.2 cleanup realpath-contains deletions under `.claude/` + `_gomad/`. `_config/` is already a subdir of `_gomad/` so containment holds by default — no schema change needed. | LOW | Verify the containment prefix check in `buildCleanupPlan` doesn't special-case `gomad/agents/`. |
+| Pre-cleanup backup snapshot under `_gomad/_backups/<timestamp>/` | Carries forward v1.2 reversibility contract. Non-negotiable for a path relocation. | LOW | Mechanism shipped. Only change is which paths flow through it. |
+| Launcher stubs continue to find the persona body | `.claude/commands/gm/agent-*.md` loads from `_gomad/gomad/agents/*.md` at runtime today. The D-06 contract / launcher extractor must now emit the `_gomad/_config/agents/*.md` path. | LOW-MED | Single path constant in the launcher-stub generator. Requires targeted test: `test:gm-surface` install-smoke assertion checking the new path is what stubs point at. |
+| `docs/upgrade-recovery.md` updated | v1.2 shipped this doc for the manifest-cleanup flow. Adding the `gomad/agents/` → `_config/agents/` leg is table stakes for anyone hitting the cleanup cold. | LOW | Append v1.3 section. |
+| Silent upgrade path (no user prompts during `gomad install` re-run) | v1.2's upgrade was non-interactive by default (`--dry-run` opt-in). Consistency matters. | LOW | Flows through existing cleanup. |
 
 ### Differentiators
 
 | Feature | Value Proposition | Complexity | Notes |
-|---|---|---|---|
-| Each requirement carries a stable REQ-ID (e.g. `REQ-AUTH-001`) | Enables cross-referencing from stories, PRs, test files. Already used in gomad's own PROJECT.md ("CUSTOM-01", "CMD", "REF", "INSTALL", "PRD"). Consistent with our own patterns. | LOW | Introduce ID scheme and require it in templates. |
-| Dual-mode output: human-readable PRD + LLM-distilled token-efficient version | gm-product-brief already mentions a "token-efficient LLM distillate" as optional output. Formalize this — human PRD for review, LLM-PRD for consumption by `gm-create-epics-and-stories`. | MEDIUM | Pipe the distillate through `gm-distillator` (already exists in core-skills). |
-| "Open Questions" section explicitly calling out decisions deferred to implementation | Agents need permission to make or escalate judgment calls. Current brief workflow has "capture-don't-interrupt" patterns — those notes should land here rather than being dropped. | LOW | New required section. |
-| Front-matter block with machine-readable metadata (schema_version, status, updated_at, upstream_docs) | Enables programmatic validation (PRD lint) and tool integrations. Matches `skill-manifest.yaml` pattern already in gomad. | LOW | Template change. |
+|---------|-------------------|------------|-------|
+| `--dry-run` preview continues to show the full diff | Already exists. v1.3 free-rides. Users get to see `delete _gomad/gomad/agents/*, create _gomad/_config/agents/*` before committing. | LOW | Free. |
+| CHANGELOG v1.3.0 BREAKING callout | v1.2 established the pattern ("CHANGELOG v1.2.0 includes explicit BREAKING callout"). Any consumer with hand-pinned paths to `_gomad/gomad/agents/` breaks silently otherwise. | LOW | One paragraph in CHANGELOG + README upgrade note. |
+| Rollback instruction in `docs/upgrade-recovery.md` | Explicit "to roll back: copy `_gomad/_backups/<timestamp>/gomad/agents/` back to `_gomad/gomad/agents/` and re-install @1.2.0". | LOW | Plain-text recipe. No tooling. |
+| Tarball presence/absence assertions for `_config/agents/` | v1.2 extended `test:tarball` with presence of `.claude/commands/gm/` + absence of `.claude/skills/gm-agent-*`. v1.3 gets an analogous assertion pair for `_config/agents/` presence, `gomad/agents/` absence (or more precisely: no new-ship of `gomad/agents/`). | LOW-MED | Adds 2 assertions to existing test. |
+| Future-facing: document `_config/` as the home for *other* config — kb packs (W4) live there too | Frames the rename as "pulling config out of the workflow tree" rather than "moving agents around." Sets up W4's `_config/kb/` naturally. | LOW | Framing only — no code. |
 
 ### Anti-Features
 
 | Feature | Why Requested | Why Problematic | Alternative |
-|---|---|---|---|
-| Keeping "time-to-market" / "launch timeline" sections | "PMs still ask." | Agents can't estimate wall-clock time; prompting them to produces confidently wrong numbers. v1.2's whole point is refocusing the artifact on coding-agent consumers. | If a human needs a timeline, they add it on top of the PRD out-of-band. The artifact itself stays dev-focused. |
-| Keeping "personas" section with demographic/psychographic detail | "Traditional PRD has it." | Agents implement behavior, not empathy. A persona ("Sarah, 34, marketing manager who values X") doesn't translate into code. | One-line "target users" identifying roles and capabilities (e.g., "authenticated admins with `billing.write` scope"). |
-| Keeping option-menu facilitation in every question (as gm-product-brief does today) | "Lower cognitive load." | The artifact output is for an agent, not an interactive PM session. Heavy facilitation structure makes the skill run long and interleaves brainstorming with spec-writing. | Keep soft guidance but drop the mandatory "2-4 concrete recommended options" rule as a load-bearing pattern. Use it where it clarifies; skip it where it stalls. |
-| Generating business-case appendices (market size, competitor landscape, pricing tiers) | "Comprehensive." | v1.2 explicitly removes these. Competitor analysis belongs in `gm-market-research` (separate skill); if a user wants it, they run that skill and link its output. | Cross-link, don't embed. |
-| "What could go wrong?" risk matrices in PRD | "Risk hygiene." | Risk analysis belongs in architecture/solutioning phase (`gm-create-architecture`, `gm-check-implementation-readiness`), not requirements. | Link to the relevant phase's artifact; PRD stays "what to build," not "how it could fail." |
-| Mandatory user-research summaries (interview quotes, survey data) | "Evidence-based PRDs." | Irrelevant for v1.2's intended consumer (coding agents). Also — gomad doesn't conduct user research; this would be a fabrication vector. | Drop entirely. Evidence claims go in `gm-market-research` output. |
-| Making `gm-create-prd` automatically run `gm-market-research` and `gm-domain-research` first | "Convenience." | Forces every PRD through heavy research workflows even when the user already has context. Also doubles token cost. | Keep `gm-create-prd` focused on PRD; suggest those skills in the "If you need market context first, run X" pointer. |
-
-### Real-World Precedent
-
-- **AGENTS.md standard** (OpenAI / Google / Sourcegraph / Cursor / Factory, 2026) — project-root + subdirectory overrides, structured sections, build/test commands + tech stack + project structure are the highest-value content.
-- **Addy Osmani "good spec for AI agents"** — explicit behaviors, concrete examples, testable outcomes, boundary constraints.
-- **ideaplan SCOPE method** — Structured, Constrained, Observable, Precise, Explicit.
-- **johnnychauvet/prd-skill** (Claude Code `/prd` command) — JTBD framework + user stories + component specs + acceptance criteria. Good shape reference.
-- **chatprd.ai PRD-for-Claude-Code guide (2026)** — machine-verifiable acceptance criteria, clearly labeled sections for MCP retrieval, pair with CLAUDE.md for coding style.
-- **BMAD v6.3.0** (upstream, April 2026) — already killed the spec-wip singleton in favor of parallel Stories and added Amazon PRFAQ + Epic context compilation. Upstream is moving the same direction gomad is.
+|---------|---------------|-----------------|-------------|
+| Silent migration with no upgrade note | "Just move stuff; it's a copy-only installer; the cleanup handles it." | Users who run `require('./path/to/_gomad/gomad/agents/dev.md')` in their own automation break with no warning. BMAD heritage = zero trust-fund of goodwill for silent breakage. | Explicit BREAKING in CHANGELOG, note in README upgrade section. |
+| Renaming to `.config/` (hidden, leading dot) | Matches XDG convention + Node tradition. | (a) Hidden dirs get missed by users exploring install output. (b) Claude Code already owns `.claude/`; another hidden `.config/` competes visually. (c) `_config/` sort-ahead behavior is deliberate — users see the config dir first when they `ls <installRoot>/`. | Stick with `_config/`. |
+| Moving `gomad/workflows/` and `gomad/data/` too | "Clean sweep, one migration." | Scope violation. PROJECT.md scopes v1.3 to agents-only. Mixing structural moves dilutes the migration blast radius. Phase 7 experience in v1.2 established that cleanup discipline = small deletes one at a time. | Agents-only for v1.3. Document `workflows/`/`data/` as stable, not relocating. |
+| New "migration wizard" UI | Interactive upgrade feels polished. | Non-interactive default is the v1.2 contract; reversing it for one workstream breaks consistency. `--dry-run` is the interactive affordance. | Free-ride on `--dry-run`. |
+| Delete `_gomad/_backups/` older than 90 days as part of v1.3 cleanup | Unbounded backup growth is real. | `REL-F1` (backup rotation) is explicitly deferred. Wiring rotation into v1.3 is scope creep. | Keep REL-F1 deferred. |
+| Auto-update user-owned scripts that reference the old path | "Helpful." | We can't reliably find those references, and touching user files outside the manifest-contained root violates the containment contract. | User's problem. Document in CHANGELOG. |
 
 ---
 
-## Cross-Feature Dependencies
+## Workstream 4 — Story-Creation Enhancements (Highest Detail Warranted)
+
+Three sub-features bundled: `gm-discuss-story` (NEW), `gm-create-story` context-load (MODIFY), `gm-domain-skill` (NEW + 2 seed knowledge packs).
+
+### 4A — `gm-discuss-story` (NEW)
+
+**Purpose:** Manual-step precursor to `gm-create-story` that surfaces gray areas before the dev-agent context is generated. Mirrors `/gsd:discuss-phase` ergonomics from the GSD dev-tooling layer (`.claude/get-shit-done/workflows/discuss-phase.md` — read in full).
+
+**Dependency analysis (HIGH confidence — workflow.md read):** `gm-create-story` consumes epics (`{planning_artifacts}/epics.md`) + PRD + architecture + UX + prior story file. `gm-discuss-story` must consume the **same inputs** (so the gray-area analysis is grounded) PLUS the current `story_key` to target a specific story. It does NOT consume context from prior CONTEXT.md files (that's phase-level — story-level is a different granularity). Output path: `{planning_artifacts}/{{story_key}}-context.md`.
+
+**Scope-boundary fundamentals** carried over from `discuss-phase.md`'s `<scope_guardrail>`:
+- Story boundary comes from epic — FIXED. Discussion clarifies HOW, never WHETHER.
+- User = visionary, Claude = builder.
+- Gray areas are implementation decisions the user cares about that could go multiple ways.
+
+#### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Takes `{{story_key}}` (e.g. `1-2-user-auth`) as argument OR auto-discovers from sprint-status.yaml | Mirrors `gm-create-story` step-1 discovery contract exactly. Users who already run `gm-create-story` without args should get the same ergonomics. | LOW-MED | Read-only reuse of the sprint-status parsing from `gm-create-story/workflow.md`. |
+| Loads epics + PRD + architecture + UX via `discover-inputs.md` protocol | Every gray-area question must be grounded in what's actually planned. Skipping this = asking the user to re-decide stuff that's already in the PRD. | LOW | Direct reuse of the existing `discover-inputs.md` SELECTIVE_LOAD pattern. |
+| Identifies 3-5 story-level gray areas before asking the user | `discuss-phase.md` pattern: Claude analyses first, THEN presents a multiSelect. Never ask "what gray areas exist?" — that's the user's fault for fuzzy AC. | MED | Story-level gray-area categories (concrete, not generic — see STORY-LEVEL GRAY AREAS below). |
+| `AskUserQuestion` (multiSelect) for gray-area selection | Matches discuss-phase UX. User picks which areas to discuss; others flow through as Claude's Discretion. | LOW | Max 4 options, header ≤12 chars. |
+| Per-area question loop until "next area" | discuss-phase default pacing: 4 questions per area, then check "more or next?". | MED | Reuse loop structure from discuss-phase.md. |
+| Writes `{planning_artifacts}/{{story_key}}-context.md` | The contract between this skill and `gm-create-story` (4B). Specific filename so 4B can glob-detect. | LOW | `planning_artifacts` is already a known path from `config.yaml`. |
+| Output contract (section headings — see below) | Downstream consumer (`gm-create-story`) must be able to parse this file deterministically. | MED | Section headings locked as part of this research. |
+| Idempotent — re-run on existing context offers Update/View/Skip | Directly from discuss-phase.md `check_existing`. | LOW | |
+| Scope-creep redirect ("that's a new story") | `<scope_guardrail>` from discuss-phase.md. Story-level version: "that sounds like Story 1.3, not 1.2 — defer to that story's context." | LOW | |
+
+#### STORY-LEVEL GRAY AREAS (the concrete categories Claude scans for)
+
+These are the domain probes `gm-discuss-story` runs over the loaded epic+PRD+architecture context. Not generic labels — real decision points that change implementation:
+
+1. **Acceptance criteria edge cases** — AC says "user logs in with email+password". What about: empty fields, malformed email, case-sensitivity on email, trailing whitespace, 50-char vs 500-char password, account lockout thresholds, expired password?
+2. **Non-functional requirements** — Latency ceiling for the happy path? Concurrent-user assumption? Memory footprint if this runs in a worker? Accessibility (WCAG level)? These rarely make it into AC but always bite on code review.
+3. **Data-model ambiguities** — "We store users" — in which table? FK cascade on delete? Soft delete or hard? Index choices? Migration strategy if this alters an existing schema?
+4. **Downstream consumer contracts** — If this story emits an event / writes an API response / updates shared state, which other stories/services read it? Format freeze or versioned?
+5. **Failure-mode surface area** — What happens on DB unavailable? Partial write? Duplicate request? Rate limit hit? The story will hit these — agent will guess badly without guidance.
+6. **Library / integration choice** (when ambiguous) — "We send an email" — via what? Existing SES wrapper? SMTP? New Resend integration? Architecture doc may not have anticipated this specific story.
+7. **Observability contract** — Logs at which level? Trace span? Metrics emitted? Dead-letter handling? Usually absent from AC but decisive for production readiness.
+8. **Testing approach** — Unit-only, or integration too? Mock which services? Test-data fixtures reused or story-specific?
+
+Not every story needs all 8. `gm-discuss-story`'s analysis step picks the 3-5 that actually have gray in them — per `<gray_area_identification>` in discuss-phase.md.
+
+#### Output Contract — `{{story_key}}-context.md` Sections (LOCKED)
+
+This is the concrete shape `gm-create-story` (4B) reads. Sections mirror discuss-phase.md's CONTEXT.md template, adapted for story scope:
+
+```markdown
+# Story {{story_key}} — Context
+
+**Gathered:** [ISO date]
+**Status:** Ready for story creation
+**Epic:** {{epic_num}}
+**Story title:** {{story_title}}
+
+<domain>
+## Story Boundary
+
+[One-paragraph statement of what this story delivers — anchors scope.
+Lifted from epic AC + PRD. NOT freshly interpreted.]
+</domain>
+
+<decisions>
+## Implementation Decisions
+
+### Acceptance Criteria Edge Cases
+- **D-01:** [concrete decision — e.g. "Email comparison is case-insensitive; trailing whitespace trimmed"]
+- **D-02:** [concrete decision]
+
+### Non-Functional Requirements
+- **D-03:** [e.g. "p95 latency budget = 300ms happy path; 1s degraded"]
+- **D-04:** [e.g. "WCAG AA on form inputs; no live-region announcements required"]
+
+### Data Model
+- **D-05:** [e.g. "Add `last_login_at` column to `users`, nullable, indexed; migration in this story"]
+
+### Failure Modes
+- **D-06:** [e.g. "DB unavailable → return 503 + retry-after:5; do not fall back to cache"]
+
+### Observability
+- **D-07:** [e.g. "Emit `auth.login.succeeded` / `auth.login.failed` structured-log events at info/warn"]
+
+### Claude's Discretion
+[Areas where user explicitly said "you decide" — Claude gets flexibility here.]
+</decisions>
+
+<canonical_refs>
+## Canonical References
+
+[MANDATORY. Every spec/ADR/doc that gm-create-story + gm-dev-story MUST read.
+Full relative paths, not just names. Grouped by topic.
+Inherited from discuss-phase.md's canonical_refs accumulator pattern.]
+
+### Architecture
+- `{planning_artifacts}/architecture.md#auth-module` — auth-module structural contract
+
+### External specs
+- `docs/adr/adr-007-session-management.md` — session timeout + rotation rules
+</canonical_refs>
+
+<specifics>
+## Specific Ideas
+
+[User-quoted language. "I want the error message to say X". "Reference how Y does it."
+Verbatim where possible. NEVER paraphrased into generic language.]
+</specifics>
+
+<deferred>
+## Deferred To Other Stories
+
+[Scope-creep items redirected out. Preserved so user doesn't lose the thought,
+but not locked into this story.]
+- [Idea] — belongs to Story {{future_story_key}}
+</deferred>
+
+---
+*Story: {{story_key}}*
+*Context gathered: [date]*
+*Consumed by: gm-create-story, gm-dev-story*
+```
+
+#### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Auto-integrates with `gm-domain-skill` (W4C) | When user references "like how React.Suspense is discussed in react-perf kb", `gm-discuss-story` calls `gm-domain-skill` to fetch the relevant kb-pack section and inlines it into `<canonical_refs>`. | MED-HIGH | Creates a natural dependency chain 4C→4A→4B. Powerful. |
+| Checkpoint file for interrupted sessions | `gm-discuss-story` writes `{planning_artifacts}/{{story_key}}-context-checkpoint.json` after each area. Resume across sessions. Directly from discuss-phase.md. | MED | Port of `check_existing` + checkpoint logic. |
+| `--all` / `--auto` flag parity | discuss-phase.md has `--power`, `--all`, `--auto`, `--chain`, `--text`, `--batch`, `--analyze`. For v1.3, ship `--auto` (recommended defaults) + `--text` (for `/rc` remote sessions). Others can come later. | MED | Minimal flag set for MVP. |
+| Prior-story-context awareness | Read previous story's final file (like `gm-create-story` step 2 does) — surface "story 1.1 decided X; does that constrain this story?" | MED | Reuses existing `gm-create-story` discovery logic. |
+| Scope boundary is epic AC, not "whatever the user says" | Scope-guardrail text (directly from discuss-phase.md) prevents story discussions from mushrooming into "let's redesign the feature." | LOW | Include the guardrail text in the skill prompt. |
+
+#### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Generic gray-area categories ("UI", "UX", "Behavior") | "Easy to enumerate." | discuss-phase.md explicitly warns against these: "Don't use generic category labels. Generate specific gray areas." Generic labels produce generic answers. | Domain-specific probes (the 8 story-level categories above). |
+| Asking about implementation details Claude should figure out (architecture patterns, performance optimization) | "Gather more context." | discuss-phase.md `<philosophy>`: "User = visionary, Claude = builder." Asking about codebase patterns wastes user time and anchors wrong. | Ask about vision + acceptance-edge decisions. Let Claude read the code. |
+| Running `gm-discuss-story` AFTER `gm-create-story` as "refinement" | Makes sense linearly. | Inverts the information flow. Story context is an INPUT to story creation, not an output. | Discuss BEFORE create. Matches PROJECT.md phrasing: "manual-step precursor to `gm-create-story`". |
+| Hard-requiring `gm-discuss-story` before `gm-create-story` | Forces the gray-area surfacing. | Breaks backward compat: v1.2 `gm-create-story` runs fine without context.md. Users with clear AC shouldn't pay the discuss tax. | OPTIONAL — 4B auto-loads if present, works as before if absent. |
+| Full AskUserQuestion flow in `gm-discuss-story` by default in `/rc` remote sessions | Standard UX. | AskUserQuestion's TUI menu doesn't render through Claude App → `/rc` sessions. discuss-phase.md explicitly handles this with `workflow.text_mode`. | Inherit `--text` flag + `workflow.text_mode` config detection. |
+| Writing context.md outside `planning_artifacts` (e.g., next to story file in `implementation_artifacts`) | "Co-locate with story for visibility." | Story file (`{implementation_artifacts}/{{story_key}}.md`) is CREATED by `gm-create-story` — context must exist before it's there. Also: `planning_artifacts` is the canonical home for pre-implementation artifacts. | `{planning_artifacts}/{{story_key}}-context.md`. |
+
+---
+
+### 4B — `gm-create-story` Context Load (MODIFY)
+
+**Current behavior (HIGH confidence — workflow.md read):** `gm-create-story` step-2 calls `discover-inputs.md` which loads epics, prd, architecture, ux. It also loads `project_context = **/project-context.md` if it exists. No story-specific context is currently considered.
+
+#### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Detect `{{story_key}}-context.md` in `{planning_artifacts}/` | Simple glob match after `story_key` is known (step-1 output). | LOW | One new line in `discover-inputs.md` or step-2. |
+| If present, load into `{story_context}` variable alongside `{epics_content}` etc. | Contract defined by `gm-discuss-story` output. | LOW | Direct file read. |
+| If absent, proceed as v1.2 (no change) | Backward compatibility. Users who never run `gm-discuss-story` must see zero behavior change. | LOW | Early return on missing file. |
+| Precedence: context.md `<decisions>` > epic AC > PRD defaults > architecture guidance > Claude inference | When sources contradict, the most specific wins. Context.md decisions are locked by the user for THIS story — highest authority. | MED | Document in skill prompt with concrete example. |
+| Inline context.md `<decisions>` into the "developer_context_section" or "technical_requirements" template section | The D-0N decisions need to show up in the final story file so `gm-dev-story` sees them at implementation time. | MED | template.md update — add a "Story Context (from gm-discuss-story)" section. |
+| Thread `<canonical_refs>` from context.md into story's `### References` section | Story references are already a template section. Context.md adds to the list. | LOW | Merge, de-dupe by path. |
+
+#### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Surface missing context.md as a hint, not a blocker | "No discuss-story context found. Run `gm-discuss-story {{story_key}}` first for richer context, or continue without." — before creating the story file. | LOW | One `<output>` line in step-2. |
+| Conflict-detection when context.md contradicts epic AC | "Context says case-insensitive email; epic AC says 'exact match' — resolving in favor of context.md. Flagging for review." | MED | One pass comparing AC text to D-0N decisions. Non-blocking, just logged. |
+| Bump story Status to `"ready-for-dev-with-context"` when context.md was loaded | Distinguishes stories that went through discuss from ones that didn't. Signal to reviewer. | LOW | Optional — keep `ready-for-dev` if simplicity preferred. |
+
+#### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Require context.md; fail if absent | Forces the discuss step. | Breaks v1.2 contract + ignores cases with crystal-clear AC. | Optional. Missing = hint, not error. |
+| Context.md OVERRIDES epic AC silently | Simpler precedence. | Hides contradiction from user. An epic AC is a commitment; silent override = "the story secretly means something else." | Detect conflict, log it, apply context.md precedence WITH a visible note in the story file. |
+| Inline the entire context.md verbatim into story file | "Preserve full context." | Story file becomes huge; `gm-dev-story` wastes tokens re-reading what was distilled. | Inline `<decisions>` + `<canonical_refs>` + `<specifics>`. Skip `<deferred>` and `<domain>` (redundant with story.md's own sections). |
+| Re-run `gm-discuss-story` automatically if context.md is older than the epic | "Keep it fresh." | Violates user's expectation of explicit manual-step workflow. Invisible re-runs = surprise token/time cost. | Hint only: "Context.md older than epic — consider re-running gm-discuss-story." |
+
+---
+
+### 4C — `gm-domain-skill` (NEW) + 2 Seed Knowledge Packs
+
+**Purpose (from PROJECT.md):** "Framework + retrieval protocol + 2 seed knowledge packs (`src/domain-kb/` → `<installRoot>/_config/kb/`)."
+
+**Reference implementations inspected:**
+- **Claude-Cortex** (`NickCrew/Claude-Cortex`, `skills/react-performance-optimization/SKILL.md`) — knowledge pack with frontmatter (name, description, keywords, `file_patterns` glob triggers, confidence score), body = overview + Quick Reference Table mapping topics to reference files + Implementation Patterns (code examples) + Common Mistakes + Checklist + External Resources. Knowledge-pack hallmark: conceptual foundations + modular reference files + cross-context applicability.
+- **vercel-labs/agent-skills** (`skills/react-best-practices/SKILL.md`) — name `vercel-react-best-practices`, description "when writing, reviewing, or refactoring React/Next.js code", MIT licensed, v1.0.0. Structure: "When to Apply" triggers + 8 rule categories ranked by impact + Quick Reference + "How to Use" + references to `rules/*.md` (individual rule files) and a compiled `AGENTS.md`.
+
+**Common structural pattern across both:** `SKILL.md` is the entry point with frontmatter; body is a lightweight topic-map; heavy content lives in `rules/` or `reference/` subdirectories; examples + anti-patterns + checklist are table-stakes sections.
+
+**Retrieval target:** `gm-domain-skill` takes a domain slug → greps `<installRoot>/_config/kb/<slug>/*.md` → returns top-1 best match. Consumer-agent can then request specific sections.
+
+#### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Caller signature: `gm-domain-skill(domain_slug, query) → markdown` | Invokable from other skills (`gm-discuss-story`, `gm-create-story`, `gm-dev-story`) as a primitive. | LOW-MED | SKILL.md + workflow.md pattern (same shape as existing skills). |
+| Slug resolution: `<slug>` maps to `<installRoot>/_config/kb/<slug>/` (directory) | Simple path resolution. No registry / index file. | LOW | `fs.existsSync` + directory check. |
+| Grep over `<slug>/*.md` | Node `fs.readdirSync` + `fs.readFileSync` + string matching. No new deps. | LOW-MED | Start with case-insensitive substring match; upgrade to scored matching later. |
+| Match ranking: simple TF-ish score — count of query-term occurrences, weighted by (a) heading matches (b) first-paragraph matches (c) body matches | Good-enough retrieval for 10s-of-files packs. | MED | Node-native; zero deps. Return top-1 AND include 2nd/3rd as alternatives in metadata. |
+| Return shape: `{ file_path, heading_hit, excerpt, full_markdown }` | Structured so the caller can decide whether to inline the full file or cite with a section ref. | LOW-MED | Small object. |
+| "Not found" graceful return | `{ file_path: null, error: "slug <slug> not installed. Available slugs: [...]" }` | LOW | Dir-listing on `_config/kb/`. |
+| Seed pack 1 — `_config/kb/testing/` | Reasonable starter domain. Test pyramid, fixtures, mocking guidance. | MED | One SKILL.md + 5-8 reference `.md` files. |
+| Seed pack 2 — `_config/kb/architecture/` (OR another chosen slug) | Covers the "what are the tradeoffs of approach X vs Y" question space. | MED | Same shape. |
+| Each pack has `SKILL.md` with frontmatter (`name`, `description`, `keywords`) | Matches Anthropic Agent Skills open format (per `agentskills.io` — skill = folder containing SKILL.md file). Interoperable with Claude Code's skill-discovery. | LOW | Direct copy of current `skill-manifest.yaml` → frontmatter convention. |
+| Each pack has clear TOC in SKILL.md mapping topics → reference files | The Claude-Cortex + vercel pattern. Keeps SKILL.md light and makes cross-pack comparison possible. | LOW | Markdown table. |
+
+#### What Counts as a Well-Formed Knowledge Pack (gomad canonical format)
+
+Locked structural contract for `src/domain-kb/<slug>/`:
 
 ```
-Feature 2 (reference sweep)
-    └──requires──> Feature 1 (commands exist as /gm:agent-*)
-                       └──requires──> design decision: command dir layout
+src/domain-kb/<slug>/
+├── SKILL.md              # frontmatter + overview + TOC
+├── reference/            # individual topic pages
+│   ├── overview.md
+│   ├── <topic-1>.md
+│   ├── <topic-2>.md
+│   └── ...
+├── examples/             # (optional) runnable/illustrative code
+│   └── <example-N>.md
+└── anti-patterns.md      # what NOT to do, with rationale
+```
 
-Feature 3 (files-manifest + cleanup)
-    └──requires──> Feature 1 (to know new paths being written)
-    └──requires──> current Installer + ManifestGenerator hooks
+**SKILL.md minimum sections:**
+```markdown
+---
+name: gomad-kb-<slug>
+description: <one-sentence domain + when-to-apply trigger>
+keywords: [<3-6 keywords>]
+license: MIT
+---
 
-Feature 4 (PRD/brief refactor)
-    └──is independent──> can ship in parallel with 1-3
+# <Domain Name>
 
-Feature 1 conflicts with keeping gm-agent-* as standalone skills
-    └──resolution──> hard cut in v1.2 (no dual surface)
+## When to Apply
+
+[Context triggers — when an agent should request this kb.]
+
+## Topic Map
+
+| Topic | Reference File | Summary |
+|-------|----------------|---------|
+| ...   | reference/X.md | ...     |
+
+## Overview
+
+[1-2 paragraph orientation.]
+
+## Core Concepts
+
+[Named concepts with 1-sentence definitions.]
+
+## Common Mistakes
+
+[3-5 anti-patterns with alternatives. Link to anti-patterns.md for depth.]
+
+## External Resources
+
+[Canonical upstream docs, spec URLs.]
+```
+
+Install-time: `src/domain-kb/*/` → `<installRoot>/_config/kb/*/` (one-to-one copy). Manifest v2 tracks each file.
+
+#### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| `gm-discuss-story` integration — discussion can cite kb by slug | User says "use the testing kb's approach" → `gm-discuss-story` calls `gm-domain-skill('testing', 'fixtures')` → inlines guidance into `<canonical_refs>`. | MED | Requires stable caller API for `gm-domain-skill`. |
+| `gm-create-story` / `gm-dev-story` opt-in citation | Story file can carry `<!-- kb: testing/fixtures -->` hints → `gm-dev-story` loads the kb-pack at implementation time. | MED | Signals which docs matter without bloating story file. |
+| Pack authoring guide (`docs/domain-kb-authoring.md`) | Defines the canonical format so external contributors can add kbs. Table-stakes if this framework is to scale beyond 2 seed packs. | LOW-MED | Covered by the canonical format above. |
+| `gm-domain-skill list` subcommand (or companion skill) | Enumerate available kb slugs. User discovers what's installed without shelling to the filesystem. | LOW | One-liner listing dir. |
+| Version pinning per pack (each SKILL.md frontmatter has `version: 1.0.0`) | If kb content evolves (testing best practices drift), users can detect "my dev-agent is citing stale testing guidance from v0.9." | LOW | Frontmatter field. No versioning logic needed in v1.3 — just the field. |
+
+#### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Embed a vector-search index (chunks → embeddings → cosine similarity) | Modern retrieval-augmented generation. | Adds heavy runtime deps (sentence-transformers, FAISS, or hosted embedding API) — violates v1.2 zero-new-deps policy carried into v1.3. Also: 2 seed packs do not need vector search to find the right file. | Simple keyword-scored grep. Upgrade path exists if kb count >>20. |
+| Pull kb packs from a remote registry at runtime | Dynamic ecosystem. | Network calls during agent invocation = unreliable + auth-complicated. v1.2 copy-only installer precedent argues for static bundling. | Ship kb packs in-repo (`src/domain-kb/`), installed at `gomad install` time. |
+| Top-K retrieval (K>1) by default | More context = better answers. | Consumers can't reason about source attribution with 5 files returned. Also bloats the caller's context window. | Top-1 with alternatives in metadata. Caller explicitly opts into more. |
+| Allow kb authors to define arbitrary directory structures | "Don't be prescriptive." | Defeats retrieval: grep + ranking depend on predictable layout. Each nonconforming pack = a special case. | Lock the canonical format (above). Validator script in `test:tarball`. |
+| Ship the Anthropic / vercel packs directly | "They're already well-written." | License / attribution overhead; they're not gomad-shaped (different triggers, different retrieval contract). | Write 2 native packs; reference Claude-Cortex + vercel-labs as prior-art in `docs/domain-kb-authoring.md`. |
+| Overlap with `core-skills/gm-help` or `gm-advanced-elicitation` | "Help + kb are the same thing." | They're not. `gm-help` = CLI/workflow help ("how do I run X?"). `gm-domain-skill` = technical domain knowledge ("what's the right approach to retry policies?"). Different audiences, different triggers. | Keep them separate. Cross-reference only if natural. |
+| Hard-bind kb slugs to specific agent personas (e.g., `testing` kb only callable from `gm-agent-dev`) | Access control. | Violates the primitive nature of `gm-domain-skill`. Any skill/agent might need any kb. | Flat access — any caller, any slug. |
+
+---
+
+## Feature Dependencies
+
+```
+gm-domain-skill (4C)
+    ├─ enables ──> gm-discuss-story citing kb in canonical_refs (4A)
+    └─ installed via ──> _config/kb/ relocation context (W3)
+
+gm-discuss-story (4A)
+    ├─ consumes ──> epics.md, PRD, architecture, UX (via discover-inputs.md — EXISTING)
+    ├─ produces ──> {planning_artifacts}/{{story_key}}-context.md
+    └─ feeds ────> gm-create-story context load (4B)
+
+gm-create-story context load (4B)
+    └─ consumes ──> {{story_key}}-context.md from 4A
+
+Agent dir relocation (W3)
+    ├─ launcher extractor (v1.2 D-06) ──> updated path _config/agents/
+    ├─ manifest v2 ──> tracks new paths, cleans old
+    └─ sets up _config/ ──> knowledge-pack home for 4C
+
+Plugin marketplace refresh (W1)
+    ├─ skill paths ──> must reference current gomad-skills/gm-* tree
+    ├─ homepage ──> points at docs site (W2)
+    └─ independent of W3/W4 for source paths (kb pack dirs are in-source; marketplace entry doesn't need per-kb-pack entries in v1.3)
+
+GitHub Pages docs site (W2)
+    ├─ skills generation ──> reads src/**/skill-manifest.yaml (references W3's `_config/agents/` new location in Agents Reference)
+    ├─ includes kb-pack authoring guide (supports 4C)
+    └─ documents upgrade mechanics (W3 rollback recipe)
 ```
 
 ### Dependency Notes
 
-- **Feature 2 requires Feature 1**: you can't sweep references to a command form that doesn't yet exist. Implement launchers first, then update references pointing to them.
-- **Feature 3 requires Feature 1**: the files-manifest must include the new command paths (`.claude/commands/gm/agent-*.md`). Fold manifest wiring into the same diff that adds command generation.
-- **Feature 4 is independent**: PRD/brief refactor doesn't touch the installer or command surface; it's a content change in `src/gomad-skills/1-analysis/gm-product-brief/` and `src/gomad-skills/2-plan-workflows/gm-create-prd/`. Can ship in parallel or first.
-- **Upgrade cleanup must understand the renames**: v1.1 → v1.2 upgrade is the *first* time the manifest-based cleanup runs on an install that has no prior manifest. Fallback plan: for v1.2, scan for known v1.1 artifact paths (`.claude/skills/gm-agent-*/`) and clean them explicitly as a one-time migration, even without prior manifest. After v1.2 the manifest covers all future upgrades.
-
----
+- **4C `gm-domain-skill` blocks nothing but unlocks 4A integration.** Ship the retrieval primitive + 2 seed packs; integration into `gm-discuss-story` is a nice-to-have, not required.
+- **4A `gm-discuss-story` depends only on EXISTING infra** (`discover-inputs.md`, sprint-status.yaml parsing in `gm-create-story`). Can ship before 4C.
+- **4B modify ships with 4A.** They're a contract pair — context.md writer + reader. Independent delivery creates a dead contract.
+- **W3 `_config/` relocation precedes 4C shipment.** Install target for kb packs is `<installRoot>/_config/kb/` — if `_config/` isn't established yet, kb packs need a second relocation later.
+- **W1 marketplace refresh independent** of all other workstreams (it's a JSON rename + path-update operation). Can ship first or last in the phase sequence.
+- **W2 docs site depends on shipped state of W1/W3/W4** — Agents Reference page documents the `_config/agents/` path (W3); Skills Reference generates from manifests; Architecture page explains `_config/kb/` (W4). W2 should be scheduled AFTER W1/W3/W4 content is stable.
 
 ## MVP Definition
 
-### Launch With (v1.2)
+### Launch With (v1.3 — all six Active items from PROJECT.md)
 
-All four features are in-scope for v1.2 per PROJECT.md. No "ship subset" path.
+Per PROJECT.md Active list — these are the scoped v1.3 deliverables:
 
-- [ ] **Feature 1 — Agent-as-command**: 7 launcher files under `.claude/commands/gm/agent-*.md`, wired through `AgentCommandGenerator`, description = "Mary — Strategic Business Analyst" style. Persona body remains in `_gomad/gomad/agents/...`.
-- [ ] **Feature 2 — Reference sweep**: every `gm-agent-*` string in source, docs, tests, manifests updated to `gm:agent-*` (command) or retained as `gm-agent-*` (skill file path) per the distinction above.
-- [ ] **Feature 3 — Copy-only installer + files-manifest.csv + upgrade cleanup**: symlink code paths removed; `files-manifest.csv` written on every install; re-install diffs against prior manifest and deletes orphan paths; one-time v1.1 artifact cleanup as fallback.
-- [ ] **Feature 4 — PRD/brief refactor**: `gm-create-prd` and `gm-product-brief` templates + steps updated to drop time windows / why-now / biz-metrics and amplify vision / MVP scope / dev-ready acceptance criteria.
+- [ ] **W1 Marketplace refresh** — renamed `marketplace.json` with 3-group structure + v1.3.0 version pinning + `test:tarball` path validation
+- [ ] **W2 Docs site (manual deploy)** — Install / Quick Start / Agents / Skills / Architecture / Contributing pages; bilingual; manually deployed to `gomad.xgent.ai`
+- [ ] **W3 Agent dir relocation** — `_config/agents/` with manifest-driven cleanup, backup snapshot, CHANGELOG BREAKING call-out, upgrade-recovery.md updated
+- [ ] **W4A `gm-discuss-story`** — SKILL.md + workflow.md emitting `{{story_key}}-context.md` with locked section contract
+- [ ] **W4B `gm-create-story` context load** — auto-detect + merge with precedence rules
+- [ ] **W4C `gm-domain-skill` + 2 seed packs** — retrieval primitive + canonical kb format + 2 seeded domains under `src/domain-kb/`
 
-### Add After Validation (v1.3+)
+### Add After Validation (v1.4+)
 
-- [ ] `gomad install --dry-run` mode (defer unless feedback surfaces need during v1.2).
-- [ ] Manifest `schema_version` field + migration-on-read logic (only needed once schema changes).
-- [ ] LLM-distilled PRD output piped through `gm-distillator` as a second artifact (differentiator).
+- [ ] Skills reference auto-gen CI pipeline (upgrade from v1.3's manual `npm run docs:skills`)
+- [ ] Docs versioning (multi-version selector)
+- [ ] Plugin dependencies between `gomad-core` / `gomad-skills` / `gm-agent-launchers`
+- [ ] Backup rotation policy (REL-F1 — already deferred)
+- [ ] `gm-domain-skill` remote-registry support OR vector-scoring upgrade (trigger: kb count >>20)
+- [ ] Additional `--flag` parity for `gm-discuss-story` (`--power`, `--chain`, `--batch`, `--analyze`)
+- [ ] Cross-plugin marketplace dependencies (`allowCrossMarketplaceDependenciesOn`)
 
 ### Future Consideration (v2+)
 
-- [ ] Runtime deprecation warnings for any residual `gm-agent-*` references.
-- [ ] PRD lint tool (validate REQ-IDs, section headers, acceptance-criteria format).
-- [ ] Per-requirement status tracking (pending / in-progress / done) as metadata in PRD front-matter.
-
----
+- [ ] Interactive docs playground
+- [ ] Hooks / MCP server entries in marketplace manifest (need source implementation first)
+- [ ] Third-party kb pack ecosystem (marketplace of marketplaces)
 
 ## Feature Prioritization Matrix
 
+Scoped to v1.3 workstreams only. "User Value" = internal xgent-ai team + AI-assisted-dev adopters per PROJECT.md audience.
+
 | Feature | User Value | Implementation Cost | Priority |
-|---|---|---|---|
-| Feature 1 — Agent as slash command | HIGH (invocation UX is the main user touch point) | LOW (existing template + generator; rename paths) | P1 |
-| Feature 2 — Reference sweep | MEDIUM (prevents confusion; required for consistency) | LOW (grep + Edit, ~20 files) | P1 |
-| Feature 3a — Copy-only mode | HIGH (portability; surviving git clone is table stakes for shared projects) | LOW (remove symlink code paths; verify) | P1 |
-| Feature 3b — files-manifest.csv + upgrade cleanup | HIGH (unblocks safe re-install; required to handle v1.1→v1.2 rename churn) | MEDIUM (schema + diff logic + v1.1 one-time fallback) | P1 |
-| Feature 3c — dry-run flag | MEDIUM | MEDIUM (plumbs through installer) | P2 (defer) |
-| Feature 4 — PRD/brief refactor (drop biz framing) | HIGH (PRD is the on-ramp to every downstream workflow; bad PRD = bad code) | MEDIUM (template + step-file rewrites; content work, not mechanical) | P1 |
-| Feature 4 extension — LLM-distilled PRD output | MEDIUM | LOW (pipe through gm-distillator) | P2 |
+|---------|------------|---------------------|----------|
+| W1 marketplace rename + path update | HIGH (current file actively misrepresents the project) | LOW | P1 |
+| W1 3-group restructure | MEDIUM (better discoverability) | LOW | P1 |
+| W1 marketplace metadata (version, keywords, homepage) | LOW-MED | LOW | P1 |
+| W2 Install + Quick Start pages | HIGH | LOW | P1 |
+| W2 Agents + Skills Reference | HIGH | MED | P1 |
+| W2 Architecture + Contributing pages | MED | MED | P1 |
+| W2 bilingual parity | MED | MED | P1 |
+| W2 auto-gen skills from manifest | MED | MED | P2 |
+| W3 manifest-driven relocation | HIGH (blocks W4C kb install target) | LOW-MED | P1 |
+| W3 upgrade-recovery.md + CHANGELOG | HIGH (safety contract) | LOW | P1 |
+| W3 tarball assertions | MED | LOW-MED | P1 |
+| W4A gm-discuss-story core | HIGH (new capability) | MED | P1 |
+| W4A checkpoint + resume | MED | MED | P2 |
+| W4A --text flag | MED (required for /rc) | LOW | P1 |
+| W4B context.md auto-load | HIGH (wire 4A to dev flow) | LOW | P1 |
+| W4B conflict detection | LOW-MED | MED | P2 |
+| W4C gm-domain-skill retrieval | MED-HIGH | MED | P1 |
+| W4C seed pack 1 (testing) | MED | MED | P1 |
+| W4C seed pack 2 (architecture or chosen domain) | MED | MED | P1 |
+| W4C kb authoring guide | MED | LOW | P1 |
 
 **Priority key:**
-- P1: Must have for v1.2 launch (matches PROJECT.md Active requirements).
-- P2: Should have, add when possible or in v1.3.
-- P3: Nice to have, future consideration.
+- P1: Must ship in v1.3 (matches the 6 Active items in PROJECT.md)
+- P2: Should ship in v1.3 if budget allows; otherwise defer to v1.4
+- P3: Future consideration (not in this doc — see "v2+" above)
 
----
+## Competitor / Prior-Art Feature Analysis
 
-## Dependencies on Existing GoMad Artifacts
-
-| Touched / Leveraged | Path | Change Type |
-|---|---|---|
-| Agent command template | `tools/installer/ide/templates/agent-command-template.md` | Minimal change — already matches target shape. Verify `{{module}}` / `{{path}}` template variables resolve under new layout. |
-| Agent command generator | `tools/installer/ide/shared/agent-command-generator.js` | Modify `collectAgentArtifacts` / `writeAgentLaunchers` to emit `gm/agent-<name>.md` layout instead of `gomad/agents/<name>.md`. |
-| Platform codes YAML | `tools/installer/ide/platform-codes.yaml` | `claude-code.installer.target_dir` is `.claude/skills`; may need additional `target_commands_dir: .claude/commands` or similar for slash commands. Inspect IDE handlers. |
-| Installer main flow | `tools/installer/core/installer.js` | Extend `installedFiles` Set → write CSV manifest; add `_cleanupPriorInstall` method before install writes. |
-| Manifest generator | `tools/installer/core/manifest-generator.js` | Add `generateFilesManifestCsv` alongside existing yaml/json manifests. |
-| Skill manifests (agent files) | `src/gomad-skills/**/gm-agent-*/skill-manifest.yaml` | Retain name `gm-agent-*` (filesystem safety). `displayName` + `title` surface in command description. |
-| Agent SKILL.md files | `src/gomad-skills/**/gm-agent-*/SKILL.md` | Content stays; cross-references updated by Feature 2 sweep. |
-| PRD skill | `src/gomad-skills/2-plan-workflows/gm-create-prd/{SKILL.md,workflow.md,steps-c/,templates/}` | Major rewrite of template + step-files. |
-| Product-brief skill | `src/gomad-skills/1-analysis/gm-product-brief/{SKILL.md,prompts/,resources/}` | Rewrite SKILL.md scope section + prompts to strip biz framing. |
-| Module help catalog | `src/gomad-skills/module-help.csv`, `src/core-skills/module-help.csv` | Entries updated by Feature 2 sweep. |
-| Installer messages | `tools/installer/install-messages.yaml` | Next-steps / completion messages reference `/gm:agent-*` command form. |
-| README / docs | `README.md`, `README_CN.md`, `docs/`, `website/` | Invocation examples updated to `/gm:agent-*`. |
-| E2E tarball test | `tests/` | Verify presence of `.claude/commands/gm/agent-*.md` files and `_gomad/_config/files-manifest.csv` in installed output. |
-
----
+| Feature | BMAD (docs.bmad-method.org) | Claude-Cortex | vercel-labs/agent-skills | GoMad v1.3 Plan |
+|---------|-----------------------------|---------------|--------------------------|------------------|
+| Docs IA | Diátaxis (Tutorials / How-To / Explanation / Reference) | README-heavy, no dedicated site | README-heavy, no dedicated site | Simplified Diátaxis — Install / Quick Start / Agents / Skills / Architecture / Contributing (flat) |
+| Skills reference | Hand-maintained "commands" reference | Root-README lists skills | Root-README lists skills | Auto-gen from `skill-manifest.yaml` (MVP = manual script) |
+| Plugin marketplace | Modular: one GitHub-Pages-ready `docs/` per module | N/A | N/A | 3-group `marketplace.json` (launchers / skills / core) |
+| Knowledge packs | bmad-help skill + external web | `skills/<domain>/SKILL.md` + `references/` | `skills/<domain>/SKILL.md` + `rules/<rule>.md` | `_config/kb/<domain>/SKILL.md` + `reference/` + `examples/` + `anti-patterns.md` (blends both) |
+| Agent file location | BMAD `agents/` in install root | N/A | N/A | `_config/agents/` in install root (v1.3 rename) |
+| Story context file | Implicit in epic expansion | N/A | N/A | Explicit `{{story_key}}-context.md` via `gm-discuss-story` |
 
 ## Sources
 
-### Claude Code slash commands
-- [Slash commands — Claude Code Docs](https://code.claude.com/docs/en/slash-commands) — authoritative on `.claude/commands/` layout, subdirectory namespacing via colon, frontmatter fields (`description`, `argument-hint`, `allowed-tools`, `model`, `disable-model-invocation`), `$ARGUMENTS`, `!` bash prefix, `@` file refs
-- [Writing Slash Commands — Claude Skills](https://claude-plugins.dev/skills/@CaptainCrouton89/.claude/slash-commands-guide)
-- [Your complete guide to slash commands Claude Code — eesel AI](https://www.eesel.ai/blog/slash-commands-claude-code)
-- [How to Create Custom Slash Commands in Claude Code — BioErrorLog Tech Blog](https://en.bioerrorlog.work/entry/claude-code-custom-slash-command)
-- [wshobson/commands](https://github.com/wshobson/commands) — production command pack using namespace layout
-- [qdhenry/Claude-Command-Suite](https://github.com/qdhenry/Claude-Command-Suite) — professional namespaced commands
-- [bmad-code-org/BMAD-METHOD issue #773](https://github.com/bmad-code-org/BMAD-METHOD/issues/773) — nested-directory discovery pitfall
+**Authoritative (HIGH confidence):**
+- Claude Code Plugin Marketplaces schema — https://code.claude.com/docs/en/plugin-marketplaces (read in full)
+- GoMad `.claude/get-shit-done/workflows/discuss-phase.md` (read in full — foundational pattern for `gm-discuss-story`)
+- GoMad `.claude/get-shit-done/references/questioning.md` (philosophy + AskUserQuestion patterns)
+- GoMad `src/gomad-skills/4-implementation/gm-create-story/{SKILL.md,workflow.md,template.md,discover-inputs.md}` (read in full — current behavior for 4B modification)
+- GoMad `.planning/PROJECT.md` (v1.3 milestone scope + constraints)
+- GoMad `.claude-plugin/marketplace.json` (current BMAD-state file)
 
-### BMAD migration / upstream patterns
-- [BMAD Method — Welcome](http://docs.bmad-method.org/)
-- [BMAD v6.3.0 changelog (April 2026)](https://www.vibesparking.com/en/blog/ai/bmad/2026-04-11-bmad-v630-changelog/)
-- [aj-geddes/claude-code-bmad-skills](https://github.com/aj-geddes/claude-code-bmad-skills)
-- [PabloLION/bmad-plugin](https://github.com/PabloLION/bmad-plugin)
-- [24601/BMAD-AT-CLAUDE](https://github.com/24601/BMAD-AT-CLAUDE)
+**Reference implementations (MEDIUM confidence — external web-fetched):**
+- Claude-Cortex knowledge pack — https://github.com/NickCrew/Claude-Cortex (structure pattern, `skills/react-performance-optimization/SKILL.md`)
+- vercel-labs/agent-skills — https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices (structure + frontmatter)
+- Anthropic Agent Skills open format — https://agentskills.io/home
+- BMAD Method docs site IA — https://docs.bmad-method.org/
 
-### Installer patterns / copy vs symlink / manifest tracking
-- [npm/cli issue #4031 — local paths create symlinks instead of copying](https://github.com/npm/cli/issues/4031)
-- [npm/npm issue #12515 — NPM and using symlinks instead of full copy](https://github.com/npm/npm/issues/12515)
-- [npm/npm issue #13050 — npm install doesn't include symlinks in a git repository](https://github.com/npm/npm/issues/13050)
-- [symlink-or-copy npm package](https://www.npmjs.com/package/symlink-or-copy) — documents when symlinks work vs when they silently break
-- [CMake Recipe #5: Adding an uninstall target using install_manifest.txt](https://www.linux.com/training-tutorials/cmake-recipe-5-adding-uninstall-target-your-project/)
-- [ML4W Dotfiles Uninstaller Wiki](https://github.com/mylinuxforwork/dotfiles/wiki/Uninstall)
-- [astral-sh/uv issue #14194 — Add --dry-run to uv tool install/uninstall](https://github.com/astral-sh/uv/issues/14194)
-- [CLI Tools That Support Previews, Dry Runs or Non-Destructive Actions — Nick Janetakis](https://nickjanetakis.com/blog/cli-tools-that-support-previews-dry-runs-or-non-destructive-actions)
-- [dotnet-core-uninstall dry-run command](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/uninstall-tool-cli-dry-run)
-- [Next.js CLI: create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app) — `--reset-preferences`, `--skip-install`, `--yes` conventions
-
-### PRD for AI coding agents / AGENTS.md standard
-- [AGENTS.md Standard — Builder.io](https://www.builder.io/blog/agents-md)
-- [Best Practices for Using PRDs with Claude Code in 2026 — ChatPRD](https://www.chatprd.ai/learn/PRD-for-Claude-Code)
-- [Best Practices for Using PRDs with Cursor in 2026 — ChatPRD](https://www.chatprd.ai/learn/PRD-for-Cursor)
-- [Writing PRDs for AI Code Generation Tools in 2026 — ChatPRD](https://www.chatprd.ai/learn/prd-for-ai-codegen)
-- [How to Write a Good Spec for AI Agents — O'Reilly Radar](https://www.oreilly.com/radar/how-to-write-a-good-spec-for-ai-agents/)
-- [AddyOsmani — How to write a good spec for AI agents](https://addyosmani.com/blog/good-spec/)
-- [Write Specs for AI Coding Agents: The SCOPE Method — ideaplan](https://www.ideaplan.io/blog/how-to-write-specs-for-ai-coding-agents)
-- [johnnychauvet/prd-skill](https://github.com/johnnychauvet/prd-skill) — Claude Code `/prd` command generating AI-prototyping-ready PRDs
-- [.cursorrules vs CLAUDE.md vs AGENTS.md (2026) — The Prompt Shelf](https://thepromptshelf.dev/blog/cursorrules-vs-claude-md/)
-- [How to Configure Every AI Coding Assistant — DeployHQ](https://www.deployhq.com/blog/ai-coding-config-files-guide)
-- [How to write PRDs for AI Coding Agents — David Haberlah, Medium](https://medium.com/@haberlah/how-to-write-prds-for-ai-coding-agents-d60d72efb797)
+**Industry conventions (MEDIUM confidence):**
+- Node CLI config-directory conventions — https://docs.npmjs.com/cli/v11/configuring-npm/folders/ ; https://github.com/nodejs/tooling/issues/71
+- XDG Base Directory Spec (referenced via Lobsters discussion) — https://lobste.rs/s/wac58n/use_config_store_your_project_configs
 
 ---
-*Feature research for: gomad v1.2 — agent-as-command, copy-only installer + file manifest, coding-agent PRD*
-*Researched: 2026-04-18*
+*Feature research for: GoMad v1.3 Marketplace, Docs & Story Context*
+*Researched: 2026-04-24*
