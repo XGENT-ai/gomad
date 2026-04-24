@@ -53,7 +53,7 @@
     "lint:fix": "eslint . --ext .js,.cjs,.mjs,.yaml --fix",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "prepare": "command -v husky >/dev/null 2>&1 && husky || exit 0",
-    "quality": "npm run format:check && npm run lint && npm run lint:md && npm run docs:build && npm run test:install && npm run test:integration && npm run validate:refs && npm run validate:skills && npm run test:orphan-refs",
+    "quality": "npm run format:check && npm run lint && npm run lint:md && npm run docs:build && npm run test:install && npm run test:integration && npm run validate:refs && npm run validate:skills && npm run validate:kb-licenses && npm run test:orphan-refs",
     "test": "npm run test:refs && npm run test:orphan-refs && npm run test:install && npm run lint && npm run lint:md && npm run format:check",
     "test:cleanup-all": "node test/test-cleanup-planner.js && node test/test-manifest-corruption.js && node test/test-cleanup-execute.js && node test/test-legacy-v11-upgrade.js && node test/test-dry-run.js",
     "test:e2e": "node test/test-e2e-install.js",
@@ -64,6 +64,7 @@
     "test:refs": "node test/test-file-refs-csv.js",
     "test:self-install-guard": "node test/test-installer-self-install-guard.js",
     "test:tarball": "node tools/verify-tarball.js",
+    "validate:kb-licenses": "node tools/validate-kb-licenses.js --strict",
     "validate:refs": "node tools/validate-file-refs.js --strict",
     "validate:skills": "node tools/validate-skills.js --strict"
   },
