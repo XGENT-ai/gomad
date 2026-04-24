@@ -8,16 +8,15 @@ GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD
 
 A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills, without dragging along the parts of BMAD we don't use.
 
-## Current Milestone: v1.3 Marketplace, Docs & Story Context
+## Current Milestone: v1.3 Docs, Story Context & Agent Relocation
 
-**Goal:** Refresh public surface (plugin marketplace + docs site), restructure the agent install path, and enrich the 4-implementation story workflow with a discuss step plus a domain-knowledge framework.
+**Goal:** Enrich the 4-implementation story workflow with a discuss step plus a domain-knowledge framework, build out initial docs content on `gomad.xgent.ai`, and restructure the agent install path.
 
 **Target workstreams:**
 
-- **Plugin marketplace refresh** — Full BMAD→GoMad rename of `.claude-plugin/marketplace.json` plus restructure of plugin groupings to match v1.2 layout (gm-agent-* launchers / gomad-skills workflow / core-skills).
+- **Story-creation enhancements** — New `gm-discuss-story` skill (manual-step precursor to `gm-create-story`) emitting `{planning_artifacts}/{{story_key}}-context.md`; `gm-create-story` auto-loads that context when present; new `gm-domain-skill` with retrieval protocol + 2 seed knowledge packs installed from `src/domain-kb/` into `<installRoot>/_config/kb/`.
 - **GitHub Pages docs site** — Build out initial docs content (install, agents, skills, architecture) and deploy manually to `gomad.xgent.ai`. No CI auto-deploy in v1.3.
 - **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/`. Agents-only; `gomad/workflows/` and `gomad/data/` stay put. v1.2→v1.3 upgrade via manifest-v2 cleanup with backup snapshots.
-- **Story-creation enhancements** — New `gm-discuss-story` skill (manual-step precursor to `gm-create-story`) emitting `{planning_artifacts}/{{story_key}}-context.md`; `gm-create-story` auto-loads that context when present; new `gm-domain-skill` with retrieval protocol + 2 seed knowledge packs installed from `src/domain-kb/` into `<installRoot>/_config/kb/`.
 
 **Key constraints for v1.3:**
 
@@ -49,12 +48,11 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 <!-- v1.3 scope. See Current Milestone section above for full context. REQ-IDs defined in .planning/REQUIREMENTS.md. -->
 
-- [ ] **Plugin marketplace refresh** — Rename + restructure `.claude-plugin/marketplace.json` to match v1.2 layout (gm-agent-* launchers / gomad-skills / core-skills)
-- [ ] **GitHub Pages docs site** — Initial content (install, agents, skills, architecture) deployed manually to `gomad.xgent.ai`
-- [ ] **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` with manifest-driven upgrade cleanup
 - [ ] **`gm-discuss-story`** — New skill emitting `{planning_artifacts}/{{story_key}}-context.md` to clarify gray areas before story creation
 - [ ] **`gm-create-story` context load** — Auto-detect and load `{story_key}-context.md` when present
 - [ ] **`gm-domain-skill`** — Framework + retrieval protocol + 2 seed knowledge packs (`src/domain-kb/` → `<installRoot>/_config/kb/`)
+- [ ] **GitHub Pages docs site** — Initial content (install, agents, skills, architecture) deployed manually to `gomad.xgent.ai`
+- [ ] **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` with manifest-driven upgrade cleanup
 
 ### Deferred (beyond v1.2)
 
@@ -70,6 +68,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 <!-- Explicit boundaries. Each carries reasoning to prevent re-adding. -->
 
+- **Claude Code plugin marketplace (`.claude-plugin/marketplace.json`)** — Dropped 2026-04-24 during v1.3 scoping. User chose `gomad install` CLI as the single distribution path. Stale BMAD-era `marketplace.json` was removed from the repo rather than refreshed. Former Phase 10 (MARKET-01..05) scrapped.
 - **Touching `bmad-method` on npm** — That package is owned by BMAD's authors (`bmadcode`, `muratkeremozcan`, `alex_verk`). We do nothing to it. Ever.
 - **Reworking bmm workflow internals** — `1-analysis` / `2-plan-workflows` / `3-solutioning` / `4-implementation` stay structurally as-is. Behavioral changes are scope violations without explicit justification.
 - **GSD integration into the gomad distribution** — `.claude/get-shit-done/` is our dev tooling for building gomad, not part of the shipped product. Likely permanently out of scope.
@@ -169,7 +168,9 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-24 after v1.3 milestone scoping — Current Milestone section added for "v1.3 Marketplace, Docs & Story Context" (4 workstreams: marketplace refresh, GH Pages docs site, agent dir relocation, story-creation enhancements); Active requirements populated with 6 v1.3 items; phase numbering continues from Phase 10; zero-new-deps policy reaffirmed; `<installRoot>` explicitly flagged as user-chosen (not hardcoded).*
+*Last updated: 2026-04-24 after marketplace workstream dropped — v1.3 milestone renamed to "Docs, Story Context & Agent Relocation" (3 workstreams); `.claude-plugin/marketplace.json` removed from the repo; former Phase 10 (MARKET-01..05) moved to Out of Scope; Phases 11/12/13 renumbered to 10/11/12. Active requirements now 5 v1.3 items.*
+
+*Previously: 2026-04-24 after v1.3 milestone scoping — Current Milestone section added for "v1.3 Marketplace, Docs & Story Context" (4 workstreams: marketplace refresh, GH Pages docs site, agent dir relocation, story-creation enhancements); Active requirements populated with 6 v1.3 items; phase numbering continues from Phase 10; zero-new-deps policy reaffirmed; `<installRoot>` explicitly flagged as user-chosen (not hardcoded).*
 
 *Previously: 2026-04-24 after v1.2 milestone close — all 32 v1.2 requirements (CMD-01..05, REF-01..05, INSTALL-01..09, PRD-01..07, REL-01..06) moved to Validated; `@xgent-ai/gomad@1.2.0` shipped on npm with `v1.2.0` tag on main; 13 new Key Decisions rows added for v1.2 (namespace commit, Windows-safe dash form, manifest v2 schema, cleanup containment, PRD strip-only refactor, dual-sided REL-03, v1.1 retained as prior-stable); Launcher-form slash commands row outcome flipped to ✓ Good.*
 

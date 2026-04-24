@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.3
-milestone_name: Marketplace, Docs & Story Context
+milestone_name: Docs, Story Context & Agent Relocation
 status: roadmap_complete
 stopped_at: ""
-last_updated: "2026-04-24T16:00:00.000Z"
-last_activity: 2026-04-24 -- v1.3 roadmap created; 39 requirements mapped to Phases 10-13; ready to plan Phase 10
+last_updated: "2026-04-24T17:00:00.000Z"
+last_activity: 2026-04-24 -- marketplace workstream dropped; v1.3 renamed; Phases 11/12/13 renumbered to 10/11/12; 34 requirements mapped to Phases 10-12; ready to plan Phase 10
 progress:
-  total_phases: 4
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,19 +18,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-24 after v1.3 milestone scoping)
+See: .planning/PROJECT.md (updated 2026-04-24 after marketplace workstream dropped)
 
 **Core value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
-**Current focus:** v1.3 Phase 10 — Marketplace Refresh (pending start).
+**Current focus:** v1.3 Phase 10 — Story-Creation Enhancements (pending start).
 
 ## Current Position
 
-Phase: 10 of 13 (Marketplace Refresh) — pending start
+Phase: 10 of 12 (Story-Creation Enhancements) — pending start
 Plan: — (planning not yet begun)
 Status: Roadmap complete; ready to plan Phase 10
-Last activity: 2026-04-24 — v1.3 ROADMAP.md authored, 39 requirements mapped
+Last activity: 2026-04-24 — marketplace workstream dropped; v1.3 ROADMAP.md updated, 34 requirements mapped
 
-Progress: [░░░░░░░░░░] 0% (0/4 v1.3 phases complete)
+Progress: [░░░░░░░░░░] 0% (0/3 v1.3 phases complete)
 
 ## Performance Metrics
 
@@ -47,9 +47,10 @@ Progress: [░░░░░░░░░░] 0% (0/4 v1.3 phases complete)
 
 v1.3 roadmap decisions (2026-04-24):
 
-- **4-phase structure (coarse granularity)** — Phases 10 (Marketplace), 11 (Story-Creation), 12 (Docs), 13 (Agent Relocation + Release). 4-phase justified over 5-phase split because AGENT-* and REL-* are tightly coupled (REL-02 quality gate depends on every AGENT-* test; AGENT-10 extends the release tarball-verify gate itself; CHANGELOG BREAKING is specifically about agent-dir).
-- **Phase 13 is last with exclusive lock** — riskiest change (runtime pointer + cleanup-planner + namespace collision + latent `newInstallSet` bug). Needs Phase 10 harness green, Phase 11 `_config/<subdir>/` pattern proven, Phase 12 docs ready for path finalization.
-- **DOCS-07 assigned entirely to Phase 13** — not split. Path-examples linter (`tools/validate-doc-paths.js`) enforces against real post-v1.3 layout.
+- **Marketplace workstream dropped** — `gomad install` CLI is the single distribution path; `.claude-plugin/marketplace.json` removed from the repo rather than refreshed. Former Phase 10 (MARKET-01..05) scrapped and logged in Out of Scope.
+- **3-phase structure (coarse granularity)** — Phases 10 (Story-Creation), 11 (Docs), 12 (Agent Relocation + Release). AGENT-* and REL-* stay coupled in one phase because REL-02 quality gate depends on every AGENT-* test; AGENT-10 extends the release tarball-verify gate itself; CHANGELOG BREAKING is specifically about agent-dir.
+- **Phase 12 is last with exclusive lock** — riskiest change (runtime pointer + cleanup-planner + namespace collision + latent `newInstallSet` bug). Needs Phase 10 `_config/<subdir>/` pattern proven and Phase 11 docs ready for path finalization.
+- **DOCS-07 assigned entirely to Phase 12** — not split. Path-examples linter (`tools/validate-doc-paths.js`) enforces against real post-v1.3 layout.
 
 Carried forward from v1.2 (logged in PROJECT.md Key Decisions):
 
@@ -64,7 +65,7 @@ None.
 
 ### Blockers/Concerns
 
-- **Phase 13 research flag** — before `/gsd-plan-phase 13`, run `/gsd-research-phase 13` to resolve two open design questions: (a) `newInstallSet` derivation fix (AGENT-04) choice has cascading `buildCleanupPlan` effects; (b) `_config/agents/` collision resolution (AGENT-05) — Option 2 (detector tweak) is smallest-diff but confirm.
+- **Phase 12 research flag** — before `/gsd-plan-phase 12`, run `/gsd-research-phase 12` to resolve two open design questions: (a) `newInstallSet` derivation fix (AGENT-04) choice has cascading `buildCleanupPlan` effects; (b) `_config/agents/` collision resolution (AGENT-05) — Option 2 (detector tweak) is smallest-diff but confirm.
 
 ### Quick Tasks Completed
 
@@ -86,6 +87,6 @@ Items carried beyond v1.2 close, not in v1.3 scope:
 
 ## Session Continuity
 
-Last session: 2026-04-24 — v1.3 ROADMAP.md created
-Stopped at: Roadmap complete; 39 v1.3 requirements mapped to Phases 10-13
-Resume: Run `/gsd-plan-phase 10` to begin planning Marketplace Refresh. For Phase 13, run `/gsd-research-phase 13` first (flagged in ROADMAP.md — open design questions on `newInstallSet` + `_config/agents/` collision).
+Last session: 2026-04-24 — marketplace workstream dropped; v1.3 roadmap re-scoped to 3 phases
+Stopped at: Roadmap updated; 34 v1.3 requirements mapped to Phases 10-12 (marketplace MARKET-01..05 removed)
+Resume: Run `/gsd-discuss-phase 10` then `/gsd-plan-phase 10` to begin planning Story-Creation Enhancements. For Phase 12, run `/gsd-research-phase 12` first (flagged in ROADMAP.md — open design questions on `newInstallSet` + `_config/agents/` collision).

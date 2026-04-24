@@ -1,24 +1,14 @@
 # Requirements: GoMad v1.3
 
-**Milestone:** v1.3 Marketplace, Docs & Story Context
+**Milestone:** v1.3 Docs, Story Context & Agent Relocation
 **Defined:** 2026-04-24
 **Core Value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
 **Research summary:** `.planning/research/SUMMARY.md`
-**Roadmap:** `.planning/ROADMAP.md` (Phases 10-13)
+**Roadmap:** `.planning/ROADMAP.md` (Phases 10-12)
 
 ## v1.3 Requirements
 
-Requirements for this milestone. Each maps to a single roadmap phase (Phases 10–13).
-
-### Marketplace
-
-Refresh `.claude-plugin/marketplace.json` from stale BMAD identity to GoMad v1.3 with restructured plugin groupings.
-
-- [ ] **MARKET-01**: Marketplace root identity matches package identity — `name: "@xgent-ai/gomad"`, owner + description + homepage + repository + license reflect xgent-ai (not Brian Madison / BMAD).
-- [ ] **MARKET-02**: Plugin groupings restructured to 3 entries matching v1.2 codebase layout — `gomad-agents` (gm-agent-* launchers), `gomad-skills` (4-phase workflow modules under `gomad-skills/`), `gomad-core` (shared infrastructure under `core-skills/`).
-- [ ] **MARKET-03**: Every `skills:` / `agents:` path in marketplace.json points at a directory that exists on disk and contains a readable `SKILL.md` — zero dead references, verified by CI.
-- [ ] **MARKET-04**: `plugins[].version` pinned to `1.3.0` (not the stale `6.3.0` BMAD value); `strict: false` per plugin; `metadata` includes `keywords` and `category`.
-- [ ] **MARKET-05**: `test:marketplace` script validates JSON shape + path existence + schema conformance (`claude plugin validate .` exits 0); wired into `npm run quality`.
+Requirements for this milestone. Each maps to a single roadmap phase (Phases 10–12).
 
 ### Docs Site Content (Starlight auto-deploy pipeline already shipped in v1.2)
 
@@ -70,18 +60,13 @@ Move persona body install path from `<installRoot>/gomad/agents/` to `<installRo
 Publish `@xgent-ai/gomad@1.3.0` with BREAKING callout. Manual `npm publish`; docs auto-deploy stays.
 
 - [ ] **REL-01**: `CHANGELOG.md` v1.3.0 entry includes explicit `### BREAKING CHANGES` section covering the agent-dir move with old-path → new-path migration instructions and backup-recovery reference.
-- [ ] **REL-02**: `npm run quality` exits 0 on the v1.3 release commit — includes `test:marketplace`, `test:gm-surface` (extended), `test:tarball` (extended), `test:legacy-v12-upgrade`, `test:v13-agent-relocation`, `test:domain-kb-install`, `test:prd-chain`, `docs:build`, `validate-kb-licenses`.
+- [ ] **REL-02**: `npm run quality` exits 0 on the v1.3 release commit — includes `test:gm-surface` (extended), `test:tarball` (extended), `test:legacy-v12-upgrade`, `test:v13-agent-relocation`, `test:domain-kb-install`, `test:prd-chain`, `docs:build`, `validate-kb-licenses`.
 - [ ] **REL-03**: `@xgent-ai/gomad@1.3.0` published to npm with `latest` dist-tag via manual `npm publish` (OIDC or granular token); `v1.1.0` + `v1.2.0` retained on npm; `v1.0.0` deprecation unchanged.
 - [ ] **REL-04**: Git tag `v1.3.0` pushed to `origin/main` after publish; PROJECT.md + MILESTONES.md + STATE.md updated in the same release commit range.
 
 ## Future Requirements (Deferred to v1.4+)
 
 Acknowledged but out of v1.3 roadmap.
-
-### Marketplace
-
-- **MARKET-F1**: `tools/generate-marketplace.js` generator that emits `marketplace.json` from `skill-manifest.yaml` metadata, preventing hand-curation drift.
-- **MARKET-F2**: Cross-plugin dependency declarations (`plugins[].depends_on[]`) if Claude Code schema gains support.
 
 ### Docs
 
@@ -105,6 +90,7 @@ Explicitly excluded from v1.3. Documented to prevent scope creep.
 
 | Feature                                                   | Reason                                                                                             |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Claude Code plugin marketplace (`.claude-plugin/marketplace.json`) | Dropped 2026-04-24 — user chose `gomad install` CLI as the single distribution path; the stale BMAD-era `marketplace.json` was removed from the repo rather than refreshed. Supersedes the former MARKET-01..05 workstream. |
 | Disabling GH Pages auto-deploy                            | User clarified: "publish manually" applied to `npm publish`, not docs. Auto-deploy stays as-is.    |
 | Adding new runtime deps to support v1.3 features          | v1.2 zero-new-deps policy carried forward. BM25 hand-rolled (~50 LOC) rejects `lunr`/`minisearch`/`fuse.js`. |
 | Borrowing KB content from Claude-Cortex / vercel-labs     | Zero IP risk preferred. Seed packs authored from scratch; license-validator still ships for future. |
@@ -112,7 +98,7 @@ Explicitly excluded from v1.3. Documented to prevent scope creep.
 | Touching BMAD upstream or `bmad-method` on npm            | Permanent — BMAD is a separate product.                                                            |
 | Restructuring 1-analysis / 2-plan / 3-solutioning / 4-implementation workflow internals | v1.3 adds sibling skills only; workflow structure unchanged.                                  |
 | Tracking BMAD upstream in GoMad                           | Permanent — GoMad is a hard fork, not a continuously-merged downstream.                            |
-| CI-driven skills / agents auto-generation for docs        | Deferred to DOCS-F1 / MARKET-F1 (v1.4+).                                                           |
+| CI-driven skills auto-generation for docs                 | Deferred to DOCS-F1 (v1.4+).                                                                       |
 
 ## Traceability
 
@@ -120,58 +106,53 @@ Populated by the roadmapper during Phase creation. Every v1.3 requirement maps t
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MARKET-01 | Phase 10 | Pending |
-| MARKET-02 | Phase 10 | Pending |
-| MARKET-03 | Phase 10 | Pending |
-| MARKET-04 | Phase 10 | Pending |
-| MARKET-05 | Phase 10 | Pending |
-| DOCS-01 | Phase 12 | Pending |
-| DOCS-02 | Phase 12 | Pending |
-| DOCS-03 | Phase 12 | Pending |
-| DOCS-04 | Phase 12 | Pending |
-| DOCS-05 | Phase 12 | Pending |
-| DOCS-06 | Phase 12 | Pending |
-| DOCS-07 | Phase 13 | Pending |
-| STORY-01 | Phase 11 | Pending |
-| STORY-02 | Phase 11 | Pending |
-| STORY-03 | Phase 11 | Pending |
-| STORY-04 | Phase 11 | Pending |
-| STORY-05 | Phase 11 | Pending |
-| STORY-06 | Phase 11 | Pending |
-| STORY-07 | Phase 11 | Pending |
-| STORY-08 | Phase 11 | Pending |
-| STORY-09 | Phase 11 | Pending |
-| STORY-10 | Phase 11 | Pending |
-| STORY-11 | Phase 11 | Pending |
-| STORY-12 | Phase 11 | Pending |
-| AGENT-01 | Phase 13 | Pending |
-| AGENT-02 | Phase 13 | Pending |
-| AGENT-03 | Phase 13 | Pending |
-| AGENT-04 | Phase 13 | Pending |
-| AGENT-05 | Phase 13 | Pending |
-| AGENT-06 | Phase 13 | Pending |
-| AGENT-07 | Phase 13 | Pending |
-| AGENT-08 | Phase 13 | Pending |
-| AGENT-09 | Phase 13 | Pending |
-| AGENT-10 | Phase 13 | Pending |
-| AGENT-11 | Phase 13 | Pending |
-| REL-01 | Phase 13 | Pending |
-| REL-02 | Phase 13 | Pending |
-| REL-03 | Phase 13 | Pending |
-| REL-04 | Phase 13 | Pending |
+| STORY-01 | Phase 10 | Pending |
+| STORY-02 | Phase 10 | Pending |
+| STORY-03 | Phase 10 | Pending |
+| STORY-04 | Phase 10 | Pending |
+| STORY-05 | Phase 10 | Pending |
+| STORY-06 | Phase 10 | Pending |
+| STORY-07 | Phase 10 | Pending |
+| STORY-08 | Phase 10 | Pending |
+| STORY-09 | Phase 10 | Pending |
+| STORY-10 | Phase 10 | Pending |
+| STORY-11 | Phase 10 | Pending |
+| STORY-12 | Phase 10 | Pending |
+| DOCS-01 | Phase 11 | Pending |
+| DOCS-02 | Phase 11 | Pending |
+| DOCS-03 | Phase 11 | Pending |
+| DOCS-04 | Phase 11 | Pending |
+| DOCS-05 | Phase 11 | Pending |
+| DOCS-06 | Phase 11 | Pending |
+| DOCS-07 | Phase 12 | Pending |
+| AGENT-01 | Phase 12 | Pending |
+| AGENT-02 | Phase 12 | Pending |
+| AGENT-03 | Phase 12 | Pending |
+| AGENT-04 | Phase 12 | Pending |
+| AGENT-05 | Phase 12 | Pending |
+| AGENT-06 | Phase 12 | Pending |
+| AGENT-07 | Phase 12 | Pending |
+| AGENT-08 | Phase 12 | Pending |
+| AGENT-09 | Phase 12 | Pending |
+| AGENT-10 | Phase 12 | Pending |
+| AGENT-11 | Phase 12 | Pending |
+| REL-01 | Phase 12 | Pending |
+| REL-02 | Phase 12 | Pending |
+| REL-03 | Phase 12 | Pending |
+| REL-04 | Phase 12 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 39 total (5 MARKET + 7 DOCS + 12 STORY + 11 AGENT + 4 REL)
-- Mapped to phases: 39 ✓
+- v1.3 requirements: 34 total (12 STORY + 7 DOCS + 11 AGENT + 4 REL)
+- Mapped to phases: 34 ✓
 - Unmapped: 0 ✓
 
 **Phase distribution:**
-- Phase 10 (Marketplace Refresh): 5 reqs
-- Phase 11 (Story-Creation Enhancements): 12 reqs
-- Phase 12 (Docs Site Content Authoring): 6 reqs
-- Phase 13 (Agent Dir Relocation + Release): 16 reqs
+- Phase 10 (Story-Creation Enhancements): 12 reqs
+- Phase 11 (Docs Site Content Authoring): 6 reqs
+- Phase 12 (Agent Dir Relocation + Release): 16 reqs
 
 ---
 
 *Requirements defined: 2026-04-24*
-*Last updated: 2026-04-24 after roadmap creation — 39/39 requirements mapped to Phases 10-13; traceability table populated.*
+*Last updated: 2026-04-24 after marketplace workstream dropped — MARKET-01..05 moved to Out of Scope; `.claude-plugin/marketplace.json` removed from repo; phases renumbered 11→10, 12→11, 13→12; 34/34 requirements mapped to Phases 10-12.*
+*Previously: 2026-04-24 after roadmap creation — 39/39 requirements mapped to Phases 10-13; traceability table populated.*
