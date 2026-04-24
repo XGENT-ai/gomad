@@ -30,7 +30,7 @@ Load ALL files in the sharded directory. Use this for PRD, Architecture, UX, bro
 
 #### SELECTIVE_LOAD Strategy
 
-Load a specific shard using a template variable. Example: used for epics with `{{epic_num}}`.
+Load a specific shard using a template variable. Examples: epics with `{{epic_num}}`, story context with `{{story_key}}`.
 
 1. Check for template variables in the sharded pattern (e.g., `{{epic_num}}`).
 2. If the variable is undefined, ask the user for the value OR infer it from context.
@@ -48,7 +48,7 @@ Load index.md, analyze the structure and description of each doc in the index, t
 2. Parse the table of contents, links, and section headers.
 3. Analyze the workflow's purpose and objective.
 4. Identify which linked/referenced documents are likely relevant.
-   - *Example:* If the workflow is about authentication and the index shows "Auth Overview", "Payment Setup", "Deployment" -- load the auth docs, consider deployment docs, skip payment.
+   - _Example:_ If the workflow is about authentication and the index shows "Auth Overview", "Payment Setup", "Deployment" -- load the auth docs, consider deployment docs, skip payment.
 5. Load all identified relevant documents.
 6. Store combined content in variable: `{pattern_name_content}`.
 
