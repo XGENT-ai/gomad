@@ -83,3 +83,5 @@ _bmad-output
 website/.astro/
 website/dist/
 build/
+_gomad/
+_gomad-output/
