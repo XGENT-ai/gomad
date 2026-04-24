@@ -56,6 +56,14 @@
     "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
   },
   {
+    "path": "src/gomad-skills/4-implementation/gm-agent-solo-dev/SKILL.md",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-solo-dev/skill-manifest.yaml",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04)."
+  },
+  {
     "path": "tools/installer/ide/shared/agent-command-generator.js",
     "reason": "Shipped installer module that legitimately references gm-agent-* filesystem dirs (7 agent paths + legacy cleanup code); filesystem-path refs per REF-02."
   },
