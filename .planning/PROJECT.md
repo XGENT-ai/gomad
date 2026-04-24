@@ -1,20 +1,8 @@
 # GoMad
 
-## Current Milestone: v1.2 — Agent-as-Command & Coding-Agent PRD Refinement
-
-**Goal:** Convert `gm-agent-*` skills into `/gm:agent-*` slash commands, make installs portable and upgrade-safe, and refocus PRD/product-brief artifacts on coding-agent consumers instead of human founders.
-
-**Target features:**
-
-- Agent → slash-command migration (7 `gm-agent-*` personas → `.claude/commands/gm/agent-*.md`, invoked as `/gm:agent-*`)
-- Reference sweep across source / docs / tests / manifests to replace `gm-agent-*` with `gm:agent-*`
-- Copy-only installer (symlink mode removed; installed output survives `git clone` to another workspace)
-- Install tracking + upgrade cleanup via `_gomad/_config/files-manifest.csv` (old files listed in prior manifest are cleaned before a re-install writes new files)
-- PRD + product-brief refinement for coding-agent consumers — drop human-founder framing (time windows, "why now?", business/operational metrics); amplify aggressive vision + MVP scope; sharpen dev-ready requirements
-
 ## What This Is
 
-GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. v1.1 shipped the fork pivot: renamed package, slim codebase, full credit + legal posture, bilingual docs, published as `@xgent-ai/gomad@1.1.0` on npm. v1.2 refactors the agent-invocation surface, hardens the installer for portable git-clone workflows, and retunes upstream planning artifacts so they read like dev-ready specs for coding agents rather than pitches for human product leads.
+GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. v1.1 shipped the fork pivot: renamed package, slim codebase, full credit + legal posture, bilingual docs, published as `@xgent-ai/gomad@1.1.0` on npm. v1.2 (shipped 2026-04-24, published as `@xgent-ai/gomad@1.2.0`) landed the agent-invocation pivot (7 `gm-agent-*` personas now invoked as `/gm:agent-*` launcher-form slash commands), hardened the installer for portable git-clone workflows (copy-only, manifest-driven upgrade cleanup with `--dry-run` + backup snapshots), and retuned `gm-create-prd` / `gm-product-brief` to read like dev-ready specs for coding agents rather than pitches for human product leads.
 
 ## Core Value
 
@@ -34,15 +22,17 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - ✓ **Bilingual docs** (README + README_CN + docs site landing pages, en + zh-cn only) — v1.1
 - ✓ **Release** (`@xgent-ai/gomad@1.1.0` published, v1.0.0 deprecated with redirect, v1.1.0 tagged on main) — v1.1
 - ✓ **Verification** (quality gate, tarball check, E2E fresh-install all green; no `bmad` residuals) — v1.1
+- ✓ **Agent-as-command migration** (7 `gm-agent-*` personas → `.claude/commands/gm/agent-*.md` launchers, invoked as `/gm:agent-*`; subdirectory namespace verified on current Claude Code; launcher stubs generated at install time from `gm-agent-*/skill-manifest.yaml`; persona body loaded from `_gomad/gomad/agents/*.md` at runtime) — v1.2 (CMD-01..05, 5 reqs)
+- ✓ **Reference sweep** (every user-visible `gm-agent-*` reference across source / docs / tests / manifests migrated to `gm:agent-*`; filesystem dirs + `skill-manifest.yaml name:` kept as dash-form for Windows safety; launcher stubs excluded from dev repo via `.gitignore`) — v1.2 (REF-01..05, 5 reqs)
+- ✓ **Copy-only installer with manifest-driven upgrade** (symlink mode removed; `files-manifest.csv` v2 schema with `schema_version` + `install_root`, parsed/written via `csv-parse/sync`; stale entries cleaned on re-install with realpath containment under `.claude/` + `_gomad/`; BOM/CRLF-aware rows; corrupt-header → `MANIFEST_CORRUPT` classification; `--dry-run` preview; pre-cleanup backup snapshots under `_gomad/_backups/<timestamp>/`; v1.1→v1.2 legacy cleanup of `.claude/skills/gm-agent-*/`) — v1.2 (INSTALL-01..09, 9 reqs)
+- ✓ **Coding-agent-oriented PRD refinement** (`gm-create-prd` steps 02b/02c/03/10 stripped of human-founder framing; residual sweep across 9 other steps; `## Coding-Agent Consumer Mindset` added to `data/prd-purpose.md`; step-09 emits `FR-NN` + Given/When/Then AC + `## Out of Scope` contract; `gm-product-brief` voice aligned with guardrails preserved; downstream skills structurally untouched) — v1.2 (PRD-01..07, 7 reqs)
+- ✓ **Release mechanics** (`type: module` factual error in PROJECT.md corrected; CHANGELOG v1.2.0 includes explicit BREAKING callout; tarball verification extended to assert `.claude/commands/gm/` presence + legacy `.claude/skills/gm-agent-*` absence; 97-assertion PRD chain integration test wired into `npm run quality`; `@xgent-ai/gomad@1.2.0` published with `latest` dist-tag; `v1.2.0` tagged on main) — v1.2 (REL-01..06, 6 reqs)
 
 ### Active
 
-<!-- Milestone 2 (v1.2): Agent-as-Command & Coding-Agent PRD Refinement. See .planning/REQUIREMENTS.md for REQ-ID detail. -->
+<!-- None active. Next milestone kicks off via /gsd:new-milestone. -->
 
-- [ ] **CMD**: The 7 `gm-agent-*` personas (analyst, tech-writer, pm, ux-designer, architect, sm, dev) are installed as `.claude/commands/gm/agent-*.md` and invoked as `/gm:agent-*` slash commands
-- [ ] **REF**: Every `gm-agent-*` reference across source (`gomad-skills/`, `core-skills/`, `tools/installer/`), docs (README, README_CN, docs/, website), tests + fixtures, and manifests is updated to the `gm:agent-*` command form
-- [ ] **INSTALL**: Installer is copy-only (symlink mode removed), writes `_gomad/_config/files-manifest.csv` tracking every installed path, and cleans files listed in the prior manifest before writing new ones on re-install / upgrade
-- [ ] **PRD**: `gm-create-prd` and `gm-product-brief` are retuned for coding-agent consumers — time-window estimation / "why now?" challenge / business-operational metrics removed; aggressive vision + MVP scope amplified; requirements clarity, feature boundaries, and dev-ready acceptance criteria sharpened
+(None — v1.2 shipped; v1.3 not yet scoped)
 
 ### Deferred (beyond v1.2)
 
@@ -51,6 +41,8 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - **CUSTOM-01**: New gomad-specific agents added to `src/gomad-skills/` or `src/core-skills/`
 - **CUSTOM-02**: New gomad-specific skills integrated into the `1-analysis` → `4-implementation` workflow
 - **CUSTOM-03**: Agent/skill documentation and installer support for new additions
+- **CMD-F1**: Task-skill → slash-command aliases (e.g. `/gm:create-prd`, `/gm:product-brief`); task skills currently stay as skills only
+- **REL-F1**: Backup rotation / pruning policy for `_gomad/_backups/<timestamp>/`; first-pass keeps all snapshots on disk
 
 ### Out of Scope
 
@@ -65,23 +57,26 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 ## Context
 
-**Shipped state (2026-04-18).** `@xgent-ai/gomad@1.1.0` is live on npm with `latest` dist-tag. `@xgent-ai/gomad@1.0.0` is deprecated with redirect message "Use @xgent-ai/gomad@latest instead." `v1.1.0` tag on main; `next` merged to main. Tarball ships 320 files via `files` allowlist; 52 `gm-*` skill directories loadable in fresh install.
+**Shipped state (2026-04-24).** `@xgent-ai/gomad@1.2.0` is live on npm with `latest` dist-tag. `v1.1.0` retained as prior stable (not deprecated). `@xgent-ai/gomad@1.0.0` remains deprecated with redirect to `@latest`. `v1.2.0` tag on main. Installer is copy-only with manifest-driven upgrade cleanup (`--dry-run` + backup snapshots under `_gomad/_backups/<timestamp>/`). 7 `gm-agent-*` personas now installed as `/gm:agent-*` launcher-form slash commands under `.claude/commands/gm/`, generated at install time from `gm-agent-*/skill-manifest.yaml`. Filesystem dir names + `skill-manifest.yaml name:` fields keep the dash form (`gm-agent-*`) for Windows-safety; only user-visible references migrated to colon form.
 
 **Codebase state.**
 
-- Package: `@xgent-ai/gomad` on npm, public scoped.
-- Source: `src/gomad-skills/` (four-phase workflow modules) + `src/core-skills/` (shared infrastructure skills). All skills use the `gm-*` prefix.
-- CLI: `tools/installer/gomad-cli.js` is the single entry point, exposing the `gomad` command.
+- Package: `@xgent-ai/gomad@1.2.0` on npm, public scoped.
+- Source: `src/gomad-skills/` (four-phase workflow modules) + `src/core-skills/` (shared infrastructure skills). All skills use the `gm-*` prefix; 7 agent personas (analyst, tech-writer, pm, ux-designer, architect, sm, dev) live under `gm-agent-*/`.
+- CLI: `tools/installer/gomad-cli.js` is the single entry point, exposing the `gomad` command. Installer now copy-only (`fs.copy`, not `fs.ensureSymlink`); tracks every installed path in `_gomad/_config/files-manifest.csv` (v2 schema with `schema_version` + `install_root`, parsed via `csv-parse/sync`); on re-install, cleans stale entries with realpath containment under `.claude/` + `_gomad/`, snapshots pre-cleanup, and offers `--dry-run`.
+- Launcher stubs: Generated at install time into target `.claude/commands/gm/agent-*.md`; launchers excluded from dev repo via `.gitignore`. Persona body loaded at runtime from `_gomad/gomad/agents/*.md` (D-06 / launcher-form contract).
+- PRD pipeline: `gm-create-prd` and `gm-product-brief` refocused on coding-agent consumers. `data/prd-purpose.md` ships `## Coding-Agent Consumer Mindset`. Step-09 emits FR-NN requirements + Given/When/Then acceptance criteria + `## Out of Scope` section. Structural compatibility preserved with downstream skills (`gm-validate-prd`, `gm-create-architecture`, `gm-create-epics-and-stories`, `gm-check-implementation-readiness`).
 - Manifests: `skill-manifest.yaml` and `manifest.json` (no `bmad-` prefix).
 - Website: Astro under-construction one-pager at `gomad.xgent.ai`.
-- Tech stack: Node.js / JavaScript (CommonJS, `require()`-based loading), inherited from BMAD.
-- Docs: English default + `zh-cn/` Chinese translation.
+- Tech stack: Node.js / JavaScript (CommonJS, `require()`-based loading), inherited from BMAD. Zero new runtime deps added in v1.2.
+- Docs: English default + `zh-cn/` Chinese translation. `docs/upgrade-recovery.md` documents backup-restore flow.
+- Tests: `test:gm-surface` (3-phase launcher contract: in-repo self-check, negative-fixture, install-smoke), `test:tarball` (extended with `.claude/commands/gm/` presence + `.claude/skills/gm-agent-*` absence assertions), `test/integration/prd-chain/test-prd-chain.js` (97 assertions). All wired into `npm run quality`.
 
 **Upstream relationship.** GoMad is a hard fork of BMAD Method (<https://github.com/bmad-code-org/BMAD-METHOD>), MIT-licensed by Brian (BMad) Madison. Credit preserved legally (MIT license byte-identical in LICENSE) and ethically (non-affiliation disclaimer, nominative fair use of BMAD trademark, BMAD contributors preserved in CONTRIBUTORS.md).
 
 **npm reality check.**
 
-- `@xgent-ai/gomad` owned by us (Rockie / xgent-ai). v1.0.0 deprecated. v1.1.0 is `latest`.
+- `@xgent-ai/gomad` owned by us (Rockie / xgent-ai). v1.0.0 deprecated. v1.1.0 prior-stable. v1.2.0 is `latest`.
 - `bmad-method` owned by BMAD's authors. We have no rights and will never touch it on npm.
 
 **Audience.** Internal — xgent-ai team using gomad to drive AI-assisted development. Public discoverability is secondary; correctness and credit are primary.
@@ -117,7 +112,19 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 | Canonical non-affiliation disclaimer established as single source of truth, reused verbatim across LICENSE/TRADEMARK/README/README_CN   | Prevents drift across legal surfaces                                                                                   | ✓ Good                                                   |
 | CLI banner via hand-authored GoMad ASCII in `cli-utils.js displayLogo()`, no figlet dep                                                 | One less runtime dep; static banner is stable enough to hand-author                                                    | ✓ Good                                                   |
 | E2E test verifies tarball structurally (not via interactive `gomad install`)                                                            | Avoids `@clack/prompts` hang in non-TTY test environment                                                               | ✓ Good                                                   |
-| Launcher-form slash commands (not self-contained) — `.claude/commands/gm/agent-*.md` is a thin stub loading persona from `_gomad/gomad/agents/*.md` at runtime | Preserves `SKILL.md` as single source of truth (persona body extracted at install time per D-06); no hand-authored duplication; Claude Code sees rich metadata via launcher body | — Contract set in Phase 5; extractor lands in Phase 6    |
+| Launcher-form slash commands (not self-contained) — `.claude/commands/gm/agent-*.md` is a thin stub loading persona from `_gomad/gomad/agents/*.md` at runtime | Preserves `SKILL.md` as single source of truth (persona body extracted at install time per D-06); no hand-authored duplication; Claude Code sees rich metadata via launcher body | ✓ Good (v1.2 shipped; contract set Phase 5, extractor shipped Phase 6) |
+| `/gm:agent-*` committed as single user-visible form (no alternative namespace) | Subdirectory namespace verified on current Claude Code; flat-name fallback (`/gm-agent-*`) documented but not built | ✓ Good (v1.2) |
+| No Claude Code version floor pinned (D-03)                                                                                               | Claude Code ships essentially daily; handle regressions in a patch release rather than freeze the dependency                             | ✓ Good (v1.2)                                             |
+| Filesystem dir names + `skill-manifest.yaml name:` fields keep dash form (`gm-agent-*`), not colon form                                 | Colons aren't Windows-safe in filesystem paths; only user-visible invocation form migrates to colon (`gm:agent-*`)                       | ✓ Good (v1.2)                                             |
+| Zero new runtime deps in v1.2 — local `escapeCsv` (3 LOC) instead of `csv-stringify/sync`                                                | Reuses existing `csv-parse/sync` dep symmetrically for read and write; smallest shipped surface                                          | ✓ Good (v1.2)                                             |
+| `files-manifest.csv` v2 schema: `schema_version="2.0"` + `install_root="_gomad"` + columns `type,name,module,path,hash`                  | Enables safe v1→v2 evolution; `install_root` lets cleanup realpath-contain deletions; column order appends new fields, preserving backward read-compat | ✓ Good (v1.2)                                             |
+| Manifest-driven cleanup containment: realpath resolution → allowed-root prefix check → symlink-escape emits `SYMLINK_ESCAPE` log then throws `ManifestCorruptError` | Symlink traversal is the highest-severity deletion risk; D-33 batch-poison on containment failure is the safe default — no partial deletion outside install roots | ✓ Good (v1.2)                                             |
+| Corrupt-header / IO-error classified as `MANIFEST_CORRUPT` (IO_ERROR sub-class); parse-time error = batch abort                          | Structured error classification so the caller's `[]` return is interpretable; cleanup contract surfaces errors rather than silently skipping | ✓ Good (v1.2)                                             |
+| Backup snapshots under `_gomad/_backups/<timestamp>/` before destructive cleanup; no rotation policy in v1.2                            | Reversibility first; rotation policy (REL-F1) deferred until real-world snapshot accumulation justifies it                              | — Pending (REL-F1 deferred)                               |
+| PRD refinement is strip-only / additive — structural sections consumed by `gm-validate-prd`, `gm-create-architecture`, `gm-create-epics-and-stories`, `gm-check-implementation-readiness` are preserved | Avoids lockstep updates across 4 downstream skills; refactor budget spent on prompt content, not pipeline rewire                        | ✓ Good (v1.2)                                             |
+| `gm-create-prd` step-09 emits FR-NN functional requirements + Given/When/Then acceptance criteria + explicit `## Out of Scope` section (D-58) | Machine-verifiable AC + stable REQ-IDs make PRDs consumable by coding agents without human translation                                  | ✓ Good (v1.2)                                             |
+| REL-03 enforcement is dual-sided: `test:gm-surface` (installer output shape) + `test:tarball` (shipped tarball shape); both must exit 0 before publish | Installer could produce correct output from broken tarball source, or tarball could be correct but installer could mis-emit — neither alone is sufficient | ✓ Good (v1.2)                                             |
+| v1.1.0 retained as prior-stable on npm (not deprecated at v1.2 release)                                                                  | No known v1.1 breakage; deprecation only if real issues emerge                                                                            | ✓ Good (v1.2)                                             |
 
 ## Evolution
 
@@ -140,6 +147,8 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-22 after Phase 8 (PRD + product-brief content refinement) complete — PRD-01..PRD-07 closed; founder framing stripped from `gm-create-prd` steps 02b/02c/03/10 + residual sweep of 9 other steps; `## Coding-Agent Consumer Mindset` installed in `data/prd-purpose.md`; FR-NN + Given/When/Then AC + `## Out of Scope` contract emitted by step-09; `gm-product-brief` voice aligned (guardrails preserved); new `test/integration/prd-chain/test-prd-chain.js` (97 assertions) wired into `npm run quality`.*
+*Last updated: 2026-04-24 after v1.2 milestone close — all 32 v1.2 requirements (CMD-01..05, REF-01..05, INSTALL-01..09, PRD-01..07, REL-01..06) moved to Validated; `@xgent-ai/gomad@1.2.0` shipped on npm with `v1.2.0` tag on main; 13 new Key Decisions rows added for v1.2 (namespace commit, Windows-safe dash form, manifest v2 schema, cleanup containment, PRD strip-only refactor, dual-sided REL-03, v1.1 retained as prior-stable); Launcher-form slash commands row outcome flipped to ✓ Good.*
 
-*Previously: 2026-04-20 after Phase 7 (upgrade safety — manifest-driven cleanup) complete — INSTALL-05/06/07/08/09 closed; `buildCleanupPlan` + `executeCleanupPlan` + `--dry-run` shipped with snapshot-before-remove, realpath containment, v1.1 legacy cleanup, `docs/upgrade-recovery.md`, and 223 Phase 7 assertions green*
+*Previously: 2026-04-22 after Phase 8 (PRD + product-brief content refinement) complete — PRD-01..PRD-07 closed; founder framing stripped from `gm-create-prd` steps 02b/02c/03/10 + residual sweep of 9 other steps; `## Coding-Agent Consumer Mindset` installed in `data/prd-purpose.md`; FR-NN + Given/When/Then AC + `## Out of Scope` contract emitted by step-09; `gm-product-brief` voice aligned (guardrails preserved); new `test/integration/prd-chain/test-prd-chain.js` (97 assertions) wired into `npm run quality`.*
+
+*2026-04-20 after Phase 7 (upgrade safety — manifest-driven cleanup) complete — INSTALL-05/06/07/08/09 closed; `buildCleanupPlan` + `executeCleanupPlan` + `--dry-run` shipped with snapshot-before-remove, realpath containment, v1.1 legacy cleanup, `docs/upgrade-recovery.md`, and 223 Phase 7 assertions green*
