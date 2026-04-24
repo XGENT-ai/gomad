@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-24 after v1.2 milestone close)
 Phase: — (no active milestone)
 Plan: —
 Status: v1.2 shipped 2026-04-24 and archived; v1.3 not yet scoped
-Last activity: 2026-04-24 - Completed quick task 260424-fvb: rename bmad-agent-solo-dev → gm-agent-solo-dev
+Last activity: 2026-04-24 - Completed quick task 260424-g68: register solo-dev in installer AGENT_SOURCES
 
 Progress: v1.2 complete ✓ — see MILESTONES.md for historical record
 
@@ -66,6 +66,7 @@ None carried from v1.2. Fresh slate for v1.3.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260424-fvb | Rename bmad-agent-solo-dev → gm-agent-solo-dev; swap bmad-* refs → gm-* | 2026-04-24 | 12251e8 | [260424-fvb-bmad-agent-solo-dev-gm-agent-solo-dev-bm](./quick/260424-fvb-bmad-agent-solo-dev-gm-agent-solo-dev-bm/) |
+| 260424-g68 | Register solo-dev as 8th canonical agent in installer AGENT_SOURCES; update install-smoke test to 8 | 2026-04-24 | 8c754b1 | [260424-g68-register-gm-agent-solo-dev-in-installer-](./quick/260424-g68-register-gm-agent-solo-dev-in-installer-/) |
 
 ## Deferred Items
 
