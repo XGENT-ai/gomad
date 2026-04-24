@@ -8,6 +8,23 @@ GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD
 
 A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills, without dragging along the parts of BMAD we don't use.
 
+## Current Milestone: v1.3 Marketplace, Docs & Story Context
+
+**Goal:** Refresh public surface (plugin marketplace + docs site), restructure the agent install path, and enrich the 4-implementation story workflow with a discuss step plus a domain-knowledge framework.
+
+**Target workstreams:**
+
+- **Plugin marketplace refresh** — Full BMAD→GoMad rename of `.claude-plugin/marketplace.json` plus restructure of plugin groupings to match v1.2 layout (gm-agent-* launchers / gomad-skills workflow / core-skills).
+- **GitHub Pages docs site** — Build out initial docs content (install, agents, skills, architecture) and deploy manually to `gomad.xgent.ai`. No CI auto-deploy in v1.3.
+- **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/`. Agents-only; `gomad/workflows/` and `gomad/data/` stay put. v1.2→v1.3 upgrade via manifest-v2 cleanup with backup snapshots.
+- **Story-creation enhancements** — New `gm-discuss-story` skill (manual-step precursor to `gm-create-story`) emitting `{planning_artifacts}/{{story_key}}-context.md`; `gm-create-story` auto-loads that context when present; new `gm-domain-skill` with retrieval protocol + 2 seed knowledge packs installed from `src/domain-kb/` into `<installRoot>/_config/kb/`.
+
+**Key constraints for v1.3:**
+
+- `<installRoot>` is user-chosen (`_gomad` by convention); no hardcoded install paths.
+- Zero new runtime deps (v1.2 policy carried forward). Domain-skill search uses Node built-ins or existing deps.
+- Phase numbering continues (v1.2 ended at Phase 9 → v1.3 starts at Phase 10).
+
 ## Requirements
 
 ### Validated
@@ -30,9 +47,14 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 
 ### Active
 
-<!-- None active. Next milestone kicks off via /gsd:new-milestone. -->
+<!-- v1.3 scope. See Current Milestone section above for full context. REQ-IDs defined in .planning/REQUIREMENTS.md. -->
 
-(None — v1.2 shipped; v1.3 not yet scoped)
+- [ ] **Plugin marketplace refresh** — Rename + restructure `.claude-plugin/marketplace.json` to match v1.2 layout (gm-agent-* launchers / gomad-skills / core-skills)
+- [ ] **GitHub Pages docs site** — Initial content (install, agents, skills, architecture) deployed manually to `gomad.xgent.ai`
+- [ ] **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` with manifest-driven upgrade cleanup
+- [ ] **`gm-discuss-story`** — New skill emitting `{planning_artifacts}/{{story_key}}-context.md` to clarify gray areas before story creation
+- [ ] **`gm-create-story` context load** — Auto-detect and load `{story_key}-context.md` when present
+- [ ] **`gm-domain-skill`** — Framework + retrieval protocol + 2 seed knowledge packs (`src/domain-kb/` → `<installRoot>/_config/kb/`)
 
 ### Deferred (beyond v1.2)
 
@@ -147,7 +169,9 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-24 after v1.2 milestone close — all 32 v1.2 requirements (CMD-01..05, REF-01..05, INSTALL-01..09, PRD-01..07, REL-01..06) moved to Validated; `@xgent-ai/gomad@1.2.0` shipped on npm with `v1.2.0` tag on main; 13 new Key Decisions rows added for v1.2 (namespace commit, Windows-safe dash form, manifest v2 schema, cleanup containment, PRD strip-only refactor, dual-sided REL-03, v1.1 retained as prior-stable); Launcher-form slash commands row outcome flipped to ✓ Good.*
+*Last updated: 2026-04-24 after v1.3 milestone scoping — Current Milestone section added for "v1.3 Marketplace, Docs & Story Context" (4 workstreams: marketplace refresh, GH Pages docs site, agent dir relocation, story-creation enhancements); Active requirements populated with 6 v1.3 items; phase numbering continues from Phase 10; zero-new-deps policy reaffirmed; `<installRoot>` explicitly flagged as user-chosen (not hardcoded).*
+
+*Previously: 2026-04-24 after v1.2 milestone close — all 32 v1.2 requirements (CMD-01..05, REF-01..05, INSTALL-01..09, PRD-01..07, REL-01..06) moved to Validated; `@xgent-ai/gomad@1.2.0` shipped on npm with `v1.2.0` tag on main; 13 new Key Decisions rows added for v1.2 (namespace commit, Windows-safe dash form, manifest v2 schema, cleanup containment, PRD strip-only refactor, dual-sided REL-03, v1.1 retained as prior-stable); Launcher-form slash commands row outcome flipped to ✓ Good.*
 
 *Previously: 2026-04-22 after Phase 8 (PRD + product-brief content refinement) complete — PRD-01..PRD-07 closed; founder framing stripped from `gm-create-prd` steps 02b/02c/03/10 + residual sweep of 9 other steps; `## Coding-Agent Consumer Mindset` installed in `data/prd-purpose.md`; FR-NN + Given/When/Then AC + `## Out of Scope` contract emitted by step-09; `gm-product-brief` voice aligned (guardrails preserved); new `test/integration/prd-chain/test-prd-chain.js` (97 assertions) wired into `npm run quality`.*
 

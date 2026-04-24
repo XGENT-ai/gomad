@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Agent-as-Command & Coding-Agent PRD Refinement
-status: shipped_and_archived
-stopped_at: v1.2 archived 2026-04-24
-last_updated: "2026-04-24T02:30:22.962Z"
-last_activity: 2026-04-24 -- v1.2 milestone closed and archived
+milestone: v1.3
+milestone_name: Marketplace, Docs & Story Context
+status: defining_requirements
+stopped_at: ""
+last_updated: "2026-04-24T00:00:00.000Z"
+last_activity: 2026-04-24 -- v1.3 milestone started; scoping requirements
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 16
-  completed_plans: 16
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-24 after v1.2 milestone close)
+See: .planning/PROJECT.md (updated 2026-04-24 after v1.3 milestone scoping)
 
 **Core value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
-**Current focus:** Planning v1.3 — run `/gsd:new-milestone` to scope next phase range (10+).
+**Current focus:** v1.3 — Marketplace, Docs & Story Context (defining requirements).
 
 ## Current Position
 
-Phase: — (no active milestone)
+Phase: Not started (defining requirements)
 Plan: —
-Status: v1.2 shipped 2026-04-24 and archived; v1.3 not yet scoped
-Last activity: 2026-04-24 - Completed quick task 260424-g68: register solo-dev in installer AGENT_SOURCES
+Status: Defining requirements
+Last activity: 2026-04-24 — Milestone v1.3 started
 
-Progress: v1.2 complete ✓ — see MILESTONES.md for historical record
+Progress: v1.3 just started — 6 Active requirements staged in PROJECT.md; REQUIREMENTS.md + ROADMAP.md pending.
 
 ## Performance Metrics
 
