@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.1 Rename & Rebrand** — Phases 1-4 (shipped 2026-04-18) — see [milestones/v1.1-ROADMAP.md](./milestones/v1.1-ROADMAP.md)
-- 🚧 **v1.2 Agent-as-Command & Coding-Agent PRD Refinement** — Phases 5-9 (in progress)
+- ✅ **v1.2 Agent-as-Command & Coding-Agent PRD Refinement** — Phases 5-9 (SHIPPED 2026-04-24)
 
 ## Phases
 
@@ -23,15 +23,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 </details>
 
-### 🚧 v1.2 Agent-as-Command & Coding-Agent PRD Refinement (In Progress)
+### ✅ v1.2 Agent-as-Command & Coding-Agent PRD Refinement (SHIPPED 2026-04-24)
 
 **Milestone Goal:** Convert `gm-agent-*` skills into `/gm:agent-*` slash commands, make installs portable and upgrade-safe, and refocus PRD/product-brief artifacts on coding-agent consumers instead of human founders.
 
-- [ ] **Phase 5: Foundations & Command-Surface Validation** — De-risk subdirectory namespace resolution, log launcher-pattern decision, fix PROJECT.md factual error, gitignore generated command output before any installer changes proceed
-- [ ] **Phase 6: Installer Mechanics — Copy + Manifest + Stub Generation** — Swap symlink→copy, extend files-manifest.csv schema, revive agent-command-generator to produce `.claude/commands/gm/agent-*.md` launchers
-- [ ] **Phase 7: Upgrade Safety — Manifest-Driven Cleanup** — Read prior manifest on re-install, realpath-contain each entry, back up + remove stale files, one-time v1.1 legacy path cleanup, dry-run flag
+- [x] **Phase 5: Foundations & Command-Surface Validation** — De-risk subdirectory namespace resolution, log launcher-pattern decision, fix PROJECT.md factual error, gitignore generated command output before any installer changes proceed
+- [x] **Phase 6: Installer Mechanics — Copy + Manifest + Stub Generation** — Swap symlink→copy, extend files-manifest.csv schema, revive agent-command-generator to produce `.claude/commands/gm/agent-*.md` launchers
+- [x] **Phase 7: Upgrade Safety — Manifest-Driven Cleanup** — Read prior manifest on re-install, realpath-contain each entry, back up + remove stale files, one-time v1.1 legacy path cleanup, dry-run flag
 - [x] **Phase 8: PRD + Product-Brief Content Refinement** — Strip human-founder framing from `gm-create-prd/steps-c/`, light pass on `gm-product-brief`, integration test preserving downstream PRD-pipeline compatibility (completed 2026-04-22)
-- [ ] **Phase 9: Reference Sweep + Verification + Release** — Migrate user-visible `gm-agent-*` → `gm:agent-*`, extend tarball verification, CHANGELOG with BREAKING callout, publish `@xgent-ai/gomad@1.2.0`, tag `v1.2.0`
+- [x] **Phase 9: Reference Sweep + Verification + Release** — Migrate user-visible `gm-agent-*` → `gm:agent-*`, extend tarball verification, CHANGELOG with BREAKING callout, publish `@xgent-ai/gomad@1.2.0`, tag `v1.2.0` (completed 2026-04-24)
 
 ## Phase Details
 
@@ -111,7 +111,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 - [x] 09-01-PLAN.md — Prose sweep + installer simplification: gm-sprint-agent/workflow.md, gm-epic-demo-story/SKILL.md, module-help.csv colon-form migration, installer.js transform-helper deletion (REF-01, REF-02, REF-04)
 - [x] 09-02-PLAN.md — Verification gates: test-orphan-refs.js + allowlist + test-gm-command-surface.js Phase C hard-assertion + verify-tarball.js Phase 3 + npm-scripts wiring (REF-01, REF-04, REF-05, REL-03, REL-04)
-- [ ] 09-03-PLAN.md — CHANGELOG v1.2.0 + version bump + gate-stack + human-verify npm publish + v1.2.0 tag + smoke-test (REL-02, REL-04, REL-05, REL-06)
+- [x] 09-03-PLAN.md — CHANGELOG v1.2.0 + version bump + gate-stack + human-verify npm publish + v1.2.0 tag + smoke-test (REL-02, REL-04, REL-05, REL-06)
 
 ## Progress
 
@@ -124,8 +124,8 @@ Phases execute in numeric order: 5 → 6 → 7 → 8 → 9. Phase 8 (content) is
 | 2. Rename                                          | v1.1      | 3/3            | Complete    | 2026-04    |
 | 3. Credit, Branding & Docs                         | v1.1      | 2/2            | Complete    | 2026-04    |
 | 4. Verification & Release                          | v1.1      | 3/3            | Complete    | 2026-04-18 |
-| 5. Foundations & Command-Surface Validation        | v1.2      | 0/3            | Not started | -          |
-| 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 0/3            | Not started | -          |
-| 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 0/2            | Not started | -          |
-| 8. PRD + Product-Brief Content Refinement          | v1.2      | 5/5 | Complete    | 2026-04-22 |
-| 9. Reference Sweep + Verification + Release        | v1.2      | 0/3            | Not started | -          |
+| 5. Foundations & Command-Surface Validation        | v1.2      | 3/3            | Complete    | 2026-04-19 |
+| 6. Installer Mechanics — Copy + Manifest + Stubs   | v1.2      | 3/3            | Complete    | 2026-04-20 |
+| 7. Upgrade Safety — Manifest-Driven Cleanup        | v1.2      | 2/2            | Complete    | 2026-04-21 |
+| 8. PRD + Product-Brief Content Refinement          | v1.2      | 5/5            | Complete    | 2026-04-22 |
+| 9. Reference Sweep + Verification + Release        | v1.2      | 3/3            | Complete    | 2026-04-24 |

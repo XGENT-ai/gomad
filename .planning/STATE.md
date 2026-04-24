@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Agent-as-Command & Coding-Agent PRD Refinement
-status: executing
-stopped_at: Phase 9 context gathered
-last_updated: "2026-04-23T13:40:28.021Z"
-last_activity: 2026-04-23 -- Phase 09 execution started
+status: shipped
+stopped_at: Phase 9 shipped — v1.2.0 published
+last_updated: "2026-04-24T02:03:06.000Z"
+last_activity: 2026-04-24 -- v1.2.0 published to npm
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 16
-  completed_plans: 13
-  percent: 81
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-18 after v1.2 milestone kickoff)
 
 ## Current Position
 
-Phase: 09 (reference-sweep-verification-release) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 09
-Last activity: 2026-04-23 -- Phase 09 execution started
+Phase: 09 (reference-sweep-verification-release) — SHIPPED
+Plan: 3/3 Complete
+Status: v1.2 shipped 2026-04-24
+Last activity: 2026-04-24 -- v1.2.0 published to npm
 
-Progress: [░░░░░░░░░░] 0% (0/5 v1.2 phases complete)
+Progress: [██████████] 100% (5/5 v1.2 phases complete)
 
 ## Performance Metrics
 
@@ -75,6 +75,6 @@ Items carried from v1.1 close and deferred beyond v1.2:
 
 ## Session Continuity
 
-Last session: 2026-04-23T12:22:36.764Z
-Stopped at: Phase 9 context gathered
-Resume: run `/gsd-plan-phase 5` to begin planning Phase 5 (Foundations & Command-Surface Validation).
+Last session: 2026-04-24T02:03:06.000Z
+Stopped at: Phase 9 shipped — v1.2.0 published
+Resume: v1.2 milestone complete. Next: run `/gsd-milestone-summary` to close milestone; then `/gsd-new-milestone` to plan v1.3.
