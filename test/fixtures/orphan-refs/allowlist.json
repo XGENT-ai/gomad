@@ -70,6 +70,16 @@
     "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
   },
   {
+    "path": "src/gomad-skills/4-implementation/gm-agent-solo-dev/SKILL.md",
+    "lineContainsPattern": "name: gm-agent-solo-dev",
+    "reason": "Frontmatter name must match dir name per parseSkillMd contract (REF-02, REF-04, D-63)."
+  },
+  {
+    "path": "src/gomad-skills/4-implementation/gm-agent-solo-dev/skill-manifest.yaml",
+    "lineContainsPattern": "name: gm-agent-solo-dev",
+    "reason": "skill-manifest.yaml name must match dir name (REF-02, REF-04, D-63)."
+  },
+  {
     "path": "tools/validate-skills.js",
     "lineContainsPattern": "gm-agent-tech-writer",
     "reason": "Validator-allowlist comment + WF_SKIP_SKILLS set referencing sub-skill dir name (filesystem path ref, REF-02)."
