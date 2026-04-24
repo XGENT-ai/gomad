@@ -66,7 +66,7 @@ Plans:
 - [x] 10-03-PLAN.md — gm-discuss-story skill (5 files; STORY-01, STORY-02, STORY-03)
 - [x] 10-04-PLAN.md — gm-domain-skill (5 files; STORY-06, STORY-07)
 - [x] 10-05-PLAN.md — Seed KB packs: testing/ + architecture/ (18 files; STORY-08, STORY-09)
-- [ ] 10-06-PLAN.md — Patch gm-create-story (discover-inputs.md + workflow.md; STORY-04, STORY-05, STORY-12)
+- [x] 10-06-PLAN.md — Patch gm-create-story (discover-inputs.md + workflow.md; STORY-04, STORY-05, STORY-12)
 
 ### Phase 11: Docs Site Content Authoring
 **Goal**: Visitors to `gomad.xgent.ai` can read tutorials (install, quick-start), reference pages (agents, skills), explanation (architecture), and contributing guide in both English and Chinese — content deployed automatically by the existing Starlight GH Actions pipeline on push to main.
