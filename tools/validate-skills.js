@@ -197,6 +197,9 @@ function discoverSkillDirs(rootDirs) {
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       if (entry.name === 'node_modules' || entry.name === '.git') continue;
+      // domain-kb/ uses a different SKILL.md contract (KB pack frontmatter:
+      // source/license/last_reviewed) validated by tools/validate-kb-licenses.js.
+      if (entry.name === 'domain-kb') continue;
 
       const fullPath = path.join(dir, entry.name);
       const skillMd = path.join(fullPath, 'SKILL.md');
