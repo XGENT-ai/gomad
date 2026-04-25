@@ -4,14 +4,11 @@ Four output modes, selected by the workflow branch. Each `<template-output>` tag
 
 ---
 
-## Mode A — file_content_response (D-08 best-match)
+## Mode A — file_content_response (D-08 best-match, read-as-skill)
 
-{{top_file_content}}
+Loaded: {{top_file_relative_path}} ({{domain_slug}} pack) — Score: {{top_score}} (BM25, k1=1.2, b=0.75)
 
----
-
-_Source: {{top_file_relative_path}} ({{domain_slug}} pack)_
-_Score: {{top_score}} (BM25, k1=1.2, b=0.75)_
+> The matched file's full content has been loaded into the LLM's working context via the file-read tool and now governs the active task as authoritative domain guidance. The body is intentionally NOT echoed here — gm-domain-skill is a coding-agent contract, not a human-readable doc viewer.
 
 ---
 

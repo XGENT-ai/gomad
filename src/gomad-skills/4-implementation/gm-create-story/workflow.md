@@ -275,12 +275,12 @@ all learnings that could impact current story implementation</action>
   </check>
 
 <action>For each relevant domain slug, invoke gm-domain-skill with a focused query derived from the story scope (e.g., domain=testing, query="integration test DB strategy for Node.js").</action>
-<note>gm-domain-skill returns a single best-matching .md file's full content per D-08, or a "no match" message per D-10, or a "did you mean" fallback per D-11. Accept all three outcomes silently — no fatal branches.</note>
+<note>gm-domain-skill operates in read-as-skill mode (D-08): on a strong BM25 match, the skill loads the matched .md file into your working context via the file-read tool and emits a single-line `Loaded: ...` citation. The file body is NOT in the chat output — it's in your context, governing this story-drafting task. On no-match (D-10) or pack-not-installed (D-11) the skill emits a short status line and loads nothing. Accept all three outcomes silently — no fatal branches.</note>
 
-<action>Append each successful retrieval to {kb_snippets} with a header line: `\n\n### Domain KB: <slug> — <relative_path>\n\n{content}`.</action>
+<action>Accumulate the citation lines (NOT file content) into `{kb_citations}` — one entry per successful retrieval, format `<slug>: <relative_path> (score <n>)`. Use the loaded file content directly when shaping the story's Dev Notes, Tasks, and References — that's the whole point of read-as-skill.</action>
 
-  <check if="kb retrieval returned no match or pack not installed for all requested slugs">
-    <action>Proceed without kb_snippets — this is NOT an error. Note in summary: "No KB pre-bake for this story."</action>
+  <check if="every gm-domain-skill invocation returned no-match or pack-not-installed">
+    <action>Proceed with empty `{kb_citations}` — this is NOT an error. Note in summary: "No KB pre-bake for this story."</action>
   </check>
 
 <note>This step is the integration point for STORY-12. gm-dev-story fresh-retrieval integration is deferred per STORY-F1.</note>
@@ -323,8 +323,8 @@ frameworks</action>
   file_structure_requirements</template-output>
   <template-output file="{default_output_file}">testing_requirements</template-output>
 
-  <!-- Domain KB pre-bake content (STORY-12) -->
-  <check if="kb_snippets is non-empty">
+  <!-- Domain KB pre-bake citations (STORY-12, read-as-skill) -->
+  <check if="kb_citations is non-empty">
     <template-output file="{default_output_file}">domain_kb_references</template-output>
   </check>
 

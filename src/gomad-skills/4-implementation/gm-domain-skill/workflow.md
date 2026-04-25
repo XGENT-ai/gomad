@@ -124,8 +124,9 @@ score[f] = Σ  idf[q] * ------------------------------------------------
     <action>HALT</action>
   </check>
 
-<action>Return `{doc_content[top_file]}` unmodified — D-08 requires full file content, NOT an excerpt, NOT a summary, NOT a top-N list.</action>
-<action>Append a source-citation footer: `Source: {top_file_rel} ({{domain_slug}} pack) — Score: {top_score} (BM25, k1=1.2, b=0.75)`.</action>
+<action>**Read-as-skill (D-08):** Use the file-read tool (e.g. `Read`) to load the FULL content of `{top_file}` into the LLM's working context. The matched file is now **authoritative domain guidance for the active task** — apply it directly to whatever the caller is doing (story drafting, code generation, design review, etc.). Treat it like a sub-skill body, not a chat response.</action>
+<action>**Do NOT echo `{doc_content[top_file]}` back to the caller as a chat message.** The caller is a coding agent, not a human reader; printing the file body wastes tokens and obscures the operational signal. The file's content lives in your context, not in your output.</action>
+<action>Emit ONLY a single-line citation acknowledgment so the caller knows what was loaded: `Loaded: {top_file_rel} ({{domain_slug}} pack) — Score: {top_score} (BM25, k1=1.2, b=0.75)`.</action>
 <template-output file="stdout">file_content_response</template-output>
 <action>Before returning, load `./checklist.md` and validate the output against Mode A integrity checks; apply any corrections required.</action>
 <action>HALT with success</action>

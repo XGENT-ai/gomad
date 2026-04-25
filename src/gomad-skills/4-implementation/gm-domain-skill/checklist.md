@@ -42,13 +42,15 @@ You are an independent validator running in a **FRESH CONTEXT**. Confirm the `gm
   - **Mode C**: `no_match_response` (D-10 — pack found + query present + `{top_score}` <= `NO_MATCH_FLOOR`)
   - **Mode D**: `pack_not_installed_response` (D-11 — pack not found or slug rejected by traversal guard)
 
-### Mode A integrity (file_content_response)
+### Mode A integrity (file_content_response — read-as-skill)
 
-- [ ] Returned content is the **FULL file content** (not an excerpt, not a summary, not the first N lines)
-- [ ] Source citation includes BOTH the relative path AND the `{{domain_slug}}` pack name
+- [ ] The file-read tool (e.g. `Read`) was invoked against `{top_file}` so the FULL content entered the LLM's working context
+- [ ] The output is a **single-line citation** of the form `Loaded: <relative_path> ({{domain_slug}} pack) — Score: <n>` — no multi-line file body, no excerpt
+- [ ] The matched file's body is **NOT** echoed back to the caller (D-08 read-as-skill: content lives in context, not in chat output)
+- [ ] Citation includes BOTH the relative path AND the `{{domain_slug}}` pack name
 - [ ] Score in the citation is > 0.5 (`NO_MATCH_FLOOR`) — otherwise Mode C should have fired instead
-- [ ] Only **ONE** file returned (D-08 explicitly forbids top-N lists)
-- [ ] The returned file is an actual file in `{pack_files_abs}` (not fabricated)
+- [ ] Only **ONE** file loaded (D-08 explicitly forbids top-N lists)
+- [ ] The loaded file is an actual file in `{pack_files_abs}` (not fabricated)
 
 ### Mode B integrity (catalog_listing_response)
 
