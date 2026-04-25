@@ -12,6 +12,21 @@
 
 ---
 
+## RUNTIME: Interactive Prompt Rendering
+
+When an `<ask>` block in this workflow uses the **structured shape** (any of `header:`, `question:`, `options:`, `multiSelect:`, `recommended:`), render it via the host's interactive question tool **if available**:
+
+- **Claude Code** → `AskUserQuestion` tool
+- **VS Code Copilot** → `vscode_askquestions` tool
+
+Map fields directly: `header` → header, `question` → question, `options` (label + optional `— description`) → options, `multiSelect: true` → enable multi-select. Steps 2, 3b, 4, and 6 below all use this shape and MUST surface as a TUI menu when the tool is available.
+
+When no interactive tool is exposed by the runtime — OR when the `<ask>` block is free-form prose (e.g. `<ask>Choose: Update / Skip</ask>`, `<ask>transition: "..."</ask>`) — present the prompt as a plain-text numbered list and wait for the user's reply.
+
+The decision flow is unchanged either way; only the UX of choice presentation adapts to the host.
+
+---
+
 ## INITIALIZATION
 
 ### Configuration Loading
