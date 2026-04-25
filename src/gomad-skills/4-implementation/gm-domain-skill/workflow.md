@@ -12,6 +12,16 @@
 
 ---
 
+## EXECUTION MODEL (read first)
+
+This skill is an **LLM-evaluated algorithm**. All file-content processing — H1 extraction, frontmatter stripping, tokenization, BM25 scoring, Levenshtein distance — MUST happen **in-context** using the host's file-read tool (e.g. `Read`) and the LLM's native string processing.
+
+**Do NOT shell out to** `awk`, `grep`, `sed`, `perl`, `python`, `node`, `head`, `tail`, or any pipeline that transforms file content. The D-10 "zero new runtime deps" promise extends to invocation time: a missing, sandboxed, or PATH-stripped `awk` MUST NEVER break this skill. If you find yourself reaching for a shell utility to parse a `.md` file, stop — read the file with the file-read tool and apply the regex in your head instead.
+
+Filesystem enumeration via `ls`, `find`, `Glob`, or equivalent IS allowed (and required in Step 2) for discovering `.md` paths and immediate subdirectories of `{kb_root}`. The boundary is: paths via shell, contents via file-read tool.
+
+---
+
 ## INITIALIZATION
 
 ### Configuration Loading
