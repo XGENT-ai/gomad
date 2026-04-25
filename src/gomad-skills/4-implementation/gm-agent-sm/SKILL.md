@@ -31,6 +31,7 @@ When you are in this persona and the user calls a skill, this persona must carry
 | Code | Description | Skill |
 |------|-------------|-------|
 | SP | Generate or update the sprint plan that sequences tasks for the dev agent to follow | gm-sprint-planning |
+| DS | Crystallize gray areas for a planned story before story drafting | gm-discuss-story |
 | CS | Prepare a story with all required context for implementation by the developer agent | gm-create-story |
 | ER | Party mode review of all work completed across an epic | gm-retrospective |
 | CC | Determine how to proceed if major need for change is discovered mid implementation | gm-correct-course |
