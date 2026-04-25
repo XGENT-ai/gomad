@@ -27,6 +27,31 @@ The decision flow is unchanged either way; only the UX of choice presentation ad
 
 ---
 
+## ANTI-HALLUCINATION (groundedness contract — read before everything else)
+
+Every claim this workflow makes about **existing code** — fields, schemas, function signatures, file paths, behavior, presence/absence — MUST be verified against the live codebase before being stated. Fabricated code claims are the primary failure mode of LLM-driven discussions: a hallucinated "this field doesn't exist" or "the API returns X" sends the user into a decision based on a false premise, and that premise then propagates into context.md → the story → the code.
+
+**The rule (applies to gray-area identification, option framing, per-area Q&A, and final write-up):**
+
+1. **Verify before asserting.** Before stating any factual claim about existing code, use the file-read tool (`Read`), `Grep`, `Glob`, or equivalent to confirm it. Cite the file path (and line number when precise) so the user can audit the claim.
+
+2. **No assertions of absence without an actual search.** NEVER state that a field, file, function, schema column, route, or behavior does NOT exist unless you have just run a Grep/Glob that came up empty. "I don't see X in the code" requires a documented search; otherwise phrase the same point as a question ("Is there already an X? If not, should we add one?") and let the user answer.
+
+3. **Mark uncertainty visibly.** If a claim cannot be verified within reasonable effort (generated code, ambiguous search, file too large to scan in full), prefix it with `[unverified]` and ask the user to confirm BEFORE treating it as a decision premise. Do NOT silently proceed on a guess.
+
+4. **Convert blind guesses into questions.** When you would otherwise assert something you do not actually know, rewrite it as a question. The user is the source of truth for things you have not verified — surface the uncertainty, do not paper over it.
+
+**Specifically forbidden patterns:**
+
+- "The current schema doesn't have field X" — without a Read of the schema file
+- "There's no existing handler for Y" — without a Grep showing the absence
+- "The component currently only accepts props A, B, C" — without reading the component
+- Inventing field names, prop shapes, table columns, or API contracts from "what would make sense for a story like this"
+
+**Cost framing:** the cost of one extra clarifying question is one round-trip with the user. The cost of one fabricated code claim is a story (and eventually a code change) built on sand. Always pay the round-trip.
+
+---
+
 ## INITIALIZATION
 
 ### Configuration Loading
@@ -197,8 +222,9 @@ The checkpoint is deleted on successful `{{default_output_file}}` write (D-05 cl
   <action>If inputs not yet loaded, read fully and follow `./discover-inputs.md` to load all input files</action>
   <action>From {epics_content}, extract story {{epic_num}}-{{story_num}} entry: acceptance criteria, technical requirements, dependencies</action>
   <action>Cross-reference against {prd_content}, {architecture_content}, {ux_content} to surface contradictions, underspecified edges, and unresolved design questions</action>
+  <critical>**ANTI-HALLUCINATION enforcement:** for every candidate gray area whose framing references existing code (fields, schemas, files, functions, behavior, presence/absence) — before adding it to {{candidate_gray_areas}}, verify the reference with `Read` / `Grep` / `Glob`. Cite the file path (and line where useful) inside the gray-area description. If a reference cannot be verified, either (a) convert the framing into a question for the user ("Does the schema already have field X?"), or (b) prefix the claim with `[unverified]` and surface it as such. Do NOT enumerate a gray area whose premise is a guess about the code.</critical>
   <action>Enumerate 3-5 gray areas with concrete labels (e.g., "AC#2 edge: empty input vs whitespace vs script tags", NOT "Input validation approach")</action>
-  <note>Each gray area must cite at least one concrete source (AC number, architecture section, UX wireframe) — no speculative areas.</note>
+  <note>Each gray area must cite at least one concrete source (AC number, architecture section, UX wireframe, OR a verified file path) — no speculative areas.</note>
   <action>Store enumerated gray areas as {{candidate_gray_areas}}</action>
   <action>GOTO step 4</action>
 </step>
@@ -245,6 +271,7 @@ The checkpoint is deleted on successful `{{default_output_file}}` write (D-05 cl
   <action>FOR EACH area IN {{areas_selected}} NOT IN {{areas_completed}}:</action>
   <action>  Ask ~4 focused questions with 2-3 concrete options each</action>
   <note>Concrete = specific values, file paths, library names — never abstract like "your preference". Each question must advance the story's scope, not re-ask PRD-level questions.</note>
+  <critical>**ANTI-HALLUCINATION enforcement (per-question):** when an option references existing code (e.g. "Reuse the existing `validateEmail` helper", "Schema already has `created_at`, add `updated_at`?"), verify the reference with `Read`/`Grep`/`Glob` and cite the file path inside the option text. If you cannot verify the claim, do NOT ship the option — either drop it, replace it with a question to the user, or prefix it with `[unverified]`. The user must NEVER pick between options whose factual premise is fabricated.</critical>
   <action>  Append { question, answer, options_presented } to decisions[area] after each answer</action>
   <action>  After the ~4 questions for this area finish (or user moves on), append area to {{areas_completed}}</action>
   <action>  Write checkpoint JSON to {{checkpoint_file}} (i.e. `{planning_artifacts}/{{story_key}}-discuss-checkpoint.json`) with current accumulators (D-05)</action>
