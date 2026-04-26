@@ -86,7 +86,7 @@ Plans:
 - [x] 11-04-PLAN.md (Wave 3) — Tutorials: docs/tutorials/install.md + quick-start.md (EN + zh-cn) (DOCS-01, DOCS-06)
 - [x] 11-05-PLAN.md (Wave 3) — Architecture explainer: docs/explanation/architecture.md (EN + zh-cn) (DOCS-04, DOCS-06)
 - [x] 11-06-PLAN.md (Wave 3) — Contributing how-to: docs/how-to/contributing.md (EN + zh-cn) (DOCS-05, DOCS-06)
-- [ ] 11-07-PLAN.md (Wave 4) — Integration gate: full `npm run docs:build` end-to-end + idempotency check (closes the link-check gate deferred from Waves 1-3) (DOCS-01..06)
+- [x] 11-07-PLAN.md (Wave 4) — Integration gate: full `npm run docs:build` end-to-end + idempotency check (closes the link-check gate deferred from Waves 1-3) (DOCS-01..06)
 **UI hint**: yes
 
 ### Phase 12: Agent Dir Relocation + Release
