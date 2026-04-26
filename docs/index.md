@@ -1,60 +1,42 @@
 ---
 title: GoMad
-description: Agentic workflow framework for AI-driven agile development
+description: Agentic workflow framework for AI-driven agile development — opinionated agents, skills, and an installer that ships them into your AI IDE.
 ---
 
-# GoMad
+GoMad is an agentic workflow framework for AI-driven agile development. It ships eight opinionated agent personas, a library of composable skills, and an installer that lays them into your AI IDE so you can drive a structured Analysis → Planning → Solutioning → Implementation cycle without hand-rolling prompts.
 
-GoMad (GOMAD Orchestration Method for Agile Development) is an agentic workflow framework for AI-driven software development. It guides you through a structured pipeline of analysis, planning, solutioning, and implementation using specialized agents and composable skills. GoMad is distributed on npm as `@xgent-ai/gomad`.
+## What is GoMad?
 
-GoMad is a hard fork of BMAD Method. It inherits the proven four-phase agile pipeline and extends it with xgent-ai's own agents, skills, and integrations. See [Credits](#credits) at the bottom of this page for fork origin.
+GoMad is a lean, properly-credited hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) that we own end-to-end. It distills the four-phase agile workflow into a small, predictable surface: each phase has a small set of `gm-*` skills, agents invoke those skills, and the installer copies them into the directories your IDE already reads.
 
-## What GoMad is
+Eight `gm-agent-*` personas cover the recurring roles in software delivery — analyst, tech-writer, pm, ux-designer, architect, scrum-master, dev, and solo-dev. They are invoked from your IDE as `/gm:agent-*` slash commands and load their persona body from your install root at runtime.
 
-GoMad treats AI agents as expert collaborators in a structured agile process. Rather than asking a model to "do the thinking" for you, GoMad's workflows bring out your best thinking in partnership with the AI.
+GoMad is published on npm as `@xgent-ai/gomad` and adds zero new runtime dependencies on top of BMAD's original stack. The installer is copy-only with manifest-driven upgrade cleanup, `--dry-run` previews, and timestamped backup snapshots.
 
-The framework is organised around four sequential phases:
+## Get started
 
-1. **Analysis** — Brainstorm, research, and scope the problem.
-2. **Planning** — Produce requirements, PRDs, or specs.
-3. **Solutioning** — Design the architecture and technical approach.
-4. **Implementation** — Execute with agentic workflows and tight review loops.
+The fastest path is the install tutorial, which walks through running the interactive installer and pointing it at your project.
 
-Each phase exposes a set of `gm-*` skills that specialized agents invoke to produce concrete artifacts. Skills are composable and can be adapted per project.
+- [Install GoMad](./tutorials/install.md) — End-to-end installation walkthrough.
+- [Quick start](./tutorials/quick-start.md) — Run your first GoMad workflow once GoMad is installed.
 
-## Install
+## Browse the docs
 
-```bash
-npm install @xgent-ai/gomad
-```
+The docs follow the [Diataxis](https://diataxis.fr/) structure. Pick the section that matches what you are trying to do.
 
-Or run the interactive installer directly via `npx`:
+- [Agents reference](./reference/agents.md) — Catalog of the eight `gm-agent-*` personas and how to invoke them.
+- [Skills reference](./reference/skills.md) — Catalog of the `gm-*` skills each agent can invoke.
+- [Architecture](./explanation/architecture.md) — How agents, skills, and the installer fit together.
+- [Contributing](./how-to/contributing.md) — Sending changes back to the GoMad repo.
 
-```bash
-npx @xgent-ai/gomad install
-```
+## Project status
 
-Follow the installer prompts, then open your AI IDE (Claude Code, Cursor, etc.) in your project folder.
+GoMad is on the v1.3 milestone (docs site, story-context skill, agent-directory relocation). Earlier v1.1 and v1.2 milestones are shipped on npm.
 
-## Where to go next
-
-These docs are organised into four Diataxis sections based on what you are trying to do:
-
-- **[Tutorials](./tutorials/getting-started.md)** — Learning-oriented. Step-by-step guides for building something. Start here if you are new.
-- **[How-To Guides](./how-to/install-gomad.md)** — Task-oriented. Practical recipes for solving specific problems.
-- **[Explanation](./explanation/analysis-phase.md)** — Understanding-oriented. Deep dives into concepts, architecture, and rationale.
-- **[Reference](./reference/agents.md)** — Information-oriented. Technical specifications for agents, workflows, and configuration.
-
-## What you'll need
-
-GoMad works with any AI coding assistant that supports custom system prompts or project context. Popular options include:
-
-- [Claude Code](https://code.claude.com) — Anthropic's CLI tool (recommended)
-- [Cursor](https://cursor.sh) — AI-first code editor
-- [Codex CLI](https://github.com/openai/codex) — OpenAI's terminal coding agent
-
-Basic familiarity with version control, project structure, and agile workflows is helpful.
+:::note[Live roadmap]
+The authoritative roadmap lives in the repo at [.planning/ROADMAP.md](https://github.com/xgent-ai/gomad/blob/main/.planning/ROADMAP.md). It is updated as phases land and reflects the actual delivery state of the project.
+:::
 
 ## Credits
 
-GoMad is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD). See the repository README for the full attribution and the canonical non-affiliation disclaimer.
+GoMad is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD), MIT-licensed by Brian (BMad) Madison. The full attribution and the canonical non-affiliation disclaimer live in the repository [LICENSE](https://github.com/xgent-ai/gomad/blob/main/LICENSE) and [README](https://github.com/xgent-ai/gomad/blob/main/README.md).
