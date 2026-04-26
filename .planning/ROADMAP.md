@@ -102,7 +102,16 @@ Plans:
   3. Developer running `npm run quality` on the release commit sees exit 0 — `test:gm-surface` (extended with launcher-body regex) + `test:tarball` (extended with legacy-path grep) + `test:legacy-v12-upgrade` + `test:v13-agent-relocation` + `test:domain-kb-install` + `test:prd-chain` + `docs:build` + `validate-kb-licenses` + `tools/validate-doc-paths.js` all pass.
   4. Developer reading `CHANGELOG.md` for `1.3.0` sees an explicit `### BREAKING CHANGES` section documenting the agent-dir move with old-path → new-path migration instructions and a backup-recovery cross-reference; `docs/upgrade-recovery.md` reflects v1.2 → v1.3 migration steps; all docs path examples (from Phase 11) use the canonical post-v1.3 layout with zero `gomad/agents/` leaks (verified by `tools/validate-doc-paths.js`).
   5. `@xgent-ai/gomad@1.3.0` is live on npm with `latest` dist-tag (v1.1.0 + v1.2.0 retained as prior stable; v1.0.0 deprecation unchanged); `v1.3.0` tag pushed to `origin/main`; PROJECT.md + MILESTONES.md + STATE.md updated in the release commit range.
-**Plans**: TBD
+**Plans:** 8 plans
+Plans:
+- [ ] 12-01-PLAN.md — Path constants + writer + template + comment swap (AGENT-01, AGENT-02, AGENT-03)
+- [ ] 12-02-PLAN.md — cleanup-planner v12 branch + installer wire-up + verbose banner (AGENT-04, AGENT-06)
+- [ ] 12-03-PLAN.md — detectCustomFiles whitelist for v1.3 personas (AGENT-05)
+- [ ] 12-04-PLAN.md — validate-doc-paths.js linter + npm script wire (DOCS-07)
+- [ ] 12-05-PLAN.md — NEW E2E tests: test-legacy-v12-upgrade + test-v13-agent-relocation (AGENT-08, AGENT-09)
+- [ ] 12-06-PLAN.md — Phase C body regex + verify-tarball Phase 4 + allowlist (AGENT-07, AGENT-10)
+- [ ] 12-07-PLAN.md — docs/upgrade-recovery.md v1.2→v1.3 section + zh-cn parity + Phase 11 merge gate (AGENT-11, DOCS-07 finalize)
+- [ ] 12-08-PLAN.md — Release commit: quality matrix + prepublishOnly + version bump + CHANGELOG + npm publish + tag + planning state (REL-01, REL-02, REL-03, REL-04)
 **Research flag**: yes — `/gsd-research-phase` recommended before `/gsd-plan-phase 12`. Two open design questions have cascading effects: (a) `newInstallSet` bug fix (AGENT-04) — choose between deriving `newInstallSet` from current install's planned outputs vs. adding relocation-specific branch to `buildCleanupPlan` analogous to `isV11Legacy`; (b) `_config/agents/` collision resolution (AGENT-05) — Option 2 (extend custom-file detector to treat matching `.md` as generated) is the smallest-diff path per research, but confirm before planning.
 
 ## Progress
@@ -123,7 +132,7 @@ Phases execute in numeric order: 10 → 11 → 12 (Phases 10/11 are logically in
 | 9. Reference Sweep + Verification + Release        | v1.2      | 3/3            | Complete    | 2026-04-24 |
 | 10. Story-Creation Enhancements                    | v1.3      | 0/TBD          | Not started | -          |
 | 11. Docs Site Content Authoring                    | v1.3      | 10/10 | Complete    | 2026-04-26 |
-| 12. Agent Dir Relocation + Release                 | v1.3      | 0/TBD          | Not started | -          |
+| 12. Agent Dir Relocation + Release                 | v1.3      | 0/8            | Planned     | -          |
 
 ## Coverage
 
