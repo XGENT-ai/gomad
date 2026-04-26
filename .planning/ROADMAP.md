@@ -87,8 +87,8 @@ Plans:
 - [x] 11-05-PLAN.md (Wave 3) — Architecture explainer: docs/explanation/architecture.md (EN + zh-cn) (DOCS-04, DOCS-06)
 - [x] 11-06-PLAN.md (Wave 3) — Contributing how-to: docs/how-to/contributing.md (EN + zh-cn) (DOCS-05, DOCS-06)
 - [x] 11-07-PLAN.md (Wave 4) — Integration gate: full `npm run docs:build` end-to-end + idempotency check (closes the link-check gate deferred from Waves 1-3) (DOCS-01..06)
-- [ ] 11-08-PLAN.md (Wave 5, gap-closure) — Tooling fixes: validate-doc-links.js URL-scheme guard (Gap A) + build-docs.mjs REPO_URL + generateLlmsTxt v1.3 URLs (WR-01, WR-02) (DOCS-01..06)
-- [ ] 11-09-PLAN.md (Wave 5, gap-closure) — zh-cn parity: translate docs/upgrade-recovery.md → docs/zh-cn/upgrade-recovery.md (Gap B) (DOCS-04, DOCS-06)
+- [x] 11-08-PLAN.md (Wave 5, gap-closure) — Tooling fixes: validate-doc-links.js URL-scheme guard (Gap A) + build-docs.mjs REPO_URL + generateLlmsTxt v1.3 URLs (WR-01, WR-02) (DOCS-01..06)
+- [x] 11-09-PLAN.md (Wave 5, gap-closure) — zh-cn parity: translate docs/upgrade-recovery.md → docs/zh-cn/upgrade-recovery.md (Gap B) (DOCS-04, DOCS-06)
 - [ ] 11-10-PLAN.md (Wave 6, gap-closure) — Re-run integration gate post-closure: npm run docs:build exit 0 + llms.txt URL audit + zh-cn upgrade-recovery static HTML emission (DOCS-01..06)
 **UI hint**: yes
 
