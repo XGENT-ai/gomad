@@ -254,6 +254,14 @@ function processFile(filePath) {
       continue;
     }
 
+    // Skip absolute URLs (http://, https://, mailto:, ftp://, file://, tel:, etc.).
+    // The validator only checks site-internal markdown links; external URL targets
+    // are not resolvable as local files. This prevents false positives like
+    // https://github.com/xgent-ai/gomad/blob/main/README.md being chased as a local file.
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(linkPath) || linkPath.startsWith('mailto:') || linkPath.startsWith('tel:')) {
+      continue;
+    }
+
     // Validate the link target exists
     const targetFile = resolveLink(linkPath, filePath);
 
