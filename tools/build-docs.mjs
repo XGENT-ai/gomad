@@ -23,7 +23,7 @@ import { translatedLocales } from '../website/src/lib/locales.mjs';
 const PROJECT_ROOT = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const BUILD_DIR = path.join(PROJECT_ROOT, 'build');
 
-const REPO_URL = 'https://github.com/gomad-code-org/GOMAD-METHOD';
+const REPO_URL = 'https://github.com/xgent-ai/gomad';
 
 // DO NOT CHANGE THESE VALUES!
 // llms-full.txt is consumed by AI agents as context. Most LLMs have ~200k token limits.
@@ -157,18 +157,21 @@ function generateLlmsTxt(outputDir) {
     '',
     '## Quick Start',
     '',
-    `- **[Getting Started](${siteUrl}/tutorials/getting-started/)** - Tutorial: install and learn how GoMad works`,
-    `- **[Installation](${siteUrl}/how-to/install-gomad/)** - How to install GoMad Method`,
+    `- **[Install GoMad](${siteUrl}/tutorials/install/)** - End-to-end installation walkthrough`,
+    `- **[Quick Start](${siteUrl}/tutorials/quick-start/)** - Run your first GoMad workflow`,
     '',
     '## Core Concepts',
     '',
-    `- **[Quick Flow](${siteUrl}/explanation/quick-flow/)** - Unified quick workflow — clarify intent, plan, implement, review, present`,
-    `- **[Party Mode](${siteUrl}/explanation/party-mode/)** - Multi-agent collaboration`,
-    `- **[Workflow Map](${siteUrl}/reference/workflow-map/)** - Visual overview of phases and workflows`,
+    `- **[Architecture](${siteUrl}/explanation/architecture/)** - How agents, skills, and the installer fit together`,
     '',
-    '## Modules',
+    '## Reference',
     '',
-    `- **[Official Modules](${siteUrl}/reference/modules/)** - BMM, BMB, BMGD, and more`,
+    `- **[Agents](${siteUrl}/reference/agents/)** - The eight gm-agent-* personas`,
+    `- **[Skills](${siteUrl}/reference/skills/)** - Catalog of gm-* skills`,
+    '',
+    '## Contributing',
+    '',
+    `- **[Contributing](${siteUrl}/how-to/contributing/)** - Send changes back to the GoMad repo`,
     '',
     '---',
     '',
