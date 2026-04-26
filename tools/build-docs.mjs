@@ -63,6 +63,10 @@ async function main() {
   console.log(`Build directory: ${BUILD_DIR}`);
   console.log();
 
+  // Regenerate auto-gen reference tables BEFORE link-check
+  // (rendered tables contain links the validator must see).
+  injectReferenceTables();
+
   // Check for broken internal links before building
   checkDocLinks();
 
@@ -437,6 +441,29 @@ function printBanner(title) {
   console.log('╔' + '═'.repeat(62) + '╗');
   console.log(`║${title.padStart(31 + title.length / 2).padEnd(62)}║`);
   console.log('╚' + '═'.repeat(62) + '╝');
+}
+
+// =============================================================================
+// Reference Table Injection
+/**
+ * Regenerate auto-gen reference tables by invoking tools/inject-reference-tables.cjs.
+ *
+ * Runs BEFORE checkDocLinks() so the rendered tables' links are validated. Idempotent —
+ * running this on a tree without docs/reference/{agents,skills}.md is a silent no-op.
+ */
+
+function injectReferenceTables() {
+  printHeader('Injecting auto-generated reference tables');
+
+  try {
+    execSync('node tools/inject-reference-tables.cjs', {
+      cwd: PROJECT_ROOT,
+      stdio: 'inherit',
+    });
+  } catch {
+    console.error('\n  \u001B[31m✗\u001B[0m Reference table injection failed\n');
+    process.exit(1);
+  }
 }
 
 // =============================================================================
