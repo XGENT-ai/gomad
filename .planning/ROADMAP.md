@@ -78,7 +78,7 @@ Plans:
   3. Visitor opening `/explanation/architecture` understands the 4-phase lifecycle, the manifest-v2 installer model, and the launcher-form slash command contract.
   4. Contributor opening `/how-to/contributing` can follow fork → PR → test-expectations steps end-to-end.
   5. Chinese-speaking visitor opening `/zh-cn/tutorials/install` (and siblings under `/zh-cn/`) sees parity content to the English pages authored above.
-**Plans:** 7 plans
+**Plans:** 10 plans (7 original + 3 gap-closure)
 Plans:
 - [x] 11-01-PLAN.md (Wave 1) — Cleanup: delete 53 BMAD pages + rewrite index.md (EN/zh-cn) + delete roadmap.mdx + scrub LLM_EXCLUDE_PATTERNS + PHASE-NOTE.md (DOCS-01..06 cleanup precondition)
 - [x] 11-02-PLAN.md (Wave 2) — Auto-gen tooling: tools/inject-reference-tables.cjs + test/test-inject-reference-tables.js + build-docs.mjs pipeline patch + npm scripts (DOCS-02, DOCS-03)
@@ -87,6 +87,9 @@ Plans:
 - [x] 11-05-PLAN.md (Wave 3) — Architecture explainer: docs/explanation/architecture.md (EN + zh-cn) (DOCS-04, DOCS-06)
 - [x] 11-06-PLAN.md (Wave 3) — Contributing how-to: docs/how-to/contributing.md (EN + zh-cn) (DOCS-05, DOCS-06)
 - [x] 11-07-PLAN.md (Wave 4) — Integration gate: full `npm run docs:build` end-to-end + idempotency check (closes the link-check gate deferred from Waves 1-3) (DOCS-01..06)
+- [ ] 11-08-PLAN.md (Wave 5, gap-closure) — Tooling fixes: validate-doc-links.js URL-scheme guard (Gap A) + build-docs.mjs REPO_URL + generateLlmsTxt v1.3 URLs (WR-01, WR-02) (DOCS-01..06)
+- [ ] 11-09-PLAN.md (Wave 5, gap-closure) — zh-cn parity: translate docs/upgrade-recovery.md → docs/zh-cn/upgrade-recovery.md (Gap B) (DOCS-04, DOCS-06)
+- [ ] 11-10-PLAN.md (Wave 6, gap-closure) — Re-run integration gate post-closure: npm run docs:build exit 0 + llms.txt URL audit + zh-cn upgrade-recovery static HTML emission (DOCS-01..06)
 **UI hint**: yes
 
 ### Phase 12: Agent Dir Relocation + Release
