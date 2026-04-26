@@ -34,11 +34,8 @@ const LLM_WARN_CHARS = 500_000;
 const LLM_EXCLUDE_PATTERNS = [
   'changelog',
   'ide-info/',
-  'v4-to-v6-upgrade',
   'faq',
   'reference/glossary/',
-  'explanation/game-dev/',
-  'bmgd/',
   // Note: Files/dirs starting with _ (like _STYLE_GUIDE.md, _archive/) are excluded in shouldExcludeFromLlm()
 ];
 
@@ -249,7 +246,6 @@ function getLlmSortKey(filePath) {
   if (filePath.startsWith(`how-to${path.sep}`) || filePath.startsWith('how-to/')) return 3;
   if (filePath.startsWith(`explanation${path.sep}`) || filePath.startsWith('explanation/')) return 4;
   if (filePath.startsWith(`reference${path.sep}`) || filePath.startsWith('reference/')) return 5;
-  if (filePath.startsWith(`bmgd${path.sep}`) || filePath.startsWith('bmgd/')) return 6;
   return 7;
 }
 
