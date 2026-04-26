@@ -59,7 +59,7 @@ See [milestones/v1.2-ROADMAP.md](./milestones/v1.2-ROADMAP.md) for full phase de
   3. Developer running `gm-domain-skill testing "how do I write a flaky test detector?"` returns content from `<installRoot>/_config/kb/testing/` ranked by BM25-normalized scoring; a typo slug (e.g., `testig`) produces a "did you mean: testing, architecture" fallback via Levenshtein; truly empty result returns an explicit "no match" (not silent weak hit).
   4. Fresh `gomad install` lands `<installRoot>/_config/kb/testing/` + `<installRoot>/_config/kb/architecture/` populated from `src/domain-kb/`, every file tracked in `files-manifest.csv` under `install_root="_gomad"`; re-install is idempotent.
   5. Developer running `npm run quality` sees `validate-kb-licenses.js` exit 0 — every KB file has `source:`, `license:`, `last_reviewed:` frontmatter; any pack missing attribution blocks the release.
-**Plans:** 6 plans
+**Plans:** 7 plans
 Plans:
 - [x] 10-01-PLAN.md — KB license validator + npm run quality wire (release gate; STORY-10)
 - [x] 10-02-PLAN.md — Installer _installDomainKb() + install-paths.js kbDir + test-domain-kb-install (STORY-11)
@@ -78,7 +78,15 @@ Plans:
   3. Visitor opening `/explanation/architecture` understands the 4-phase lifecycle, the manifest-v2 installer model, and the launcher-form slash command contract.
   4. Contributor opening `/how-to/contributing` can follow fork → PR → test-expectations steps end-to-end.
   5. Chinese-speaking visitor opening `/zh-cn/tutorials/install` (and siblings under `/zh-cn/`) sees parity content to the English pages authored above.
-**Plans**: TBD
+**Plans:** 7 plans
+Plans:
+- [ ] 11-01-PLAN.md (Wave 1) — Cleanup: delete 53 BMAD pages + rewrite index.md (EN/zh-cn) + delete roadmap.mdx + scrub LLM_EXCLUDE_PATTERNS + PHASE-NOTE.md (DOCS-01..06 cleanup precondition)
+- [ ] 11-02-PLAN.md (Wave 2) — Auto-gen tooling: tools/inject-reference-tables.cjs + test/test-inject-reference-tables.js + build-docs.mjs pipeline patch + npm scripts (DOCS-02, DOCS-03)
+- [ ] 11-03-PLAN.md (Wave 3) — Reference pages: docs/reference/agents.md + skills.md (EN + zh-cn) with AUTO markers (DOCS-02, DOCS-03, DOCS-06)
+- [ ] 11-04-PLAN.md (Wave 3) — Tutorials: docs/tutorials/install.md + quick-start.md (EN + zh-cn) (DOCS-01, DOCS-06)
+- [ ] 11-05-PLAN.md (Wave 3) — Architecture explainer: docs/explanation/architecture.md (EN + zh-cn) (DOCS-04, DOCS-06)
+- [ ] 11-06-PLAN.md (Wave 3) — Contributing how-to: docs/how-to/contributing.md (EN + zh-cn) (DOCS-05, DOCS-06)
+- [ ] 11-07-PLAN.md (Wave 4) — Integration gate: full `npm run docs:build` end-to-end + idempotency check (closes the link-check gate deferred from Waves 1-3) (DOCS-01..06)
 **UI hint**: yes
 
 ### Phase 12: Agent Dir Relocation + Release
@@ -111,7 +119,7 @@ Phases execute in numeric order: 10 → 11 → 12 (Phases 10/11 are logically in
 | 8. PRD + Product-Brief Content Refinement          | v1.2      | 5/5            | Complete    | 2026-04-22 |
 | 9. Reference Sweep + Verification + Release        | v1.2      | 3/3            | Complete    | 2026-04-24 |
 | 10. Story-Creation Enhancements                    | v1.3      | 0/TBD          | Not started | -          |
-| 11. Docs Site Content Authoring                    | v1.3      | 0/TBD          | Not started | -          |
+| 11. Docs Site Content Authoring                    | v1.3      | 0/7            | Not started | -          |
 | 12. Agent Dir Relocation + Release                 | v1.3      | 0/TBD          | Not started | -          |
 
 ## Coverage
