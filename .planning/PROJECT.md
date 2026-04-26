@@ -43,6 +43,7 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - ✓ **Copy-only installer with manifest-driven upgrade** (symlink mode removed; `files-manifest.csv` v2 schema with `schema_version` + `install_root`, parsed/written via `csv-parse/sync`; stale entries cleaned on re-install with realpath containment under `.claude/` + `_gomad/`; BOM/CRLF-aware rows; corrupt-header → `MANIFEST_CORRUPT` classification; `--dry-run` preview; pre-cleanup backup snapshots under `_gomad/_backups/<timestamp>/`; v1.1→v1.2 legacy cleanup of `.claude/skills/gm-agent-*/`) — v1.2 (INSTALL-01..09, 9 reqs)
 - ✓ **Coding-agent-oriented PRD refinement** (`gm-create-prd` steps 02b/02c/03/10 stripped of human-founder framing; residual sweep across 9 other steps; `## Coding-Agent Consumer Mindset` added to `data/prd-purpose.md`; step-09 emits `FR-NN` + Given/When/Then AC + `## Out of Scope` contract; `gm-product-brief` voice aligned with guardrails preserved; downstream skills structurally untouched) — v1.2 (PRD-01..07, 7 reqs)
 - ✓ **Release mechanics** (`type: module` factual error in PROJECT.md corrected; CHANGELOG v1.2.0 includes explicit BREAKING callout; tarball verification extended to assert `.claude/commands/gm/` presence + legacy `.claude/skills/gm-agent-*` absence; 97-assertion PRD chain integration test wired into `npm run quality`; `@xgent-ai/gomad@1.2.0` published with `latest` dist-tag; `v1.2.0` tagged on main) — v1.2 (REL-01..06, 6 reqs)
+- ✓ **Docs site content authoring** (6 EN pages + 6 zh-cn siblings authored: tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing; 53 BMAD-era pages deleted; `docs/index.md` rewritten as gomad landing; `tools/inject-reference-tables.cjs` auto-populates 8 personas + 28 task-skills + 11 core-skills from `src/{gomad,core}-skills/*/SKILL.md` at build time; `tools/validate-doc-links.js` URL-scheme guard; `tools/build-docs.mjs` REPO_URL + llms.txt corrected to v1.3; `npm run docs:build` exits 0 end-to-end and idempotent) — v1.3 Phase 11 (DOCS-01..06, 6 reqs)
 
 ### Active
 
@@ -51,7 +52,6 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - [ ] **`gm-discuss-story`** — New skill emitting `{planning_artifacts}/{{story_key}}-context.md` to clarify gray areas before story creation
 - [ ] **`gm-create-story` context load** — Auto-detect and load `{story_key}-context.md` when present
 - [ ] **`gm-domain-skill`** — Framework + retrieval protocol + 2 seed knowledge packs (`src/domain-kb/` → `<installRoot>/_config/kb/`)
-- [ ] **GitHub Pages docs site** — Initial content (install, agents, skills, architecture) deployed manually to `gomad.xgent.ai`
 - [ ] **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` with manifest-driven upgrade cleanup
 
 ### Deferred (beyond v1.2)
@@ -168,7 +168,9 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-24 after marketplace workstream dropped — v1.3 milestone renamed to "Docs, Story Context & Agent Relocation" (3 workstreams); `.claude-plugin/marketplace.json` removed from the repo; former Phase 10 (MARKET-01..05) moved to Out of Scope; Phases 11/12/13 renumbered to 10/11/12. Active requirements now 5 v1.3 items.*
+*Last updated: 2026-04-26 after Phase 11 (Docs Site Content Authoring) complete — DOCS-01..06 moved to Validated; 12 new doc pages authored (6 EN + 6 zh-cn) covering tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing; auto-injecting reference-table tooling shipped (`tools/inject-reference-tables.cjs` populating 8 personas + 28 task-skills + 11 core-skills); `npm run docs:build` exits 0 end-to-end with idempotency; 53 BMAD-era doc pages deleted, `tools/build-docs.mjs` REPO_URL + llms.txt cleansed of v1.2-era leaks; "GitHub Pages docs site" workstream removed from Active. Remaining v1.3 active items: 4 (story-creation enhancements x3 + agent dir relocation).*
+
+*Previously: 2026-04-24 after marketplace workstream dropped — v1.3 milestone renamed to "Docs, Story Context & Agent Relocation" (3 workstreams); `.claude-plugin/marketplace.json` removed from the repo; former Phase 10 (MARKET-01..05) moved to Out of Scope; Phases 11/12/13 renumbered to 10/11/12. Active requirements now 5 v1.3 items.*
 
 *Previously: 2026-04-24 after v1.3 milestone scoping — Current Milestone section added for "v1.3 Marketplace, Docs & Story Context" (4 workstreams: marketplace refresh, GH Pages docs site, agent dir relocation, story-creation enhancements); Active requirements populated with 6 v1.3 items; phase numbering continues from Phase 10; zero-new-deps policy reaffirmed; `<installRoot>` explicitly flagged as user-chosen (not hardcoded).*
 
