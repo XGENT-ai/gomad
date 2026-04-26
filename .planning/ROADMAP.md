@@ -81,11 +81,11 @@ Plans:
 **Plans:** 7 plans
 Plans:
 - [x] 11-01-PLAN.md (Wave 1) — Cleanup: delete 53 BMAD pages + rewrite index.md (EN/zh-cn) + delete roadmap.mdx + scrub LLM_EXCLUDE_PATTERNS + PHASE-NOTE.md (DOCS-01..06 cleanup precondition)
-- [ ] 11-02-PLAN.md (Wave 2) — Auto-gen tooling: tools/inject-reference-tables.cjs + test/test-inject-reference-tables.js + build-docs.mjs pipeline patch + npm scripts (DOCS-02, DOCS-03)
-- [ ] 11-03-PLAN.md (Wave 3) — Reference pages: docs/reference/agents.md + skills.md (EN + zh-cn) with AUTO markers (DOCS-02, DOCS-03, DOCS-06)
-- [ ] 11-04-PLAN.md (Wave 3) — Tutorials: docs/tutorials/install.md + quick-start.md (EN + zh-cn) (DOCS-01, DOCS-06)
-- [ ] 11-05-PLAN.md (Wave 3) — Architecture explainer: docs/explanation/architecture.md (EN + zh-cn) (DOCS-04, DOCS-06)
-- [ ] 11-06-PLAN.md (Wave 3) — Contributing how-to: docs/how-to/contributing.md (EN + zh-cn) (DOCS-05, DOCS-06)
+- [x] 11-02-PLAN.md (Wave 2) — Auto-gen tooling: tools/inject-reference-tables.cjs + test/test-inject-reference-tables.js + build-docs.mjs pipeline patch + npm scripts (DOCS-02, DOCS-03)
+- [x] 11-03-PLAN.md (Wave 3) — Reference pages: docs/reference/agents.md + skills.md (EN + zh-cn) with AUTO markers (DOCS-02, DOCS-03, DOCS-06)
+- [x] 11-04-PLAN.md (Wave 3) — Tutorials: docs/tutorials/install.md + quick-start.md (EN + zh-cn) (DOCS-01, DOCS-06)
+- [x] 11-05-PLAN.md (Wave 3) — Architecture explainer: docs/explanation/architecture.md (EN + zh-cn) (DOCS-04, DOCS-06)
+- [x] 11-06-PLAN.md (Wave 3) — Contributing how-to: docs/how-to/contributing.md (EN + zh-cn) (DOCS-05, DOCS-06)
 - [ ] 11-07-PLAN.md (Wave 4) — Integration gate: full `npm run docs:build` end-to-end + idempotency check (closes the link-check gate deferred from Waves 1-3) (DOCS-01..06)
 **UI hint**: yes
 
