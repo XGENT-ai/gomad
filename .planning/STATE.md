@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Docs, Story Context & Agent Relocation
-status: executing
+status: ready_to_plan
 stopped_at: Phase 11 gap-closure plans ready
 last_updated: "2026-04-26T12:50:00.000Z"
 last_activity: 2026-04-26 -- Phase 11 gap-closure plans created (11-08, 11-09, 11-10)
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 19
   completed_plans: 13
-  percent: 68
+  percent: 67
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-24 after marketplace workstream dropp
 
 ## Current Position
 
-Phase: 11 (docs-site-content-authoring) — GAPS-FOUND, gap-closure plans ready
-Plan: 7 of 10 complete; 3 gap-closure plans pending (11-08, 11-09, 11-10)
-Status: Phase 11 verifier returned gaps_found (4/6 must-haves); 3 surgical gap-closure plans created and verified
-Last activity: 2026-04-26 -- Phase 11 gap-closure plans created (11-08, 11-09, 11-10)
+Phase: 12
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-04-26
 
 Progress: [░░░░░░░░░░] 0% (0/3 v1.3 phases complete)
 

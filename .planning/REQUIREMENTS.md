@@ -14,12 +14,12 @@ Requirements for this milestone. Each maps to a single roadmap phase (Phases 10�
 
 Author initial docs content for `gomad.xgent.ai`. GH Actions auto-deploy on push stays as-is.
 
-- [ ] **DOCS-01**: User can read install + quick-start tutorials at `gomad.xgent.ai/tutorials/install` and `/tutorials/quick-start` — covers `npm install @xgent-ai/gomad` + `gomad install` flow.
-- [ ] **DOCS-02**: User can browse an Agents Reference at `/reference/agents` listing all 8 `gm-agent-*` personas with purpose + invocation (`/gm:agent-*`).
-- [ ] **DOCS-03**: User can browse a Skills Reference at `/reference/skills` listing all 4-phase + core skills with purpose, grouped by workflow layer.
-- [ ] **DOCS-04**: User can read an Architecture explainer at `/explanation/architecture` describing the 4-phase workflow, installer + manifest-v2 model, and launcher-form slash commands.
-- [ ] **DOCS-05**: Contributor can read a Contributing how-to at `/how-to/contributing` covering fork + PR + test expectations.
-- [ ] **DOCS-06**: Chinese-speaking user has parity content under `/zh-cn/` for all pages authored in DOCS-01..05.
+- [x] **DOCS-01**: User can read install + quick-start tutorials at `gomad.xgent.ai/tutorials/install` and `/tutorials/quick-start` — covers `npm install @xgent-ai/gomad` + `gomad install` flow.
+- [x] **DOCS-02**: User can browse an Agents Reference at `/reference/agents` listing all 8 `gm-agent-*` personas with purpose + invocation (`/gm:agent-*`).
+- [x] **DOCS-03**: User can browse a Skills Reference at `/reference/skills` listing all 4-phase + core skills with purpose, grouped by workflow layer.
+- [x] **DOCS-04**: User can read an Architecture explainer at `/explanation/architecture` describing the 4-phase workflow, installer + manifest-v2 model, and launcher-form slash commands.
+- [x] **DOCS-05**: Contributor can read a Contributing how-to at `/how-to/contributing` covering fork + PR + test expectations.
+- [x] **DOCS-06**: Chinese-speaking user has parity content under `/zh-cn/` for all pages authored in DOCS-01..05.
 - [ ] **DOCS-07**: All docs path examples use the canonical post-v1.3 install layout (`<installRoot>/_config/agents/`, not legacy `<installRoot>/gomad/agents/`) — authored or refreshed after AGENT-* phase lands; `tools/validate-doc-paths.js` enforces in `npm run quality`.
 
 ### Story-Creation Enhancements (src/gomad-skills/4-implementation/)
@@ -118,12 +118,12 @@ Populated by the roadmapper during Phase creation. Every v1.3 requirement maps t
 | STORY-10 | Phase 10 | Pending |
 | STORY-11 | Phase 10 | Pending |
 | STORY-12 | Phase 10 | Pending |
-| DOCS-01 | Phase 11 | Pending |
-| DOCS-02 | Phase 11 | Pending |
-| DOCS-03 | Phase 11 | Pending |
-| DOCS-04 | Phase 11 | Pending |
-| DOCS-05 | Phase 11 | Pending |
-| DOCS-06 | Phase 11 | Pending |
+| DOCS-01 | Phase 11 | Complete |
+| DOCS-02 | Phase 11 | Complete |
+| DOCS-03 | Phase 11 | Complete |
+| DOCS-04 | Phase 11 | Complete |
+| DOCS-05 | Phase 11 | Complete |
+| DOCS-06 | Phase 11 | Complete |
 | DOCS-07 | Phase 12 | Pending |
 | AGENT-01 | Phase 12 | Pending |
 | AGENT-02 | Phase 12 | Pending |

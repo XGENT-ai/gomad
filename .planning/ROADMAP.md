@@ -44,7 +44,7 @@ See [milestones/v1.2-ROADMAP.md](./milestones/v1.2-ROADMAP.md) for full phase de
 **Structure:** 3 phases, coarse granularity. Phases 10/11 are independent and parallel-safe, but the shipping order matters: story-creation lands first (exercises `_config/<subdir>/` greenfield path as warm-up for relocation), docs content authored second (references the post-v1.3 install layout), then Phase 12 executes the agent-dir relocation with exclusive lock — simultaneously shipping the release (CHANGELOG BREAKING + `npm publish` + `v1.3.0` tag). The 3-phase plan is justified because AGENT-* and REL-* are so tightly coupled — REL-02 quality gate depends on every AGENT-* test, AGENT-10 extends `verify-tarball.js` which is the release gate itself, and CHANGELOG BREAKING (REL-01) is specifically about the agent-dir move. Splitting them would manufacture an artificial boundary. (Marketplace refresh — formerly Phase 10 — was dropped 2026-04-24; see `.planning/REQUIREMENTS.md` Out of Scope.)
 
 - [ ] **Phase 10: Story-Creation Enhancements** — Ship `gm-discuss-story` + `gm-domain-skill` under `4-implementation/`, 2 seed KB packs in `src/domain-kb/`, installer `_installDomainKb()` step copying to `<installRoot>/_config/kb/`, context auto-load in `gm-create-story`, and `validate-kb-licenses.js` gate.
-- [ ] **Phase 11: Docs Site Content Authoring** — Author Install / Quick-Start / Agents / Skills / Architecture / Contributing pages plus zh-cn parity under `docs/**`; Starlight auto-deploy pipeline (already shipped in v1.2) handles publishing to `gomad.xgent.ai`.
+- [x] **Phase 11: Docs Site Content Authoring** — Author Install / Quick-Start / Agents / Skills / Architecture / Contributing pages plus zh-cn parity under `docs/**`; Starlight auto-deploy pipeline (already shipped in v1.2) handles publishing to `gomad.xgent.ai`. (completed 2026-04-26)
 - [ ] **Phase 12: Agent Dir Relocation + Release** — Relocate persona bodies `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` across 11 touchpoints, fix `newInstallSet` latent bug, tweak custom-file detector, add v1.2→v1.3 upgrade test, finalize DOCS-07 path sweep, publish `@xgent-ai/gomad@1.3.0` with BREAKING callout.
 
 ## Phase Details
@@ -78,7 +78,7 @@ Plans:
   3. Visitor opening `/explanation/architecture` understands the 4-phase lifecycle, the manifest-v2 installer model, and the launcher-form slash command contract.
   4. Contributor opening `/how-to/contributing` can follow fork → PR → test-expectations steps end-to-end.
   5. Chinese-speaking visitor opening `/zh-cn/tutorials/install` (and siblings under `/zh-cn/`) sees parity content to the English pages authored above.
-**Plans:** 10 plans (7 original + 3 gap-closure)
+**Plans:** 10/10 plans complete
 Plans:
 - [x] 11-01-PLAN.md (Wave 1) — Cleanup: delete 53 BMAD pages + rewrite index.md (EN/zh-cn) + delete roadmap.mdx + scrub LLM_EXCLUDE_PATTERNS + PHASE-NOTE.md (DOCS-01..06 cleanup precondition)
 - [x] 11-02-PLAN.md (Wave 2) — Auto-gen tooling: tools/inject-reference-tables.cjs + test/test-inject-reference-tables.js + build-docs.mjs pipeline patch + npm scripts (DOCS-02, DOCS-03)
@@ -122,7 +122,7 @@ Phases execute in numeric order: 10 → 11 → 12 (Phases 10/11 are logically in
 | 8. PRD + Product-Brief Content Refinement          | v1.2      | 5/5            | Complete    | 2026-04-22 |
 | 9. Reference Sweep + Verification + Release        | v1.2      | 3/3            | Complete    | 2026-04-24 |
 | 10. Story-Creation Enhancements                    | v1.3      | 0/TBD          | Not started | -          |
-| 11. Docs Site Content Authoring                    | v1.3      | 0/7            | Not started | -          |
+| 11. Docs Site Content Authoring                    | v1.3      | 10/10 | Complete    | 2026-04-26 |
 | 12. Agent Dir Relocation + Release                 | v1.3      | 0/TBD          | Not started | -          |
 
 ## Coverage
