@@ -1,8 +1,10 @@
 ---
 phase: 10-story-creation-enhancements
 verified: 2026-04-25T00:00:00Z
-status: human_needed
+human_verified: 2026-04-26T00:00:00Z
+status: verified
 score: 5/5 must-haves verified
+human_uat: 5/5 passed (see 10-HUMAN-UAT.md)
 overrides_applied: 0
 re_verification:
   previous_status: not_verified
@@ -32,9 +34,10 @@ human_verification:
 
 **Phase Goal:** Ship `gm-discuss-story` + `gm-domain-skill` under `4-implementation/`, 2 seed KB packs in `src/domain-kb/`, installer `_installDomainKb()` step copying to `<installRoot>/_config/kb/`, context auto-load in `gm-create-story`, and `validate-kb-licenses.js` gate.
 
-**Verified:** 2026-04-25
-**Status:** human_needed
+**Verified:** 2026-04-25 (mechanical) / 2026-04-26 (human UAT)
+**Status:** verified
 **Re-verification:** No — initial verification
+**Human UAT:** 5/5 tests passed (10-HUMAN-UAT.md). 5 in-flight fixes shipped during UAT: 780756a, 9bf1f6d, 98e3f4e, 069ed8f, 8d48aa8.
 
 ## Goal Achievement
 
