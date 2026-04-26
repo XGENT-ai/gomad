@@ -94,11 +94,6 @@ export default defineConfig({
           slug: 'index',
         },
         {
-          label: 'Roadmap',
-          translations: { 'zh-CN': '路线图' },
-          slug: 'roadmap',
-        },
-        {
           label: 'Tutorials',
           translations: { 'zh-CN': '教程' },
           collapsed: false,
