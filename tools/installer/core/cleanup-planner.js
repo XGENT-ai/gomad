@@ -25,6 +25,7 @@
 const path = require('node:path');
 const fs = require('fs-extra');
 const { AgentCommandGenerator } = require('../ide/shared/agent-command-generator');
+const { LEGACY_AGENTS_PERSONA_SUBPATH } = require('../ide/shared/path-utils');
 const { ManifestGenerator } = require('./manifest-generator');
 const prompts = require('../prompts');
 
@@ -156,6 +157,33 @@ async function isV11Legacy(workspaceRoot, gomadDir) {
 }
 
 /**
+ * Detect a v1.2 install that needs the persona-dir relocation cleanup.
+ * Distinguishes from v1.1 by REQUIRING the manifest to exist (v1.1 has no
+ * manifest). Returns true iff manifest exists AND >=1 of the 8 known persona
+ * files is present at the legacy _gomad/gomad/agents/ location.
+ *
+ * Used by buildCleanupPlan's v12 branch (D-01, D-02) which queues the legacy
+ * persona files for snapshot+remove regardless of newInstallSet membership
+ * (fixes AGENT-04 latent bug where prior-manifest entries wrongly survived
+ * cleanup because newInstallSet preserved them).
+ *
+ * @param {string} workspaceRoot — absolute path
+ * @param {string} gomadDir — absolute path to the workspace's _gomad dir
+ * @returns {Promise<boolean>}
+ */
+async function isV12LegacyAgentsDir(workspaceRoot, gomadDir) {
+  // Manifest MUST exist — distinguishes v1.2→v1.3 upgrade from v1.1→v1.3.
+  const manifestPath = path.join(gomadDir, '_config', 'files-manifest.csv');
+  if (!(await fs.pathExists(manifestPath))) return false;
+  const legacyAgentsDir = path.join(gomadDir, ...LEGACY_AGENTS_PERSONA_SUBPATH.split('/'));
+  if (!(await fs.pathExists(legacyAgentsDir))) return false;
+  for (const shortName of LEGACY_AGENT_SHORT_NAMES) {
+    if (await fs.pathExists(path.join(legacyAgentsDir, `${shortName}.md`))) return true;
+  }
+  return false;
+}
+
+/**
  * Build a cleanup plan describing what the installer will snapshot, remove,
  * and write. PURE function — no filesystem WRITES. Performs realpath READS
  * and SHA-256 hash READS only.
@@ -178,6 +206,10 @@ async function isV11Legacy(workspaceRoot, gomadDir) {
  *   platform-codes.yaml + ['_gomad', '.claude'] sentinels
  * @param {boolean} input.isV11Legacy — true if no prior manifest AND ≥1 of
  *   the 7 legacy gm-agent-* dirs (use isV11Legacy() to compute)
+ * @param {boolean} [input.isV12LegacyAgentsDir] — true if v1.2 install with
+ *   legacy persona files at _gomad/gomad/agents/ (use isV12LegacyAgentsDir()
+ *   to compute). When true, this branch falls through to the standard
+ *   manifest-diff branch via handledPaths to avoid double-processing.
  * @param {ManifestGenerator} [input.manifestGen] — optional injected hash
  *   computer (defaults to a fresh ManifestGenerator instance for D-34
  *   was_modified detection)
@@ -196,7 +228,7 @@ async function isV11Legacy(workspaceRoot, gomadDir) {
  *   specific failing entry is captured.
  */
 async function buildCleanupPlan(input) {
-  const { priorManifest, newInstallSet, workspaceRoot, allowedRoots, isV11Legacy: v11, manifestGen } = input;
+  const { priorManifest, newInstallSet, workspaceRoot, allowedRoots, isV11Legacy: v11, isV12LegacyAgentsDir: v12Reloc, manifestGen } = input;
   const hashGen = manifestGen || new ManifestGenerator();
 
   const plan = {
@@ -244,6 +276,62 @@ async function buildCleanupPlan(input) {
     return plan;
   }
 
+  // v1.2 → v1.3 persona dir relocation (D-01, D-02 — Phase 12).
+  // Reason 'manifest_cleanup' is already the plan-level default (set above
+  // when v11=false); writeMetadata reads `plan.reason` top-level. This
+  // branch FALLS THROUGH to the standard manifest-diff branch below via
+  // handledPaths so non-persona stale entries are still processed normally.
+  // Per-entry `reason` field is intentionally NOT added to to_snapshot
+  // pushes — writeMetadata enumerates {install_root, relative_path,
+  // orig_hash, was_modified} and silently drops any other fields.
+  const handledPaths = new Set();
+  if (v12Reloc) {
+    const legacyAgentsDir = path.join(workspaceRoot, '_gomad', ...LEGACY_AGENTS_PERSONA_SUBPATH.split('/'));
+    for (const shortName of LEGACY_AGENT_SHORT_NAMES) {
+      const legacyPath = path.join(legacyAgentsDir, `${shortName}.md`);
+      if (!(await fs.pathExists(legacyPath))) continue;
+
+      let resolved;
+      try {
+        resolved = await fs.realpath(legacyPath);
+      } catch (error) {
+        if (error.code === 'ENOENT') continue; // race: removed between pathExists and realpath
+        throw error;
+      }
+
+      if (!isContained(resolved, workspaceRoot)) {
+        // SYMLINK_ESCAPE on a v1.2 persona file is non-fatal (mirrors v11
+        // branch posture per D-35) — refuse this entry and continue.
+        await prompts.log.warn('SYMLINK_ESCAPE: ' + legacyPath + ' → ' + resolved + ', refusing to touch');
+        plan.refused.push({ idx: null, entry: { path: legacyPath }, reason: 'SYMLINK_ESCAPE' });
+        continue;
+      }
+
+      // D-34 was_modified detection — manifest IS present in v1.2 upgrade
+      // context, so we can compute the original hash. priorManifest entries
+      // store absolutePath (already realpath'd) when available.
+      const priorEntry = priorManifest.find((e) => (e.absolutePath || '') === resolved);
+      const orig_hash = (priorEntry && priorEntry.hash) || null;
+      let was_modified = null;
+      if (orig_hash && hashGen) {
+        const currentHash = await hashGen.calculateFileHash(resolved);
+        was_modified = currentHash !== orig_hash;
+      }
+
+      // Shape MUST match writeMetadata's enumerated field set exactly.
+      // Do NOT add `reason` per entry; writeMetadata drops it.
+      plan.to_snapshot.push({
+        src: resolved,
+        install_root: '_gomad',
+        relative_path: path.posix.join(...LEGACY_AGENTS_PERSONA_SUBPATH.split('/'), `${shortName}.md`),
+        orig_hash,
+        was_modified,
+      });
+      plan.to_remove.push(resolved);
+      handledPaths.add(resolved);
+    }
+  }
+
   // ─── Standard manifest-diff branch ──────────────────────────────────
   for (const [idx, entry] of priorManifest.entries()) {
     const installRoot = entry.install_root || '_gomad';
@@ -277,6 +365,10 @@ async function buildCleanupPlan(input) {
       await prompts.log.warn('SYMLINK_ESCAPE: ' + joined + ' → ' + resolved + ', refusing to touch');
       throw new ManifestCorruptError('CONTAINMENT_FAIL: row ' + idx + ' escapes workspace: ' + resolved);
     }
+
+    // v12 branch already snapshot+removed this path (D-02 fall-through guard).
+    // Skip to avoid double-processing without altering the v11 / standard logic.
+    if (handledPaths.has(resolved)) continue;
 
     // Still-needed entry — preserved (no snapshot, no remove).
     if (newInstallSet.has(resolved)) continue;
@@ -516,6 +608,7 @@ function renderPlan(plan) {
 module.exports = {
   isContained,
   isV11Legacy,
+  isV12LegacyAgentsDir,
   formatTimestamp,
   uniqueBackupDir,
   LEGACY_AGENT_SHORT_NAMES,
