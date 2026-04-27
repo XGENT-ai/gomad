@@ -122,6 +122,54 @@
 
 ---
 
+## Milestone: v1.3 — Docs, Story Context & Agent Relocation
+
+**Shipped:** 2026-04-27
+**Phases:** 3 | **Plans:** 24
+**Git range:** 182 commits between `v1.2.0`..`v1.3.0`; 294 files changed (+36,232 / −7,737); ~3 days
+
+### What Was Built
+
+- **Story-creation enhancements (Phase 10, 6 plans):** `gm-discuss-story` 5-file task-skill emitting `{{story_key}}-context.md` with 5 locked XML-wrapped sections; `gm-domain-skill` BM25 + Levenshtein retrieval task-skill with 4 mode-branching outputs; 2 seed KB packs (`testing/`, `architecture/`) at 18 files total under `src/domain-kb/`; `tools/validate-kb-licenses.js` IP-cleanliness release gate (7 rules KB-01..KB-07); installer `_installDomainKb()` step copying to `<installRoot>/_config/kb/`; `gm-create-story` SELECTIVE_LOAD auto-detection of context.md.
+- **Docs site content authoring (Phase 11, 10 plans):** 6 EN pages + 6 zh-cn siblings (tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing); 53 BMAD-era pages deleted; `tools/inject-reference-tables.cjs` build-time auto-injection of 8 personas / 28 task-skills / 11 core-skills; `validate-doc-links.js` URL-scheme guard; `npm run docs:build` exits 0 with idempotency.
+- **Agent dir relocation + release (Phase 12, 8 plans):** Persona body files relocated `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` via single source-of-truth `AGENTS_PERSONA_SUBPATH` constant; `cleanup-planner.js` v12 branch with `isV12LegacyAgentsDir` predicate snapshots + removes legacy persona files; latent `newInstallSet` derivation bug fixed; `detectCustomFiles` whitelist treats relocated persona `.md` as generated; verbose 4-bullet BREAKING migration banner; `tools/validate-doc-paths.js` linter; new E2E tests `test-legacy-v12-upgrade.js` (32 assertions) + `test-v13-agent-relocation.js`; `package.json` `prepublishOnly = npm run quality` gate; `@xgent-ai/gomad@1.3.0` published with `latest` dist-tag; `v1.3.0` annotated tag on `github/main` with BREAKING-callout body.
+
+### What Worked
+
+- **Greenfield-pattern-before-collision-pattern sequencing.** Phase 10 exercised the `_config/<subdir>/` install pattern via `_config/kb/` (additive, no collision) before Phase 12 touched the collision-prone `_config/agents/` path. The greenfield rehearsal caught one installer-tracking edge case (manifest entry shape under `install_root`) cheaply.
+- **Single source-of-truth path constant for the relocation.** `AGENTS_PERSONA_SUBPATH` in `path-utils.js` made the 11-touchpoint sweep mechanical: writer + launcher template + installer comment + tarball linter + Phase C launcher-body regex all reference the constant, not a hardcoded literal. Net: zero "missed touchpoint" defects in the relocation phase.
+- **Dual-sided verification gates (`test:gm-surface` + `test:tarball`).** Pattern carried forward from v1.2: installer-output shape + shipped-tarball shape gate independently. Phase 12 extended Phase C with launcher-body positive/negative regex (verifies new path referenced + legacy path absent) and `verify-tarball.js` Phase 4 (`checkLegacyAgentPathClean`). Both were necessary — installer could emit correct output from broken tarball source, or vice versa.
+- **Hermetic install-smoke env.** Discovered during the v1.3.0 publish attempt that `npm publish --registry=<custom>` exports `npm_config_registry` to subprocesses, deadlocking nested `npm install` in `prepublishOnly`-triggered tests. Strip `npm_*` from spawned env. Now load-bearing for any future custom-registry publish.
+- **`prepublishOnly = npm run quality` defensive gate.** Caught publish-time gate drift (orphan-refs allowlist staleness, prettier sweep on test/installer files, tarball-grep allowlist for shipped statusline + agent-tracker hooks) that would otherwise have shipped a broken release.
+
+### What Was Inefficient
+
+- **Late-breaking publish-time gate fixes.** 4 unrelated gate fixes during the v1.3.0 publish session (`a8812fb`, `1a611ee`, `df49ce9`, `5bec364`) — each a separate context switch from "ready to ship" back to "fix the gate". Pattern: gates not exercised under the exact `npm publish` invocation accumulate latent failures. Mitigation for v1.4: run `npm publish --dry-run` (or equivalent) as part of phase verification, not just at release commit.
+- **Phase 11 UAT/verification carried as deferred.** Phase 11 closed with `status: partial` UAT (2 pending scenarios) and `status: human_needed` verification. `npm run docs:build` exit 0 + post-publish smoke cleared the ship gate, but the formal UAT/verification never closed. Acknowledged at v1.3 milestone close — this is the third milestone in a row where some artifact lifecycle (REQUIREMENTS.md checkboxes for v1.1/v1.2; UAT/VERIFICATION here) lags ship.
+- **REQUIREMENTS.md traceability drift recurred for the third time.** All 28 non-DOCS-01..06 v1.3 reqs were marked "Pending" in the traceability table at milestone-close even though the underlying phases had shipped. Bulk-flip at close is now the established close-time bookkeeping pattern (see Top Lessons §1).
+
+### Patterns Established
+
+- **`_config/<subdir>/` namespace for user-customizable surface.** v1.3 introduced both `_config/kb/` (greenfield) and `_config/agents/` (relocation). v1.4+ should default new user-facing install surfaces to `_config/<name>/` rather than `gomad/<name>/`.
+- **Build-time auto-injection of catalog tables.** `inject-reference-tables.cjs` uses `AUTO:agents-table-{start,end}` + `AUTO:skills-table-{phase}-{start,end}` markers to render tables from `src/{gomad,core}-skills/*/SKILL.md` at `docs:build` time. Pattern: hand-written intro + auto-injected table = correct catalog by construction. Generalizable to any future enumeration page.
+- **Negative-only path linter as the canonical sweep gate.** `tools/validate-doc-paths.js` (76 LOC, zero deps) greps for legacy-path leaks under `docs/**/*.md(x)` with a hard allowlist for legitimate references (`upgrade-recovery.md`). Cheaper and more durable than positive-coverage assertions for path migrations.
+- **NETWORK-FREE manual state synthesis for legacy-upgrade tests.** `test-legacy-v12-upgrade.js` synthesizes a v1.2 install state directly (no `npm install bmad-method@1.2.0`), then runs the v1.3 install on top. Fast (~1s vs ~30s), deterministic, no network dependency. Reusable for future major-version upgrade tests.
+
+### Key Lessons
+
+1. **Sequence greenfield before collision when relocating shared paths.** Phase 10's `_config/kb/` proved the pattern on a path with no collision; Phase 12's `_config/agents/` then leveraged a known-good pattern under collision pressure. Extra Phase 10 cost: ~zero (work was needed regardless). Phase 12 risk reduction: substantial.
+2. **`prepublishOnly` gates must be exercised under real `npm publish` env, not just `npm run quality`.** Custom-registry env propagation, env-strip semantics, and tarball-pack-from-clean-tree behavior diverge from a bare `quality` invocation. Add a `dry-run-publish` rehearsal step before milestone close.
+3. **Phase verification artifacts (UAT, VERIFICATION) lag implementation under deadline pressure.** Treat "ship gate" (functional smoke) and "verification gate" (structured UAT/VERIFICATION) as separate concerns. v1.4: consider whether UAT/VERIFICATION belongs in the phase critical path or as post-ship debt with explicit trigger conditions.
+4. **Single source-of-truth path constants make multi-touchpoint sweeps mechanical.** v1.3 had 11 touchpoints for the agent-dir move; one constant + downstream `require()` reduced sweep risk to "did I update the constant" rather than "did I miss a literal".
+
+### Cost Observations
+
+- Model mix: predominantly Opus (planning + execution + verification); Sonnet 4.6 used for some lighter passes (e.g., docs translations).
+- Sessions: ~one session per plan plus 2-3 release sessions; one mid-publish recovery session for the 4 late-breaking gate fixes.
+- Notable: the 4 gate fixes at publish time would have been cheap to avoid with a `dry-run-publish` rehearsal step (~5 min). Net cost of skipping: ~30 min of context-switch and recovery.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -130,17 +178,20 @@
 | --------- | ------ | ----- | -------------------------------------------------------------------------------------------------------------- |
 | v1.1      | 4      | 10    | First milestone archived via GSD (v1.0 had a tag but no archive)                                                |
 | v1.2      | 5      | 16    | First milestone shipping under zero-new-runtime-deps constraint; launcher-form slash commands pattern established |
+| v1.3      | 3      | 24    | First milestone with a BREAKING upgrade migration (manifest-driven cleanup + backup snapshots); `prepublishOnly = npm run quality` gate added; first hand-rolled retrieval (BM25 + Levenshtein, zero deps) |
 
 ### Cumulative Quality
 
-| Milestone | Test suites                                                                                                    | Requirements coverage | Tarball size |
-| --------- | -------------------------------------------------------------------------------------------------------------- | --------------------- | ------------ |
-| v1.1      | quality (7 sub-checks) + tarball + E2E (10 assertions, 52 skills)                                              | 36/36 (100%)          | 320 files    |
-| v1.2      | quality + tarball + E2E + `test:gm-surface` (3-phase) + `test:orphan-refs` + PRD-chain integration (97 assert) | 32/32 (100%)          | growing      |
+| Milestone | Test suites                                                                                                                                              | Requirements coverage | Tarball size |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------ |
+| v1.1      | quality (7 sub-checks) + tarball + E2E (10 assertions, 52 skills)                                                                                        | 36/36 (100%)          | 320 files    |
+| v1.2      | quality + tarball + E2E + `test:gm-surface` (3-phase) + `test:orphan-refs` + PRD-chain integration (97 assert)                                           | 32/32 (100%)          | growing      |
+| v1.3      | quality + tarball + E2E + `test:gm-surface` (extended Phase C) + `test:orphan-refs` + PRD-chain (97) + `test:domain-kb-install` + `test:legacy-v12-upgrade` (32) + `test:v13-agent-relocation` + `validate:kb-licenses` + `validate:doc-paths` + `test:inject-reference-tables` | 34/34 (100%)          | growing       |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. **Requirements checkbox drift is structural, not incidental.** Both v1.1 and v1.2 closed with 0% checkbox sync despite shipping. Treat REQUIREMENTS.md checkboxes as bulk-flip-at-close bookkeeping or automate via hook; trusting phase SUMMARY.md is the reliable pattern.
-2. **CLI/workflow drift recurs at milestone close.** Both v1.1 and v1.2 hit missing/broken `gsd-tools` subcommands during archival (`audit-open` mis-classification, `milestone complete` routing mismatch). Workflows referencing CLI commands should degrade gracefully.
-3. **De-risk load-bearing assumptions before downstream work.** v1.1 Phase 2 sweep gaps cascaded into Phase 4 deviations; v1.2 Phase 5 explicit de-risk kept Phases 6-9 clean. Front-loading validation costs ~4 min and saves a replan cycle.
-4. **Byte-identical preservation + additive refactors are the safe shape.** v1.1 preserved BMAD LICENSE verbatim; v1.2 PRD refactor stayed strip-only. When touching shared-surface content, preserve every named section structurally.
+1. **Requirements checkbox drift is structural, not incidental.** v1.1, v1.2, and v1.3 all closed with significant checkbox sync drift despite shipping. Bulk-flip at close is now the established pattern; consider automation via post-phase hook in v1.4+.
+2. **CLI/workflow drift recurs at milestone close.** v1.1 hit `audit-open` mis-classification, v1.2 hit `milestone complete` routing mismatch, v1.3 surfaced no `milestone.complete` SDK handler at all (manual archival fallback). Workflows referencing CLI commands should degrade gracefully — and at minimum the orchestrator should not assume any specific subcommand exists.
+3. **De-risk load-bearing assumptions before downstream work.** v1.1 Phase 2 sweep gaps cascaded into Phase 4 deviations; v1.2 Phase 5 explicit de-risk kept Phases 6-9 clean; v1.3 Phase 10 greenfield `_config/kb/` rehearsed the pattern Phase 12 needed under collision. Front-loading validation costs ~4 min and saves a replan cycle.
+4. **Byte-identical preservation + additive refactors are the safe shape.** v1.1 preserved BMAD LICENSE verbatim; v1.2 PRD refactor stayed strip-only; v1.3 manifest-v2 cleanup preserved v1.1/v1.2 row formats. When touching shared-surface content, preserve every named section structurally.
+5. **Single source-of-truth constants make multi-touchpoint sweeps mechanical.** v1.2 introduced `manifest-generator.js` `install_root="_gomad"` constant; v1.3 added `AGENTS_PERSONA_SUBPATH`. Pattern: relocations and renames belong behind a constant, not as literals scattered across the codebase.

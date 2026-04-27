@@ -4,6 +4,51 @@ Historical record of shipped versions.
 
 ---
 
+## v1.3 — Docs, Story Context & Agent Relocation
+
+**Shipped:** 2026-04-27
+**Phases:** 3 | **Plans:** 24 | **Timeline:** 2026-04-24 → 2026-04-27 (~3 days)
+**Git range:** 182 commits between `v1.2.0`..`v1.3.0`; 294 files changed (+36,232 / −7,737)
+**Git tag:** `v1.3.0` (annotated, BREAKING-callout body) on `github/main`
+**npm:** [`@xgent-ai/gomad@1.3.0`](https://www.npmjs.com/package/@xgent-ai/gomad) (`latest`); v1.2.0 retained as prior-stable; v1.1.0 retained; v1.0.0 deprecation unchanged
+
+### Delivered
+
+Enriched the 4-implementation story workflow with a discuss step plus a hand-rolled domain-knowledge retrieval framework (BM25 + Levenshtein, zero new runtime deps), built out initial docs content for `gomad.xgent.ai` (6 EN + 6 zh-cn pages plus `inject-reference-tables.cjs` build-time auto-injection of 8 personas / 28 task-skills / 11 core-skills), and relocated the agent install path from `<installRoot>/gomad/agents/` to `<installRoot>/_config/agents/` with manifest-driven cleanup, v1.2→v1.3 backup snapshots, dual-sided launcher-body regression gates, and explicit BREAKING callout in CHANGELOG.
+
+### Key Accomplishments
+
+1. **Story-creation enhancements** (Phase 10) — Shipped `gm-discuss-story` (5-file skill emitting `{{story_key}}-context.md` with 5 locked XML-wrapped sections), `gm-domain-skill` (4-mode BM25/Levenshtein retrieval, zero new deps), 2 seed KB packs (`testing/` + `architecture/` at 18 files total under `src/domain-kb/`) with `tools/validate-kb-licenses.js` IP-cleanliness release gate (7 rules KB-01..KB-07), installer `_installDomainKb()` step copying to `<installRoot>/_config/kb/` tracked in `files-manifest.csv` v2, and `gm-create-story` SELECTIVE_LOAD auto-detection of context.md + pre-bake of domain KB before story draft.
+2. **Docs site content authoring** (Phase 11) — Authored 6 EN pages + 6 zh-cn siblings (tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing); deleted 53 BMAD-era pages plus 2 `roadmap.mdx` files; rewrote `docs/index.md` (+ zh-cn mirror) as the v1.3 gomad landing; shipped `tools/inject-reference-tables.cjs` build-time auto-injection of agents (8) / skills (28 task + 11 core) tables from `src/{gomad,core}-skills/*/SKILL.md`; added `validate-doc-links.js` URL-scheme guard + `build-docs.mjs` REPO_URL + `generateLlmsTxt` v1.3 URLs; `npm run docs:build` exits 0 end-to-end with idempotency.
+3. **Agent dir relocation** (Phase 12 / AGENT-01..11) — Single source-of-truth `AGENTS_PERSONA_SUBPATH` constant in `path-utils.js` swapped writer + launcher template + installer comment to `_config/agents/`; new v12 branch in `cleanup-planner.js` snapshots + removes legacy `_gomad/gomad/agents/<shortName>.md` files via `isV12LegacyAgentsDir` predicate (fixes latent `newInstallSet` bug); verbose 4-bullet BREAKING migration banner printed by installer; `detectCustomFiles` whitelist treats relocated persona `.md` as generated; `docs/upgrade-recovery.md` + zh-cn parity v1.2→v1.3 migration section; cross-referenced from CHANGELOG BREAKING entry.
+4. **Test matrix expansion** (Phase 12 / AGENT-07..10, DOCS-07) — `test-gm-command-surface.js` Phase C extended with launcher-body positive `_config/agents/` + negative `gomad/agents/` regex per persona; `verify-tarball.js` Phase 4 (`checkLegacyAgentPathClean`) greps shipped tarball for legacy-path leaks; new E2E tests `test-legacy-v12-upgrade.js` (32 assertions, NETWORK-FREE manual v1.2 synthesis) and `test-v13-agent-relocation.js` (fresh-install assertion); `tools/validate-doc-paths.js` linter (76 LOC, zero new deps) wired into `npm run quality`.
+5. **Release mechanics** (Phase 12 / REL-01..04) — `CHANGELOG.md` v1.3.0 entry with explicit `### BREAKING CHANGES` section documenting agent-dir move + old-path → new-path migration + backup-recovery cross-reference; `package.json` `prepublishOnly = npm run quality` gate added; full `quality` matrix extended (`validate:doc-paths`, `test:inject-reference-tables`, `test:install`, `test:integration`, `test:gm-surface`, `test:tarball`, `test:domain-kb-install`, `test:legacy-v12-upgrade`, `test:v13-agent-relocation`); `@xgent-ai/gomad@1.3.0` published to npm with `latest` dist-tag; `v1.3.0` annotated tag on `github/main` with BREAKING-callout body.
+
+### Requirements: 34/34 complete (100%)
+
+| Category | Count | Phases |
+|----------|-------|--------|
+| DOCS (docs site content)        | 7  | Phase 11, 12 |
+| STORY (story-creation)          | 12 | Phase 10 |
+| AGENT (agent dir relocation)    | 11 | Phase 12 |
+| REL (release mechanics)         | 4  | Phase 12 |
+
+See [milestones/v1.3-REQUIREMENTS.md](./milestones/v1.3-REQUIREMENTS.md) for full traceability.
+
+### Known deferred items at close: 2
+
+- **Phase 11 UAT** (`11-HUMAN-UAT.md` `status: partial`) — 2 pending scenarios; `npm run docs:build` exit 0 + post-publish smoke cleared the ship gate; carried as acknowledged debt.
+- **Phase 11 Verification** (`11-VERIFICATION.md` `status: human_needed`) — functional verification handled via `docs:build` end-to-end + idempotency; human-needed resolution acknowledged at close.
+
+(See STATE.md "Deferred Items" for the full list including v1.1 / v1.2 carry-forwards.)
+
+### Archives
+
+- [milestones/v1.3-ROADMAP.md](./milestones/v1.3-ROADMAP.md) — full phase details
+- [milestones/v1.3-REQUIREMENTS.md](./milestones/v1.3-REQUIREMENTS.md) — requirements traceability
+
+---
+
 ## v1.2 — Agent-as-Command & Coding-Agent PRD Refinement
 
 **Shipped:** 2026-04-24
@@ -80,3 +125,4 @@ See [milestones/v1.1-REQUIREMENTS.md](./milestones/v1.1-REQUIREMENTS.md) for ful
 
 *First milestone archived: 2026-04-18 (v1.1)*
 *Second milestone archived: 2026-04-24 (v1.2)*
+*Third milestone archived: 2026-04-27 (v1.3)*

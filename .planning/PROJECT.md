@@ -2,29 +2,17 @@
 
 ## What This Is
 
-GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. v1.1 shipped the fork pivot: renamed package, slim codebase, full credit + legal posture, bilingual docs, published as `@xgent-ai/gomad@1.1.0` on npm. v1.2 (shipped 2026-04-24, published as `@xgent-ai/gomad@1.2.0`) landed the agent-invocation pivot (7 `gm-agent-*` personas now invoked as `/gm:agent-*` launcher-form slash commands), hardened the installer for portable git-clone workflows (copy-only, manifest-driven upgrade cleanup with `--dry-run` + backup snapshots), and retuned `gm-create-prd` / `gm-product-brief` to read like dev-ready specs for coding agents rather than pitches for human product leads.
+GoMad (GOMAD Orchestration Method for Agile Development) is a hard fork of [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) — an agentic workflow framework for AI-driven software development. v1.1 shipped the fork pivot: renamed package, slim codebase, full credit + legal posture, bilingual docs, published as `@xgent-ai/gomad@1.1.0` on npm. v1.2 (shipped 2026-04-24, published as `@xgent-ai/gomad@1.2.0`) landed the agent-invocation pivot (7 `gm-agent-*` personas invoked as `/gm:agent-*` launcher-form slash commands), hardened the installer for portable git-clone workflows (copy-only, manifest-driven upgrade cleanup with `--dry-run` + backup snapshots), and retuned `gm-create-prd` / `gm-product-brief` to read like dev-ready specs for coding agents rather than pitches for human product leads. v1.3 (shipped 2026-04-27, published as `@xgent-ai/gomad@1.3.0`) added a story-creation discuss step + hand-rolled domain-knowledge retrieval (`gm-discuss-story` + `gm-domain-skill` + 2 seed KB packs), built out 6 EN + 6 zh-cn docs pages on `gomad.xgent.ai` with build-time auto-injection of agents/skills tables, and relocated the agent install path from `<installRoot>/gomad/agents/` to `<installRoot>/_config/agents/` with manifest-driven backup snapshots and explicit BREAKING callout.
 
 ## Core Value
 
 A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills, without dragging along the parts of BMAD we don't use.
 
-## Shipped — v1.3 Docs, Story Context & Agent Relocation (2026-04-27)
+## Current Milestone — v1.4 (TBD)
 
-**Status:** `@xgent-ai/gomad@1.3.0` published to npm with `latest` dist-tag; `v1.3.0` annotated tag on github/main; v1.2.0 retained as prior-stable. Full v1.3 milestone close (MILESTONES.md entry, Active→Validated migration, archive of phase artifacts) pending `/gsd-complete-milestone`.
+**Status:** v1.3 closed 2026-04-27. v1.4 not yet scoped — run `/gsd-new-milestone` to start questioning → research → requirements → roadmap.
 
-**Goal:** Enrich the 4-implementation story workflow with a discuss step plus a domain-knowledge framework, build out initial docs content on `gomad.xgent.ai`, and restructure the agent install path.
-
-**Target workstreams:**
-
-- **Story-creation enhancements** — New `gm-discuss-story` skill (manual-step precursor to `gm-create-story`) emitting `{planning_artifacts}/{{story_key}}-context.md`; `gm-create-story` auto-loads that context when present; new `gm-domain-skill` with retrieval protocol + 2 seed knowledge packs installed from `src/domain-kb/` into `<installRoot>/_config/kb/`.
-- **GitHub Pages docs site** — Build out initial docs content (install, agents, skills, architecture) and deploy manually to `gomad.xgent.ai`. No CI auto-deploy in v1.3.
-- **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/`. Agents-only; `gomad/workflows/` and `gomad/data/` stay put. v1.2→v1.3 upgrade via manifest-v2 cleanup with backup snapshots.
-
-**Key constraints for v1.3:**
-
-- `<installRoot>` is user-chosen (`_gomad` by convention); no hardcoded install paths.
-- Zero new runtime deps (v1.2 policy carried forward). Domain-skill search uses Node built-ins or existing deps.
-- Phase numbering continues (v1.2 ended at Phase 9 → v1.3 starts at Phase 10).
+Phase numbering continues from Phase 12 (v1.3 ended) → Phase 13 starts v1.4.
 
 ## Requirements
 
@@ -46,15 +34,17 @@ A lean, properly-credited fork of BMAD Method that we own end-to-end and can ext
 - ✓ **Coding-agent-oriented PRD refinement** (`gm-create-prd` steps 02b/02c/03/10 stripped of human-founder framing; residual sweep across 9 other steps; `## Coding-Agent Consumer Mindset` added to `data/prd-purpose.md`; step-09 emits `FR-NN` + Given/When/Then AC + `## Out of Scope` contract; `gm-product-brief` voice aligned with guardrails preserved; downstream skills structurally untouched) — v1.2 (PRD-01..07, 7 reqs)
 - ✓ **Release mechanics** (`type: module` factual error in PROJECT.md corrected; CHANGELOG v1.2.0 includes explicit BREAKING callout; tarball verification extended to assert `.claude/commands/gm/` presence + legacy `.claude/skills/gm-agent-*` absence; 97-assertion PRD chain integration test wired into `npm run quality`; `@xgent-ai/gomad@1.2.0` published with `latest` dist-tag; `v1.2.0` tagged on main) — v1.2 (REL-01..06, 6 reqs)
 - ✓ **Docs site content authoring** (6 EN pages + 6 zh-cn siblings authored: tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing; 53 BMAD-era pages deleted; `docs/index.md` rewritten as gomad landing; `tools/inject-reference-tables.cjs` auto-populates 8 personas + 28 task-skills + 11 core-skills from `src/{gomad,core}-skills/*/SKILL.md` at build time; `tools/validate-doc-links.js` URL-scheme guard; `tools/build-docs.mjs` REPO_URL + llms.txt corrected to v1.3; `npm run docs:build` exits 0 end-to-end and idempotent) — v1.3 Phase 11 (DOCS-01..06, 6 reqs)
+- ✓ **DOCS-07 path-sweep linter** (`tools/validate-doc-paths.js` negative-only docs-path linter (76 LOC, zero new deps); `npm run validate:doc-paths` exits 0 on clean tree, 1 on legacy-path leaks; hard allowlist exempts `docs/upgrade-recovery.md` + `docs/zh-cn/upgrade-recovery.md`; wired into `quality` + `prepublishOnly`) — v1.3 Phase 12 (DOCS-07, 1 req)
+- ✓ **Story-creation enhancements** (`gm-discuss-story` 5-file task-skill emitting `{{story_key}}-context.md` with 5 locked XML-wrapped sections + per-area checkpoint resume + ≤1500 token cap; `gm-domain-skill` BM25 + Levenshtein retrieval task-skill with 4 mode-branching outputs (file-content / catalog / no-match / typo-fallback), zero new runtime deps; 2 seed KB packs `src/domain-kb/{testing,architecture}/` at 18 files total, `source: original` + `license: MIT` + `last_reviewed`; `tools/validate-kb-licenses.js` IP-cleanliness release gate (7 rules KB-01..KB-07) wired into `npm run quality`; installer `_installDomainKb()` step copying to `<installRoot>/_config/kb/` tracked in `files-manifest.csv` v2; `gm-create-story` SELECTIVE_LOAD auto-detection of context.md + pre-bake of domain KB before story draft; conflict resolution: prompt-wins with visible warning) — v1.3 Phase 10 (STORY-01..12, 12 reqs)
+- ✓ **Agent dir relocation** (persona body files relocated `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/`; single source-of-truth `AGENTS_PERSONA_SUBPATH` constant in `path-utils.js`; writer + launcher template + installer comment swapped; `cleanup-planner.js` v12 branch with `isV12LegacyAgentsDir` predicate snapshots + removes legacy persona files via manifest-driven cleanup with `_gomad/_backups/<timestamp>/` snapshots and `meta.reason: manifest_cleanup`; latent `newInstallSet` derivation bug fixed; `detectCustomFiles` whitelist treats relocated persona `.md` as generated; verbose 4-bullet BREAKING migration banner printed on v1.2→v1.3 upgrade; `docs/upgrade-recovery.md` + zh-cn parity v1.2→v1.3 migration section; `<installRoot>` resolves at install time from user-chosen dir, never hardcoded `_gomad`) — v1.3 Phase 12 (AGENT-01..11, 11 reqs)
+- ✓ **v1.3 test matrix expansion** (`test-gm-command-surface.js` Phase C extended with launcher-body positive `_config/agents/` + negative `gomad/agents/` regex per persona; `verify-tarball.js` Phase 4 `checkLegacyAgentPathClean` greps shipped tarball; new E2E tests `test-legacy-v12-upgrade.js` (32 assertions, NETWORK-FREE manual v1.2 synthesis) + `test-v13-agent-relocation.js`; full `quality` matrix wired through `prepublishOnly`) — v1.3 Phase 12 (AGENT-07..10, REL-02, 5 reqs)
+- ✓ **v1.3 release** (`CHANGELOG.md` v1.3.0 entry with explicit `### BREAKING CHANGES` section + old-path → new-path migration + backup-recovery cross-reference; `package.json` `prepublishOnly = npm run quality` gate added; `@xgent-ai/gomad@1.3.0` published to npm with `latest` dist-tag; `v1.3.0` annotated tag on `github/main` with BREAKING-callout body; v1.2.0 retained as prior-stable; v1.1.0 retained; v1.0.0 deprecation unchanged) — v1.3 Phase 12 (REL-01, REL-03, REL-04, 3 reqs)
 
 ### Active
 
-<!-- v1.3 scope. See Current Milestone section above for full context. REQ-IDs defined in .planning/REQUIREMENTS.md. -->
+<!-- v1.4 scope — TBD. Run `/gsd-new-milestone` to populate after questioning. -->
 
-- [ ] **`gm-discuss-story`** — New skill emitting `{planning_artifacts}/{{story_key}}-context.md` to clarify gray areas before story creation
-- [ ] **`gm-create-story` context load** — Auto-detect and load `{story_key}-context.md` when present
-- [ ] **`gm-domain-skill`** — Framework + retrieval protocol + 2 seed knowledge packs (`src/domain-kb/` → `<installRoot>/_config/kb/`)
-- [ ] **Agent dir relocation** — `<installRoot>/gomad/agents/` → `<installRoot>/_config/agents/` with manifest-driven upgrade cleanup
+(None — v1.3 closed 2026-04-27. Awaiting v1.4 scoping.)
 
 ### Deferred (beyond v1.2)
 
@@ -174,7 +164,9 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-04-27 after Phase 12 (Agent Dir Relocation + Release) complete — `@xgent-ai/gomad@1.3.0` shipped to npm with `latest` dist-tag; annotated `v1.3.0` tag on github/main with BREAKING-callout body; CHANGELOG v1.3.0 entry + `docs/upgrade-recovery.md` v1.2→v1.3 cross-link in place. Persona body files relocated `<installRoot>/_gomad/gomad/agents/` → `<installRoot>/_gomad/_config/agents/` (agents-only; `gomad/workflows/` and `gomad/data/` unchanged). v1.2 → v1.3 upgrade automated with backup snapshots under `_gomad/_backups/<ts>/` and metadata `reason: manifest_cleanup`. 5 new Key Decisions rows for v1.3 (BREAKING-callout + prepublishOnly gate, agent-dir relocation, prepublishOnly scope vs npm test, hermetic install-smoke env, Phase 10 _config/<subdir>/ pattern proven before Phase 12). Active→Validated migration of remaining v1.3 items + MILESTONES.md v1.3 entry deferred to `/gsd-complete-milestone`.*
+*Last updated: 2026-04-27 after v1.3 milestone close — all 34 v1.3 requirements (DOCS-01..07, STORY-01..12, AGENT-01..11, REL-01..04) moved to Validated; MILESTONES.md v1.3 entry authored; ROADMAP.md reorganized with collapsed v1.3 section under `<details>`; REQUIREMENTS.md + ROADMAP.md archived to `milestones/v1.3-{ROADMAP,REQUIREMENTS}.md`. Active section cleared pending v1.4 scoping via `/gsd-new-milestone`. Phase numbering continues from Phase 12 → Phase 13 starts v1.4.*
+
+*Previously: 2026-04-27 after Phase 12 (Agent Dir Relocation + Release) complete — `@xgent-ai/gomad@1.3.0` shipped to npm with `latest` dist-tag; annotated `v1.3.0` tag on github/main with BREAKING-callout body; CHANGELOG v1.3.0 entry + `docs/upgrade-recovery.md` v1.2→v1.3 cross-link in place. Persona body files relocated `<installRoot>/_gomad/gomad/agents/` → `<installRoot>/_gomad/_config/agents/` (agents-only; `gomad/workflows/` and `gomad/data/` unchanged). v1.2 → v1.3 upgrade automated with backup snapshots under `_gomad/_backups/<ts>/` and metadata `reason: manifest_cleanup`. 5 new Key Decisions rows for v1.3 (BREAKING-callout + prepublishOnly gate, agent-dir relocation, prepublishOnly scope vs npm test, hermetic install-smoke env, Phase 10 _config/<subdir>/ pattern proven before Phase 12). Active→Validated migration of remaining v1.3 items + MILESTONES.md v1.3 entry deferred to `/gsd-complete-milestone`.*
 
 *Previously: 2026-04-26 after Phase 11 (Docs Site Content Authoring) complete — DOCS-01..06 moved to Validated; 12 new doc pages authored (6 EN + 6 zh-cn) covering tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing; auto-injecting reference-table tooling shipped (`tools/inject-reference-tables.cjs` populating 8 personas + 28 task-skills + 11 core-skills); `npm run docs:build` exits 0 end-to-end with idempotency; 53 BMAD-era doc pages deleted, `tools/build-docs.mjs` REPO_URL + llms.txt cleansed of v1.2-era leaks; "GitHub Pages docs site" workstream removed from Active. Remaining v1.3 active items: 4 (story-creation enhancements x3 + agent dir relocation).*
 
