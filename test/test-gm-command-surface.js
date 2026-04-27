@@ -183,11 +183,26 @@ try {
   installTempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gomad-gm-surface-install-'));
   assert(fs.existsSync(installTempDir), 'Install-smoke temp directory created');
 
+  // Strip inherited npm_* env so the inner npm install does not pick up the
+  // outer process's --registry / lifecycle / cache config. When this test runs
+  // under `npm publish --registry=<custom>` (via prepublishOnly → quality →
+  // test:gm-surface), the inherited npm_config_registry forces the inner
+  // install to fetch the tarball's deps from <custom> instead of the public
+  // registry, which deadlocks against the 120s timeout when <custom> does not
+  // host those deps. The install-smoke test asserts hermetic installability
+  // from the user's default npm config, so inherited overrides are noise.
+  const hermeticEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('npm_')));
+
   console.log(`${colors.dim}Initializing temp project...${colors.reset}`);
-  execSync('npm init -y', { cwd: installTempDir, stdio: 'pipe', timeout: 30_000 });
+  execSync('npm init -y', { cwd: installTempDir, stdio: 'pipe', timeout: 30_000, env: hermeticEnv });
 
   console.log(`${colors.dim}Installing tarball (timeout: 120s)...${colors.reset}`);
-  execSync(`npm install "${tarballPath}"`, { cwd: installTempDir, stdio: 'pipe', timeout: 120_000 });
+  execSync(`npm install "${tarballPath}"`, {
+    cwd: installTempDir,
+    stdio: 'pipe',
+    timeout: 120_000,
+    env: hermeticEnv,
+  });
 
   const gomadBin = path.join(installTempDir, 'node_modules', '.bin', 'gomad');
   assert(fs.existsSync(gomadBin), 'gomad bin present in installed node_modules/.bin', `Checked: ${gomadBin}`);

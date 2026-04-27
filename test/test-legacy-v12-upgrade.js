@@ -95,9 +95,21 @@ function packAndInstall(prefix) {
   const tarballName = packOutput.split('\n').pop().trim();
   const tarballPath = path.join(REPO_ROOT, tarballName);
 
+  // Strip inherited npm_* env so the inner npm install does not pick up the
+  // outer process's --registry / lifecycle / cache config (e.g. when this
+  // test runs under `npm publish --registry=<custom>` via prepublishOnly →
+  // quality → test:legacy-v12-upgrade). See test-gm-command-surface.js for
+  // the full rationale.
+  const hermeticEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('npm_')));
+
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
-  execSync('npm init -y', { cwd: tempDir, stdio: 'pipe', timeout: 30_000 });
-  execSync(`npm install "${tarballPath}"`, { cwd: tempDir, stdio: 'pipe', timeout: 180_000 });
+  execSync('npm init -y', { cwd: tempDir, stdio: 'pipe', timeout: 30_000, env: hermeticEnv });
+  execSync(`npm install "${tarballPath}"`, {
+    cwd: tempDir,
+    stdio: 'pipe',
+    timeout: 180_000,
+    env: hermeticEnv,
+  });
 
   const gomadBin = path.join(tempDir, 'node_modules', '.bin', 'gomad');
   return { tempDir, gomadBin, tarballPath };
