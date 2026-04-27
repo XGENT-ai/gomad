@@ -4,14 +4,14 @@ milestone: v1.3
 milestone_name: Docs, Story Context & Agent Relocation
 status: planning
 stopped_at: Phase 12 context gathered
-last_updated: "2026-04-26T14:23:55.162Z"
+last_updated: "2026-04-27T01:36:35.972Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 16
+  total_plans: 24
   completed_plans: 16
-  percent: 100
+  percent: 67
 ---
 
 # Project State
@@ -91,4 +91,4 @@ Last session: --stopped-at
 Stopped at: Phase 12 context gathered
 Resume: Run `/gsd-discuss-phase 10` then `/gsd-plan-phase 10` to begin planning Story-Creation Enhancements. For Phase 12, run `/gsd-research-phase 12` first (flagged in ROADMAP.md — open design questions on `newInstallSet` + `_config/agents/` collision).
 
-**Planned Phase:** 11 () — 0 plans — 2026-04-26T12:43:57.809Z
+**Planned Phase:** 12 (agent-dir-relocation-release) — 8 plans — 2026-04-27T01:36:35.966Z
