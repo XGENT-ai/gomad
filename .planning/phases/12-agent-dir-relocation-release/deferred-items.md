@@ -1,0 +1,1 @@
+- Pre-existing prettier formatting issue in tools/installer/ide/templates/agent-command-template.md (unrelated to plan 12-01 — exists before plan changes; out of scope per Rule 3 scope boundary)
