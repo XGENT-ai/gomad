@@ -228,7 +228,15 @@ async function isV12LegacyAgentsDir(workspaceRoot, gomadDir) {
  *   specific failing entry is captured.
  */
 async function buildCleanupPlan(input) {
-  const { priorManifest, newInstallSet, workspaceRoot, allowedRoots, isV11Legacy: v11, isV12LegacyAgentsDir: v12Reloc, manifestGen } = input;
+  const {
+    priorManifest,
+    newInstallSet,
+    workspaceRoot,
+    allowedRoots,
+    isV11Legacy: v11,
+    isV12LegacyAgentsDir: v12Reloc,
+    manifestGen,
+  } = input;
   const hashGen = manifestGen || new ManifestGenerator();
 
   const plan = {

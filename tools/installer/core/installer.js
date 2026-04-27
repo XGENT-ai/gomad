@@ -1010,16 +1010,11 @@ class Installer {
               //             User .customize.yaml files at _config/agents/ are handled by
               //             the orthogonal _config/-prefix early-continue above and are
               //             NOT touched by this conditional (D-04 user-override preservation).
-              const isModuleAgentMd = (
-                fileName.endsWith('.md')
-                && relativePath.includes('/agents/')
-                && !relativePath.startsWith('_config/')
-              );
-              const isV13PersonaMd = (
-                fileName.endsWith('.md')
-                && (relativePath.startsWith('_config/agents/') || relativePath.startsWith('_config\\agents\\'))
-                && PERSONA_SHORTNAMES.has(fileName.replace(/\.md$/, ''))
-              );
+              const isModuleAgentMd = fileName.endsWith('.md') && relativePath.includes('/agents/') && !relativePath.startsWith('_config/');
+              const isV13PersonaMd =
+                fileName.endsWith('.md') &&
+                (relativePath.startsWith('_config/agents/') || relativePath.startsWith('_config\\agents\\')) &&
+                PERSONA_SHORTNAMES.has(fileName.replace(/\.md$/, ''));
               if (!isModuleAgentMd && !isV13PersonaMd) {
                 customFiles.push(fullPath);
               }

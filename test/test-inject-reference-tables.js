@@ -200,22 +200,13 @@ function testRenderSkillsTableSections() {
 
 function testInjectBetweenMarkersReplaces() {
   const before = `prefix\n<!-- AUTO:agents-table-start -->\nold content\n<!-- AUTO:agents-table-end -->\nsuffix`;
-  const replaced = inject.injectBetweenMarkers(
-    before,
-    'AUTO:agents-table-start',
-    'AUTO:agents-table-end',
-    'NEW',
-  );
+  const replaced = inject.injectBetweenMarkers(before, 'AUTO:agents-table-start', 'AUTO:agents-table-end', 'NEW');
   assert(
     replaced.includes('<!-- AUTO:agents-table-start -->\nNEW\n<!-- AUTO:agents-table-end -->'),
     'injectBetweenMarkers substitutes content between markers',
     `Output:\n${replaced}`,
   );
-  assert(
-    !replaced.includes('old content'),
-    'injectBetweenMarkers removes old content between markers',
-    `Output:\n${replaced}`,
-  );
+  assert(!replaced.includes('old content'), 'injectBetweenMarkers removes old content between markers', `Output:\n${replaced}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -251,11 +242,7 @@ function testEscapePipe() {
   // Prefer the dedicated helper if exported; otherwise inspect a rendered table cell.
   if (typeof inject.escapeTableCell === 'function') {
     const escaped = inject.escapeTableCell('a | b');
-    assert(
-      escaped.includes('\\|') && !escaped.includes(' | '),
-      'escapeTableCell escapes pipe characters as \\|',
-      `Got: ${escaped}`,
-    );
+    assert(escaped.includes('\\|') && !escaped.includes(' | '), 'escapeTableCell escapes pipe characters as \\|', `Got: ${escaped}`);
   } else {
     // Fallback: render a synthetic personas table with a pipe in the description.
     const synthetic = [

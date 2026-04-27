@@ -77,7 +77,10 @@ const SKILLS_MARKER_KEYS = [
  * - Newlines collapse to a single space so the row stays on one logical line.
  */
 function escapeTableCell(str) {
-  return String(str || '').replaceAll('|', String.raw`\|`).replace(/\r?\n+/g, ' ').trim();
+  return String(str || '')
+    .replaceAll('|', String.raw`\|`)
+    .replace(/\r?\n+/g, ' ')
+    .trim();
 }
 
 /**
@@ -289,9 +292,7 @@ function renderTaskSkillSection(skillsForPhase) {
   lines.push('| Skill | Description | Invoked by |');
   lines.push('| --- | --- | --- |');
   for (const s of skillsForPhase) {
-    lines.push(
-      `| \`${s.name}\` | ${escapeTableCell(s.description)} | Invoked by \`gm-agent-*\` or any persona via the skill loader |`,
-    );
+    lines.push(`| \`${s.name}\` | ${escapeTableCell(s.description)} | Invoked by \`gm-agent-*\` or any persona via the skill loader |`);
   }
   return lines.join('\n');
 }
@@ -304,9 +305,7 @@ function renderCoreSection(coreSkills) {
   lines.push('| Skill | Description | Invoked by |');
   lines.push('| --- | --- | --- |');
   for (const s of coreSkills) {
-    lines.push(
-      `| \`${s.name}\` | ${escapeTableCell(s.description)} | Invoked by \`gm-agent-*\` or any persona via the skill loader |`,
-    );
+    lines.push(`| \`${s.name}\` | ${escapeTableCell(s.description)} | Invoked by \`gm-agent-*\` or any persona via the skill loader |`);
   }
   return lines.join('\n');
 }
