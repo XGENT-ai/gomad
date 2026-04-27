@@ -29,6 +29,7 @@
   "files": [
     "src/",
     "tools/installer/",
+    "tools/installer/assets/",
     "LICENSE",
     "README.md",
     "README_CN.md",
