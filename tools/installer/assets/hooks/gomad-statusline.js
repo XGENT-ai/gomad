@@ -59,10 +59,11 @@ function escapeRegex(s) {
   return s.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
-// --- Transcript-driven agent detection --------------------------------------
+// --- Hook-driven agent state reader -----------------------------------------
 
-// Reverse PERSONAS: shortName → persona display name. Lets the transcript
-// scanner translate `/gm:agent-pm` or `_config/agents/pm.md` straight to John.
+// Reverse PERSONAS: shortName → persona display name. The tracker hook writes
+// the resolved persona directly to the state file, so this map is now only
+// here for tests / introspection — not used in the read path.
 const SHORTNAMES = {
   analyst: 'Mary',
   'tech-writer': 'Paige',
@@ -74,140 +75,27 @@ const SHORTNAMES = {
   'solo-dev': 'Barry',
 };
 
-// Cheap mtime+size cache so the per-tick transcript scan is a no-op when the
-// file hasn't changed. Keyed by `${path}:${mtimeMs}:${size}`. One slot is
-// enough — Claude Code statusline runs in a fresh process per refresh anyway,
-// but module-level cache helps if the host ever shares a process.
-let _transcriptCache = { key: null, value: null };
-
 /**
- * Scan the tail of a Claude Code transcript (.jsonl) for the most recent
- * gomad agent load signal. Returns `{ persona, skill }` or `null`.
+ * Read the active gomad persona for this session from the tracker hook's
+ * state file. Returns `{ persona, skill }` or `null`.
  *
- * Each line is parsed as JSON and matched against the *structural* shapes
- * Claude Code emits — chat text or tool I/O that happens to mention the
- * literal strings does NOT count. Two strong signals are honored:
- *
- *   1. User invoked `/gm:agent-<short>` as a slash command. The transcript
- *      records a `type:'user'` entry whose `message.content` STARTS WITH
- *      `<command-name>/gm:agent-<short></command-name>`.
- *   2. Claude loaded the persona body via the `Read` tool. The transcript
- *      records a `type:'assistant'` entry whose `message.content[]` includes
- *      a `{ type:'tool_use', name:'Read', input:{ file_path: …/_config/agents/<short>.md } }`.
- *
- * `/clear` acts as a hard barrier — but only when it has the same
- * `<command-name>/clear</command-name>` structural shape; assistant text
- * or tool I/O that happens to mention the literal string is ignored.
- *
- * Reads at most TAIL_BYTES from the end of the file to keep the per-tick
- * cost bounded even on long sessions. Drops the first (potentially partial)
- * line when truncating mid-file.
+ * The state file is written by `gomad-agent-tracker.js` on UserPromptSubmit
+ * (when the prompt starts with `/gm:agent-<short>`) and deleted on
+ * SessionStart / SessionEnd. The statusline just reads — no transcript
+ * scanning, no regex over chat text.
  */
-function detectAgentFromTranscript(transcriptPath) {
-  if (!transcriptPath || typeof transcriptPath !== 'string') return null;
-  let st;
+function readAgentState(session) {
+  if (!session || typeof session !== 'string') return null;
+  if (/[/\\]|\.\./.test(session)) return null;
+  const stateFile = path.join(os.tmpdir(), `gomad-agent-${session}.json`);
   try {
-    st = fs.statSync(transcriptPath);
-  } catch {
-    return null;
-  }
-  const cacheKey = `${transcriptPath}:${st.mtimeMs}:${st.size}`;
-  if (_transcriptCache.key === cacheKey) return _transcriptCache.value;
-
-  let result = null;
-  try {
-    const TAIL_BYTES = 65_536;
-    const len = Math.min(TAIL_BYTES, st.size);
-    const fd = fs.openSync(transcriptPath, 'r');
-    const buf = Buffer.alloc(len);
-    fs.readSync(fd, buf, 0, len, st.size - len);
-    fs.closeSync(fd);
-
-    const lines = buf.toString('utf8').split('\n').filter(Boolean);
-    if (st.size > TAIL_BYTES && lines.length > 1) lines.shift();
-
-    for (let i = lines.length - 1; i >= 0; i--) {
-      let entry;
-      try {
-        entry = JSON.parse(lines[i]);
-      } catch {
-        continue;
-      }
-
-      if (isClearCommand(entry)) break;
-
-      const slashShort = extractSlashAgent(entry);
-      if (slashShort && SHORTNAMES[slashShort]) {
-        result = { persona: SHORTNAMES[slashShort], skill: `gm-agent-${slashShort}` };
-        break;
-      }
-
-      const readShort = extractAgentRead(entry);
-      if (readShort && SHORTNAMES[readShort]) {
-        result = { persona: SHORTNAMES[readShort], skill: `gm-agent-${readShort}` };
-        break;
-      }
+    if (!fs.existsSync(stateFile)) return null;
+    const j = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    if (j && typeof j.persona === 'string' && typeof j.skill === 'string') {
+      return { persona: j.persona, skill: j.skill };
     }
   } catch {
-    // Silent fail — never break the statusline over a transcript hiccup.
-  }
-
-  _transcriptCache = { key: cacheKey, value: result };
-  return result;
-}
-
-/** True when this entry is a real user-invoked /clear (structural match). */
-function isClearCommand(entry) {
-  if (!entry || entry.type !== 'user') return false;
-  const c = entry.message && entry.message.content;
-  if (typeof c !== 'string') return false;
-  return /^\s*<command-name>\/clear<\/command-name>/.test(c);
-}
-
-/** Returns the short-name of a `/gm:agent-<short>` slash invocation, or null. */
-function extractSlashAgent(entry) {
-  if (!entry || entry.type !== 'user') return null;
-  const c = entry.message && entry.message.content;
-  if (typeof c !== 'string') return null;
-  const m = c.match(/^\s*<command-name>\/gm:agent-([a-z][a-z-]*)<\/command-name>/i);
-  return m ? m[1].toLowerCase() : null;
-}
-
-/** Returns the short-name from an assistant Read tool_use of `…/_config/agents/<short>.md`, or null. */
-function extractAgentRead(entry) {
-  if (!entry || entry.type !== 'assistant') return null;
-  const blocks = entry.message && entry.message.content;
-  if (!Array.isArray(blocks)) return null;
-  for (const block of blocks) {
-    if (!block || block.type !== 'tool_use' || block.name !== 'Read') continue;
-    const fp = block.input && block.input.file_path;
-    if (typeof fp !== 'string') continue;
-    const m = fp.match(/[/\\]_config[/\\]+agents[/\\]+([a-z][a-z-]+)\.md$/i);
-    if (m) return m[1].toLowerCase();
-  }
-  return null;
-}
-
-/**
- * Resolve the transcript file for this session. Claude Code newer builds
- * pass `transcript_path` directly in the statusline JSON. Older builds
- * don't — fall back to globbing `~/.claude/projects/*\/<session>.jsonl`.
- */
-function resolveTranscriptPath(data, session) {
-  if (data && typeof data.transcript_path === 'string' && data.transcript_path) {
-    return data.transcript_path;
-  }
-  if (!session) return null;
-  const projectsDir = path.join(os.homedir(), '.claude', 'projects');
-  try {
-    if (!fs.existsSync(projectsDir)) return null;
-    const subdirs = fs.readdirSync(projectsDir);
-    for (const sub of subdirs) {
-      const candidate = path.join(projectsDir, sub, `${session}.jsonl`);
-      if (fs.existsSync(candidate)) return candidate;
-    }
-  } catch {
-    // Silent fail
+    // Bad / locked / vanished state file — silent fail.
   }
   return null;
 }
@@ -454,14 +342,13 @@ function runStatusline() {
       }
 
       // Decide the middle zone:
-      //   1. transcript shows a recent /gm:agent-* load → 👤 Persona (skill)
+      //   1. tracker-hook state file pinned a /gm:agent-* persona → 👤 …
       //   2. else if persona is detectable in the active todo → 👤 …
       //   3. else if a todo activeForm exists → bare activeForm (bold)
       //   4. else if sprint-status resolved → Sprint: <project> · ▶x ✓y ⏳z (dim)
       //   5. else → empty
       let middle = null;
-      const transcriptPath = resolveTranscriptPath(data, session);
-      const persona = detectAgentFromTranscript(transcriptPath) || detectGomadAgent(activeForm);
+      const persona = readAgentState(session) || detectGomadAgent(activeForm);
       if (persona) {
         middle = `[1m👤 ${persona.persona} (${persona.skill})[0m`;
       } else if (activeForm) {
@@ -497,8 +384,7 @@ function runStatusline() {
 module.exports = {
   readGomadSprint,
   detectGomadAgent,
-  detectAgentFromTranscript,
-  resolveTranscriptPath,
+  readAgentState,
   SHORTNAMES,
 };
 

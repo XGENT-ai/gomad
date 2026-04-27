@@ -372,16 +372,13 @@ async function makeTmpDir() {
   if (caseCTmp) await fs.remove(caseCTmp);
 
   // -------------------------------------------------------------------------
-  // Case F — transcript-driven agent detection picks up /gm:agent-* loads
-  // (no todo activeForm — the persona signal must come from transcript only).
+  // Case F — hook-driven agent state: tracker writes, statusline reads.
   // -------------------------------------------------------------------------
-  console.log(`${colors.yellow}Case F: detect /gm:agent-pm from transcript${colors.reset}`);
-  let caseFTmp;
+  console.log(`${colors.yellow}Case F: hook-driven agent state${colors.reset}`);
+  let caseFSession;
   try {
-    caseFTmp = await makeTmpDir();
-    const { detectAgentFromTranscript, resolveTranscriptPath, SHORTNAMES } = require(
-      '../tools/installer/assets/hooks/gomad-statusline.js',
-    );
+    const { readAgentState, SHORTNAMES } = require('../tools/installer/assets/hooks/gomad-statusline.js');
+    const tracker = require('../tools/installer/assets/hooks/gomad-agent-tracker.js');
 
     check('F1 SHORTNAMES covers all 8 personas', () => {
       assert.equal(Object.keys(SHORTNAMES).length, 8);
@@ -390,139 +387,241 @@ async function makeTmpDir() {
       assert.equal(SHORTNAMES['solo-dev'], 'Barry');
     });
 
-    // Helpers — match the real Claude Code transcript shape.
-    const slashCmd = (cmd) =>
-      JSON.stringify({
-        type: 'user',
-        message: { role: 'user', content: `<command-name>${cmd}</command-name>\n<command-message></command-message>` },
-      });
-    const chatUser = (text) =>
-      JSON.stringify({ type: 'user', message: { role: 'user', content: text } });
-    const personaRead = (filePath) =>
-      JSON.stringify({
-        type: 'assistant',
-        message: { role: 'assistant', content: [{ type: 'tool_use', name: 'Read', input: { file_path: filePath } }] },
-      });
+    // Use a unique session id per process so we never collide with a real one.
+    caseFSession = `gomad-test-${process.pid}-${Date.now()}`;
+    const stateFile = tracker.stateFileFor(caseFSession);
+    try {
+      fs.unlinkSync(stateFile);
+    } catch {
+      /* fresh */
+    }
 
-    // F2: real slash-command invocation.
-    const t1 = path.join(caseFTmp, 't1.jsonl');
-    await fs.writeFile(t1, [chatUser('hi there'), slashCmd('/gm:agent-pm')].join('\n') + '\n');
-    check('F2 slash-command /gm:agent-pm → John', () => {
-      const r = detectAgentFromTranscript(t1);
-      assert.deepEqual(r, { persona: 'John', skill: 'gm-agent-pm' });
+    // F2: UserPromptSubmit with /gm:agent-pm writes state, statusline reads it.
+    tracker.handle({
+      hook_event_name: 'UserPromptSubmit',
+      session_id: caseFSession,
+      prompt: '/gm:agent-pm please draft a PRD',
+    });
+    check('F2 tracker writes state on /gm:agent-pm', () => {
+      assert.equal(fs.pathExistsSync(stateFile), true);
+      assert.deepEqual(readAgentState(caseFSession), { persona: 'John', skill: 'gm-agent-pm' });
     });
 
-    // F3: persona file Read picks up the persona too.
-    const t2 = path.join(caseFTmp, 't2.jsonl');
-    await fs.writeFile(t2, personaRead('/proj/_gomad/_config/agents/dev.md') + '\n');
-    check('F3 _config/agents/dev.md → Amelia', () => {
-      const r = detectAgentFromTranscript(t2);
-      assert.deepEqual(r, { persona: 'Amelia', skill: 'gm-agent-dev' });
+    // F3: subsequent UserPromptSubmit with chat text leaves state alone.
+    tracker.handle({
+      hook_event_name: 'UserPromptSubmit',
+      session_id: caseFSession,
+      prompt: 'thanks, also gm-agent-solo-dev should not change the persona',
+    });
+    check('F3 chat text does not overwrite state', () => {
+      assert.deepEqual(readAgentState(caseFSession), { persona: 'John', skill: 'gm-agent-pm' });
     });
 
-    // F4: most-recent persona wins when transcript shows two loads.
-    const t3 = path.join(caseFTmp, 't3.jsonl');
-    await fs.writeFile(t3, [slashCmd('/gm:agent-pm'), slashCmd('/gm:agent-architect')].join('\n') + '\n');
-    check('F4 most-recent persona wins (architect over pm)', () => {
-      const r = detectAgentFromTranscript(t3);
-      assert.deepEqual(r, { persona: 'Winston', skill: 'gm-agent-architect' });
+    // F4: /gm:agent-architect overwrites — most recent invocation wins.
+    tracker.handle({
+      hook_event_name: 'UserPromptSubmit',
+      session_id: caseFSession,
+      prompt: '/gm:agent-architect now',
+    });
+    check('F4 second /gm:agent-* overwrites state', () => {
+      assert.deepEqual(readAgentState(caseFSession), { persona: 'Winston', skill: 'gm-agent-architect' });
     });
 
-    // F5: unknown shortname → null (not a false positive on `/gm:agent-foo`).
-    const t4 = path.join(caseFTmp, 't4.jsonl');
-    await fs.writeFile(t4, slashCmd('/gm:agent-bogus') + '\n');
-    check('F5 unknown shortname returns null', () => {
-      assert.equal(detectAgentFromTranscript(t4), null);
+    // F5: SessionStart resets state regardless of subtype.
+    tracker.handle({ hook_event_name: 'SessionStart', session_id: caseFSession, source: 'clear' });
+    check('F5 SessionStart deletes state file', () => {
+      assert.equal(fs.pathExistsSync(stateFile), false);
+      assert.equal(readAgentState(caseFSession), null);
     });
 
-    // F6: missing transcript file returns null silently.
-    check('F6 missing file returns null', () => {
-      assert.equal(detectAgentFromTranscript(path.join(caseFTmp, 'does-not-exist.jsonl')), null);
+    // F6: SessionEnd also deletes (defensive cleanup).
+    tracker.handle({
+      hook_event_name: 'UserPromptSubmit',
+      session_id: caseFSession,
+      prompt: '/gm:agent-dev',
+    });
+    tracker.handle({ hook_event_name: 'SessionEnd', session_id: caseFSession, reason: 'logout' });
+    check('F6 SessionEnd deletes state file', () => {
+      assert.equal(fs.pathExistsSync(stateFile), false);
     });
 
-    // F7: resolveTranscriptPath prefers data.transcript_path when provided.
-    check('F7 resolveTranscriptPath honors data.transcript_path', () => {
-      assert.equal(resolveTranscriptPath({ transcript_path: t1 }, 'irrelevant'), t1);
+    // F7: unknown shortname is rejected silently.
+    tracker.handle({
+      hook_event_name: 'UserPromptSubmit',
+      session_id: caseFSession,
+      prompt: '/gm:agent-bogus',
+    });
+    check('F7 unknown shortname does not create state', () => {
+      assert.equal(fs.pathExistsSync(stateFile), false);
     });
 
-    // F8: /clear acts as a hard barrier — old persona signals before the
-    // most-recent /clear must not leak into the current display.
-    const tClear = path.join(caseFTmp, 't-clear.jsonl');
-    await fs.writeFile(
-      tClear,
-      [slashCmd('/gm:agent-pm'), chatUser('sure thing'), slashCmd('/clear')].join('\n') + '\n',
-    );
-    check('F8 /clear barrier nullifies pre-clear /gm:agent-pm', () => {
-      assert.equal(detectAgentFromTranscript(tClear), null);
+    // F8: chat starting with non-slash text is rejected (regression for the
+    // "我运行 /gm:agent-pm" false-positive bug).
+    tracker.handle({
+      hook_event_name: 'UserPromptSubmit',
+      session_id: caseFSession,
+      prompt: '我运行 /gm:agent-pm ，但显示的是 Barry (gm-agent-solo-dev)',
+    });
+    check('F8 chat text mentioning /gm:agent-* mid-sentence is rejected', () => {
+      assert.equal(fs.pathExistsSync(stateFile), false);
+      assert.equal(readAgentState(caseFSession), null);
     });
 
-    // F9: persona signal AFTER /clear is still detected.
-    const tClearThenAgent = path.join(caseFTmp, 't-clear-then-agent.jsonl');
-    await fs.writeFile(
-      tClearThenAgent,
-      [slashCmd('/gm:agent-pm'), slashCmd('/clear'), slashCmd('/gm:agent-architect')].join('\n') + '\n',
-    );
-    check('F9 post-clear /gm:agent-architect → Winston', () => {
-      assert.deepEqual(detectAgentFromTranscript(tClearThenAgent), {
-        persona: 'Winston',
-        skill: 'gm-agent-architect',
-      });
+    // F9: extractSlashAgent direct-unit checks for the regex anchoring.
+    check('F9 extractSlashAgent rejects non-anchored matches', () => {
+      assert.equal(tracker.extractSlashAgent('chat /gm:agent-pm'), null);
+      assert.equal(tracker.extractSlashAgent('  /gm:agent-pm draft'), 'pm');
+      assert.equal(tracker.extractSlashAgent('/gm:agent-bogus'), null);
+      assert.equal(tracker.extractSlashAgent('/gm:agent-dev'), 'dev');
+      // boundary: should not match `/gm:agent-developer` as `dev`
+      assert.equal(tracker.extractSlashAgent('/gm:agent-developer'), null);
     });
 
-    // F10: chat text mentioning `/gm:agent-pm` mid-sentence is NOT a signal —
-    // only structurally-shaped slash commands count. This is the regression
-    // for "我运行 /gm:agent-pm" being typed in chat surfaced as a persona load.
-    const tChat = path.join(caseFTmp, 't-chat.jsonl');
-    await fs.writeFile(
-      tChat,
-      [
-        chatUser('I just ran /gm:agent-pm but it shows Barry (gm-agent-solo-dev) instead'),
-        JSON.stringify({
-          type: 'assistant',
-          message: { role: 'assistant', content: [{ type: 'text', text: 'Looking into the bug — gm-agent-pm should win.' }] },
-        }),
-      ].join('\n') + '\n',
-    );
-    check('F10 chat mentions of /gm:agent-* and gm-agent-* are NOT signals', () => {
-      assert.equal(detectAgentFromTranscript(tChat), null);
+    // F10: stateFileFor rejects path-traversal session ids.
+    check('F10 stateFileFor rejects unsafe session ids', () => {
+      assert.equal(tracker.stateFileFor('../etc/passwd'), null);
+      assert.equal(tracker.stateFileFor('foo/bar'), null);
+      assert.equal(tracker.stateFileFor(''), null);
+      assert.equal(tracker.stateFileFor(null), null);
     });
 
-    // F11: tool I/O text containing `<command-name>/clear</command-name>` (e.g.
-    // an Edit writing test fixtures, a grep output) must NOT be treated as a
-    // /clear barrier.
-    const tFakeClear = path.join(caseFTmp, 't-fake-clear.jsonl');
-    await fs.writeFile(
-      tFakeClear,
-      [
-        slashCmd('/gm:agent-pm'),
-        // Assistant's Edit tool_use embedding the literal `<command-name>/clear</command-name>` string
-        JSON.stringify({
-          type: 'assistant',
-          message: {
-            role: 'assistant',
-            content: [
-              {
-                type: 'tool_use',
-                name: 'Edit',
-                input: { new_string: 'await fs.writeFile(t, "<command-name>/clear</command-name>")' },
-              },
-            ],
-          },
-        }),
-      ].join('\n') + '\n',
-    );
-    check('F11 fake-clear in tool_use input is NOT a barrier', () => {
-      assert.deepEqual(detectAgentFromTranscript(tFakeClear), {
-        persona: 'John',
-        skill: 'gm-agent-pm',
-      });
+    // F11: readAgentState returns null when state file is missing.
+    check('F11 readAgentState returns null without state file', () => {
+      assert.equal(readAgentState(`${caseFSession}-never-existed`), null);
     });
   } catch (error) {
     check('F0 case F ran without throwing', () => {
       throw error;
     });
   }
-  if (caseFTmp) await fs.remove(caseFTmp);
+  // Cleanup any state file we left behind.
+  if (caseFSession) {
+    try {
+      const trackerMod = require('../tools/installer/assets/hooks/gomad-agent-tracker.js');
+      const sf = trackerMod.stateFileFor(caseFSession);
+      if (sf) fs.removeSync(sf);
+    } catch {
+      /* ignore */
+    }
+  }
+  console.log('');
+
+  // -------------------------------------------------------------------------
+  // Case G — installAgentTracker / cleanupAgentTracker round-trip
+  // -------------------------------------------------------------------------
+  console.log(`${colors.yellow}Case G: agent-tracker install/uninstall round-trip${colors.reset}`);
+  try {
+    const tmp = await makeTmpDir();
+    const cfg = {
+      name: 'Claude Code',
+      installer: {
+        target_dir: '.claude/skills',
+        hooks_target_dir: '.claude/hooks',
+        agent_tracker: {
+          source: 'tools/installer/assets/hooks/gomad-agent-tracker.js',
+          dest_name: 'gomad-agent-tracker.js',
+          settings_file: '.claude/settings.json',
+          events: ['UserPromptSubmit', 'SessionStart', 'SessionEnd'],
+        },
+      },
+    };
+    const setup = new ConfigDrivenIdeSetup('claude-code', cfg);
+
+    // Pre-existing settings.json with an unrelated hook entry that must survive.
+    const settingsPath = path.join(tmp, '.claude/settings.json');
+    await fs.ensureDir(path.dirname(settingsPath));
+    await fs.writeJson(
+      settingsPath,
+      {
+        env: { KEEP: 'me' },
+        hooks: {
+          SessionStart: [{ hooks: [{ type: 'command', command: 'echo other' }] }],
+        },
+      },
+      { spaces: 2 },
+    );
+
+    const installed = await setup.installAgentTracker(tmp, cfg.installer, { silent: true });
+    check('G1 installAgentTracker returns true', () => assert.equal(installed, true));
+
+    const trackerPath = path.join(tmp, '.claude/hooks/gomad-agent-tracker.js');
+    check('G2 tracker file copied + executable', () => {
+      assert.equal(fs.pathExistsSync(trackerPath), true);
+      if (process.platform !== 'win32') {
+        const mode = fs.statSync(trackerPath).mode;
+        assert.equal((mode & 0o100) !== 0, true);
+      }
+    });
+
+    const settingsAfter = await fs.readJson(settingsPath);
+    check('G3 unrelated env.KEEP survives', () => assert.equal(settingsAfter.env?.KEEP, 'me'));
+    check('G4 unrelated SessionStart hook survives', () => {
+      const groups = settingsAfter.hooks?.SessionStart || [];
+      const echoSurvived = groups.some((g) =>
+        (g.hooks || []).some((h) => h.command === 'echo other'),
+      );
+      assert.equal(echoSurvived, true);
+    });
+    check('G5 tracker registered on all 3 events', () => {
+      for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
+        const groups = settingsAfter.hooks?.[event] || [];
+        const found = groups.some((g) =>
+          (g.hooks || []).some((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')),
+        );
+        assert.equal(found, true, `missing tracker registration on ${event}`);
+      }
+    });
+
+    // G6: re-running install is idempotent — no duplicates.
+    await setup.installAgentTracker(tmp, cfg.installer, { silent: true });
+    const settingsAfter2 = await fs.readJson(settingsPath);
+    check('G6 re-install does not duplicate registrations', () => {
+      for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
+        const matches = (settingsAfter2.hooks?.[event] || []).reduce(
+          (n, g) =>
+            n +
+            (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js'))
+              .length,
+          0,
+        );
+        assert.equal(matches, 1, `expected 1 tracker entry on ${event}, got ${matches}`);
+      }
+    });
+
+    // G7: cleanup removes file + entries, leaves unrelated config alone.
+    await setup.cleanupAgentTracker(tmp, { silent: true });
+    const settingsCleaned = await fs.readJson(settingsPath);
+    check('G7 cleanup removes tracker file', () => {
+      assert.equal(fs.pathExistsSync(trackerPath), false);
+    });
+    check('G8 cleanup leaves unrelated keys intact', () => {
+      assert.equal(settingsCleaned.env?.KEEP, 'me');
+      const groups = settingsCleaned.hooks?.SessionStart || [];
+      const echoSurvived = groups.some((g) =>
+        (g.hooks || []).some((h) => h.command === 'echo other'),
+      );
+      assert.equal(echoSurvived, true);
+    });
+    check('G9 cleanup strips all tracker entries', () => {
+      for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
+        const groups = settingsCleaned.hooks?.[event] || [];
+        const trackerEntries = groups.reduce(
+          (n, g) =>
+            n +
+            (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js'))
+              .length,
+          0,
+        );
+        assert.equal(trackerEntries, 0, `tracker still registered on ${event}`);
+      }
+    });
+
+    await fs.remove(tmp);
+  } catch (error) {
+    check('G0 case G ran without throwing', () => {
+      throw error;
+    });
+  }
   console.log('');
 
   // -------------------------------------------------------------------------

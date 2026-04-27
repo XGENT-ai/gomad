@@ -39,6 +39,19 @@ platforms:
         source: tools/installer/assets/hooks/gomad-statusline.js
         dest_name: gomad-statusline.js
         settings_file: .claude/settings.json
+      # Active-persona tracker — three Claude Code hook events, one script.
+      # The statusline reads the tracker's state file rather than scanning
+      # the transcript, so chat text mentioning /gm:agent-* never produces
+      # false positives. Same script handles all three events via
+      # hook_event_name dispatch.
+      agent_tracker:
+        source: tools/installer/assets/hooks/gomad-agent-tracker.js
+        dest_name: gomad-agent-tracker.js
+        settings_file: .claude/settings.json
+        events:
+          - UserPromptSubmit
+          - SessionStart
+          - SessionEnd
 
   cline:
     name: "Cline"

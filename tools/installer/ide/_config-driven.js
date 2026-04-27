@@ -172,6 +172,14 @@ class ConfigDrivenIdeSetup {
       if (installed) results.statusline = true;
     }
 
+    // Active-persona tracker — installs a Claude Code hook that captures
+    // /gm:agent-<short> invocations on UserPromptSubmit and resets on
+    // SessionStart / SessionEnd. The statusline reads its state file.
+    if (config.agent_tracker) {
+      const installed = await this.installAgentTracker(projectDir, config, options);
+      if (installed) results.agentTracker = true;
+    }
+
     await this.printSummary(results, target_dir, options);
     this.skillWriteTracker = null;
     return { success: true, results };
@@ -296,6 +304,184 @@ class ConfigDrivenIdeSetup {
   }
 
   /**
+   * Copy the gomad-agent-tracker.js hook and register it under each requested
+   * `hooks.<EventName>` entry in `.claude/settings.json`. Additive merge —
+   * preserves any non-gomad hook entries the user had configured.
+   *
+   * Identifying our entries on uninstall: the command string contains the
+   * tracker's dest_name (e.g. `gomad-agent-tracker.js`), which is gomad-specific.
+   *
+   * @param {string} projectDir
+   * @param {Object} config - installer config block (must have agent_tracker + hooks_target_dir)
+   * @param {Object} options - { silent, trackInstalledFile }
+   * @returns {Promise<boolean>}
+   */
+  async installAgentTracker(projectDir, config, options = {}) {
+    const { hooks_target_dir, agent_tracker } = config;
+    if (!hooks_target_dir || !agent_tracker?.source || !agent_tracker?.dest_name) return false;
+    const events = Array.isArray(agent_tracker.events) ? agent_tracker.events : [];
+    if (events.length === 0) return false;
+
+    const gomadSrcRoot = getProjectRoot();
+    const srcFile = path.join(gomadSrcRoot, agent_tracker.source);
+    if (!(await fs.pathExists(srcFile))) return false;
+
+    const destDir = path.join(projectDir, hooks_target_dir);
+    const destFile = path.join(destDir, agent_tracker.dest_name);
+    await fs.ensureDir(destDir);
+    await fs.copy(srcFile, destFile, { overwrite: true });
+    try {
+      await fs.chmod(destFile, 0o755);
+    } catch {
+      // Windows — harmless.
+    }
+    options.trackInstalledFile?.(destFile);
+
+    if (!agent_tracker.settings_file) {
+      if (!options.silent) {
+        await prompts.log.success(`Claude Code agent tracker installed → ${hooks_target_dir}/${agent_tracker.dest_name}`);
+      }
+      return true;
+    }
+
+    const settingsFile = path.join(projectDir, agent_tracker.settings_file);
+    let parsed = {};
+    if (await fs.pathExists(settingsFile)) {
+      try {
+        const raw = await fs.readFile(settingsFile, 'utf8');
+        parsed = raw.trim() ? JSON.parse(raw) : {};
+        if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          if (!options.silent) {
+            await prompts.log.warn(`  Could not merge ${agent_tracker.settings_file}: not a JSON object — skipping tracker registration`);
+          }
+          return true;
+        }
+      } catch {
+        if (!options.silent) {
+          await prompts.log.warn(`  Could not parse ${agent_tracker.settings_file} — skipping tracker registration`);
+        }
+        return true;
+      }
+    }
+
+    if (!parsed.hooks || typeof parsed.hooks !== 'object' || Array.isArray(parsed.hooks)) {
+      parsed.hooks = {};
+    }
+
+    const command = `node "$CLAUDE_PROJECT_DIR"/${hooks_target_dir}/${agent_tracker.dest_name}`;
+
+    for (const event of events) {
+      if (!Array.isArray(parsed.hooks[event])) parsed.hooks[event] = [];
+      const groups = parsed.hooks[event];
+
+      // Skip if any existing entry already invokes our tracker (re-install / idempotent).
+      const alreadyRegistered = groups.some(
+        (group) =>
+          Array.isArray(group?.hooks) &&
+          group.hooks.some((h) => typeof h?.command === 'string' && h.command.includes(agent_tracker.dest_name)),
+      );
+      if (alreadyRegistered) continue;
+
+      groups.push({ hooks: [{ type: 'command', command, timeout: 5 }] });
+    }
+
+    await fs.ensureDir(path.dirname(settingsFile));
+    await fs.writeFile(settingsFile, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
+    options.trackInstalledFile?.(settingsFile);
+
+    if (!options.silent) {
+      await prompts.log.success(
+        `Claude Code agent tracker installed → ${hooks_target_dir}/${agent_tracker.dest_name} (${events.join(', ')})`,
+      );
+    }
+    return true;
+  }
+
+  /**
+   * Reverse of installAgentTracker: remove the hook file and strip our
+   * tracker entries from each `hooks.<EventName>` array in settings.json.
+   * Identifies our entries by `command` containing dest_name.
+   */
+  async cleanupAgentTracker(projectDir, options = {}) {
+    const installerCfg = this.installerConfig || {};
+    const { hooks_target_dir, agent_tracker } = installerCfg;
+    if (!hooks_target_dir || !agent_tracker?.dest_name) return;
+
+    const destDir = path.join(projectDir, hooks_target_dir);
+    const destFile = path.join(destDir, agent_tracker.dest_name);
+    if (await fs.pathExists(destFile)) {
+      try {
+        await fs.remove(destFile);
+      } catch {
+        // Best-effort.
+      }
+    }
+
+    if (!agent_tracker.settings_file) return;
+    const settingsFile = path.join(projectDir, agent_tracker.settings_file);
+    if (!(await fs.pathExists(settingsFile))) return;
+
+    let parsed;
+    try {
+      const raw = await fs.readFile(settingsFile, 'utf8');
+      parsed = raw.trim() ? JSON.parse(raw) : {};
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) return;
+    } catch {
+      return;
+    }
+
+    if (!parsed.hooks || typeof parsed.hooks !== 'object') return;
+
+    let mutated = false;
+    for (const [event, groups] of Object.entries(parsed.hooks)) {
+      if (!Array.isArray(groups)) continue;
+      const filteredGroups = [];
+      for (const group of groups) {
+        if (!group || !Array.isArray(group.hooks)) {
+          filteredGroups.push(group);
+          continue;
+        }
+        const remaining = group.hooks.filter(
+          (h) => !(typeof h?.command === 'string' && h.command.includes(agent_tracker.dest_name)),
+        );
+        if (remaining.length === 0) {
+          mutated = true;
+          continue; // Drop the entire group — it was only ours.
+        }
+        if (remaining.length !== group.hooks.length) {
+          mutated = true;
+          filteredGroups.push({ ...group, hooks: remaining });
+        } else {
+          filteredGroups.push(group);
+        }
+      }
+      if (filteredGroups.length === 0) {
+        delete parsed.hooks[event];
+        mutated = true;
+      } else {
+        parsed.hooks[event] = filteredGroups;
+      }
+    }
+
+    if (Object.keys(parsed.hooks).length === 0) {
+      delete parsed.hooks;
+      mutated = true;
+    }
+
+    if (mutated) {
+      try {
+        await fs.writeFile(settingsFile, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
+      } catch {
+        // Silent.
+      }
+    }
+
+    if (!options.silent) {
+      await prompts.log.message(`  Removed gomad agent-tracker hooks from ${agent_tracker.settings_file}`);
+    }
+  }
+
+  /**
    * Install verbatim native SKILL.md directories from skill-manifest.csv.
    * Copies the entire source directory as-is into the IDE skill directory.
    * The source SKILL.md is used directly — no frontmatter transformation or file generation.
@@ -402,6 +588,10 @@ class ConfigDrivenIdeSetup {
     // dangling references in `.claude/settings.json`.
     if (this.installerConfig?.statusline && this.name === 'claude-code') {
       await this.cleanupStatusline(projectDir, options);
+    }
+
+    if (this.installerConfig?.agent_tracker && this.name === 'claude-code') {
+      await this.cleanupAgentTracker(projectDir, options);
     }
 
     // Migrate legacy target directories (e.g. .opencode/agent → .opencode/agents)
