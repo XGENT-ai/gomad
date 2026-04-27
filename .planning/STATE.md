@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Docs, Story Context & Agent Relocation
-status: planning
+status: executing
 stopped_at: Phase 12 context gathered
-last_updated: "2026-04-27T01:36:35.972Z"
-last_activity: 2026-04-26
+last_updated: "2026-04-27T01:44:55.551Z"
+last_activity: 2026-04-27 -- Phase 12 execution started
 progress:
   total_phases: 3
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-24 after marketplace workstream dropped)
 
 **Core value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
-**Current focus:** Phase 11 — docs-site-content-authoring
+**Current focus:** Phase 12 — agent-dir-relocation-release
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-26
+Phase: 12 (agent-dir-relocation-release) — EXECUTING
+Plan: 1 of 8
+Status: Executing Phase 12
+Last activity: 2026-04-27 -- Phase 12 execution started
 
 Progress: [░░░░░░░░░░] 0% (0/3 v1.3 phases complete)
 
