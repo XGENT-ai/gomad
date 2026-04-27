@@ -192,9 +192,9 @@ async function makeTmpDir() {
   console.log('');
 
   // -------------------------------------------------------------------------
-  // Case C — pre-existing third-party statusLine: don't stomp it
+  // Case C — pre-existing third-party statusLine, silent install: leave it
   // -------------------------------------------------------------------------
-  console.log(`${colors.yellow}Case C: pre-existing third-party statusLine${colors.reset}`);
+  console.log(`${colors.yellow}Case C: pre-existing third-party statusLine (silent)${colors.reset}`);
   let caseCTmp;
   try {
     caseCTmp = await makeTmpDir();
@@ -218,11 +218,86 @@ async function makeTmpDir() {
 
     check('C1 install returns true (we still copy the hook)', () => assert.equal(installed, true));
     check('C2 hook file is still copied', () => assert.equal(fs.pathExistsSync(hookPath), true));
-    check('C3 third-party statusLine.command is untouched', () => {
+    check('C3 third-party statusLine.command is untouched (silent skips prompt)', () => {
       assert.equal(settings.statusLine?.command, 'cat /tmp/foo');
     });
   } catch (error) {
     check('C0 case C ran without throwing', () => {
+      throw error;
+    });
+  }
+  console.log('');
+
+  // -------------------------------------------------------------------------
+  // Case C2 — third-party statusLine, user accepts override
+  // -------------------------------------------------------------------------
+  console.log(`${colors.yellow}Case C2: override accepted via overrideExistingStatusline=true${colors.reset}`);
+  let caseC2Tmp;
+  try {
+    caseC2Tmp = await makeTmpDir();
+    const cfg = makeClaudeCodeConfig();
+    const setup = new ConfigDrivenIdeSetup('claude-code', cfg);
+
+    const settingsPath = path.join(caseC2Tmp, '.claude/settings.json');
+    await fs.ensureDir(path.dirname(settingsPath));
+    await fs.writeJson(
+      settingsPath,
+      {
+        env: { KEEP: 'me' },
+        statusLine: { type: 'command', command: 'node ~/.claude/hooks/gsd-statusline.js' },
+      },
+      { spaces: 2 },
+    );
+
+    await setup.installStatusline(caseC2Tmp, cfg.installer, {
+      silent: true,
+      overrideExistingStatusline: true,
+    });
+
+    const settings = await fs.readJson(settingsPath);
+
+    check('C2.1 statusLine.command now references gomad-statusline.js', () => {
+      assert.match(settings.statusLine?.command || '', /gomad-statusline\.js/);
+    });
+    check('C2.2 unrelated keys (env.KEEP) survive the override', () => {
+      assert.equal(settings.env?.KEEP, 'me');
+    });
+  } catch (error) {
+    check('C2.0 case C2 ran without throwing', () => {
+      throw error;
+    });
+  }
+  console.log('');
+
+  // -------------------------------------------------------------------------
+  // Case C3 — third-party statusLine, user declines override
+  // -------------------------------------------------------------------------
+  console.log(`${colors.yellow}Case C3: override declined via overrideExistingStatusline=false${colors.reset}`);
+  let caseC3Tmp;
+  try {
+    caseC3Tmp = await makeTmpDir();
+    const cfg = makeClaudeCodeConfig();
+    const setup = new ConfigDrivenIdeSetup('claude-code', cfg);
+
+    const settingsPath = path.join(caseC3Tmp, '.claude/settings.json');
+    await fs.ensureDir(path.dirname(settingsPath));
+    const original = { statusLine: { type: 'command', command: 'node /opt/ccusage/cli.js' } };
+    await fs.writeJson(settingsPath, original, { spaces: 2 });
+
+    await setup.installStatusline(caseC3Tmp, cfg.installer, {
+      silent: true,
+      overrideExistingStatusline: false,
+    });
+
+    const hookPath = path.join(caseC3Tmp, '.claude/hooks/gomad-statusline.js');
+    const settings = await fs.readJson(settingsPath);
+
+    check('C3.1 hook file IS copied even when override declined', () => assert.equal(fs.pathExistsSync(hookPath), true));
+    check('C3.2 third-party statusLine.command unchanged', () => {
+      assert.equal(settings.statusLine?.command, 'node /opt/ccusage/cli.js');
+    });
+  } catch (error) {
+    check('C3.0 case C3 ran without throwing', () => {
       throw error;
     });
   }

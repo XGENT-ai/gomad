@@ -8,6 +8,24 @@ const { getProjectRoot } = require('../project-root');
 const { GOMAD_FOLDER_NAME } = require('./shared/path-utils');
 const { AgentCommandGenerator } = require('./shared/agent-command-generator');
 
+// Best-effort signature match for well-known statusline plugins so the override
+// prompt can show a friendly name. Order matters: first match wins. Returns
+// null if nothing matches (the caller falls back to displaying the raw command).
+const STATUSLINE_PLUGIN_SIGNATURES = [
+  { match: /gsd-statusline/i, name: 'GSD statusline' },
+  { match: /ccusage/i, name: 'ccusage' },
+  { match: /cc-statusline/i, name: 'cc-statusline' },
+  { match: /claude-?powerline/i, name: 'claude-powerline' },
+];
+
+function detectStatuslinePlugin(command) {
+  if (!command || typeof command !== 'string') return null;
+  for (const sig of STATUSLINE_PLUGIN_SIGNATURES) {
+    if (sig.match.test(command)) return sig.name;
+  }
+  return null;
+}
+
 /**
  * Config-driven IDE setup handler
  *
@@ -220,13 +238,40 @@ class ConfigDrivenIdeSetup {
         }
       }
 
-      // Don't stomp third-party statuslines.
+      // Detect third-party statuslines and ask before overriding.
       const existingCmd = parsed.statusLine?.command;
-      if (existingCmd && typeof existingCmd === 'string' && !existingCmd.includes(statusline.dest_name)) {
-        if (!options.silent) {
-          await prompts.log.warn(`  Existing third-party statusLine in ${statusline.settings_file} — left untouched`);
+      const isThirdParty = existingCmd && typeof existingCmd === 'string' && !existingCmd.includes(statusline.dest_name);
+
+      let shouldWrite = !isThirdParty;
+      if (isThirdParty) {
+        const detectedName = detectStatuslinePlugin(existingCmd);
+        const label = detectedName ? `${detectedName} (${existingCmd})` : existingCmd;
+        // Test/automation hook: deterministic override decision skips the prompt.
+        // Silent installs default to preserving the existing entry — never prompt.
+        if (typeof options.overrideExistingStatusline === 'boolean') {
+          shouldWrite = options.overrideExistingStatusline;
+          if (!options.silent) {
+            await prompts.log.warn(
+              shouldWrite
+                ? `  Existing statusLine: ${label} — overriding (--override-statusline)`
+                : `  Existing statusLine: ${label} — left untouched`,
+            );
+          }
+        } else if (options.silent) {
+          await prompts.log.warn(`  Existing statusLine: ${label} — left untouched (silent mode)`);
+        } else {
+          await prompts.log.warn(`  Found existing statusLine: ${label}`);
+          shouldWrite = await prompts.confirm({
+            message: `Override existing statusLine in ${statusline.settings_file} with the gomad statusline?`,
+            default: false,
+          });
+          if (!shouldWrite) {
+            await prompts.log.message(`  Keeping existing statusLine — gomad-statusline.js still copied to ${hooks_target_dir}/`);
+          }
         }
-      } else {
+      }
+
+      if (shouldWrite) {
         parsed.statusLine = {
           type: 'command',
           command: `node "$CLAUDE_PROJECT_DIR"/${hooks_target_dir}/${statusline.dest_name}`,
