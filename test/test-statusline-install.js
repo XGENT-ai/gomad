@@ -372,6 +372,91 @@ async function makeTmpDir() {
   if (caseCTmp) await fs.remove(caseCTmp);
 
   // -------------------------------------------------------------------------
+  // Case F — transcript-driven agent detection picks up /gm:agent-* loads
+  // (no todo activeForm — the persona signal must come from transcript only).
+  // -------------------------------------------------------------------------
+  console.log(`${colors.yellow}Case F: detect /gm:agent-pm from transcript${colors.reset}`);
+  let caseFTmp;
+  try {
+    caseFTmp = await makeTmpDir();
+    const { detectAgentFromTranscript, resolveTranscriptPath, SHORTNAMES } = require(
+      '../tools/installer/assets/hooks/gomad-statusline.js',
+    );
+
+    check('F1 SHORTNAMES covers all 8 personas', () => {
+      assert.equal(Object.keys(SHORTNAMES).length, 8);
+      assert.equal(SHORTNAMES.pm, 'John');
+      assert.equal(SHORTNAMES.dev, 'Amelia');
+      assert.equal(SHORTNAMES['solo-dev'], 'Barry');
+    });
+
+    // F2: slash-command form picks up the right persona.
+    const t1 = path.join(caseFTmp, 't1.jsonl');
+    await fs.writeFile(
+      t1,
+      [
+        JSON.stringify({ type: 'user', content: 'hi there' }),
+        JSON.stringify({ type: 'user', content: '/gm:agent-pm please draft the PRD' }),
+      ].join('\n') + '\n',
+    );
+    check('F2 slash-command /gm:agent-pm → John', () => {
+      const r = detectAgentFromTranscript(t1);
+      assert.deepEqual(r, { persona: 'John', skill: 'gm-agent-pm' });
+    });
+
+    // F3: persona file Read picks up the persona too.
+    const t2 = path.join(caseFTmp, 't2.jsonl');
+    await fs.writeFile(
+      t2,
+      JSON.stringify({
+        type: 'assistant',
+        content: [{ type: 'tool_use', name: 'Read', input: { file_path: '/proj/_gomad/_config/agents/dev.md' } }],
+      }) + '\n',
+    );
+    check('F3 _config/agents/dev.md → Amelia', () => {
+      const r = detectAgentFromTranscript(t2);
+      assert.deepEqual(r, { persona: 'Amelia', skill: 'gm-agent-dev' });
+    });
+
+    // F4: most-recent persona wins when transcript shows two loads.
+    const t3 = path.join(caseFTmp, 't3.jsonl');
+    await fs.writeFile(
+      t3,
+      [
+        JSON.stringify({ type: 'user', content: '/gm:agent-pm draft PRD' }),
+        JSON.stringify({ type: 'user', content: 'thanks, now /gm:agent-architect please' }),
+      ].join('\n') + '\n',
+    );
+    check('F4 most-recent persona wins (architect over pm)', () => {
+      const r = detectAgentFromTranscript(t3);
+      assert.deepEqual(r, { persona: 'Winston', skill: 'gm-agent-architect' });
+    });
+
+    // F5: unknown shortname → null (not a false positive on `/gm:agent-foo`).
+    const t4 = path.join(caseFTmp, 't4.jsonl');
+    await fs.writeFile(t4, JSON.stringify({ type: 'user', content: '/gm:agent-bogus' }) + '\n');
+    check('F5 unknown shortname returns null', () => {
+      assert.equal(detectAgentFromTranscript(t4), null);
+    });
+
+    // F6: missing transcript file returns null silently.
+    check('F6 missing file returns null', () => {
+      assert.equal(detectAgentFromTranscript(path.join(caseFTmp, 'does-not-exist.jsonl')), null);
+    });
+
+    // F7: resolveTranscriptPath prefers data.transcript_path when provided.
+    check('F7 resolveTranscriptPath honors data.transcript_path', () => {
+      assert.equal(resolveTranscriptPath({ transcript_path: t1 }, 'irrelevant'), t1);
+    });
+  } catch (error) {
+    check('F0 case F ran without throwing', () => {
+      throw error;
+    });
+  }
+  if (caseFTmp) await fs.remove(caseFTmp);
+  console.log('');
+
+  // -------------------------------------------------------------------------
   console.log(`${colors.cyan}========================================${colors.reset}`);
   console.log(
     `Total: ${passed + failed}, Passed: ${colors.green}${passed}${colors.reset}, Failed: ${failed > 0 ? colors.red : colors.green}${failed}${colors.reset}`,

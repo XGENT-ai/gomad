@@ -59,6 +59,108 @@ function escapeRegex(s) {
   return s.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
+// --- Transcript-driven agent detection --------------------------------------
+
+// Reverse PERSONAS: shortName → persona display name. Lets the transcript
+// scanner translate `/gm:agent-pm` or `_config/agents/pm.md` straight to John.
+const SHORTNAMES = {
+  analyst: 'Mary',
+  'tech-writer': 'Paige',
+  pm: 'John',
+  'ux-designer': 'Sally',
+  architect: 'Winston',
+  sm: 'Bob',
+  dev: 'Amelia',
+  'solo-dev': 'Barry',
+};
+
+// Cheap mtime+size cache so the per-tick transcript scan is a no-op when the
+// file hasn't changed. Keyed by `${path}:${mtimeMs}:${size}`. One slot is
+// enough — Claude Code statusline runs in a fresh process per refresh anyway,
+// but module-level cache helps if the host ever shares a process.
+let _transcriptCache = { key: null, value: null };
+
+/**
+ * Scan the tail of a Claude Code transcript (.jsonl) for the most recent
+ * gomad agent load signal. Returns `{ persona, skill }` or `null`.
+ *
+ * Signals (any wins, most recent occurrence in the tail):
+ *   - `/gm:agent-<short>` or `gm:agent-<short>` (slash-command launcher)
+ *   - `gm-agent-<short>` (skill id)
+ *   - `_config/agents/<short>.md` (persona body Read by Claude after launch)
+ *
+ * Reads at most TAIL_BYTES from the end of the file to keep the per-tick
+ * cost bounded even on long sessions. Drops the first (potentially partial)
+ * line when truncating mid-file.
+ */
+function detectAgentFromTranscript(transcriptPath) {
+  if (!transcriptPath || typeof transcriptPath !== 'string') return null;
+  let st;
+  try {
+    st = fs.statSync(transcriptPath);
+  } catch {
+    return null;
+  }
+  const cacheKey = `${transcriptPath}:${st.mtimeMs}:${st.size}`;
+  if (_transcriptCache.key === cacheKey) return _transcriptCache.value;
+
+  let result = null;
+  try {
+    const TAIL_BYTES = 65_536;
+    const len = Math.min(TAIL_BYTES, st.size);
+    const fd = fs.openSync(transcriptPath, 'r');
+    const buf = Buffer.alloc(len);
+    fs.readSync(fd, buf, 0, len, st.size - len);
+    fs.closeSync(fd);
+
+    const lines = buf.toString('utf8').split('\n').filter(Boolean);
+    if (st.size > TAIL_BYTES && lines.length > 1) lines.shift();
+
+    // Match either:
+    //   gm:agent-<short>  /  gm-agent-<short>
+    //   _config/agents/<short>.md  (or backslash variant on Windows)
+    const re = /(?:gm:agent-|gm-agent-|_config[/\\]+agents[/\\]+)([a-z][a-z-]+?)(?:\.md\b|[^a-z-]|$)/i;
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const m = lines[i].match(re);
+      if (!m) continue;
+      const shortName = m[1].toLowerCase();
+      if (SHORTNAMES[shortName]) {
+        result = { persona: SHORTNAMES[shortName], skill: `gm-agent-${shortName}` };
+        break;
+      }
+    }
+  } catch {
+    // Silent fail — never break the statusline over a transcript hiccup.
+  }
+
+  _transcriptCache = { key: cacheKey, value: result };
+  return result;
+}
+
+/**
+ * Resolve the transcript file for this session. Claude Code newer builds
+ * pass `transcript_path` directly in the statusline JSON. Older builds
+ * don't — fall back to globbing `~/.claude/projects/*\/<session>.jsonl`.
+ */
+function resolveTranscriptPath(data, session) {
+  if (data && typeof data.transcript_path === 'string' && data.transcript_path) {
+    return data.transcript_path;
+  }
+  if (!session) return null;
+  const projectsDir = path.join(os.homedir(), '.claude', 'projects');
+  try {
+    if (!fs.existsSync(projectsDir)) return null;
+    const subdirs = fs.readdirSync(projectsDir);
+    for (const sub of subdirs) {
+      const candidate = path.join(projectsDir, sub, `${session}.jsonl`);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  } catch {
+    // Silent fail
+  }
+  return null;
+}
+
 // --- Sprint state reader ----------------------------------------------------
 
 /**
@@ -301,12 +403,14 @@ function runStatusline() {
       }
 
       // Decide the middle zone:
-      //   1. if a persona is detectable in the active todo → 👤 Persona (skill)
-      //   2. else if a todo activeForm exists → bare activeForm (bold)
-      //   3. else if sprint-status resolved → Sprint: <project> · ▶x ✓y ⏳z (dim)
-      //   4. else → empty
+      //   1. transcript shows a recent /gm:agent-* load → 👤 Persona (skill)
+      //   2. else if persona is detectable in the active todo → 👤 …
+      //   3. else if a todo activeForm exists → bare activeForm (bold)
+      //   4. else if sprint-status resolved → Sprint: <project> · ▶x ✓y ⏳z (dim)
+      //   5. else → empty
       let middle = null;
-      const persona = detectGomadAgent(activeForm);
+      const transcriptPath = resolveTranscriptPath(data, session);
+      const persona = detectAgentFromTranscript(transcriptPath) || detectGomadAgent(activeForm);
       if (persona) {
         middle = `[1m👤 ${persona.persona} (${persona.skill})[0m`;
       } else if (activeForm) {
@@ -339,6 +443,12 @@ function runStatusline() {
 }
 
 // Export helpers for unit tests. Harmless when the file runs as a script.
-module.exports = { readGomadSprint, detectGomadAgent };
+module.exports = {
+  readGomadSprint,
+  detectGomadAgent,
+  detectAgentFromTranscript,
+  resolveTranscriptPath,
+  SHORTNAMES,
+};
 
 if (require.main === module) runStatusline();
