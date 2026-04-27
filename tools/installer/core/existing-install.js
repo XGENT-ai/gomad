@@ -88,7 +88,16 @@ class ExistingInstall {
     }
 
     if (manifestData && manifestData.modules && manifestData.modules.length > 0) {
-      for (const moduleId of manifestData.modules) {
+      for (const rawModuleId of manifestData.modules) {
+        // Legacy-id migration: pre-853aeb3 manifests recorded the agile module
+        // as `gomad` (matching `code: gomad` in src/gomad-skills/module.yaml at
+        // the time). The code field was renamed to `agile`, but old manifests
+        // still list a `gomad` entry — sometimes alongside `agile` after a
+        // re-install. Treat `gomad` as `agile` on read; skip if `agile` is
+        // already present, so the duplicate doesn't survive the next write.
+        const moduleId = rawModuleId === 'gomad' ? 'agile' : rawModuleId;
+        if (modules.some((m) => m.id === moduleId)) continue;
+
         const modulePath = path.join(gomadDir, moduleId);
         const moduleConfigPath = path.join(modulePath, 'config.yaml');
 
