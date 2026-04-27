@@ -557,9 +557,7 @@ async function makeTmpDir() {
     check('G3 unrelated env.KEEP survives', () => assert.equal(settingsAfter.env?.KEEP, 'me'));
     check('G4 unrelated SessionStart hook survives', () => {
       const groups = settingsAfter.hooks?.SessionStart || [];
-      const echoSurvived = groups.some((g) =>
-        (g.hooks || []).some((h) => h.command === 'echo other'),
-      );
+      const echoSurvived = groups.some((g) => (g.hooks || []).some((h) => h.command === 'echo other'));
       assert.equal(echoSurvived, true);
     });
     check('G5 tracker registered on all 3 events', () => {
@@ -578,10 +576,7 @@ async function makeTmpDir() {
     check('G6 re-install does not duplicate registrations', () => {
       for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
         const matches = (settingsAfter2.hooks?.[event] || []).reduce(
-          (n, g) =>
-            n +
-            (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js'))
-              .length,
+          (n, g) => n + (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')).length,
           0,
         );
         assert.equal(matches, 1, `expected 1 tracker entry on ${event}, got ${matches}`);
@@ -597,19 +592,14 @@ async function makeTmpDir() {
     check('G8 cleanup leaves unrelated keys intact', () => {
       assert.equal(settingsCleaned.env?.KEEP, 'me');
       const groups = settingsCleaned.hooks?.SessionStart || [];
-      const echoSurvived = groups.some((g) =>
-        (g.hooks || []).some((h) => h.command === 'echo other'),
-      );
+      const echoSurvived = groups.some((g) => (g.hooks || []).some((h) => h.command === 'echo other'));
       assert.equal(echoSurvived, true);
     });
     check('G9 cleanup strips all tracker entries', () => {
       for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
         const groups = settingsCleaned.hooks?.[event] || [];
         const trackerEntries = groups.reduce(
-          (n, g) =>
-            n +
-            (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js'))
-              .length,
+          (n, g) => n + (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')).length,
           0,
         );
         assert.equal(trackerEntries, 0, `tracker still registered on ${event}`);

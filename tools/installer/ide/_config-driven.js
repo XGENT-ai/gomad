@@ -441,9 +441,7 @@ class ConfigDrivenIdeSetup {
           filteredGroups.push(group);
           continue;
         }
-        const remaining = group.hooks.filter(
-          (h) => !(typeof h?.command === 'string' && h.command.includes(agent_tracker.dest_name)),
-        );
+        const remaining = group.hooks.filter((h) => !(typeof h?.command === 'string' && h.command.includes(agent_tracker.dest_name)));
         if (remaining.length === 0) {
           mutated = true;
           continue; // Drop the entire group — it was only ours.

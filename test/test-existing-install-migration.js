@@ -103,9 +103,7 @@ modules:
     const result = await ExistingInstall.detect(gomadDir);
     check('A1 detect() succeeds', () => assert.equal(result.installed, true));
     check('A2 moduleIds contains agile', () => assert.equal(result.moduleIds.includes('agile'), true));
-    check('A3 moduleIds does NOT contain legacy gomad', () =>
-      assert.equal(result.moduleIds.includes('gomad'), false),
-    );
+    check('A3 moduleIds does NOT contain legacy gomad', () => assert.equal(result.moduleIds.includes('gomad'), false));
     check('A4 no duplicate agile entries (de-dup)', () => {
       const agileCount = result.moduleIds.filter((id) => id === 'agile').length;
       assert.equal(agileCount, 1);
@@ -174,9 +172,7 @@ modules:
     );
 
     const result = await ExistingInstall.detect(gomadDir);
-    check('C1 modern manifest preserves agile', () =>
-      assert.deepEqual([...result.moduleIds].sort(), ['agile', 'core']),
-    );
+    check('C1 modern manifest preserves agile', () => assert.deepEqual([...result.moduleIds].sort(), ['agile', 'core']));
     check('C2 single agile entry only', () => {
       const agileCount = result.moduleIds.filter((id) => id === 'agile').length;
       assert.equal(agileCount, 1);
@@ -211,9 +207,7 @@ modules:
 `,
     );
     const result = await ExistingInstall.detect(gomadDir);
-    check('D1 custom module id preserved verbatim', () =>
-      assert.equal(result.moduleIds.includes('my-custom-mod'), true),
-    );
+    check('D1 custom module id preserved verbatim', () => assert.equal(result.moduleIds.includes('my-custom-mod'), true));
   } catch (error) {
     check('D0 case D ran without throwing', () => {
       throw error;
