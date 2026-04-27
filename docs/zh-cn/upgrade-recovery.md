@@ -105,3 +105,58 @@ rm -rf _gomad/_backups/20260401-*   # remove all April-1st backups
 - 检测到 manifest 损坏（日志中记录 `MANIFEST_CORRUPT`）—— 出于安全考虑，清理流程会被整体跳过
 
 在这些情形下，`_gomad/_backups/` 可能保持为空，或仅保留更早的备份。
+
+## v1.2 → v1.3 升级恢复
+
+从 v1.2.0 升级到 v1.3.0 时，安装程序会将代理人格主体文件从
+`_gomad/gomad/agents/<shortName>.md` 迁移到
+`_gomad/_config/agents/<shortName>.md`。这 8 个旧文件会在删除前被快照备份到
+`_gomad/_backups/<YYYYMMDD-HHMMSS>/_gomad/gomad/agents/` 目录。
+
+v1.3 清理计划程序通过同时检测以下两个条件来识别 v1.2 布局：
+存在 `_gomad/_config/files-manifest.csv`（v2 模式），并且
+`_gomad/gomad/agents/` 目录下至少存在一个人格文件。一旦检测到，
+迁移过程会输出醒目的横幅，说明迁移内容、备份位置以及指向本恢复文档的链接。
+
+### 回滚到 v1.2 布局
+
+如果升级后 `/gm:agent-*` 调用失败，或者你需要回滚到 v1.2.0：
+
+1. 重新全局固定 v1.2 版本：
+
+   ```bash
+   npm install -g @xgent-ai/gomad@1.2.0
+   ```
+
+2. 还原快照中的人格文件（请把示例中的时间戳替换为
+   `_gomad/_backups/` 目录下的实际值）：
+
+   ```bash
+   cp -R _gomad/_backups/<YYYYMMDD-HHMMSS>/_gomad/gomad/agents/ _gomad/gomad/
+   ```
+
+3. 在 v1.2 二进制下重新运行 `gomad install`，安装程序会重新生成
+   指向已恢复的 `_gomad/gomad/agents/` 路径的启动器存根
+   （`/gm:agent-*`）：
+
+   ```bash
+   gomad install
+   ```
+
+### 前向恢复
+
+如果只是启动器存根失效（人格主体文件已位于新的 `_config/agents/` 路径，
+但 `/gm:agent-*` 仍然 404），重新运行 `gomad install`。
+`writeAgentLaunchers` 步骤会无条件覆盖启动器存根，使用 v1.3 的新路径
+重新生成它们：
+
+```bash
+gomad install
+```
+
+### .customize.yaml 的保留语义
+
+位于 `_gomad/_config/agents/.customize.yaml` 的用户自定义配置会在
+v1.2→v1.3 升级中得到保留。自定义文件检测器把 8 个生成的人格 `.md`
+文件视为安装程序管理的文件，不会触碰 `.customize.yaml` 以及任何
+不匹配上述名单的 `.md` 文件。
