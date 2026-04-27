@@ -31,12 +31,30 @@ class MessageLoader {
   }
 
   /**
+   * Resolve `{version}` placeholders against the current package.json
+   * version. Falls back to leaving the placeholder in place if the
+   * package.json can't be loaded — never throws into the install flow.
+   * @param {string|null} message
+   * @returns {string|null}
+   */
+  interpolate(message) {
+    if (!message) return message;
+    let version;
+    try {
+      version = require('../../package.json').version;
+    } catch {
+      return message;
+    }
+    return message.replaceAll('{version}', version);
+  }
+
+  /**
    * Get the start message for display
    * @returns {string|null} Start message or null
    */
   getStartMessage() {
     const messages = this.load();
-    return messages?.startMessage || null;
+    return this.interpolate(messages?.startMessage || null);
   }
 
   /**
@@ -45,7 +63,7 @@ class MessageLoader {
    */
   getEndMessage() {
     const messages = this.load();
-    return messages?.endMessage || null;
+    return this.interpolate(messages?.endMessage || null);
   }
 
   /**

@@ -6,7 +6,7 @@
 startMessage: |
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Welcome to GoMad v1.1.0.
+  Welcome to GoMad v{version}.
 
   GoMad (GOMAD Orchestration Method for Agile Development) is an agentic
   workflow framework for AI-driven software development. 
