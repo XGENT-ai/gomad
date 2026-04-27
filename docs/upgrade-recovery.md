@@ -105,3 +105,60 @@ No backup is created when:
 - A manifest corruption is detected (`MANIFEST_CORRUPT` logged) — cleanup is skipped entirely as a safety measure
 
 In these cases, `_gomad/_backups/` may remain empty or contain only earlier backups.
+
+## v1.2 → v1.3 recovery
+
+When upgrading from v1.2.0 to v1.3.0, the installer relocates persona body
+files from `_gomad/gomad/agents/<shortName>.md` to
+`_gomad/_config/agents/<shortName>.md`. The 8 old files are snapshotted
+into `_gomad/_backups/<YYYYMMDD-HHMMSS>/_gomad/gomad/agents/` before removal.
+
+The v1.3 cleanup planner detects v1.2 layouts via the presence of both a
+`_gomad/_config/files-manifest.csv` (v2 schema) AND at least one persona
+file at `_gomad/gomad/agents/`. When detected, the migration emits a
+verbose banner naming the move, the backup location, and this recovery
+document.
+
+### Rollback to v1.2 layout
+
+If `/gm:agent-*` invocation fails after upgrade, or you need to roll back to
+v1.2.0:
+
+1. Re-pin the v1.2 release globally:
+
+   ```bash
+   npm install -g @xgent-ai/gomad@1.2.0
+   ```
+
+2. Restore the snapshotted persona files (substitute the actual timestamp
+   from `_gomad/_backups/`):
+
+   ```bash
+   cp -R _gomad/_backups/<YYYYMMDD-HHMMSS>/_gomad/gomad/agents/ _gomad/gomad/
+   ```
+
+3. Re-run `gomad install` against the v1.2 binary — the installer will
+   regenerate launcher stubs (`/gm:agent-*`) pointing at the restored
+   `_gomad/gomad/agents/` location:
+
+   ```bash
+   gomad install
+   ```
+
+### Forward recovery
+
+If only the launcher stubs are stale (the persona body files are at the
+new `_config/agents/` location but `/gm:agent-*` 404s), re-run
+`gomad install`. The `writeAgentLaunchers` step overwrites launcher stubs
+unconditionally and will regenerate them with the v1.3 path.
+
+```bash
+gomad install
+```
+
+### What the .customize.yaml semantics look like
+
+User overrides at `_gomad/_config/agents/.customize.yaml` are preserved
+across the v1.2→v1.3 upgrade. The custom-file detector treats the 8
+generated persona `.md` files as installer-managed and leaves
+`.customize.yaml` and any non-matching `.md` files untouched.
