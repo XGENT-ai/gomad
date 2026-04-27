@@ -34,6 +34,11 @@ platforms:
         - .claude/commands
       target_dir: .claude/skills
       launcher_target_dir: .claude/commands/gm
+      hooks_target_dir: .claude/hooks
+      statusline:
+        source: tools/installer/assets/hooks/gomad-statusline.js
+        dest_name: gomad-statusline.js
+        settings_file: .claude/settings.json
 
   cline:
     name: "Cline"

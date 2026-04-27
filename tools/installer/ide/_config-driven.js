@@ -4,6 +4,7 @@ const fs = require('fs-extra');
 const yaml = require('yaml');
 const prompts = require('../prompts');
 const csv = require('csv-parse/sync');
+const { getProjectRoot } = require('../project-root');
 const { GOMAD_FOLDER_NAME } = require('./shared/path-utils');
 const { AgentCommandGenerator } = require('./shared/agent-command-generator');
 
@@ -144,9 +145,109 @@ class ConfigDrivenIdeSetup {
       results.launchers = launcherPaths.length;
     }
 
+    // Quick task 260427-k86: gomad-flavored Claude Code statusline.
+    // Drop a Node hook into <projectDir>/<hooks_target_dir>/ and merge a
+    // `statusLine` entry into `.claude/settings.json` non-destructively.
+    // Only claude-code carries the `statusline` config block today.
+    if (config.statusline) {
+      const installed = await this.installStatusline(projectDir, config, options);
+      if (installed) results.statusline = true;
+    }
+
     await this.printSummary(results, target_dir, options);
     this.skillWriteTracker = null;
     return { success: true, results };
+  }
+
+  /**
+   * Copy the gomad statusline hook into <projectDir>/<hooks_target_dir>/ and
+   * register it under `statusLine` in <settings_file>. Defensive about
+   * pre-existing third-party statuslines (won't stomp them) and missing
+   * source assets (silently skips for tarball edge cases).
+   *
+   * Quick task 260427-k86.
+   *
+   * @param {string} projectDir - Project root
+   * @param {Object} config - installer config block (must have statusline + hooks_target_dir)
+   * @param {Object} options - { silent, trackInstalledFile }
+   * @returns {Promise<boolean>} true if the hook was actually copied
+   */
+  async installStatusline(projectDir, config, options = {}) {
+    const { hooks_target_dir, statusline } = config;
+    if (!hooks_target_dir || !statusline?.source || !statusline?.dest_name) return false;
+
+    // Resolve source against the gomad source repo (npm-pack root or live repo).
+    const gomadSrcRoot = getProjectRoot();
+    const srcFile = path.join(gomadSrcRoot, statusline.source);
+    if (!(await fs.pathExists(srcFile))) {
+      // Tarball edge case — asset not shipped. Silent skip.
+      return false;
+    }
+
+    const destDir = path.join(projectDir, hooks_target_dir);
+    const destFile = path.join(destDir, statusline.dest_name);
+    await fs.ensureDir(destDir);
+    await fs.copy(srcFile, destFile, { overwrite: true });
+    try {
+      await fs.chmod(destFile, 0o755);
+    } catch {
+      // Some filesystems (Windows) can't chmod — harmless.
+    }
+    options.trackInstalledFile?.(destFile);
+
+    // Settings merge.
+    const settingsFile = statusline.settings_file ? path.join(projectDir, statusline.settings_file) : null;
+    if (settingsFile) {
+      let parsed = {};
+      let exists = false;
+      if (await fs.pathExists(settingsFile)) {
+        exists = true;
+        try {
+          const raw = await fs.readFile(settingsFile, 'utf8');
+          parsed = raw.trim() ? JSON.parse(raw) : {};
+          if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            // settings.json must be a JSON object — bail without touching.
+            if (!options.silent) {
+              await prompts.log.warn(`  Could not merge ${statusline.settings_file}: not a JSON object — skipping statusline registration`);
+            }
+            return true;
+          }
+        } catch {
+          if (!options.silent) {
+            await prompts.log.warn(`  Could not parse ${statusline.settings_file} — skipping statusline registration`);
+          }
+          return true;
+        }
+      }
+
+      // Don't stomp third-party statuslines.
+      const existingCmd = parsed.statusLine?.command;
+      if (existingCmd && typeof existingCmd === 'string' && !existingCmd.includes(statusline.dest_name)) {
+        if (!options.silent) {
+          await prompts.log.warn(`  Existing third-party statusLine in ${statusline.settings_file} — left untouched`);
+        }
+      } else {
+        parsed.statusLine = {
+          type: 'command',
+          command: `node "$CLAUDE_PROJECT_DIR"/${hooks_target_dir}/${statusline.dest_name}`,
+          padding: 0,
+        };
+        await fs.ensureDir(path.dirname(settingsFile));
+        await fs.writeFile(settingsFile, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
+        // Track the settings file too so manifest cleanup knows about it.
+        // (For pre-existing settings.json we still track — uninstall only
+        // removes our `statusLine` key, not the file.)
+        options.trackInstalledFile?.(settingsFile);
+        if (!exists && !options.silent) {
+          await prompts.log.message(`  Created ${statusline.settings_file} with statusLine entry`);
+        }
+      }
+    }
+
+    if (!options.silent) {
+      await prompts.log.success(`Claude Code statusline installed → ${hooks_target_dir}/${statusline.dest_name}`);
+    }
+    return true;
   }
 
   /**
@@ -251,6 +352,13 @@ class ConfigDrivenIdeSetup {
    * @param {string} projectDir - Project directory
    */
   async cleanup(projectDir, options = {}) {
+    // Quick task 260427-k86: tear down the gomad statusline first so
+    // anything below (legacy_targets, target_dir wipe) doesn't leave
+    // dangling references in `.claude/settings.json`.
+    if (this.installerConfig?.statusline && this.name === 'claude-code') {
+      await this.cleanupStatusline(projectDir, options);
+    }
+
     // Migrate legacy target directories (e.g. .opencode/agent → .opencode/agents)
     if (this.installerConfig?.legacy_targets) {
       if (!options.silent) await prompts.log.message('  Migrating legacy directories...');
@@ -282,6 +390,68 @@ class ConfigDrivenIdeSetup {
     // Clean target directory
     if (this.installerConfig?.target_dir) {
       await this.cleanupTarget(projectDir, this.installerConfig.target_dir, options);
+    }
+  }
+
+  /**
+   * Reverse of installStatusline: remove the hook file and strip our
+   * `statusLine` entry from settings.json. Defensive — only touches
+   * a `statusLine` block whose command actually references our hook.
+   *
+   * Quick task 260427-k86.
+   *
+   * @param {string} projectDir - Project root
+   * @param {Object} options - { silent }
+   */
+  async cleanupStatusline(projectDir, options = {}) {
+    const cfg = this.installerConfig?.statusline;
+    const hooks_target_dir = this.installerConfig?.hooks_target_dir;
+    if (!cfg || !cfg.dest_name || !hooks_target_dir) return;
+
+    const hookFile = path.join(projectDir, hooks_target_dir, cfg.dest_name);
+    let removed = false;
+    if (await fs.pathExists(hookFile)) {
+      try {
+        await fs.remove(hookFile);
+        removed = true;
+      } catch {
+        // Best-effort — keep going.
+      }
+    }
+
+    // Strip our statusLine from settings.json if it's still ours.
+    if (cfg.settings_file) {
+      const settingsFile = path.join(projectDir, cfg.settings_file);
+      if (await fs.pathExists(settingsFile)) {
+        try {
+          const raw = await fs.readFile(settingsFile, 'utf8');
+          const parsed = raw.trim() ? JSON.parse(raw) : {};
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            const cmd = parsed.statusLine?.command;
+            if (typeof cmd === 'string' && cmd.includes(cfg.dest_name)) {
+              delete parsed.statusLine;
+              await fs.writeFile(settingsFile, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
+            }
+          }
+        } catch {
+          // Bad JSON — leave the user's file alone.
+        }
+      }
+    }
+
+    // Best-effort: rmdir hooks_target_dir if it's now empty.
+    if (removed) {
+      const hooksDir = path.join(projectDir, hooks_target_dir);
+      try {
+        const remaining = await fs.readdir(hooksDir);
+        if (remaining.length === 0) await fs.rmdir(hooksDir);
+      } catch {
+        // Dir gone or non-empty — ignore.
+      }
+    }
+
+    if (removed && !options.silent) {
+      await prompts.log.message(`  Removed Claude Code statusline (${hooks_target_dir}/${cfg.dest_name})`);
     }
   }
 
