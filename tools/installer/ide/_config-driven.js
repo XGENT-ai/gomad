@@ -448,11 +448,11 @@ class ConfigDrivenIdeSetup {
           mutated = true;
           continue; // Drop the entire group — it was only ours.
         }
-        if (remaining.length !== group.hooks.length) {
+        if (remaining.length === group.hooks.length) {
+          filteredGroups.push(group);
+        } else {
           mutated = true;
           filteredGroups.push({ ...group, hooks: remaining });
-        } else {
-          filteredGroups.push(group);
         }
       }
       if (filteredGroups.length === 0) {
