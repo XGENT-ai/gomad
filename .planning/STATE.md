@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Docs, Story Context & Agent Relocation
-status: executing
-stopped_at: Phase 12 context gathered
-last_updated: "2026-04-27T01:44:55.551Z"
-last_activity: 2026-04-27 -- Phase 12 execution started
+status: shipped
+stopped_at: v1.3.0 shipped to npm + tagged on github/main
+last_updated: "2026-04-27T12:30:00.000Z"
+last_activity: 2026-04-27 -- v1.3.0 published to npm; Phase 12 closed
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 24
-  completed_plans: 16
-  percent: 67
+  completed_plans: 24
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-24 after marketplace workstream dropped)
 
 **Core value:** A lean, properly-credited fork of BMAD Method that we own end-to-end and can extend with our own agents/skills.
-**Current focus:** Phase 12 — agent-dir-relocation-release
+**Current focus:** v1.3 shipped 2026-04-27 — next milestone planning runs `/gsd-new-milestone` for v1.4
 
 ## Current Position
 
-Phase: 12 (agent-dir-relocation-release) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 12
-Last activity: 2026-04-27 -- Completed quick task 260427-k86: gomad Claude Code statusline + installer wiring
+Phase: 12 (agent-dir-relocation-release) — SHIPPED
+Plan: 8 of 8 (all complete)
+Status: v1.3.0 published to npm; tag v1.3.0 on github/main
+Last activity: 2026-04-27 -- v1.3.0 published to npm; Phase 12 closed
 
-Progress: [░░░░░░░░░░] 0% (0/3 v1.3 phases complete)
+Progress: [██████████] 100% (3/3 v1.3 phases complete)
 
 ## Performance Metrics
 
@@ -65,7 +65,9 @@ None.
 
 ### Blockers/Concerns
 
-- **Phase 12 research flag** — before `/gsd-plan-phase 12`, run `/gsd-research-phase 12` to resolve two open design questions: (a) `newInstallSet` derivation fix (AGENT-04) choice has cascading `buildCleanupPlan` effects; (b) `_config/agents/` collision resolution (AGENT-05) — Option 2 (detector tweak) is smallest-diff but confirm.
+None — v1.3 shipped. Phase 12 closed 2026-04-27 — v1.3.0 published to npm with `latest` dist-tag; v1.2.0 retained as prior-stable; v1.1.0 retained; v1.0.0 deprecation unchanged. CHANGELOG BREAKING + `docs/upgrade-recovery.md` cross-link in place. `prepublishOnly = npm run quality` wired (D-07). Annotated `v1.3.0` tag on github/main with BREAKING-callout body.
+
+Late-breaking gate fixes during the publish attempt (this session): (1) orphan-refs allowlist updated for 124 Phase 11/12 `gm-agent-*` refs (`a8812fb`); (2) prettier sweep on 3 test/installer files that bypassed pre-commit (`1a611ee`); (3) install-smoke tests stripped inherited `npm_*` env to avoid nested-npm deadlock under custom `--registry` (`df49ce9`); (4) tarball-grep allowlist extended for shipped statusline + agent-tracker hooks (`5bec364`). All gates green pre-publish.
 
 ### Quick Tasks Completed
 
@@ -88,8 +90,8 @@ Items carried beyond v1.2 close, not in v1.3 scope:
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 12 context gathered
-Resume: Run `/gsd-discuss-phase 10` then `/gsd-plan-phase 10` to begin planning Story-Creation Enhancements. For Phase 12, run `/gsd-research-phase 12` first (flagged in ROADMAP.md — open design questions on `newInstallSet` + `_config/agents/` collision).
+Last session: 2026-04-27 -- v1.3.0 shipped
+Stopped at: v1.3 closed; ready for milestone archive + v1.4 planning
+Resume: Run `/gsd-complete-milestone` to archive v1.3 and author the MILESTONES.md v1.3 entry; then `/gsd-new-milestone` to start v1.4 scoping.
 
-**Planned Phase:** 12 (agent-dir-relocation-release) — 8 plans — 2026-04-27T01:36:35.966Z
+**Shipped Milestone:** v1.3 (Docs, Story Context & Agent Relocation) — 3 phases / 24 plans — 2026-04-27
