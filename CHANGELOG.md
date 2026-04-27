@@ -4,6 +4,71 @@ All notable changes to GoMad are documented in this file. This changelog starts
 fresh at v1.1.0 and does not include the upstream BMAD Method history. See
 [LICENSE](LICENSE) and [README.md](README.md#credits) for the fork's origin.
 
+## [1.3.0] - 2026-04-27
+
+### Summary
+
+v1.3.0 ships the docs/story-creation/relocation milestone. Persona body files
+relocate from `<installRoot>/_gomad/gomad/agents/` to
+`<installRoot>/_gomad/_config/agents/`. The `gm-discuss-story` and
+`gm-domain-skill` skills land under `4-implementation/`, two seed KB packs
+ship at `<installRoot>/_gomad/_config/kb/`, and initial docs content goes
+live at `gomad.xgent.ai`. v1.2 → v1.3 upgrades are handled automatically by
+the cleanup planner with backup snapshots.
+
+### Added
+
+- `gm-discuss-story` skill (`src/gomad-skills/4-implementation/gm-discuss-story/`) — pre-story context-gathering with locked output sections.
+- `gm-domain-skill` (`src/gomad-skills/4-implementation/gm-domain-skill/`) — hand-rolled BM25-style retrieval with Levenshtein typo fallback.
+- `src/domain-kb/testing/` and `src/domain-kb/architecture/` — seed KB packs with attribution frontmatter (`source`, `license`, `last_reviewed`).
+- `tools/validate-kb-licenses.js` — release gate for KB attribution.
+- `tools/validate-doc-paths.js` — DOCS-07 linter forbidding legacy `_gomad/gomad/agents/` paths in shipped docs.
+- `tools/verify-tarball.js` Phase 4 — grep-clean for residual `gomad/agents/` references in shipped source (allowlisted via `tools/fixtures/tarball-grep-allowlist.json`).
+- `test/test-domain-kb-install.js`, `test/test-legacy-v12-upgrade.js`, `test/test-v13-agent-relocation.js` — new E2E test coverage.
+- `prepublishOnly` script gating publish on the full `quality` matrix.
+- Initial docs content at `gomad.xgent.ai` (English + Simplified Chinese): tutorials/install, tutorials/quick-start, reference/agents, reference/skills, explanation/architecture, how-to/contributing.
+- `docs/upgrade-recovery.md` — new "v1.2 → v1.3 recovery" section with rollback recipe.
+
+### Changed
+
+- Persona body install path: `<installRoot>/_gomad/gomad/agents/<shortName>.md` → `<installRoot>/_gomad/_config/agents/<shortName>.md`.
+- Launcher stubs (`/gm:agent-*`) now reference `_gomad/_config/agents/`; regenerated unconditionally on every install.
+- `tools/installer/core/cleanup-planner.js` — new `isV12LegacyAgentsDir` detector + parallel branch in `buildCleanupPlan` that snapshots and removes the 8 legacy persona files (reason `manifest_cleanup`).
+- `tools/installer/core/installer.js` — `detectCustomFiles` whitelist treats the 8 known persona `.md` files at `_config/agents/` as generated (preserves `.customize.yaml` user-override semantics).
+- `npm run quality` matrix extended with `validate:doc-paths`, `test:gm-surface`, `test:tarball`, `test:domain-kb-install`, `test:legacy-v12-upgrade`, `test:v13-agent-relocation`.
+- `tools/installer/ide/shared/path-utils.js` — new `AGENTS_PERSONA_SUBPATH` and `LEGACY_AGENTS_PERSONA_SUBPATH` constants as the sole source of truth for the persona subpath.
+
+### Removed
+
+- (none — v1.2 → v1.3 is a relocation, not a removal)
+
+### BREAKING CHANGES
+
+The 8 persona body files have moved from
+`<installRoot>/_gomad/gomad/agents/<shortName>.md` to
+`<installRoot>/_gomad/_config/agents/<shortName>.md`.
+
+Upgrading from v1.2.0: run `gomad install` in your existing v1.2 workspace.
+The installer will:
+
+1. Snapshot the old `_gomad/gomad/agents/` files into
+   `_gomad/_backups/<YYYYMMDD-HHMMSS>/_gomad/gomad/agents/`.
+2. Remove the old files from `_gomad/gomad/agents/`.
+3. Write the new files at `_gomad/_config/agents/<shortName>.md`.
+4. Regenerate launcher stubs (`/gm:agent-*`) to point at the new location.
+
+A verbose migration banner prints during the upgrade naming the relocation,
+the backup location, and the recovery doc cross-reference.
+
+If `/gm:agent-pm` (or any persona) invocation fails after upgrade, see
+[`docs/upgrade-recovery.md`](./docs/upgrade-recovery.md#v12-v13-recovery)
+for the rollback recipe (re-pin v1.2 globally → restore from snapshot →
+re-run `gomad install`).
+
+If you scripted the literal path `_gomad/gomad/agents/`, update to
+`_gomad/_config/agents/`. Your `.customize.yaml` files at `_config/agents/`
+are preserved across the upgrade.
+
 ## [1.2.0] - 2026-04-23
 
 ### Summary
