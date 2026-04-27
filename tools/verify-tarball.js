@@ -5,6 +5,8 @@
  * 1. Forbidden path check - ensures no .planning/, test/, .github/, docs/, website/, or banner-bmad files leak into tarball
  * 2. Grep-clean check - ensures no bmad/bmm references remain in shipped files (VFY-03)
  * 3. gm-agent- grep-clean check - ensures no user-visible gm-agent- residuals in shipped content (Phase 9 D-71)
+ * 4. gomad/agents/ legacy-path grep-clean check - ensures no residual v1.2 persona-dir references
+ *    in shipped content after the Phase 12 relocation (AGENT-10)
  *
  * Usage: node tools/verify-tarball.js
  *        npm run test:tarball
@@ -110,7 +112,46 @@ function checkGmAgentGrepClean() {
 
   const allowlistPath = path.join(__dirname, 'fixtures', 'tarball-grep-allowlist.json');
   const allowlist = fs.existsSync(allowlistPath) ? JSON.parse(fs.readFileSync(allowlistPath, 'utf8')) : [];
-  const allowedPaths = new Set(allowlist.map((entry) => entry.path));
+  // Phase 3 (gm-agent-) is satisfied by entries with no category (legacy default),
+  // category === 'gm-agent', or category === 'both'.
+  const allowedPaths = new Set(
+    allowlist.filter((entry) => !entry.category || entry.category === 'gm-agent' || entry.category === 'both').map((entry) => entry.path),
+  );
+
+  const failures = grepOutput
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .filter((line) => !allowedPaths.has(line));
+
+  return { passed: failures.length === 0, failures };
+}
+
+/**
+ * Phase 4: Grep-clean check for residual gomad/agents/ legacy-path references
+ * in shipped files (AGENT-10). Allowlist filtered by category=='gomad-agents'
+ * OR 'both'. Failure surfaces any non-allowlisted file that still references
+ * _gomad/gomad/agents/ or gomad/agents/<name>.md after the Phase 12 relocation.
+ * @returns {{ passed: boolean, failures: string[] }}
+ */
+function checkLegacyAgentPathClean() {
+  let grepOutput = '';
+  try {
+    grepOutput = execSync(
+      String.raw`grep -rlE "\bgomad/agents/" src/ tools/installer/ ` +
+        `--include="*.js" --include="*.yaml" --include="*.md" --include="*.json" --include="*.csv" ` +
+        `2>/dev/null`,
+      { encoding: 'utf8' },
+    );
+  } catch {
+    return { passed: true, failures: [] };
+  }
+
+  const allowlistPath = path.join(__dirname, 'fixtures', 'tarball-grep-allowlist.json');
+  const allowlist = fs.existsSync(allowlistPath) ? JSON.parse(fs.readFileSync(allowlistPath, 'utf8')) : [];
+  const allowedPaths = new Set(
+    allowlist.filter((entry) => entry.category === 'gomad-agents' || entry.category === 'both').map((entry) => entry.path),
+  );
 
   const failures = grepOutput
     .split('\n')
@@ -170,11 +211,21 @@ if (gmAgentCheck.passed) {
   console.log(`${colors.red}FAIL: residual gm-agent- references in: ${gmAgentCheck.failures.join(', ')}${colors.reset}`);
 }
 
+// Phase 4: gomad/agents/ legacy-path grep-clean check (AGENT-10)
+console.log(`${colors.cyan}Phase 4: Checking for residual gomad/agents/ references...${colors.reset}`);
+const legacyAgentPathCheck = checkLegacyAgentPathClean();
+if (legacyAgentPathCheck.passed) {
+  console.log(`${colors.green}PASS: no unallowlisted gomad/agents/ residuals in shipped files${colors.reset}`);
+} else {
+  hasFailures = true;
+  console.log(`${colors.red}FAIL: residual gomad/agents/ references in: ${legacyAgentPathCheck.failures.join(', ')}${colors.reset}`);
+}
+
 // Exit
 if (hasFailures) {
   process.exit(1);
 }
 
 console.log(
-  `\n${colors.green}OK: ${tarballFiles.length} files in tarball, no forbidden paths, no bmad/bmm residuals, no unallowlisted gm-agent- residuals${colors.reset}`,
+  `\n${colors.green}OK: ${tarballFiles.length} files in tarball, no forbidden paths, no bmad/bmm residuals, no unallowlisted gm-agent- residuals, no unallowlisted gomad/agents/ residuals${colors.reset}`,
 );

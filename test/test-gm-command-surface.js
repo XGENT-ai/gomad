@@ -238,6 +238,12 @@ try {
       `Got: ${fm ? fm.name : '<no name>'}`,
     );
     assert(fm && typeof fm.description === 'string' && fm.description.length > 0, `(C) agent-${shortName}.md has non-empty description`);
+
+    // AGENT-07: launcher body MUST reference the v1.3 path, NOT the v1.2 legacy path.
+    const positiveRegex = new RegExp(`/_gomad/_config/agents/${shortName}\\.md`);
+    const negativeRegex = new RegExp(`/_gomad/gomad/agents/${shortName}\\.md`);
+    assert(positiveRegex.test(raw), `(C) agent-${shortName}.md body references v1.3 _config/agents/ path`);
+    assert(!negativeRegex.test(raw), `(C) agent-${shortName}.md body has NO legacy gomad/agents/ reference`);
   }
 
   // D-69: negative assertion — fresh install must NOT leave any legacy skills dir.
