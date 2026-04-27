@@ -120,7 +120,13 @@ function detectAgentFromTranscript(transcriptPath) {
     //   gm:agent-<short>  /  gm-agent-<short>
     //   _config/agents/<short>.md  (or backslash variant on Windows)
     const re = /(?:gm:agent-|gm-agent-|_config[/\\]+agents[/\\]+)([a-z][a-z-]+?)(?:\.md\b|[^a-z-]|$)/i;
+    // `/clear` writes a user message with literal `<command-name>/clear</command-name>`
+    // into the transcript. Treat it as a hard barrier when walking backwards —
+    // anything before the most-recent /clear belongs to a discarded conversation
+    // and must not influence the current persona display.
+    const clearRe = /<command-name>\/clear<\/command-name>/;
     for (let i = lines.length - 1; i >= 0; i--) {
+      if (clearRe.test(lines[i])) break;
       const m = lines[i].match(re);
       if (!m) continue;
       const shortName = m[1].toLowerCase();

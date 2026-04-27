@@ -448,6 +448,41 @@ async function makeTmpDir() {
     check('F7 resolveTranscriptPath honors data.transcript_path', () => {
       assert.equal(resolveTranscriptPath({ transcript_path: t1 }, 'irrelevant'), t1);
     });
+
+    // F8: /clear acts as a hard barrier — old persona signals before the
+    // most-recent /clear must not leak into the current display.
+    const tClear = path.join(caseFTmp, 't-clear.jsonl');
+    await fs.writeFile(
+      tClear,
+      [
+        JSON.stringify({ type: 'user', message: { role: 'user', content: '/gm:agent-pm draft PRD' } }),
+        JSON.stringify({ type: 'assistant', message: { role: 'assistant', content: 'sure...' } }),
+        JSON.stringify({
+          type: 'user',
+          message: { role: 'user', content: '<command-name>/clear</command-name>\n<command-message>clear</command-message>' },
+        }),
+      ].join('\n') + '\n',
+    );
+    check('F8 /clear barrier nullifies pre-clear /gm:agent-pm', () => {
+      assert.equal(detectAgentFromTranscript(tClear), null);
+    });
+
+    // F9: persona signal AFTER /clear is still detected.
+    const tClearThenAgent = path.join(caseFTmp, 't-clear-then-agent.jsonl');
+    await fs.writeFile(
+      tClearThenAgent,
+      [
+        JSON.stringify({ type: 'user', message: { role: 'user', content: '/gm:agent-pm old' } }),
+        JSON.stringify({ type: 'user', message: { role: 'user', content: '<command-name>/clear</command-name>' } }),
+        JSON.stringify({ type: 'user', message: { role: 'user', content: '/gm:agent-architect new' } }),
+      ].join('\n') + '\n',
+    );
+    check('F9 post-clear /gm:agent-architect → Winston', () => {
+      assert.deepEqual(detectAgentFromTranscript(tClearThenAgent), {
+        persona: 'Winston',
+        skill: 'gm-agent-architect',
+      });
+    });
   } catch (error) {
     check('F0 case F ran without throwing', () => {
       throw error;
