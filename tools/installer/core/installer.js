@@ -296,8 +296,9 @@ class Installer {
         this.installedFiles.add(paths.agentManifest());
 
         // Phase 6 (D-14/D-15): extract 8 agent personas from src/gomad-skills/*/gm-agent-*/
-        // into _gomad/gomad/agents/<shortName>.md. Runs BEFORE generateManifests so the
-        // extracted files land in files-manifest.csv with install_root='_gomad'.
+        // into _gomad/_config/agents/<shortName>.md (v1.3+ — was gomad/agents/ in v1.2).
+        // Runs BEFORE generateManifests so the extracted files land in
+        // files-manifest.csv with install_root='_gomad'.
         message('Extracting agent personas...');
         const personaGen = new AgentCommandGenerator(this.gomadFolderName);
         const workspaceRoot = path.dirname(paths.gomadDir);
