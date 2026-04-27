@@ -521,6 +521,7 @@ class Installer {
       const ideRoots = await this._collectIdeRoots();
       const allowedRoots = new Set(['_gomad', '.claude', ...ideRoots]);
       const isV11 = await cleanupPlanner.isV11Legacy(workspaceRoot, paths.gomadDir);
+      const isV12Reloc = await cleanupPlanner.isV12LegacyAgentsDir(workspaceRoot, paths.gomadDir);
 
       // newInstallSet: realpath-resolve every prior manifest entry that still exists on
       // disk. This preserves Phase 7 SC1 (idempotent re-install — no new backup, no
@@ -553,7 +554,34 @@ class Installer {
         workspaceRoot,
         allowedRoots,
         isV11Legacy: isV11,
+        isV12LegacyAgentsDir: isV12Reloc,
       });
+
+      // D-09: verbose v1.3 BREAKING migration banner. Suppressed in dry-run
+      // (D-10) because cleanupPlanner.renderPlan(plan) already prints the
+      // planned actions. API pattern verified at installer.js:347-358 —
+      // `await prompts.getColor()` returns the chalk-shaped helper used
+      // throughout the installer for banner output.
+      if (isV12Reloc && !config.dryRun) {
+        const color = await prompts.getColor();
+        await prompts.log.message(color.cyan('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        await prompts.log.message(color.yellow('  GoMad v1.3 BREAKING: Agent persona files are relocating'));
+        await prompts.log.message(color.cyan('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        await prompts.log.message('');
+        await prompts.log.message('  • What is moving: 8 persona body files (.md)');
+        await prompts.log.message('      from  _gomad/gomad/agents/<shortName>.md');
+        await prompts.log.message('      to    _gomad/_config/agents/<shortName>.md');
+        await prompts.log.message('  • Backup snapshot: every old file is copied to');
+        await prompts.log.message('      _gomad/_backups/<YYYYMMDD-HHMMSS>/_gomad/gomad/agents/');
+        await prompts.log.message('      BEFORE removal. Recovery is non-destructive.');
+        await prompts.log.message('  • Your .customize.yaml files are preserved unchanged');
+        await prompts.log.message('      (custom-file detector handles persona .md as generated).');
+        await prompts.log.message('  • Rollback recipe: see docs/upgrade-recovery.md');
+        await prompts.log.message('      § "v1.2 → v1.3 recovery"');
+        await prompts.log.message('');
+        await prompts.log.message(color.cyan('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'));
+        await prompts.log.message('');
+      }
 
       if (config.dryRun) {
         // D-41 dry-run: print plan and exit without touching disk.
