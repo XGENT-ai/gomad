@@ -65,22 +65,37 @@
   },
   {
     "path": "tools/installer/ide/shared/agent-command-generator.js",
-    "reason": "Shipped installer module that legitimately references gm-agent-* filesystem dirs (8 agent paths + legacy cleanup code); filesystem-path refs per REF-02."
+    "reason": "Shipped installer module that legitimately references gm-agent-* filesystem dirs (8 agent paths + legacy cleanup code) AND legacy gomad/agents/ source-path JSDoc (Phase 12 D-01); filesystem-path refs per REF-02.",
+    "category": "both"
   },
   {
     "path": "tools/installer/ide/_config-driven.js",
-    "reason": "Shipped installer module; comments and log string describe legacy .claude/skills/gm-agent-*/ cleanup target (D-29, REF-02)."
+    "reason": "Shipped installer module; comments and log string describe legacy .claude/skills/gm-agent-*/ cleanup target (D-29, REF-02).",
+    "category": "gm-agent"
   },
   {
     "path": "tools/installer/core/cleanup-planner.js",
-    "reason": "Shipped installer module; legacy v1.1 cleanup code referring to .claude/skills/gm-agent-<shortName>/ dirs (D-42, REF-02)."
+    "reason": "Shipped installer module; v1.1 (.claude/skills/gm-agent-*) AND v1.2 (gomad/agents/*) cleanup code legitimately references both legacy paths (D-42 + Phase 12 D-01).",
+    "category": "both"
   },
   {
     "path": "tools/installer/core/manifest-generator.js",
-    "reason": "Shipped installer module; dash↔colon transform helpers + JSDoc explaining D-63 filesystem invariant (REF-02)."
+    "reason": "Shipped installer module; dash↔colon transform helpers + JSDoc explaining D-63 filesystem invariant (REF-02), and a JSDoc reference to the legacy gomad/agents/ source dir for the standalone-agents enumeration (Phase 12 D-01).",
+    "category": "both"
   },
   {
     "path": "tools/installer/core/installer.js",
-    "reason": "Shipped installer module; single comment at line 294 references src/gomad-skills/*/gm-agent-*/ persona source path (D-14/D-15, REF-02)."
+    "reason": "Shipped installer module; comment at line 294 references src/gomad-skills/*/gm-agent-*/ persona source path (D-14/D-15, REF-02); v1.3 BREAKING migration banner messages reference _gomad/gomad/agents/ legacy path (Phase 12 D-09).",
+    "category": "both"
+  },
+  {
+    "path": "tools/installer/ide/shared/path-utils.js",
+    "reason": "Shipped installer module; LEGACY_AGENTS_PERSONA_SUBPATH constant + JSDoc examples define the legacy v1.2 path for cleanup-planner consumption (Phase 12 D-05).",
+    "category": "gomad-agents"
+  },
+  {
+    "path": "tools/installer/ide/shared/artifacts.js",
+    "reason": "Shipped installer module; single comment at line 55 references the legacy gomad/agents/ standalone-agent source dir (Phase 12 D-01).",
+    "category": "gomad-agents"
   }
 ]
