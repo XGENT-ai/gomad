@@ -390,15 +390,23 @@ async function makeTmpDir() {
       assert.equal(SHORTNAMES['solo-dev'], 'Barry');
     });
 
-    // F2: slash-command form picks up the right persona.
+    // Helpers — match the real Claude Code transcript shape.
+    const slashCmd = (cmd) =>
+      JSON.stringify({
+        type: 'user',
+        message: { role: 'user', content: `<command-name>${cmd}</command-name>\n<command-message></command-message>` },
+      });
+    const chatUser = (text) =>
+      JSON.stringify({ type: 'user', message: { role: 'user', content: text } });
+    const personaRead = (filePath) =>
+      JSON.stringify({
+        type: 'assistant',
+        message: { role: 'assistant', content: [{ type: 'tool_use', name: 'Read', input: { file_path: filePath } }] },
+      });
+
+    // F2: real slash-command invocation.
     const t1 = path.join(caseFTmp, 't1.jsonl');
-    await fs.writeFile(
-      t1,
-      [
-        JSON.stringify({ type: 'user', content: 'hi there' }),
-        JSON.stringify({ type: 'user', content: '/gm:agent-pm please draft the PRD' }),
-      ].join('\n') + '\n',
-    );
+    await fs.writeFile(t1, [chatUser('hi there'), slashCmd('/gm:agent-pm')].join('\n') + '\n');
     check('F2 slash-command /gm:agent-pm → John', () => {
       const r = detectAgentFromTranscript(t1);
       assert.deepEqual(r, { persona: 'John', skill: 'gm-agent-pm' });
@@ -406,13 +414,7 @@ async function makeTmpDir() {
 
     // F3: persona file Read picks up the persona too.
     const t2 = path.join(caseFTmp, 't2.jsonl');
-    await fs.writeFile(
-      t2,
-      JSON.stringify({
-        type: 'assistant',
-        content: [{ type: 'tool_use', name: 'Read', input: { file_path: '/proj/_gomad/_config/agents/dev.md' } }],
-      }) + '\n',
-    );
+    await fs.writeFile(t2, personaRead('/proj/_gomad/_config/agents/dev.md') + '\n');
     check('F3 _config/agents/dev.md → Amelia', () => {
       const r = detectAgentFromTranscript(t2);
       assert.deepEqual(r, { persona: 'Amelia', skill: 'gm-agent-dev' });
@@ -420,13 +422,7 @@ async function makeTmpDir() {
 
     // F4: most-recent persona wins when transcript shows two loads.
     const t3 = path.join(caseFTmp, 't3.jsonl');
-    await fs.writeFile(
-      t3,
-      [
-        JSON.stringify({ type: 'user', content: '/gm:agent-pm draft PRD' }),
-        JSON.stringify({ type: 'user', content: 'thanks, now /gm:agent-architect please' }),
-      ].join('\n') + '\n',
-    );
+    await fs.writeFile(t3, [slashCmd('/gm:agent-pm'), slashCmd('/gm:agent-architect')].join('\n') + '\n');
     check('F4 most-recent persona wins (architect over pm)', () => {
       const r = detectAgentFromTranscript(t3);
       assert.deepEqual(r, { persona: 'Winston', skill: 'gm-agent-architect' });
@@ -434,7 +430,7 @@ async function makeTmpDir() {
 
     // F5: unknown shortname → null (not a false positive on `/gm:agent-foo`).
     const t4 = path.join(caseFTmp, 't4.jsonl');
-    await fs.writeFile(t4, JSON.stringify({ type: 'user', content: '/gm:agent-bogus' }) + '\n');
+    await fs.writeFile(t4, slashCmd('/gm:agent-bogus') + '\n');
     check('F5 unknown shortname returns null', () => {
       assert.equal(detectAgentFromTranscript(t4), null);
     });
@@ -454,14 +450,7 @@ async function makeTmpDir() {
     const tClear = path.join(caseFTmp, 't-clear.jsonl');
     await fs.writeFile(
       tClear,
-      [
-        JSON.stringify({ type: 'user', message: { role: 'user', content: '/gm:agent-pm draft PRD' } }),
-        JSON.stringify({ type: 'assistant', message: { role: 'assistant', content: 'sure...' } }),
-        JSON.stringify({
-          type: 'user',
-          message: { role: 'user', content: '<command-name>/clear</command-name>\n<command-message>clear</command-message>' },
-        }),
-      ].join('\n') + '\n',
+      [slashCmd('/gm:agent-pm'), chatUser('sure thing'), slashCmd('/clear')].join('\n') + '\n',
     );
     check('F8 /clear barrier nullifies pre-clear /gm:agent-pm', () => {
       assert.equal(detectAgentFromTranscript(tClear), null);
@@ -471,16 +460,61 @@ async function makeTmpDir() {
     const tClearThenAgent = path.join(caseFTmp, 't-clear-then-agent.jsonl');
     await fs.writeFile(
       tClearThenAgent,
-      [
-        JSON.stringify({ type: 'user', message: { role: 'user', content: '/gm:agent-pm old' } }),
-        JSON.stringify({ type: 'user', message: { role: 'user', content: '<command-name>/clear</command-name>' } }),
-        JSON.stringify({ type: 'user', message: { role: 'user', content: '/gm:agent-architect new' } }),
-      ].join('\n') + '\n',
+      [slashCmd('/gm:agent-pm'), slashCmd('/clear'), slashCmd('/gm:agent-architect')].join('\n') + '\n',
     );
     check('F9 post-clear /gm:agent-architect → Winston', () => {
       assert.deepEqual(detectAgentFromTranscript(tClearThenAgent), {
         persona: 'Winston',
         skill: 'gm-agent-architect',
+      });
+    });
+
+    // F10: chat text mentioning `/gm:agent-pm` mid-sentence is NOT a signal —
+    // only structurally-shaped slash commands count. This is the regression
+    // for "我运行 /gm:agent-pm" being typed in chat surfaced as a persona load.
+    const tChat = path.join(caseFTmp, 't-chat.jsonl');
+    await fs.writeFile(
+      tChat,
+      [
+        chatUser('I just ran /gm:agent-pm but it shows Barry (gm-agent-solo-dev) instead'),
+        JSON.stringify({
+          type: 'assistant',
+          message: { role: 'assistant', content: [{ type: 'text', text: 'Looking into the bug — gm-agent-pm should win.' }] },
+        }),
+      ].join('\n') + '\n',
+    );
+    check('F10 chat mentions of /gm:agent-* and gm-agent-* are NOT signals', () => {
+      assert.equal(detectAgentFromTranscript(tChat), null);
+    });
+
+    // F11: tool I/O text containing `<command-name>/clear</command-name>` (e.g.
+    // an Edit writing test fixtures, a grep output) must NOT be treated as a
+    // /clear barrier.
+    const tFakeClear = path.join(caseFTmp, 't-fake-clear.jsonl');
+    await fs.writeFile(
+      tFakeClear,
+      [
+        slashCmd('/gm:agent-pm'),
+        // Assistant's Edit tool_use embedding the literal `<command-name>/clear</command-name>` string
+        JSON.stringify({
+          type: 'assistant',
+          message: {
+            role: 'assistant',
+            content: [
+              {
+                type: 'tool_use',
+                name: 'Edit',
+                input: { new_string: 'await fs.writeFile(t, "<command-name>/clear</command-name>")' },
+              },
+            ],
+          },
+        }),
+      ].join('\n') + '\n',
+    );
+    check('F11 fake-clear in tool_use input is NOT a barrier', () => {
+      assert.deepEqual(detectAgentFromTranscript(tFakeClear), {
+        persona: 'John',
+        skill: 'gm-agent-pm',
       });
     });
   } catch (error) {

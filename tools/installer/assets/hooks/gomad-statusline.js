@@ -84,10 +84,20 @@ let _transcriptCache = { key: null, value: null };
  * Scan the tail of a Claude Code transcript (.jsonl) for the most recent
  * gomad agent load signal. Returns `{ persona, skill }` or `null`.
  *
- * Signals (any wins, most recent occurrence in the tail):
- *   - `/gm:agent-<short>` or `gm:agent-<short>` (slash-command launcher)
- *   - `gm-agent-<short>` (skill id)
- *   - `_config/agents/<short>.md` (persona body Read by Claude after launch)
+ * Each line is parsed as JSON and matched against the *structural* shapes
+ * Claude Code emits — chat text or tool I/O that happens to mention the
+ * literal strings does NOT count. Two strong signals are honored:
+ *
+ *   1. User invoked `/gm:agent-<short>` as a slash command. The transcript
+ *      records a `type:'user'` entry whose `message.content` STARTS WITH
+ *      `<command-name>/gm:agent-<short></command-name>`.
+ *   2. Claude loaded the persona body via the `Read` tool. The transcript
+ *      records a `type:'assistant'` entry whose `message.content[]` includes
+ *      a `{ type:'tool_use', name:'Read', input:{ file_path: …/_config/agents/<short>.md } }`.
+ *
+ * `/clear` acts as a hard barrier — but only when it has the same
+ * `<command-name>/clear</command-name>` structural shape; assistant text
+ * or tool I/O that happens to mention the literal string is ignored.
  *
  * Reads at most TAIL_BYTES from the end of the file to keep the per-tick
  * cost bounded even on long sessions. Drops the first (potentially partial)
@@ -116,22 +126,25 @@ function detectAgentFromTranscript(transcriptPath) {
     const lines = buf.toString('utf8').split('\n').filter(Boolean);
     if (st.size > TAIL_BYTES && lines.length > 1) lines.shift();
 
-    // Match either:
-    //   gm:agent-<short>  /  gm-agent-<short>
-    //   _config/agents/<short>.md  (or backslash variant on Windows)
-    const re = /(?:gm:agent-|gm-agent-|_config[/\\]+agents[/\\]+)([a-z][a-z-]+?)(?:\.md\b|[^a-z-]|$)/i;
-    // `/clear` writes a user message with literal `<command-name>/clear</command-name>`
-    // into the transcript. Treat it as a hard barrier when walking backwards —
-    // anything before the most-recent /clear belongs to a discarded conversation
-    // and must not influence the current persona display.
-    const clearRe = /<command-name>\/clear<\/command-name>/;
     for (let i = lines.length - 1; i >= 0; i--) {
-      if (clearRe.test(lines[i])) break;
-      const m = lines[i].match(re);
-      if (!m) continue;
-      const shortName = m[1].toLowerCase();
-      if (SHORTNAMES[shortName]) {
-        result = { persona: SHORTNAMES[shortName], skill: `gm-agent-${shortName}` };
+      let entry;
+      try {
+        entry = JSON.parse(lines[i]);
+      } catch {
+        continue;
+      }
+
+      if (isClearCommand(entry)) break;
+
+      const slashShort = extractSlashAgent(entry);
+      if (slashShort && SHORTNAMES[slashShort]) {
+        result = { persona: SHORTNAMES[slashShort], skill: `gm-agent-${slashShort}` };
+        break;
+      }
+
+      const readShort = extractAgentRead(entry);
+      if (readShort && SHORTNAMES[readShort]) {
+        result = { persona: SHORTNAMES[readShort], skill: `gm-agent-${readShort}` };
         break;
       }
     }
@@ -141,6 +154,38 @@ function detectAgentFromTranscript(transcriptPath) {
 
   _transcriptCache = { key: cacheKey, value: result };
   return result;
+}
+
+/** True when this entry is a real user-invoked /clear (structural match). */
+function isClearCommand(entry) {
+  if (!entry || entry.type !== 'user') return false;
+  const c = entry.message && entry.message.content;
+  if (typeof c !== 'string') return false;
+  return /^\s*<command-name>\/clear<\/command-name>/.test(c);
+}
+
+/** Returns the short-name of a `/gm:agent-<short>` slash invocation, or null. */
+function extractSlashAgent(entry) {
+  if (!entry || entry.type !== 'user') return null;
+  const c = entry.message && entry.message.content;
+  if (typeof c !== 'string') return null;
+  const m = c.match(/^\s*<command-name>\/gm:agent-([a-z][a-z-]*)<\/command-name>/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
+/** Returns the short-name from an assistant Read tool_use of `…/_config/agents/<short>.md`, or null. */
+function extractAgentRead(entry) {
+  if (!entry || entry.type !== 'assistant') return null;
+  const blocks = entry.message && entry.message.content;
+  if (!Array.isArray(blocks)) return null;
+  for (const block of blocks) {
+    if (!block || block.type !== 'tool_use' || block.name !== 'Read') continue;
+    const fp = block.input && block.input.file_path;
+    if (typeof fp !== 'string') continue;
+    const m = fp.match(/[/\\]_config[/\\]+agents[/\\]+([a-z][a-z-]+)\.md$/i);
+    if (m) return m[1].toLowerCase();
+  }
+  return null;
 }
 
 /**
