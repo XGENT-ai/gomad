@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-24 after marketplace workstream dropp
 Phase: 12 (agent-dir-relocation-release) — EXECUTING
 Plan: 1 of 8
 Status: Executing Phase 12
-Last activity: 2026-04-27 -- Phase 12 execution started
+Last activity: 2026-04-27 -- Completed quick task 260427-k86: gomad Claude Code statusline + installer wiring
 
 Progress: [░░░░░░░░░░] 0% (0/3 v1.3 phases complete)
 
@@ -73,6 +73,7 @@ None.
 |---|-------------|------|--------|-----------|
 | 260424-fvb | Rename bmad-agent-solo-dev → gm-agent-solo-dev; swap bmad-* refs → gm-* | 2026-04-24 | 12251e8 | [260424-fvb-bmad-agent-solo-dev-gm-agent-solo-dev-bm](./quick/260424-fvb-bmad-agent-solo-dev-gm-agent-solo-dev-bm/) |
 | 260424-g68 | Register solo-dev as 8th canonical agent in installer AGENT_SOURCES; update install-smoke test to 8 | 2026-04-24 | 8c754b1 | [260424-g68-register-gm-agent-solo-dev-in-installer-](./quick/260424-g68-register-gm-agent-solo-dev-in-installer-/) |
+| 260427-k86 | Add gomad Claude Code statusline + installer wiring (`.claude/hooks/gomad-statusline.js` + `settings.json` merge) | 2026-04-27 | e46910e | [260427-k86-claude-hooks-gsd-statusline-js-gomad-hoo](./quick/260427-k86-claude-hooks-gsd-statusline-js-gomad-hoo/) |
 
 ## Deferred Items
 
