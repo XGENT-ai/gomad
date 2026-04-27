@@ -1,7 +1,14 @@
 const path = require('node:path');
 const fs = require('fs-extra');
 const yaml = require('yaml');
-const { toColonPath, toDashPath, customAgentColonName, customAgentDashName, GOMAD_FOLDER_NAME } = require('./path-utils');
+const {
+  toColonPath,
+  toDashPath,
+  customAgentColonName,
+  customAgentDashName,
+  GOMAD_FOLDER_NAME,
+  AGENTS_PERSONA_SUBPATH,
+} = require('./path-utils');
 const { getSourcePath } = require('../../project-root');
 
 /**
@@ -68,7 +75,7 @@ class AgentCommandGenerator {
    */
   async extractPersonas(workspaceRoot) {
     const skillsRoot = getSourcePath('gomad-skills');
-    const outputDir = path.join(workspaceRoot, this.gomadFolderName, 'gomad', 'agents');
+    const outputDir = path.join(workspaceRoot, this.gomadFolderName, ...AGENTS_PERSONA_SUBPATH.split('/'));
     await fs.ensureDir(outputDir);
 
     const writtenPaths = [];
