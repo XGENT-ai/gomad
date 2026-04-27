@@ -79,7 +79,7 @@ const SKILLS_MARKER_KEYS = [
 function escapeTableCell(str) {
   return String(str || '')
     .replaceAll('|', String.raw`\|`)
-    .replace(/\r?\n+/g, ' ')
+    .replaceAll(/\r?\n+/g, ' ')
     .trim();
 }
 
@@ -90,9 +90,9 @@ function escapeTableCell(str) {
 function readFileOrNull(filePath) {
   try {
     return fs.readFileSync(filePath, 'utf8');
-  } catch (err) {
-    if (err && err.code === 'ENOENT') return null;
-    throw err;
+  } catch (error) {
+    if (error && error.code === 'ENOENT') return null;
+    throw error;
   }
 }
 
@@ -272,8 +272,7 @@ function discoverCoreSkills() {
  */
 function renderAgentsTable(personas) {
   const lines = [];
-  lines.push('| Persona | Slash command | Phase | Purpose |');
-  lines.push('| --- | --- | --- | --- |');
+  lines.push('| Persona | Slash command | Phase | Purpose |', '| --- | --- | --- | --- |');
   for (const p of personas) {
     const display = escapeTableCell(p.displayName || p.name);
     const slash = `\`/gm:agent-${p.shortName}\``;
@@ -289,8 +288,7 @@ function renderAgentsTable(personas) {
  */
 function renderTaskSkillSection(skillsForPhase) {
   const lines = [];
-  lines.push('| Skill | Description | Invoked by |');
-  lines.push('| --- | --- | --- |');
+  lines.push('| Skill | Description | Invoked by |', '| --- | --- | --- |');
   for (const s of skillsForPhase) {
     lines.push(`| \`${s.name}\` | ${escapeTableCell(s.description)} | Invoked by \`gm-agent-*\` or any persona via the skill loader |`);
   }
@@ -302,8 +300,7 @@ function renderTaskSkillSection(skillsForPhase) {
  */
 function renderCoreSection(coreSkills) {
   const lines = [];
-  lines.push('| Skill | Description | Invoked by |');
-  lines.push('| --- | --- | --- |');
+  lines.push('| Skill | Description | Invoked by |', '| --- | --- | --- |');
   for (const s of coreSkills) {
     lines.push(`| \`${s.name}\` | ${escapeTableCell(s.description)} | Invoked by \`gm-agent-*\` or any persona via the skill loader |`);
   }
@@ -459,8 +456,9 @@ if (require.main === module) {
   try {
     main();
     console.log('  ✓ Reference tables injected');
-  } catch (err) {
-    console.error(`  ✗ ${err.message}`);
+  } catch (error) {
+    console.error(`  ✗ ${error.message}`);
+    // eslint-disable-next-line n/no-process-exit, unicorn/no-process-exit -- CLI entry; non-zero exit signals failure to npm script chain
     process.exit(1);
   }
 }

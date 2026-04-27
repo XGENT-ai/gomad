@@ -242,7 +242,11 @@ function testEscapePipe() {
   // Prefer the dedicated helper if exported; otherwise inspect a rendered table cell.
   if (typeof inject.escapeTableCell === 'function') {
     const escaped = inject.escapeTableCell('a | b');
-    assert(escaped.includes('\\|') && !escaped.includes(' | '), 'escapeTableCell escapes pipe characters as \\|', `Got: ${escaped}`);
+    assert(
+      escaped.includes(String.raw`\|`) && !escaped.includes(' | '),
+      String.raw`escapeTableCell escapes pipe characters as \|`,
+      `Got: ${escaped}`,
+    );
   } else {
     // Fallback: render a synthetic personas table with a pipe in the description.
     const synthetic = [
@@ -257,8 +261,8 @@ function testEscapePipe() {
     ];
     const rendered = inject.renderAgentsTable(synthetic);
     assert(
-      rendered.includes('\\|') && !rendered.includes('foo | bar'),
-      'rendered cell escapes pipe characters as \\| (escapeTableCell behavior)',
+      rendered.includes(String.raw`\|`) && !rendered.includes('foo | bar'),
+      String.raw`rendered cell escapes pipe characters as \| (escapeTableCell behavior)`,
       `Got: ${rendered}`,
     );
   }
@@ -288,8 +292,8 @@ console.log('');
 for (const t of tests) {
   try {
     t();
-  } catch (err) {
-    console.log(`${colors.red}✗${colors.reset} ${t.name} threw: ${err.message}`);
+  } catch (error) {
+    console.log(`${colors.red}✗${colors.reset} ${t.name} threw: ${error.message}`);
     failed++;
   }
 }
