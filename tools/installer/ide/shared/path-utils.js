@@ -15,12 +15,20 @@
  * - standalone/agents/fred.md → gomad-agent-standalone-fred.md
  */
 
+const path = require('node:path');
+
 // Type segments - agents are included in naming, others are filtered out
 const TYPE_SEGMENTS = ['workflows', 'tasks', 'tools'];
 const AGENT_SEGMENT = 'agents';
 
 // GOMAD installation folder name - centralized constant for all installers
 const GOMAD_FOLDER_NAME = '_gomad';
+
+// v1.3+ persona body location under <installRoot>/_gomad/. Sole source of
+// truth — every other module derives from this constant. Pair with
+// LEGACY_AGENTS_PERSONA_SUBPATH so cleanup-planner can name the old path.
+const AGENTS_PERSONA_SUBPATH = path.posix.join('_config', 'agents');
+const LEGACY_AGENTS_PERSONA_SUBPATH = path.posix.join('gomad', 'agents');
 
 /**
  * Convert hierarchical path to flat dash-separated name (NEW STANDARD)
@@ -361,4 +369,6 @@ module.exports = {
   TYPE_SEGMENTS,
   AGENT_SEGMENT,
   GOMAD_FOLDER_NAME,
+  AGENTS_PERSONA_SUBPATH,
+  LEGACY_AGENTS_PERSONA_SUBPATH,
 };
