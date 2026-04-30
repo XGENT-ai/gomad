@@ -7,6 +7,7 @@ const csv = require('csv-parse/sync');
 const { getProjectRoot } = require('../project-root');
 const { GOMAD_FOLDER_NAME } = require('./shared/path-utils');
 const { AgentCommandGenerator } = require('./shared/agent-command-generator');
+const { applyInvocationSyntaxTransform, resolveInvocationSyntax } = require('./shared/invocation-syntax');
 
 // Best-effort signature match for well-known statusline plugins so the override
 // prompt can show a friendly name. Order matters: first match wins. Returns
@@ -507,6 +508,12 @@ class ConfigDrivenIdeSetup {
     const filesManifestPath = path.join(gomadDir, '_config', 'files-manifest.csv');
     const isReinstall = await fs.pathExists(filesManifestPath);
 
+    // 260430-q3c: install-time syntax transform. claude-code installs colon
+    // form verbatim (D-22/D-64); every other platform gets the dash rewrite
+    // applied to copied skill content so `/gm:agent-pm` becomes
+    // `$gm-agent-pm` (Codex/Auggie/Cline/etc. resolve dash form natively).
+    const invocationSyntax = resolveInvocationSyntax(this.platformConfig);
+
     let count = 0;
 
     for (const record of records) {
@@ -540,6 +547,13 @@ class ConfigDrivenIdeSetup {
       // sourceDir is the live source under gomadDir; copy into targetPath as real files.
       await fs.copy(sourceDir, skillDir);
 
+      // 260430-q3c: rewrite copied skill content for non-launcher platforms.
+      // Only touches *.md / *.csv / *.yaml / *.yml under skillDir. No-op when
+      // invocationSyntax === 'colon' (claude-code preserves source verbatim).
+      if (invocationSyntax === 'dash') {
+        await this._applyInvocationSyntaxToDir(skillDir, invocationSyntax);
+      }
+
       count++;
     }
 
@@ -556,6 +570,35 @@ class ConfigDrivenIdeSetup {
     }
 
     return count;
+  }
+
+  /**
+   * 260430-q3c: walk a just-copied skill directory and rewrite cross-skill
+   * agent references from colon form (`/gm:agent-<short>`, `gm:agent-<short>`)
+   * to dash form (`$gm-agent-<short>`, `gm-agent-<short>`). Only `.md`, `.csv`,
+   * `.yaml`, `.yml` files are touched. Files whose contents do not change
+   * are not rewritten (mtime stays stable).
+   *
+   * @param {string} dir - Directory to walk (recursive).
+   * @param {string} invocationSyntax - Forwarded to applyInvocationSyntaxTransform.
+   */
+  async _applyInvocationSyntaxToDir(dir, invocationSyntax) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const entryPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await this._applyInvocationSyntaxToDir(entryPath, invocationSyntax);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      const ext = path.extname(entry.name).toLowerCase();
+      if (ext !== '.md' && ext !== '.csv' && ext !== '.yaml' && ext !== '.yml') continue;
+      const original = await fs.readFile(entryPath, 'utf8');
+      const transformed = applyInvocationSyntaxTransform(original, invocationSyntax);
+      if (transformed !== original) {
+        await fs.writeFile(entryPath, transformed);
+      }
+    }
   }
 
   /**

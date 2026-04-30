@@ -11,6 +11,7 @@ const { getProjectRoot, getSourcePath } = require('../project-root');
 const { ManifestGenerator } = require('./manifest-generator');
 const cleanupPlanner = require('./cleanup-planner');
 const { AgentCommandGenerator } = require('../ide/shared/agent-command-generator');
+const { applyInvocationSyntaxTransform, resolveInvocationSyntax } = require('../ide/shared/invocation-syntax');
 const prompts = require('../prompts');
 const { GOMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 const { InstallPaths } = require('./install-paths');
@@ -342,7 +343,8 @@ class Installer {
         });
 
         message('Generating help catalog...');
-        await this.mergeModuleHelpCatalogs(paths.gomadDir);
+        const mergedInvocationSyntax = await this._resolveMergedInvocationSyntax(config.ides || []);
+        await this.mergeModuleHelpCatalogs(paths.gomadDir, mergedInvocationSyntax);
         addResult('Help catalog', 'ok');
 
         return 'Configurations generated';
@@ -806,6 +808,28 @@ class Installer {
    * installed outside `_gomad/`. Returns a sorted array of unique root segments.
    * @returns {Promise<string[]>} Array of IDE root directory names (leading segment only)
    */
+  /**
+   * 260430-q3c: resolve the invocation syntax for the merged help catalog
+   * shared across all selected IDEs. Returns 'colon' only when every selected
+   * IDE resolves to colon (i.e. claude-code is the sole pick). Any non-launcher
+   * IDE in the mix forces 'dash' — the merged catalog must use dash form so
+   * Codex/Auggie/etc. read native invocations; claude-code can read dash form
+   * informationally (the help catalog is not a launcher).
+   *
+   * @param {string[]} ides - Selected IDE platform codes from config.ides.
+   * @returns {Promise<'colon' | 'dash'>}
+   */
+  async _resolveMergedInvocationSyntax(ides) {
+    if (!Array.isArray(ides) || ides.length === 0) return 'dash';
+    const { loadPlatformCodes } = require('../ide/platform-codes');
+    const platformConfig = await loadPlatformCodes();
+    for (const ideCode of ides) {
+      const entry = platformConfig.platforms?.[ideCode];
+      if (resolveInvocationSyntax(entry) === 'dash') return 'dash';
+    }
+    return 'colon';
+  }
+
   async _collectIdeRoots() {
     const { loadPlatformCodes } = require('../ide/platform-codes');
     const platformConfig = await loadPlatformCodes();
@@ -1188,7 +1212,7 @@ class Installer {
    * Output is written to _gomad/_config/gomad-help.csv
    * @param {string} gomadDir - GOMAD installation directory
    */
-  async mergeModuleHelpCatalogs(gomadDir) {
+  async mergeModuleHelpCatalogs(gomadDir, invocationSyntax = 'colon') {
     const allRows = [];
     const headerRow =
       'module,phase,name,code,sequence,workflow-file,command,required,agent-name,agent-command,agent-display-name,agent-title,options,description,output-location,outputs';
@@ -1214,9 +1238,12 @@ class Installer {
       for (const r of records) {
         const agentName = (r.name || '').trim();
         if (!agentName) continue;
-        // Store the lookup key as-is; both the manifest and module-help.csv
-        // sources now carry user-visible colon form (D-64).
-        const internalAgentName = agentName;
+        // Store the lookup key under the merged invocation syntax. For
+        // 'colon' (claude-code-only installs) this is a no-op and the key
+        // stays as-is per D-64. For 'dash' (any non-launcher IDE selected),
+        // both the map key and the row's rawAgentName are transformed before
+        // lookup so they meet in dash form.
+        const internalAgentName = applyInvocationSyntaxTransform(agentName, invocationSyntax);
         const displayName = (r.displayName || '').trim();
         const title = (r.title || '').trim();
         const icon = (r.icon || '').trim();
@@ -1297,10 +1324,13 @@ class Installer {
               // If module column is empty, set it to this module's name (except for core which stays empty for universal tools)
               const finalModule = (!module || module.trim() === '') && moduleName !== 'core' ? moduleName : module || '';
 
-              // D-64: source module-help.csv carries user-visible colon form
-              // directly, so the merge is a straight pass-through — no
-              // dash↔colon transform, no separate internal/emitted split.
-              const rawAgentName = agentName ? agentName.trim() : '';
+              // D-64: source module-help.csv carries colon form. For
+              // claude-code-only installs (invocationSyntax === 'colon')
+              // the transform is a no-op — straight pass-through. For any
+              // non-launcher IDE in the mix (invocationSyntax === 'dash'),
+              // both lookup key and emitted column are rewritten to dash
+              // form (260430-q3c).
+              const rawAgentName = applyInvocationSyntaxTransform(agentName ? agentName.trim() : '', invocationSyntax);
               const agentData = agentInfo.get(rawAgentName) || { command: '', displayName: '', title: '' };
               const emittedAgentName = rawAgentName;
               const emittedPhase = phase || '';
