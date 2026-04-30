@@ -246,5 +246,10 @@
     "path": "docs/zh-cn/how-to/contributing.md",
     "lineContainsPattern": "gm-agent-",
     "reason": "Phase 11 zh-cn contributing guide (mirror of docs/how-to/contributing.md); same filesystem-layout description with code/paths untranslated."
+  },
+  {
+    "path": "tools/installer/ide/shared/invocation-syntax.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "260430-q3c invocation-syntax transform — this is the implementation of the colon→dash rewrite for non-launcher IDEs. JSDoc and regex literals legitimately reference both `gm:agent-<short>` (input) and `gm-agent-<short>` (output) forms."
   }
 ]
