@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: TBD (run /gsd-new-milestone to scope)
 status: between_milestones
 stopped_at: v1.3 archived; awaiting v1.4 scoping
-last_updated: "2026-04-30T04:53:14.399Z"
-last_activity: 2026-04-30 -- Completed quick task 260430-kod: add argument-hint to gm-domain-skill SKILL.md; seed local CLAUDE.md with gomad-fenced behavioral guidelines
+last_updated: "2026-04-30T08:47:12.067Z"
+last_activity: 2026-04-30 -- Completed quick task 260430-q3c: install-time invocation-syntax transform — Codex (and other non-launcher IDEs) now receive `$gm-agent-*` (dash) form in copied skill content + merged help CSV; Claude Code unchanged
 progress:
   total_phases: 0
   completed_phases: 0
@@ -62,6 +62,7 @@ None. v1.3 closed and archived 2026-04-27. Awaiting `/gsd-new-milestone` to scop
 | 260424-g68 | Register solo-dev as 8th canonical agent in installer AGENT_SOURCES; update install-smoke test to 8 | 2026-04-24 | 8c754b1 | [260424-g68-register-gm-agent-solo-dev-in-installer-](./quick/260424-g68-register-gm-agent-solo-dev-in-installer-/) |
 | 260427-k86 | Add gomad Claude Code statusline + installer wiring (`.claude/hooks/gomad-statusline.js` + `settings.json` merge) | 2026-04-27 | e46910e | [260427-k86-claude-hooks-gsd-statusline-js-gomad-hoo](./quick/260427-k86-claude-hooks-gsd-statusline-js-gomad-hoo/) |
 | 260430-kod | v1.3.1: add argument-hint to gm-domain-skill SKILL.md; seed local CLAUDE.md with gomad-fenced behavioral guidelines (CLAUDE.md stays gitignored — local upgrade target) | 2026-04-30 | c23511a | [260430-kod-1-3-1-add-argument-hint-to-gm-domain-ski](./quick/260430-kod-1-3-1-add-argument-hint-to-gm-domain-ski/) |
+| 260430-q3c | Install-time invocation-syntax transform: Codex/Auggie/Cline/CodeBuddy/Antigravity installs receive `$gm-agent-*` (dash) form in copied skill content + merged help CSV; Claude Code unchanged | 2026-04-30 | 3694a08 | [260430-q3c-codex-gm-agent-agent-gm-gomad](./quick/260430-q3c-codex-gm-agent-agent-gm-gomad/) |
 
 ## Deferred Items
 
