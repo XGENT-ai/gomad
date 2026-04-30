@@ -10,10 +10,11 @@ fresh at v1.1.0 and does not include the upstream BMAD Method history. See
 
 Patch release. Adds an `argument-hint` field to the `gm-domain-skill` SKILL.md
 frontmatter so callers see the expected `<domain_slug> [query]` signature, and
-introduces a developer-side `CLAUDE.md` template with `<!-- gomad:start -->` /
-`<!-- gomad:end -->` fence markers so future gomad releases can replace just the
-gomad-managed block in each developer's local `CLAUDE.md` without disturbing
-custom content outside the fence.
+ships a new installer step that seeds (or upgrades in place) a project-root
+`CLAUDE.md` containing the gomad behavioral-guidelines block. The block is
+wrapped by `<!-- gomad:start -->` / `<!-- gomad:end -->` fence markers; future
+gomad releases replace just the fenced block, leaving any user-authored content
+outside the fence intact.
 
 ### Added
 
@@ -22,18 +23,27 @@ custom content outside the fence.
   surfaces the skill's expected argument shape to callers. Convention follows
   `.claude/commands/gsd/quick.md`: angle brackets for required, square brackets
   for optional.
-- Project-root `CLAUDE.md` template containing the gomad behavioral-guidelines
-  block (Think Before Coding / Simplicity First / Surgical Changes / Goal-Driven
-  Execution) wrapped by `<!-- gomad:start -->` / `<!-- gomad:end -->` fence
-  markers. The fence is the upgrade contract: future gomad versions can regex-
-  replace the block in each developer's local `CLAUDE.md` while leaving content
-  outside the fence intact. `CLAUDE.md` remains gitignored per existing project
-  policy (alongside `.ai/*`, `cursor`, `.gemini`) — this is a local developer
-  affordance, not a shipped runtime change.
+- `tools/installer/assets/CLAUDE.md.template` — canonical source of the gomad
+  behavioral-guidelines block (Think Before Coding / Simplicity First / Surgical
+  Changes / Goal-Driven Execution) wrapped by `<!-- gomad:start -->` /
+  `<!-- gomad:end -->` fence markers.
+- `tools/installer/core/claude-md-installer.js` — new `installClaudeMdGuidelines()`
+  step invoked from `Installer.install()`. Behavior:
+  - **No `CLAUDE.md` at project root** → file is created from the template.
+  - **`CLAUDE.md` exists with gomad fence** → fenced block is replaced in
+    place; content before and after the fence is preserved byte-for-byte.
+  - **`CLAUDE.md` exists without gomad fence** → fenced block is appended at
+    the end (non-destructive); user's original content stays at the top.
+- `test/test-claude-md-install.js` — 21 assertions covering the create, replace,
+  append, and idempotency paths. Wired into `npm test` and added as the
+  `test:claude-md` script.
 
 ### Changed
 
-- (none)
+- `tools/installer/core/installer.js` calls the new `installClaudeMdGuidelines`
+  step after IDE setup and before the install summary; the action
+  (`created` / `replaced` / `appended`) is reported in the consolidated summary
+  results.
 
 ### Removed
 

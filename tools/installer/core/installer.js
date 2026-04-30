@@ -16,6 +16,7 @@ const { GOMAD_FOLDER_NAME } = require('../ide/shared/path-utils');
 const { InstallPaths } = require('./install-paths');
 
 const { ExistingInstall } = require('./existing-install');
+const { installClaudeMdGuidelines } = require('./claude-md-installer');
 
 class Installer {
   constructor() {
@@ -89,6 +90,14 @@ class Installer {
           preservedModules: allModulesForManifest,
           ideRoots,
         });
+      }
+
+      const claudeMdAction = await installClaudeMdGuidelines(paths.projectRoot, {
+        silent: false,
+        logInfo: (msg) => prompts.log.message(msg),
+      });
+      if (claudeMdAction !== 'skipped') {
+        addResult('CLAUDE.md', 'success', claudeMdAction);
       }
 
       const restoreResult = await this._restoreUserFiles(paths, updateState);
