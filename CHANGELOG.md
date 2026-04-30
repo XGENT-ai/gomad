@@ -4,6 +4,41 @@ All notable changes to GoMad are documented in this file. This changelog starts
 fresh at v1.1.0 and does not include the upstream BMAD Method history. See
 [LICENSE](LICENSE) and [README.md](README.md#credits) for the fork's origin.
 
+## [1.3.1] - 2026-04-30
+
+### Summary
+
+Patch release. Adds an `argument-hint` field to the `gm-domain-skill` SKILL.md
+frontmatter so callers see the expected `<domain_slug> [query]` signature, and
+introduces a developer-side `CLAUDE.md` template with `<!-- gomad:start -->` /
+`<!-- gomad:end -->` fence markers so future gomad releases can replace just the
+gomad-managed block in each developer's local `CLAUDE.md` without disturbing
+custom content outside the fence.
+
+### Added
+
+- `argument-hint: "<domain_slug> [query]"` in
+  `src/gomad-skills/4-implementation/gm-domain-skill/SKILL.md` frontmatter —
+  surfaces the skill's expected argument shape to callers. Convention follows
+  `.claude/commands/gsd/quick.md`: angle brackets for required, square brackets
+  for optional.
+- Project-root `CLAUDE.md` template containing the gomad behavioral-guidelines
+  block (Think Before Coding / Simplicity First / Surgical Changes / Goal-Driven
+  Execution) wrapped by `<!-- gomad:start -->` / `<!-- gomad:end -->` fence
+  markers. The fence is the upgrade contract: future gomad versions can regex-
+  replace the block in each developer's local `CLAUDE.md` while leaving content
+  outside the fence intact. `CLAUDE.md` remains gitignored per existing project
+  policy (alongside `.ai/*`, `cursor`, `.gemini`) — this is a local developer
+  affordance, not a shipped runtime change.
+
+### Changed
+
+- (none)
+
+### Removed
+
+- (none)
+
 ## [1.3.0] - 2026-04-27
 
 ### Summary
