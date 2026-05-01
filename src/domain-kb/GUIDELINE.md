@@ -8,20 +8,41 @@ last_reviewed: 2026-05-01
 
 This document defines how to write entries under `src/domain-kb/`. Read it once and you should be able to author a new article without looking at any other file. The conventions here are not aspirational — they describe what every existing article in this directory already does. New entries that diverge will be rejected in review.
 
-`src/domain-kb/` is for knowledge articles only. It is NOT a home for skill packs (those live elsewhere in the repo and follow different conventions). If your contribution is a packaged capability with its own loader semantics, it does not belong here.
-
 ## Purpose & Scope
 
 `src/domain-kb/` is curated, opinionated domain knowledge consumed by both humans and coding agents. Each article exists because someone hit a real problem, paid for the answer, and wrote down the parts that generalize.
 
 It is NOT:
 
+- A skill. Skills are problem-solving capabilities that bundle workflows, scripts, and conventions for an agent to load and run. They live in skill-specific directories elsewhere in the repo. Articles here are reference material only — pure markdown, no side effects. See [kb vs Skill](#kb-vs-skill) for the boundary.
 - A wiki. There is no obligation to cover a topic comprehensively.
 - A dump of upstream documentation. Link out to canonical docs; don't restate them.
 - A tutorial collection. Articles assume the reader is mid-task and needs a decision, not an introduction.
 - A scratchpad. Drafts go in PRs, not here.
 
 The retrieval model is: an agent loads an article when its `description` matches the situation. If your article has nothing concrete enough to match against, it does not belong here.
+
+## kb vs Skill
+
+Skills and kb articles often sound similar in casual conversation but they're different artifacts. Mixing them is the most common authoring mistake. Here's the boundary:
+
+| Aspect | KB article (here) | Skill (elsewhere in the repo) |
+|---|---|---|
+| Goal | Transfer know-how — best practices, samples, anti-patterns, recipes | Solve a problem end-to-end for an agent |
+| Form | Markdown only. One file. | A bundle: SKILL.md + supporting workflows, scripts, fixtures |
+| Style | Opinionated reference: "if X, do Y; here's why" | Procedural: "load me, take these inputs, run these steps" |
+| Flexibility | Static. Same content for every reader. | Adapts to context. Takes args; branches on situation. |
+| Side effects | None. Reading an article changes nothing. | Often. Skills may run scripts, edit files, hit APIs. |
+| Reader's mode | Learning or deciding | Doing |
+
+Decision rule:
+
+- **Writing know-how, best practices, samples, or anti-patterns?** → kb article. Right place.
+- **Writing something an agent will load, parameterize, and run procedurally?** → skill. Wrong place; this guideline does not cover it.
+- **Have a procedure that's pure prose with no inputs and no side effects?** → kb article. Even if it reads like a recipe, if there's no executable side and no parameterization, it's reference material.
+- **Have static knowledge that you want bundled with helper scripts?** → split it. The knowledge half lives here as a kb article; the script half lives in the appropriate skill directory.
+
+When in doubt: "Could the reader use this without running anything?" If yes, it's a kb article. If no, it's a skill.
 
 ## Directory Layout
 
