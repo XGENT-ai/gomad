@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: TBD (run /gsd-new-milestone to scope)
 status: between_milestones
 stopped_at: v1.3 archived; awaiting v1.4 scoping
-last_updated: "2026-05-01T11:55:31.333Z"
-last_activity: 2026-05-01 -- Completed quick task 260501-ug9: 优化 gm-dev-story 和 gm-code-review skill 的 sprint-status.yaml 写入行为 — restrict sprint-status.yaml updates to status + last_updated only; redirect narrative to deferred-work.md or known-issues.md
+last_updated: "2026-05-01T13:42:00.000Z"
+last_activity: 2026-05-01 -- Completed quick task 260501-wqw: 写一个 src/domain-kb/{domain_slug}/{article}.md 的guideline
 progress:
   total_phases: 0
   completed_phases: 0
@@ -65,6 +65,7 @@ None. v1.3 closed and archived 2026-04-27. Awaiting `/gsd-new-milestone` to scop
 | 260430-q3c | Install-time invocation-syntax transform: Codex/Auggie/Cline/CodeBuddy/Antigravity installs receive `$gm-agent-*` (dash) form in copied skill content + merged help CSV; Claude Code unchanged | 2026-04-30 | 3694a08 | [260430-q3c-codex-gm-agent-agent-gm-gomad](./quick/260430-q3c-codex-gm-agent-agent-gm-gomad/) |
 | 260501-ug9 | 优化 gm-dev-story 和 gm-code-review skill 的 sprint-status.yaml 写入行为 | 2026-05-01 | 9e42974 | [260501-ug9-src-gomad-skills-4-implementation-gm-dev](./quick/260501-ug9-src-gomad-skills-4-implementation-gm-dev/) |
 | 260501-vy9 | 将 Append summary 步骤从 gm-sprint-agent 移到 gm-dev-story；gm-code-review 中加入 Update summary（仅当 review 涉及代码修改时） | 2026-05-01 | 5566284 | [260501-vy9-gm-sprint-agent-skill-append-summary-gm-](./quick/260501-vy9-gm-sprint-agent-skill-append-summary-gm-/) |
+| 260501-wqw | 写一个 src/domain-kb/{domain_slug}/{article}.md 的guideline | 2026-05-01 | 56c66b6 | [260501-wqw-src-domain-kb-domain-slug-article-md-gui](./quick/260501-wqw-src-domain-kb-domain-slug-article-md-gui/) |
 
 ## Deferred Items
 
