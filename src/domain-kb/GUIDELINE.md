@@ -6,7 +6,9 @@ last_reviewed: 2026-05-01
 
 # `src/domain-kb/` Authoring Contract
 
-This document defines how to write entries under `src/domain-kb/`. Read it once and you should be able to author a new article without looking at any other file. The conventions here are not aspirational — they describe what every existing article and SKILL.md in this directory already does. New entries that diverge will be rejected in review.
+This document defines how to write entries under `src/domain-kb/`. Read it once and you should be able to author a new article without looking at any other file. The conventions here are not aspirational — they describe what every existing article in this directory already does. New entries that diverge will be rejected in review.
+
+`src/domain-kb/` is for knowledge articles only. It is NOT a home for skill packs (those live elsewhere in the repo and follow different conventions). If your contribution is a packaged capability with its own loader semantics, it does not belong here.
 
 ## Purpose & Scope
 
@@ -27,32 +29,15 @@ The retrieval model is: an agent loads an article when its `description` matches
 src/domain-kb/
 ├── GUIDELINE.md                              # this file
 ├── {domain_slug}/
-│   ├── {article}.md                          # one article per file
-│   ├── SKILL.md                              # optional: pack overview / index
-│   ├── examples/                             # optional: runnable or reference snippets
-│   │   └── {example}.md
-│   └── reference/                            # optional: supplementary material
-│       └── {topic}.md
+│   └── {article}.md                          # one article per file
 └── ...
 ```
 
 Rules:
 
 - Every leaf knowledge unit is a single `.md` file. No multi-file articles.
-- `examples/` and `reference/` are subordinate to a SKILL.md. Don't create them in a flat domain that has no SKILL.md.
 - Don't nest domains. `src/domain-kb/{domain_slug}/` is the only level of grouping.
-
-## When to Add a SKILL.md vs a Standalone Article
-
-Decision rule:
-
-| Situation | Shape |
-|---|---|
-| One focused topic, no obvious siblings | Standalone article in a flat domain dir. Example: [`better-auth/better-auth-best-practices.md`](better-auth/better-auth-best-practices.md). |
-| One focused topic, but the domain may grow | Standalone article in its own domain dir, no SKILL.md yet. Example: [`debugging/tls-handshake-debugging.md`](debugging/tls-handshake-debugging.md). |
-| Multiple articles or a curriculum | Add `SKILL.md` as the index/overview, plus `reference/` and `examples/` as needed. Example: [`testing/SKILL.md`](testing/SKILL.md). |
-
-Do NOT add a SKILL.md "for completeness" when the domain has one article. The SKILL.md is an index; an index of one is noise. Add it the moment a second article lands.
+- A domain dir holds one or more articles. Nothing else — no index files, no `examples/` subdirs, no `reference/` subdirs. Each article must stand alone.
 
 ## Slug Rules
 
@@ -62,7 +47,7 @@ Both `{domain_slug}` and `{article}` filenames follow the same rules:
 - Descriptive nouns or noun-phrases. The slug describes the topic, not the reader's verb.
 - No dates. No version numbers. (`react-19-hooks` is wrong; `react-hooks` is right. Version-specific notes go in the body.)
 - `{article}` reads as the topic, not the action: `tls-handshake-debugging.md`, not `how-to-debug-tls.md`.
-- `{domain_slug}` is short — 1 to 3 words. Examples in this repo: `testing`, `architecture`, `debugging`, `better-auth`.
+- `{domain_slug}` is short — 1 to 3 words. Examples in this repo: `debugging`, `better-auth`.
 - Do NOT use the slug to encode hierarchy (`debugging-tls-handshake.md` in a flat dir). Put it in a `debugging/` domain instead.
 
 ## Article Frontmatter Schema
@@ -123,30 +108,6 @@ Anti-patterns — reject in review:
 - Restating the title: `tls-handshake-debugging covers TLS handshake debugging.` Zero new information.
 - Future tense / aspirational: `Will help you understand...`. Describe what the article does, not what it intends to.
 
-## SKILL.md Frontmatter Schema
-
-`SKILL.md` is a pack index, not an article. It uses a lighter schema — no `name`, no `description`. The H1 inside the file plays the role those fields would.
-
-| Field | Required | Type | Rule |
-|---|---|---|---|
-| `source` | yes | string | Usually `original`. |
-| `license` | yes | string | SPDX identifier or `proprietary`. |
-| `last_reviewed` | yes | ISO date `YYYY-MM-DD` | Date the index was last reconciled with the articles it points to. |
-
-Example, from [`testing/SKILL.md`](testing/SKILL.md):
-
-```yaml
----
-source: original
-license: MIT
-last_reviewed: 2026-04-25
----
-
-# Testing Pack Overview
-```
-
-A SKILL.md body must contain, at minimum: a one-paragraph framing of the pack, a `## When to use this pack` section, and a `## What's in this pack` list with one bullet per article. See [`testing/SKILL.md`](testing/SKILL.md) and [`architecture/SKILL.md`](architecture/SKILL.md) for the canonical shape.
-
 ## Style Rules
 
 These apply to article bodies. They are non-negotiable; existing articles already follow them.
@@ -181,7 +142,5 @@ These apply to article bodies. They are non-negotiable; existing articles alread
 
 Use these as templates when starting a new entry:
 
-- **Standalone article in its own domain dir:** [`debugging/tls-handshake-debugging.md`](debugging/tls-handshake-debugging.md) — gold-standard `description` field, probe-matrix layout, opinionated body.
-- **Flat-domain single article:** [`better-auth/better-auth-best-practices.md`](better-auth/better-auth-best-practices.md) — domain dir with a single article and no SKILL.md.
-- **Domain with SKILL.md index:** [`testing/SKILL.md`](testing/SKILL.md) — multi-article pack with `reference/` and `examples/` subdirs.
-- **Domain with SKILL.md index (alternative shape):** [`architecture/SKILL.md`](architecture/SKILL.md) — same pattern, includes a `Principles the pack leans on` section that's worth borrowing for principle-heavy domains.
+- **Single-article domain:** [`debugging/tls-handshake-debugging.md`](debugging/tls-handshake-debugging.md) — gold-standard `description` field, probe-matrix layout, opinionated body.
+- **Multi-article flat domain:** [`better-auth/`](better-auth/) — several sibling articles in one domain dir; each one self-contained, no shared index.
