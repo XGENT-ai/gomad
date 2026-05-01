@@ -15,7 +15,7 @@ known_issues_file: '{implementation_artifacts}/known-issues.md'
 
 ### 1. Clean review shortcut
 
-If zero findings remain after triage (all dismissed or none raised): state "✅ Clean review — no actionable findings." Then set `{new_status}` = `done` and **YOU MUST** execute section 6 (Update story status and sync sprint tracking) before presenting next steps. Do NOT skip section 6 — status updates are mandatory even when the review is clean.
+If zero findings remain after triage (all dismissed or none raised): state "✅ Clean review — no actionable findings." Then set `{new_status}` = `done` and **YOU MUST** execute section 7 (Update story status and sync sprint tracking) before presenting next steps. Do NOT skip section 7 — status updates are mandatory even when the review is clean.
 
 ### 2. Write findings to the story file
 
@@ -84,7 +84,24 @@ If `{spec_file}` is **not** set, present only options 1 and 3 (omit option 2 —
 - Deferred: <W>
 - Dismissed: <R>
 
-### 6. Update story status and sync sprint tracking
+### 6. Update summary (only if review applied code patches)
+
+**Trigger condition:** Run this section ONLY IF the user selected Option 0 (batch-apply) or Option 1 (fix automatically) in section 5 AND at least one patch was applied. Skip this section otherwise (Options 2/3 with no fixes, or clean review with zero findings).
+
+Skip this section if `{spec_file}` is not set or `{story_key}` is not available.
+
+#### Steps
+
+1. Compute `{epic_num}` = first hyphen-separated segment of `{story_key}` (e.g., `story_key` "1-2-user-auth" → `epic_num` "1").
+2. Resolve target file path: `{output_folder}/epic-{epic_num}-done.md`.
+3. Locate the existing entry for `{story_key}` in that file — the H2 heading `## {story_key} — ...`.
+   - If the entry is **NOT found**, log a one-line note: "summary entry for `{story_key}` not found in `epic-{epic_num}-done.md`; skipping update — likely standalone code review run". Skip the rest of this section. Do **NOT** create a new entry — entry creation is `gm-dev-story`'s responsibility.
+4. If the entry **IS found**, update it in place:
+   - Append/extend the **Work Done** subsection with bullets describing the post-review patches that were applied (use the patch findings from section 5 as the source).
+   - Update the **Known Issues** subsection to include any newly-deferred items added during review (from `{deferred_work_file}`). If the subsection currently reads `None` and new deferrals exist, replace `None` with the bullet list.
+5. Do **NOT** touch other entries or other sections of the file.
+
+### 7. Update story status and sync sprint tracking
 
 Skip this section if `{spec_file}` is not set.
 
@@ -128,7 +145,7 @@ If `{sprint_status}` file does not exist, note that story status was updated in 
 > **Deferred:** <W>
 > **Dismissed:** <R>
 
-### 7. Next steps
+### 8. Next steps
 
 Present the user with follow-up options:
 

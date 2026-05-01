@@ -43,6 +43,7 @@ Load and read full config from `{main_config}` and resolve:
 
 - `project_name`, `planning_artifacts`, `implementation_artifacts`, `user_name`
 - `communication_language`, `document_output_language`, `user_skill_level`
+- `output_folder`
 - `date` as system-generated current datetime
 - `sprint_status` = `{implementation_artifacts}/sprint-status.yaml`
 - `project_context` = `**/project-context.md` (load if exists)
