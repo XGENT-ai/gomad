@@ -23,6 +23,7 @@ Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 - `communication_language`, `document_output_language`
 - `user_skill_level`
 - `implementation_artifacts`
+- `output_folder`
 - `date` as system-generated current datetime
 
 ### Paths
@@ -421,7 +422,48 @@ When writing to `{sprint_status}`:
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
   </step>
 
-  <step n="10" goal="Completion communication and user support">
+  <step n="10" goal="Append per-story summary entry to epic-done file" tag="summary">
+    <critical>This step runs AFTER status is set to "review" (step 9) and BEFORE user communication (step 11)</critical>
+    <critical>Do NOT modify any pre-existing entries in the file; only append</critical>
+
+    <action>Compute {{epic_num}} = first hyphen-separated segment of {{story_key}} (e.g., story_key "1-2-user-auth" → epic_num "1")</action>
+    <action>Resolve target file path: {output_folder}/epic-{{epic_num}}-done.md</action>
+
+    <check if="target file does NOT exist">
+      <action>Create the file with empty contents (the appended entry begins with the `---` divider so a fresh file reads correctly)</action>
+    </check>
+
+    <action>Extract from the story file {implementation_artifacts}/{{story_key}}.md:
+      - story title (from the story file's H1 / title field — same source step 9 references)
+      - one-line description (from the story file's description/goal section)
+      - completed tasks (the FEATURES/CAPABILITIES, not implementation minutiae)
+      - deferred items from {implementation_artifacts}/deferred-work.md (or "None" if none for this story)
+    </action>
+
+    <action>Append the following markdown block VERBATIM to {output_folder}/epic-{{epic_num}}-done.md, with placeholders filled (use {date} from INITIALIZATION for {current date}):
+
+      ```markdown
+      ---
+
+      ## {story-key} — {story title}
+
+      **Date:** {current date}
+
+      ### Story
+      {One-line description}
+
+      ### Work Done
+      - {Bullet list of completed FEATURES/CAPABILITIES}
+
+      ### Known Issues
+      - {Deferred issues, or "None"}
+      ```
+    </action>
+
+    <output>📝 Summary entry appended to {output_folder}/epic-{{epic_num}}-done.md</output>
+  </step>
+
+  <step n="11" goal="Completion communication and user support">
     <action>Execute the enhanced definition-of-done checklist using the validation framework</action>
     <action>Prepare a concise summary in Dev Agent Record → Completion Notes</action>
 
