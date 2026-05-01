@@ -30,6 +30,15 @@ Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 - `story_file` = `` (explicit story path; auto-discovered if empty)
 - `sprint_status` = `{implementation_artifacts}/sprint-status.yaml`
 
+### Sprint Status Write Rules
+
+When writing to `{sprint_status}`:
+- **ONLY** modify these two fields: `development_status[{{story_key}}]` (the status value) and `last_updated` (the timestamp)
+- **NEVER** add comments, narrative, notes, or any other text to sprint-status.yaml
+- **NEVER** modify or remove STATUS DEFINITIONS or any existing comments — preserve them as-is
+- If you need to record notes about the story (blockers, issues, completion details), write them to `{implementation_artifacts}/deferred-work.md` or `{implementation_artifacts}/known-issues.md` instead
+- sprint-status.yaml is a compact status tracker — keep it minimal
+
 ### Context
 
 - `project_context` = `**/project-context.md` (load if exists)
@@ -227,12 +236,13 @@ Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 
   <step n="4" goal="Mark story in-progress" tag="sprint-status">
     <check if="{{sprint_status}} file exists">
+      <critical>Follow Sprint Status Write Rules: ONLY update status and last_updated. NEVER add comments or narrative.</critical>
       <action>Load the FULL file: {{sprint_status}}</action>
       <action>Read all development_status entries to find {{story_key}}</action>
       <action>Get current status value for development_status[{{story_key}}]</action>
 
       <check if="current status == 'ready-for-dev' OR review_continuation == true">
-        <action>Update the story in the sprint status report to = "in-progress"</action>
+        <action>Update development_status[{{story_key}}] to "in-progress"</action>
         <action>Update last_updated field to current date</action>
         <output>🚀 Starting work on story {{story_key}}
           Status updated: ready-for-dev → in-progress
@@ -383,12 +393,13 @@ Load config from `{project-root}/_gomad/agile/config.yaml` and resolve:
 
     <!-- Mark story ready for review - sprint status conditional -->
     <check if="{sprint_status} file exists AND {{current_sprint_status}} != 'no-sprint-tracking'">
+      <critical>Follow Sprint Status Write Rules: ONLY update status and last_updated. NEVER add comments or narrative to sprint-status.yaml. If notes are needed, write to deferred-work.md or known-issues.md.</critical>
       <action>Load the FULL file: {sprint_status}</action>
       <action>Find development_status key matching {{story_key}}</action>
       <action>Verify current status is "in-progress" (expected previous state)</action>
       <action>Update development_status[{{story_key}}] = "review"</action>
       <action>Update last_updated field to current date</action>
-      <action>Save file, preserving ALL comments and structure including STATUS DEFINITIONS</action>
+      <action>Save the file. ONLY development_status[{{story_key}}] and last_updated were modified. Preserve ALL existing comments and structure including STATUS DEFINITIONS — do not add, remove, or modify any comments.</action>
       <output>✅ Story status updated to "review" in sprint-status.yaml</output>
     </check>
 
