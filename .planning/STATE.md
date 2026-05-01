@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: TBD (run /gsd-new-milestone to scope)
 status: between_milestones
 stopped_at: v1.3 archived; awaiting v1.4 scoping
-last_updated: "2026-04-30T08:47:12.067Z"
-last_activity: 2026-04-30 -- Completed quick task 260430-q3c: install-time invocation-syntax transform — Codex (and other non-launcher IDEs) now receive `$gm-agent-*` (dash) form in copied skill content + merged help CSV; Claude Code unchanged
+last_updated: "2026-05-01T11:55:31.333Z"
+last_activity: 2026-05-01 -- Completed quick task 260501-ug9: 优化 gm-dev-story 和 gm-code-review skill 的 sprint-status.yaml 写入行为 — restrict sprint-status.yaml updates to status + last_updated only; redirect narrative to deferred-work.md or known-issues.md
 progress:
   total_phases: 0
   completed_phases: 0
@@ -63,6 +63,7 @@ None. v1.3 closed and archived 2026-04-27. Awaiting `/gsd-new-milestone` to scop
 | 260427-k86 | Add gomad Claude Code statusline + installer wiring (`.claude/hooks/gomad-statusline.js` + `settings.json` merge) | 2026-04-27 | e46910e | [260427-k86-claude-hooks-gsd-statusline-js-gomad-hoo](./quick/260427-k86-claude-hooks-gsd-statusline-js-gomad-hoo/) |
 | 260430-kod | v1.3.1: add argument-hint to gm-domain-skill SKILL.md; seed local CLAUDE.md with gomad-fenced behavioral guidelines (CLAUDE.md stays gitignored — local upgrade target) | 2026-04-30 | c23511a | [260430-kod-1-3-1-add-argument-hint-to-gm-domain-ski](./quick/260430-kod-1-3-1-add-argument-hint-to-gm-domain-ski/) |
 | 260430-q3c | Install-time invocation-syntax transform: Codex/Auggie/Cline/CodeBuddy/Antigravity installs receive `$gm-agent-*` (dash) form in copied skill content + merged help CSV; Claude Code unchanged | 2026-04-30 | 3694a08 | [260430-q3c-codex-gm-agent-agent-gm-gomad](./quick/260430-q3c-codex-gm-agent-agent-gm-gomad/) |
+| 260501-ug9 | 优化 gm-dev-story 和 gm-code-review skill 的 sprint-status.yaml 写入行为 | 2026-05-01 | 9e42974 | [260501-ug9-src-gomad-skills-4-implementation-gm-dev](./quick/260501-ug9-src-gomad-skills-4-implementation-gm-dev/) |
 
 ## Deferred Items
 
