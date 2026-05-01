@@ -16,13 +16,13 @@ This is a **sequential orchestration loop**. Each iteration processes ONE story 
 │                                                  │
 │  Phase 1:   CREATE STORY (Bob/SM → CS)           │
 │     ↓                                            │
-│  Phase 1.5: STORY REVIEW (PM ↔ SM negotiation)   │
+│  Phase 2:   STORY REVIEW (PM ↔ SM negotiation)   │
 │     ↓                                            │
-│  Phase 2:   DEVELOP STORY (Amelia/Dev → DS)      │
+│  Phase 3:   DEVELOP STORY (Amelia/Dev → DS)      │
 │     ↓                                            │
-│  Phase 3:   CODE REVIEW (Amelia/Dev → CR)        │
+│  Phase 4:   CODE REVIEW (Amelia/Dev → CR)        │
 │     ↓                                            │
-│  Phase 4:   COMMIT & STATUS (Elon)                │
+│  Phase 5:   COMMIT & STATUS (Elon)                 │
 │     ↓                                            │
 │  → Loop back to Phase 1 for next story           │
 └─────────────────────────────────────────────────┘
@@ -46,22 +46,22 @@ When subagent workflows ask questions or need decisions, apply these rules:
 - **Ambiguity in requirements**: Use the PRD and architecture docs as the source of truth. If still ambiguous, make the most conservative choice and note it.
 - **Technology choices**: Follow the architecture.md decisions. Don't deviate.
 
-### During Story Review (Phase 1.5)
+### During Story Review (Phase 2)
 - **PM raises scope concern**: Cross-check against epics.md. If PM is right, accept. If epics.md supports SM's version, side with SM.
 - **PM and SM disagree**: Elon breaks the tie using PRD as the tiebreaker. Product requirements > implementation convenience.
 - **PM finds missing acceptance criteria**: Almost always accept — the PM's job is catching these. SM should add them.
 - **PM suggests scope expansion**: Reject. Scope is defined by epics.md. Additional scope goes to a future story.
 - **Negotiation exceeds 2 rounds**: Accept SM's version. Log PM concerns in story file. Move on.
 
-### During Develop Story (Phase 2)
+### During Develop Story (Phase 3)
 - **Implementation approach**: Follow the story file's task list exactly as written.
 - **Library/API questions**: Use the versions and patterns established in architecture.md and existing code.
 - **Test strategy**: Write unit tests for all business logic. Integration tests for API endpoints. Follow existing test patterns in the codebase.
 - **Edge cases**: Handle the ones specified in acceptance criteria. Note others as potential future work but don't gold-plate.
 
-### During Code Review (Phase 3)
+### During Code Review (Phase 4)
 - **Severity triage**: Fix HIGH issues immediately. Note MEDIUM issues for the current story if quick (<5 min). Defer LOW issues.
-- **Deferred issues**: Any issue deferred to a future story MUST be recorded (see Phase 3 details below).
+- **Deferred issues**: Any issue deferred to a future story MUST be recorded (see Phase 4 details below).
 - **Style/preference issues**: Accept the codebase's established patterns, don't debate them.
 
 ### When to HALT (genuinely blocked)
@@ -119,13 +119,13 @@ When subagent workflows ask questions or need decisions, apply these rules:
 
 ---
 
-## PHASE 1.5: STORY REVIEW (PM ↔ SM Negotiation)
+## PHASE 2: STORY REVIEW (PM ↔ SM Negotiation)
 
 **Objective:** Spawn a meticulous Product Manager to review the story for completeness and directional correctness. If issues are found, the PM negotiates with the Scrum Master until alignment is reached.
 
 ### Execution:
 
-1. **Announce:** "[Elon] Phase 1.5: Story 审查 — 派遣产品经理 subagent"
+1. **Announce:** "[Elon] Phase 2: Story 审查 — 派遣产品经理 subagent"
 
 2. **Spawn PM review subagent** using the Agent tool with `name: "product-reviewer"`, `mode: "bypassPermissions"` and the following prompt:
 
@@ -229,13 +229,13 @@ When subagent workflows ask questions or need decisions, apply these rules:
 
 ---
 
-## PHASE 2: DEVELOP STORY (Subagent)
+## PHASE 3: DEVELOP STORY (Subagent)
 
 **Objective:** Spawn a subagent to implement the story.
 
 ### Execution:
 
-1. **Announce:** "[Elon] Phase 2: Story 开发 — 派遣 subagent"
+1. **Announce:** "[Elon] Phase 3: Story 开发 — 派遣 subagent"
 
 2. **Spawn subagent** using the Agent tool with `mode: "bypassPermissions"` and the following prompt:
 
@@ -275,13 +275,13 @@ When subagent workflows ask questions or need decisions, apply these rules:
 
 ---
 
-## PHASE 3: CODE REVIEW (Subagent)
+## PHASE 4: CODE REVIEW (Subagent)
 
 **Objective:** Spawn a subagent for code review.
 
 ### Execution:
 
-1. **Announce:** "[Elon] Phase 3: Code Review — 派遣 subagent"
+1. **Announce:** "[Elon] Phase 4: Code Review — 派遣 subagent"
 
 2. **Spawn subagent** using the Agent tool with `mode: "bypassPermissions"` and the following prompt:
 
@@ -317,15 +317,15 @@ When subagent workflows ask questions or need decisions, apply these rules:
 
 ---
 
-## PHASE 4: COMMIT & STATUS (Elon directly)
+## PHASE 5: COMMIT & STATUS (Elon directly)
 
 **Objective:** Commit the story's work and flip its status to done. This phase is lightweight — Elon executes directly, no subagent needed.
 
-> Note: The per-story summary entry in `{output_folder}/epic-{epic-num}-done.md` is now written by `gm-dev-story` upon story completion and updated by `gm-code-review` when review-time patches are applied. Phase 4 here is intentionally lighter: commit + sprint-status update + announce.
+> Note: The per-story summary entry in `{output_folder}/epic-{epic-num}-done.md` is now written by `gm-dev-story` upon story completion and updated by `gm-code-review` when review-time patches are applied. Phase 5 here is intentionally lighter: commit + sprint-status update + announce.
 
 ### Steps:
 
-1. **Announce:** "[Elon] Phase 4: 提交与状态更新"
+1. **Announce:** "[Elon] Phase 5: 提交与状态更新"
 
 2. **Commit all changes:**
    - Stage ALL modified and new files
@@ -352,7 +352,7 @@ When subagent workflows ask questions or need decisions, apply these rules:
 
 ## LOOP CONTINUATION
 
-After Phase 4 completes:
+After Phase 5 completes:
 
 1. **Check for next story:**
    - Re-read `{implementation_artifacts}/sprint-status.yaml`
