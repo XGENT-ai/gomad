@@ -64,6 +64,7 @@ None. v1.3 closed and archived 2026-04-27. Awaiting `/gsd-new-milestone` to scop
 | 260430-kod | v1.3.1: add argument-hint to gm-domain-skill SKILL.md; seed local CLAUDE.md with gomad-fenced behavioral guidelines (CLAUDE.md stays gitignored — local upgrade target) | 2026-04-30 | c23511a | [260430-kod-1-3-1-add-argument-hint-to-gm-domain-ski](./quick/260430-kod-1-3-1-add-argument-hint-to-gm-domain-ski/) |
 | 260430-q3c | Install-time invocation-syntax transform: Codex/Auggie/Cline/CodeBuddy/Antigravity installs receive `$gm-agent-*` (dash) form in copied skill content + merged help CSV; Claude Code unchanged | 2026-04-30 | 3694a08 | [260430-q3c-codex-gm-agent-agent-gm-gomad](./quick/260430-q3c-codex-gm-agent-agent-gm-gomad/) |
 | 260501-ug9 | 优化 gm-dev-story 和 gm-code-review skill 的 sprint-status.yaml 写入行为 | 2026-05-01 | 9e42974 | [260501-ug9-src-gomad-skills-4-implementation-gm-dev](./quick/260501-ug9-src-gomad-skills-4-implementation-gm-dev/) |
+| 260501-vy9 | 将 Append summary 步骤从 gm-sprint-agent 移到 gm-dev-story；gm-code-review 中加入 Update summary（仅当 review 涉及代码修改时） | 2026-05-01 | 5566284 | [260501-vy9-gm-sprint-agent-skill-append-summary-gm-](./quick/260501-vy9-gm-sprint-agent-skill-append-summary-gm-/) |
 
 ## Deferred Items
 
