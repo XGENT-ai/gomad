@@ -1,5 +1,6 @@
 ---
 deferred_work_file: '{implementation_artifacts}/deferred-work.md'
+known_issues_file: '{implementation_artifacts}/known-issues.md'
 ---
 
 # Step 4: Present and Act
@@ -99,11 +100,20 @@ Save the story file.
 
 If `{story_key}` is not set, skip this subsection and note that sprint status was not synced because no story key was available.
 
+#### Sprint Status Write Rules
+
+When writing to `{sprint_status}`:
+- **ONLY** modify these two fields: `development_status[{story_key}]` (the status value) and `last_updated` (the timestamp)
+- **NEVER** add comments, narrative, notes, or any other text to sprint-status.yaml
+- **NEVER** modify or remove STATUS DEFINITIONS or any existing comments — preserve them as-is
+- If you need to record notes about review findings, blockers, or issues, write them to `{deferred_work_file}` or `{known_issues_file}` instead
+- sprint-status.yaml is a compact status tracker — keep it minimal
+
 If `{sprint_status}` file exists:
 
 1. Load the FULL `{sprint_status}` file.
 2. Find the `development_status` entry matching `{story_key}`.
-3. If found: update `development_status[{story_key}]` to `{new_status}`. Update `last_updated` to current date. Save the file, preserving ALL comments and structure including STATUS DEFINITIONS.
+3. If found: update `development_status[{story_key}]` to `{new_status}`. Update `last_updated` to current date. Save the file. ONLY `development_status[{story_key}]` and `last_updated` were modified. Preserve ALL existing comments and structure including STATUS DEFINITIONS — do not add, remove, or modify any comments.
 4. If `{story_key}` not found in sprint status: warn the user that the story file was updated but sprint-status sync failed.
 
 If `{sprint_status}` file does not exist, note that story status was updated in the story file only.
