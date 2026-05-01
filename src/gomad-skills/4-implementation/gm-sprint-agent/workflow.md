@@ -22,7 +22,7 @@ This is a **sequential orchestration loop**. Each iteration processes ONE story 
 │     ↓                                            │
 │  Phase 3:   CODE REVIEW (Amelia/Dev → CR)        │
 │     ↓                                            │
-│  Phase 4:   SUMMARY & COMMIT (Amelia/Dev)        │
+│  Phase 4:   COMMIT & STATUS (Elon)                │
 │     ↓                                            │
 │  → Loop back to Phase 1 for next story           │
 └─────────────────────────────────────────────────┘
@@ -317,36 +317,17 @@ When subagent workflows ask questions or need decisions, apply these rules:
 
 ---
 
-## PHASE 4: SUMMARY & COMMIT (Elon directly)
+## PHASE 4: COMMIT & STATUS (Elon directly)
 
-**Objective:** Write summary and commit. This phase is lightweight — Elon executes directly, no subagent needed.
+**Objective:** Commit the story's work and flip its status to done. This phase is lightweight — Elon executes directly, no subagent needed.
+
+> Note: The per-story summary entry in `{output_folder}/epic-{epic-num}-done.md` is now written by `gm-dev-story` upon story completion and updated by `gm-code-review` when review-time patches are applied. Phase 4 here is intentionally lighter: commit + sprint-status update + announce.
 
 ### Steps:
 
-1. **Announce:** "[Elon] Phase 4: 总结与提交"
+1. **Announce:** "[Elon] Phase 4: 提交与状态更新"
 
-2. **Read the story file** to extract: story title, completed tasks, known issues (deferred from Phase 3).
-
-3. **Append summary** to `{output_folder}/epic-{epic-num}-done.md` (create if not exists):
-
-   ```markdown
-   ---
-
-   ## {story-key} — {story title}
-
-   **Date:** {current date}
-
-   ### Story
-   {One-line description}
-
-   ### Work Done
-   - {Bullet list of completed FEATURES/CAPABILITIES}
-
-   ### Known Issues
-   - {Deferred issues, or "None"}
-   ```
-
-4. **Commit all changes:**
+2. **Commit all changes:**
    - Stage ALL modified and new files
    - Commit message format:
 
@@ -358,11 +339,11 @@ When subagent workflows ask questions or need decisions, apply these rules:
      - {key accomplishment N}
      ```
 
-5. **Update sprint-status.yaml:**
+3. **Update sprint-status.yaml:**
    - Story: `review` → `done`
    - If ALL stories in epic are `done`: epic → `done`
 
-6. **Announce:**
+4. **Announce:**
    "[Elon] Story {story-key} 已完成并提交。
 
    **Sprint 进度:** {done_count}/{total_count} stories 完成"
