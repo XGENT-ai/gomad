@@ -259,7 +259,7 @@ If E2E fails but API and component pass, the problem is in integration (routing,
 
 **Mock at the boundary, test your stack end-to-end.** Mock third-party services you don't own (payment gateways, email providers, OAuth). Never mock your own frontend-to-backend communication. Tests should prove YOUR code works, not that third-party APIs are available.
 
-## Decision Matrix
+## Mock Decision Matrix
 
 | Scenario | Mock? | Strategy |
 | --- | --- | --- |
