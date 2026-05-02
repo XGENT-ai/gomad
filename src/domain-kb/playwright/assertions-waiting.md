@@ -1,7 +1,6 @@
 ---
 name: assertions-waiting
-description: Write Playwright assertions and waiting strategies that are reliable and never use `waitForTimeout`. Use this when choosing between web-first assertions (`toBeVisible`, `toHaveText`, `toHaveCount`, `toHaveValue`, `toBeEnabled`, `toBeChecked`, `toHaveURL`, `toHaveTitle`) and generic Jest-style assertions, when a test times out or is flaky due to missing waits, or when you need to poll an API endpoint until a condition is met with `toPass()` or `expect.poll()`. Covers soft assertions with `expect.soft()` and `expect.soft.hasFailures()`, waiting strategies (`waitForURL`, `waitForResponse`, `waitForRequest`, `waitForLoadState`, `waitFor({ state })`, `waitForFunction`), timeout configuration in `playwright.config.ts` (`timeout`, `expect.timeout`), and extending Playwright with `expect.extend` custom matchers. The article is opinionated: always prefer web-first assertions over generic ones for DOM elements — they auto-retry, eliminating the need for manual sleep calls. Anti-pattern: `waitForTimeout(5000)` and `new Promise(resolve => setTimeout(resolve, 1000))` are explicitly forbidden.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Write reliable Playwright assertions and waiting strategies without using waitForTimeout.
 license: MIT
 last_reviewed: 2026-05-02
 ---

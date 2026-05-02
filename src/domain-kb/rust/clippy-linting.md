@@ -1,10 +1,11 @@
 ---
 name: clippy-linting
-description: Configure and respect clippy in a Rust project — daily-driver invocation, important lints to never silence, the `expect` vs `allow` distinction, and `[lints]` config in `Cargo.toml` for both packages and workspaces. Use this whenever the user is setting up a new Rust project, asks how to wire `cargo clippy` into CI, debates `#[allow(clippy::lint_name)]` vs `#[expect(clippy::lint_name)]`, sees `redundant_clone` / `large_enum_variant` / `needless_collect` / `clone_on_copy` / `manual_ok_or` warnings and asks if they can ignore them, wants to enable `clippy::pedantic` workspace-wide, or wonders why `cargo clippy` is silent on their CI run. Covers: the canonical command (`cargo clippy --all-targets --all-features --locked -- -D warnings`), the must-fix lint shortlist with reasons, the `expect`-with-justification pattern, `[lints.clippy]` and `[workspace.lints.clippy]` config with priorities, and what NOT to do (global `allow`, ignoring `redundant_clone`, treating warnings as suggestions).
-source: https://github.com/apollographql/rust-best-practices
+description: Configure and enforce clippy in a Rust project with CI-ready lint discipline.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when setting up clippy for a new Rust project, wiring `cargo clippy` into CI, debating `#[allow]` vs `#[expect]`, seeing `redundant_clone` / `large_enum_variant` / `needless_collect` / `clone_on_copy` / `manual_ok_or` warnings, enabling `clippy::pedantic` workspace-wide, or investigating why `cargo clippy` is silent in CI.
 
 # Clippy and lint discipline
 

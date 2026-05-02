@@ -1,7 +1,6 @@
 ---
 name: react-data-fetching
-description: Eliminate async waterfalls and optimize client-side data fetching in React and Next.js applications. Use this when the user reports sequential `await` calls causing slow page loads, multiple redundant network requests, excessive `useEffect` data fetching, or wants to parallelize independent async operations with `Promise.all()`. Covers deferring `await` until actually needed, checking cheap synchronous conditions before expensive async flags, dependency-based parallelization with promise chaining, strategic `React.Suspense` boundaries, SWR automatic deduplication, passive event listeners for scroll performance, and localStorage schema versioning with try-catch. Distinguishes from server-side patterns by focusing on browser-runtime fetch orchestration rather than RSC/Route Handler optimization.
-source: original
+description: Eliminate async waterfalls and optimize client-side data fetching in React and Next.js.
 license: MIT
 last_reviewed: 2026-05-02
 ---

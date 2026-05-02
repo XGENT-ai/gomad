@@ -1,7 +1,6 @@
 ---
 name: mobile-testing
-description: Use this when testing mobile and responsive behavior in Playwright — emulating devices with `devices['iPhone 14']`, `devices['Pixel 7']`, `devices['iPad Pro 11']`, setting `isMobile: true`, `hasTouch: true`, `deviceScaleFactor`, and `userAgent` for custom device configs, using `page.touchscreen.tap()` for touch interactions, simulating swipe gestures with `boundingBox()` and `dragTo()`, testing long press with `touchscreen.tap()` + delay, pinch zoom via `WheelEvent` with `ctrlKey: true`, testing viewport breakpoints with `page.setViewportSize()`, asserting hamburger menu visibility at mobile width, testing bottom sheet dialogs, pull-to-refresh with touch events, and responsive layout changes across xs/sm/md/lg/xl/2xl breakpoints. Specific to Playwright's device emulation and touch API — not for real device testing frameworks like Appium.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test mobile and responsive behavior in Playwright using device emulation, touch, and viewports.
 license: MIT
 last_reviewed: 2026-05-02
 ---

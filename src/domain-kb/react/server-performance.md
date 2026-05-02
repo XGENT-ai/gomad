@@ -1,7 +1,6 @@
 ---
 name: react-server-performance
-description: Optimize React Server Components, Server Actions, and Route Handlers in Next.js App Router applications. Use this when the user reports slow server response times, RSC payload bloat, cross-request data leaks, duplicate DB queries within a single request, or wants to parallelize data fetching across Server Components. Covers `React.cache()` deduplication, LRU cross-request caching, `after()` for non-blocking side effects, RSC serialization boundaries, module-level static I/O hoisting, and Server Action authentication. Distinguishes from client-side patterns by focusing on request-scoped and build-time optimizations in the server runtime.
-source: original
+description: Optimize RSC, Server Actions, and Route Handlers in Next.js App Router.
 license: MIT
 last_reviewed: 2026-05-02
 ---

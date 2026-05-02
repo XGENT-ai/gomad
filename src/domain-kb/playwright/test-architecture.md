@@ -1,7 +1,6 @@
 ---
 name: test-architecture
-description: Use this when deciding which Playwright test type to write (E2E, component, or API), how to layer them in the test pyramid, or whether to mock vs hit real services. Covers the test type decision matrix (login/auth/checkout/WebSocket → E2E; form validation/widgets/accessibility → component; CRUD/permissions/pagination/schemas → API), execution profiles (API 60%, component 30%, E2E 10%), `@playwright/experimental-ct-react` for component tests, and mock vs real service decisions. The core mocking principle: mock at the boundary (third-party services you don't own: Stripe, SendGrid, OAuth providers, analytics) and never mock your own frontend-to-backend communication. Covers `route.fulfill()` for full mocks, `route.fetch()` + modify for partial mocks, `routeFromHAR()` for record/replay, `route.abort()` for blocking analytics. Also covers fixture-based mock control (`{ option: true }` pattern), environment-based project splitting (ci-fast vs nightly-full), and contract validation tests to catch mock drift.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Choose between E2E, component, and API tests in Playwright and set a third-party mocking strategy.
 license: MIT
 last_reviewed: 2026-05-02
 ---

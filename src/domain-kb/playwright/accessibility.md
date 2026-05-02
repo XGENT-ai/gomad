@@ -1,10 +1,11 @@
 ---
 name: accessibility
-description: Use this when testing web accessibility in Playwright — running axe-core audits with `@axe-core/playwright`, checking `results.violations`, scoping analysis with `.include()` / `.exclude()`, disabling rules with `.disableRules()`, verifying WCAG 2.1 AA compliance via `.withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa'])`, testing keyboard tab order with `page.keyboard.press('Tab')`, asserting `toBeFocused()`, verifying `aria-expanded` attribute states, testing focus traps in modals, asserting focus restoration after dialog close, testing skip links, testing live regions with `aria-live`, emulating high-contrast mode with `page.emulateMedia({ forcedColors: 'active' })`, and enforcing `prefers-reduced-motion` via `reducedMotion: 'reduce'`. Specific to the `AxeBuilder` API from `@axe-core/playwright` — not for general ARIA attribute questions.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test web accessibility in Playwright using axe-core, keyboard navigation, ARIA, and focus traps.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Use when running axe-core audits with `@axe-core/playwright` (`results.violations`, `.include()`, `.exclude()`, `.disableRules()`), verifying WCAG 2.1 AA compliance via `.withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa'])`, testing keyboard tab order with `page.keyboard.press('Tab')`, asserting `toBeFocused()`, verifying `aria-expanded` states, testing focus traps in modals, asserting focus restoration, testing skip links, testing live regions with `aria-live`, emulating high-contrast mode via `page.emulateMedia({ forcedColors: 'active' })`, or enforcing `prefers-reduced-motion`. Specific to the `AxeBuilder` API — not for general ARIA attribute questions.
 
 ## Axe-Core Integration
 

@@ -1,10 +1,11 @@
 ---
 name: option-and-result-patterns
-description: Pattern-match `Option<T>` and `Result<T, E>` idiomatically in Rust — choose between `match`, `if let`, `let ... else`, the `?` operator, and the `*_or` / `*_or_else` family. Use this whenever the user is writing or reviewing code that calls `.unwrap()` / `.expect()` outside tests, has `match` arms that just convert `Result` to `Option`, debates `unwrap_or(...)` vs `unwrap_or_else(...)` for an allocation-heavy default, asks when `let Some(x) = ... else { return }` is preferable to `match`, or wants to know how `.ok_or_else()` / `.map_err()` / `.inspect_err()` compose. Covers: which pattern fits which intent, why `_or_else` matters when the default would allocate, the standard `Result`-conversion helpers (`.ok()`, `.ok_or()`, `.ok_or_else()`), and the common anti-patterns (manual `match` that re-implements `.ok()`, eager allocation in `unwrap_or`, `if let` where `let-else` reads cleaner).
-source: https://github.com/apollographql/rust-best-practices
+description: Pattern-match `Option<T>` and `Result<T, E>` idiomatically in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when reviewing `.unwrap()` / `.expect()` outside tests, seeing `match` arms that just convert `Result` to `Option`, debating `unwrap_or(...)` vs `unwrap_or_else(...)` for an allocating default, asking when `let-else` beats `match`, or composing `.ok_or_else()` / `.map_err()` / `.inspect_err()`.
 
 # `Option` and `Result` pattern matching
 

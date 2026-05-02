@@ -1,7 +1,6 @@
 ---
 name: flaky-tests
-description: Diagnose and fix flaky Playwright tests — tests that pass sometimes and fail other times. Use this when a test fails intermittently with "Element not found", "Timeout exceeded", or "strict mode violation"; when tests fail only in CI but pass locally; when tests fail only with `--workers=4` but pass with `--workers=1`; or when tests fail only after specific other tests run (state leak). Covers four flakiness categories (UI-driven, environment-driven, data/parallelism-driven, test-suite-driven), a decision tree for identifying root cause, commands like `--repeat-each=20` and `CI=true npx playwright test`, quarantine patterns using `testIgnore`/`testMatch` in `playwright.config.ts`, per-worker auth state via `workerStorageState` fixture, shared `storageState` anti-pattern, `page.route()` for stubbing unstable third-party APIs, and the `testInfo.annotations.push({ type: 'flaky' })` tracking pattern. The article is opinionated: retries mask problems — use them for diagnosis, not as a permanent fix. Increasing global timeouts to "fix" flakiness is an anti-pattern.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Diagnose and fix flaky Playwright tests — UI timing, CI environment, parallelism, and state leaks.
 license: MIT
 last_reviewed: 2026-05-02
 ---

@@ -1,7 +1,6 @@
 ---
 name: configuration
-description: Use this when configuring `playwright.config.ts` with `defineConfig()`, setting `timeout`, `expect.timeout`, `actionTimeout`, `navigationTimeout`, `fullyParallel`, `forbidOnly`, `retries`, `workers`, `reporter`, `webServer`, `globalSetup`, `globalTeardown`, `baseURL`, `storageState`, `trace`, `screenshot`, `video`, or managing `projects` with `dependencies`. Covers the production-ready config template, timeout selection guide, `webServer.reuseExistingServer`, environment-specific configs with `dotenv`, setup projects (`testMatch: /auth\.setup\.ts/`, `dependencies: ['setup']`) for shared auth state, chained project dependencies (db-setup → auth-setup → seed-setup → tests), `globalSetup` for one-time non-browser work (DB migrations, service startup), `globalTeardown` for cleanup, and artifact collection strategy (trace/screenshot/video on-failure vs always). Also covers "baseURL not working" fix (use relative paths), and when to use `globalSetup` vs setup projects vs fixtures.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Configure playwright.config.ts with defineConfig — timeouts, projects, webServer, and globalSetup.
 license: MIT
 last_reviewed: 2026-05-02
 ---

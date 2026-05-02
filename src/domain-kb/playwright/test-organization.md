@@ -1,7 +1,6 @@
 ---
 name: test-organization
-description: Use this when using Playwright test annotations (`test.skip()`, `test.fixme()`, `test.fail()`, `test.slow()`, `test.setTimeout()`) or test tags (`{ tag: '@smoke' }`, `--grep`, `--grep-invert`, `grepInvert`). Covers skip/fixme/fail differences (fixme skips and tracks bugs; fail runs but expects failure; skip means not applicable), `test.describe.configure({ mode: 'serial' })`, `test.step()` with nested steps and return values, `testInfo.annotations.push()` for custom annotations, conditional annotations by `browserName`/platform/environment, and tag patterns for CI (OR: `--grep "@fast|@smoke"`, AND: `--grep "(?=.*@fast)(?=.*@critical)"`, invert: `--grep-invert @slow`). Also covers project-level `grep` and `grepInvert` in `playwright.config.ts`, and tag categories by speed, priority, feature area, pipeline, and team. Use this when organizing large test suites, selectively running smoke vs regression suites, or tracking known bugs.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Organize Playwright tests with annotations, tags, steps, and grep-based selective execution in CI.
 license: MIT
 last_reviewed: 2026-05-02
 ---

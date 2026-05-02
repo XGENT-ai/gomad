@@ -1,7 +1,6 @@
 ---
 name: error-testing
-description: Test error states, network failures, and edge cases in Playwright using `page.route()` interception. Use this when testing error boundaries that show "Something went wrong" fallback UI, when mocking HTTP 400/401/403/404/500/502/503 responses with `route.fulfill({ status, json })`, when simulating connection failures with `route.abort("connectionfailed")`, when testing offline behavior with `context.setOffline(true)`, when verifying loading states (skeleton loaders, spinner, disabled submit button), or when testing client-side and server-side form validation. Covers error recovery with retry buttons (first call returns 500, second returns success), request timeout simulation with a never-resolving route handler, mid-request abort with `setTimeout` + `route.abort("failed")`, network recovery after `context.setOffline(false)`, empty state UI, and `page.route("**/api/save", async route => { await delay; route.fulfill(...) })` for loading indicator testing. The article is opinionated: happy-path-only tests miss the most common production failures. Every network call should have a corresponding error scenario test.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test error states, network failures, and edge cases in Playwright using page.route() interception.
 license: MIT
 last_reviewed: 2026-05-02
 ---

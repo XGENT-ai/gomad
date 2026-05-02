@@ -1,7 +1,6 @@
 ---
 name: page-object-model
-description: Use this when deciding between Page Object Model (POM), custom fixtures (`test.extend()`), and helper functions in Playwright, or when implementing POM classes. Covers the pattern selection flowchart (5+ interactions → POM, resource lifecycle → fixture, stateless utility → helper), pattern comparison table, page class structure with `readonly` Locator properties, component objects using Locator-scoped selectors, composition patterns (pages composed of components, `BasePage` with abstract `goto()`), factory function alternative to classes, and fixture-wrapped page objects for lifecycle management. Anti-patterns include locator-only page objects (no methods), page objects managing API calls, monolithic fixtures, helpers with module-level state, and over-abstracting single-use code. Use this when structuring test helper code for apps with complex multi-step UI interactions in 3+ test files.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Structure Playwright test helpers using Page Object Model, custom fixtures, and helper functions.
 license: MIT
 last_reviewed: 2026-05-02
 ---

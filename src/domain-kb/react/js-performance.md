@@ -1,7 +1,6 @@
 ---
 name: react-js-performance
-description: Apply JavaScript micro-optimizations for hot paths in React applications. Use this when the user reports slow array operations, repeated property lookups in loops, redundant function calls during render, layout thrashing from interleaved DOM reads/writes, or excessive sorting/mutation of React state arrays. Covers layout thrashing avoidance, Set/Map for O(1) lookups, index maps for repeated `.find()`, caching storage API calls, combining array iterations, immutable sort with `toSorted()`, `flatMap` for map+filter, `requestIdleCallback` for non-critical work, and RegExp hoisting. Distinguishes from React-specific patterns by focusing on raw JavaScript execution in the browser, not React's render cycle.
-source: original
+description: Apply JavaScript micro-optimizations for hot paths in React applications.
 license: MIT
 last_reviewed: 2026-05-02
 ---

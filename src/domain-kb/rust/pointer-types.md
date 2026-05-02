@@ -1,10 +1,11 @@
 ---
 name: pointer-types
-description: Choose the right Rust pointer / smart-pointer type — `&T`, `&mut T`, `Box<T>`, `Rc<T>`, `Arc<T>`, `Cell<T>`, `RefCell<T>`, `Mutex<T>`, `RwLock<T>`, `OnceCell<T>` / `OnceLock<T>`, `LazyCell<T>` / `LazyLock<T>`, raw `*const T` / `*mut T` — and understand when each is `Send`, `Sync`, both, or neither. Use this whenever the user is debating `Rc<T>` vs `Arc<T>`, asks "why isn't `Rc` thread-safe", hits "the trait `Send` is not implemented for ..." across a `tokio::spawn`, designs a recursive enum that needs heap indirection, wants shared mutability and isn't sure between `RefCell<T>` and `Mutex<T>`, or wonders when to reach for `OnceLock<T>` / `LazyLock<T>` over `lazy_static!`. Covers: the `Send` / `Sync` rules, the role of each pointer with a one-line use case, the `Arc<Mutex<T>>` and `Arc<RwLock<T>>` patterns, the `*const T` / `*mut T` unsafe boundary, and what NOT to do (`Rc` across threads, `RefCell` borrow-mut while borrowed, `Mutex` nested without lock-ordering, raw pointers when a reference would compile).
-source: https://github.com/apollographql/rust-best-practices
+description: Choose the right smart-pointer type and understand `Send`/`Sync` rules in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when debating `Rc<T>` vs `Arc<T>`, hitting "the trait `Send` is not implemented for ..." across `tokio::spawn`, choosing between `RefCell<T>` and `Mutex<T>` for shared mutability, or deciding between `OnceLock<T>` / `LazyLock<T>` and `lazy_static!`.
 
 # Pointer types and thread safety
 

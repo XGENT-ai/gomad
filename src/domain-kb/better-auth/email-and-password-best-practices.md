@@ -1,7 +1,6 @@
 ---
 name: email-and-password-best-practices
-description: Configure email verification, implement password reset flows, set password policies, and customise hashing algorithms for Better Auth email/password authentication. Use when users need to set up login, sign-in, sign-up, credential authentication, or password security with Better Auth.
-source: original
+description: Configure email verification, password reset flows, password policies, and hashing algorithms in Better Auth.
 license: MIT
 last_reviewed: 2026-04-25
 ---

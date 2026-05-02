@@ -1,7 +1,6 @@
 ---
 name: visual-regression
-description: Use this when setting up or debugging visual regression tests in Playwright with `toHaveScreenshot()`, `toHaveScreenshot({ mask: [...] })`, `animations: 'disabled'`, `maxDiffPixelRatio`, `maxDiffPixels`, `threshold`, `fullPage: true`, `--update-snapshots`, or `snapshotPathTemplate`. Covers the "Screenshot comparison failed" error when CI snapshots differ from local macOS snapshots (font rendering differs across OSes), fixing flaky screenshot diffs caused by CSS animations, masking dynamic content like timestamps and avatars, running Docker-based snapshot generation with `mcr.microsoft.com/playwright`, configuring global screenshot defaults in `playwright.config.ts`, cross-browser snapshot separation, responsive visual testing at breakpoints, and the correct workflow for reviewing and committing updated baselines. Specific to Playwright's built-in screenshot assertion API — not for third-party tools like Percy or Chromatic.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Set up visual regression tests in Playwright with toHaveScreenshot, masking, and Docker baselines.
 license: MIT
 last_reviewed: 2026-05-02
 ---

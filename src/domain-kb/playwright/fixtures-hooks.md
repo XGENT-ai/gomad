@@ -1,7 +1,6 @@
 ---
 name: fixtures-hooks
-description: Write Playwright fixtures and hooks for test isolation, shared setup, and authentication. Use this when extending `test` with `base.extend<MyFixtures>()`, choosing between test-scoped and worker-scoped fixtures (`{ scope: 'worker' }`), configuring `storageState` for auth, setting up multi-role auth with `adminPage` / `userPage` fixtures, isolating parallel workers with `testInfo.workerIndex`, implementing database transaction rollback patterns, or understanding when `beforeAll` vs `beforeEach` vs a custom fixture is the right tool. Covers built-in fixtures (`page`, `context`, `browser`, `browserName`, `request`), automatic fixtures with `{ auto: true }`, fixture option overrides in `playwright.config.ts`, `auth.setup.ts` with `storageState` and project dependencies, `test.describe`-scoped hooks, and seed data fixtures with teardown. The article is opinionated: shared `page` or `context` in `beforeAll` is an anti-pattern — it causes state leaks and parallel test failures. Prefer worker-scoped fixtures with `testInfo.workerIndex` over shared mutable data.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Write Playwright fixtures and hooks for test isolation, shared setup, and authentication.
 license: MIT
 last_reviewed: 2026-05-02
 ---

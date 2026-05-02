@@ -1,10 +1,11 @@
 ---
 name: performance-profiling
-description: Profile and optimize Rust code with evidence — `cargo flamegraph` / `samply` for CPU, `cargo bench` for micro-benchmarks, `cargo clippy -- -D clippy::perf` for cheap wins, plus stack-vs-heap and `#[inline]` rules. Use this whenever the user reports "Rust code is slow" or "slower than $other_language" (often it's a missing `--release`), asks where to start profiling, debates whether to add `#[inline]` to a function, hits a stack overflow from a large local array (`[u8; 65536]`), or wonders if their iterator chain is "really zero cost." Covers: the `--release` reflex, the daily-driver perf-clippy command, flamegraph workflow, when to box large allocations vs use `smallvec`, when to return by value, and what NOT to do (premature `#[inline]`, profiling debug builds, optimizing without a benchmark, sprinkling clones to "make borrow checker happy" in a hot loop).
-source: https://github.com/apollographql/rust-best-practices
+description: Profile and optimize Rust code with flamegraph, benchmarks, and perf-clippy.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when Rust code is reported slow or slower than another language (often a missing `--release`), deciding where to start profiling, debating `#[inline]` on a function, hitting a stack overflow from a large local array, or asking whether an iterator chain is truly zero-cost.
 
 # Performance: profile, then optimize
 

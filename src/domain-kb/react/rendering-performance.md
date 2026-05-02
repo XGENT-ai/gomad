@@ -1,7 +1,6 @@
 ---
 name: react-rendering-performance
-description: Optimize browser rendering, hydration, and resource loading in React and Next.js applications. Use this when the user reports layout shift during hydration, flickering on theme switching, slow initial paint for long lists, SVG animation jank, or wants to preload critical resources before the client receives HTML. Covers `content-visibility` for off-screen content, hydration mismatch handling, `suppressHydrationWarning`, React DOM resource hints (`preload`, `preconnect`, `prefetchDNS`), script `defer`/`async`, SVG wrapper animation, `<Activity>` for state preservation, and explicit conditional rendering. Distinguishes from re-render optimization by focusing on what the browser paints, not what React re-executes.
-source: original
+description: Optimize browser rendering, hydration, and resource loading in React and Next.js applications.
 license: MIT
 last_reviewed: 2026-05-02
 ---

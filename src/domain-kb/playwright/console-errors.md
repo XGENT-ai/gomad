@@ -1,7 +1,6 @@
 ---
 name: console-errors
-description: Capture and assert on browser console errors, warnings, and uncaught JavaScript exceptions in Playwright tests. Use this when you want to fail a test if `console.error` fires, detect uncaught exceptions via `page.on("pageerror")`, capture `msg.text()` / `msg.type()` / `msg.location()` from `page.on("console")`, build a reusable `failOnConsoleError` auto fixture, or filter out known-noisy errors like `ResizeObserver loop` and favicon 404s. Covers `page.on("console")` for capturing logs by type (error/warning/info/log), `page.on("pageerror")` for unhandled JS exceptions with stack traces, a comprehensive `consoleMessages` fixture with `assertNoErrors(allowedPatterns: RegExp[])`, React-specific warning detection (missing list keys, "Cannot update a component", "Can't perform a React state update"), and `testInfo.attach("console-log")` for attaching logs to the test report. The article is opinionated: capturing console errors should be a fixture, not duplicated per test. The `{ auto: true }` fixture pattern is the correct default — it runs silently when nothing goes wrong and surfaces errors only on failure.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Capture and assert browser console errors, warnings, and uncaught JS exceptions in Playwright tests.
 license: MIT
 last_reviewed: 2026-05-02
 ---

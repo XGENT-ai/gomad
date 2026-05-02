@@ -1,7 +1,6 @@
 ---
 name: better-auth-security-best-practices
-description: Configure rate limiting, manage auth secrets, set up CSRF protection, define trusted origins, secure sessions and cookies, encrypt OAuth tokens, track IP addresses, and implement audit logging for Better Auth. Use when users need to secure their auth setup, prevent brute force attacks, or harden a Better Auth deployment.
-source: original
+description: Harden Better Auth with rate limiting, CSRF protection, secure cookies, OAuth token encryption, and audit logging.
 license: MIT
 last_reviewed: 2026-04-25
 ---

@@ -1,7 +1,6 @@
 ---
 name: network-mocking
-description: Use this when using `page.route()` to intercept, modify, or block network requests in Playwright. Covers request interception with `route.continue()`, `route.fulfill()`, `route.fetch()`, `route.abort()`, response modification (transforming JSON, injecting fields, simulating errors), HAR recording with `context.routeFromHAR()` using `update: true` for recording and `update: false` for playback, `notFound: 'fallback'` for live fallback, GraphQL mocking by `operationName`, conditional mocking based on request body, mock Nth request patterns for retry testing, simulated delays, and network throttling via CDP `Network.emulateNetworkConditions`. Use this when you need to test loading states, error recovery, retry logic, offline behavior, or want to isolate frontend behavior from backend availability.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Intercept and mock network requests in Playwright using page.route(), HAR playback, and CDP.
 license: MIT
 last_reviewed: 2026-05-02
 ---

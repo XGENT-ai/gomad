@@ -1,10 +1,11 @@
 ---
 name: api-testing
-description: Use this when writing Playwright API tests using the `request` fixture, `APIRequestContext`, `playwright.request.newContext()`, or `page.request`. Covers REST API patterns (GET, POST, PUT, PATCH, DELETE with `params`, `data`, `form`, `multipart`), authenticated API clients via `test.extend()`, response assertions with `expect(resp.status())`, `resp.json()`, `toMatchObject()`, schema validation with Zod, API data seeding fixtures, chained API workflows, and error response testing (400, 401, 403, 404, 409, 422, 429). Also covers GraphQL testing via POST to `/graphql` — queries with variables, mutations, handling `errors` array (GraphQL returns 200 even on errors), authenticated GraphQL fixtures, and a reusable `gqlQuery`/`gqlMutation` helper. Use this when you see "Request failed: connect ECONNREFUSED", "response.json() failed", or "401 Unauthorized" when using the request fixture. Distinguishes when to use API tests vs E2E browser tests.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Write REST and GraphQL API tests in Playwright using the request fixture and APIRequestContext.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Use when writing Playwright API tests with the `request` fixture, `APIRequestContext`, `playwright.request.newContext()`, or `page.request`. Covers REST patterns (GET/POST/PUT/PATCH/DELETE), authenticated API clients via `test.extend()`, response assertions, schema validation with Zod, API data seeding, chained workflows, and error response testing (400, 401, 403, 404, 409, 422, 429). Also covers GraphQL via POST to `/graphql` — queries with variables, mutations, handling the `errors` array (GraphQL returns 200 even on errors), and reusable `gqlQuery`/`gqlMutation` helpers. Trigger errors: "Request failed: connect ECONNREFUSED", "response.json() failed", "401 Unauthorized" when using the request fixture.
 
 # API Testing
 

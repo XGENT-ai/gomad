@@ -1,7 +1,6 @@
 ---
 name: react-rerender-optimization
-description: Reduce unnecessary React component re-renders and optimize hook usage in React applications. Use this when the user reports sluggish UI updates, `useEffect` running too often, stale closure bugs, excessive `useMemo`/`useCallback` usage, or components re-rendering when parent state changes but their props haven't. Covers memoization discipline (`memo`, `useMemo`, `useCallback`), derived state computation during render, functional `setState`, lazy initialization, `useDeferredValue`, `startTransition`, splitting combined hooks, and effect dependency narrowing. Also includes advanced patterns with `useEffectEvent` and ref-based event handlers. Distinguishes from rendering-performance by focusing on React's render cycle (when components run) rather than browser paint work.
-source: original
+description: Reduce unnecessary React component re-renders and optimize hook usage in React applications.
 license: MIT
 last_reviewed: 2026-05-02
 ---

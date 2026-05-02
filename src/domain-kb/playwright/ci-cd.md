@@ -1,7 +1,6 @@
 ---
 name: ci-cd
-description: Use this when configuring Playwright in CI/CD pipelines, specifically GitHub Actions workflows, test sharding, parallel execution, or Docker containers. Covers `npx playwright install --with-deps`, `npx playwright install-deps` (cache hit path), `~/.cache/ms-playwright` caching with `actions/cache@v4`, sharding with `--shard=1/4` and `npx playwright merge-reports --reporter=html`, blob reporter for shard merging, `actions/upload-artifact@v4` with `if: ${{ !cancelled() }}`, `concurrency.cancel-in-progress`, `fail-fast: false` for matrix jobs, container jobs with `mcr.microsoft.com/playwright:v1.48.0-noble`, Docker Compose stacks with health checks, `HOME: /root` env var for container jobs, and CI playwright.config.ts settings (`forbidOnly`, `retries`, `workers: '50%'`). Also covers PR vs nightly workflow strategies and scheduled runs. Use this when tests pass locally but fail in CI, for browser launch failures, or sharded report merging issues.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Configure Playwright in CI/CD with GitHub Actions, test sharding, parallel execution, and Docker.
 license: MIT
 last_reviewed: 2026-05-02
 ---

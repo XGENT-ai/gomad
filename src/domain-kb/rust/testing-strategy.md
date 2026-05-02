@@ -1,10 +1,11 @@
 ---
 name: testing-strategy
-description: Structure Rust tests for clarity and signal — descriptive names, one assertion per test, the unit / integration / doc-test split, snapshot testing with `cargo insta`, and parameterized cases with `rstest`. Use this whenever the user is naming tests like `test_add_happy_path`, packing five `assert!` calls into one function, asks where a test belongs (alongside the code or under `tests/`), wonders whether `cargo test` runs doc tests (sometimes), debates `cargo insta` vs raw `assert_eq!`, or wants to know how to organize tests for a function with many cases. Covers: the descriptive-naming convention (`process::should_return_blob_when_larger_than_b`), the `#[cfg(test)] mod tests` layout, when to reach for `insta::assert_yaml_snapshot!` vs `assert_eq!`, the `rstest` fixture-with-cases pattern, doc-test attributes (`ignore` / `no_run` / `compile_fail` / `should_panic`), and what NOT to do (one test asserting four behaviors, snapshotting primitives, snapshotting huge objects without redaction).
-source: https://github.com/apollographql/rust-best-practices
+description: Structure Rust tests with descriptive names, snapshot testing, and parameterized cases.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when naming tests like `test_add_happy_path`, packing multiple `assert!` calls into one function, deciding whether a test belongs in the module or under `tests/`, wondering if `cargo test` runs doc tests, or choosing between `cargo insta` and raw `assert_eq!`.
 
 # Testing strategy
 

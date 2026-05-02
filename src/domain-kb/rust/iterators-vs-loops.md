@@ -1,10 +1,11 @@
 ---
 name: iterators-vs-loops
-description: Choose between iterator chains (`.iter().map().filter().collect()`) and `for` loops in idiomatic Rust, and avoid intermediate-allocation traps. Use this whenever the user is reviewing or writing code that calls `.collect()` only to pass into the next function, has a manual `for` loop that builds up a `Vec`, debates `.iter()` vs `.into_iter()`, sees clippy `needless_collect` / `manual_filter_map` / `into_iter_on_ref`, asks when `.fold()` should become `.sum()` / `.product()`, or wonders why their iterator chain "doesn't run." Covers: when iterators win (composition, transformation), when `for` wins (early exit, side effects, readability), the lazy-evaluation gotcha, the `.iter()` / `.iter_mut()` / `.into_iter()` distinction, and the canonical anti-patterns (intermediate `.collect()`, `.into_iter()` on a `Copy`-element collection, deeply chained one-liners no one can read).
-source: https://github.com/apollographql/rust-best-practices
+description: Choose between iterator chains and `for` loops to avoid allocations in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when reviewing code that calls `.collect()` only to re-iterate, writing a manual `for` loop that builds a `Vec`, debating `.iter()` vs `.into_iter()`, seeing clippy `needless_collect` / `manual_filter_map` / `into_iter_on_ref`, asking when `.fold()` should become `.sum()`, or investigating why an iterator chain "doesn't run."
 
 # Iterators vs `for` loops
 

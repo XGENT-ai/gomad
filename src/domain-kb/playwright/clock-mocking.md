@@ -1,7 +1,6 @@
 ---
 name: clock-mocking
-description: Use this when mocking dates, times, timers, or timezones in Playwright tests — using `page.clock.install({ time: new Date(...) })` to freeze the current time, `page.clock.fastForward('25:00')` or `page.clock.fastForward(300)` to advance time, testing debounced functions by fast-forwarding past the debounce delay, testing `setInterval`-based auto-refresh, testing session timeouts and countdown timers, setting browser timezone with `browser.newContext({ timezoneId: 'America/Los_Angeles' })`, testing holiday banners by fixing the date in December, and testing relative time displays like "2 hours ago" by combining clock mock with route mocking. The critical rule: always call `page.clock.install()` BEFORE `page.goto()` — installing after navigation has no effect because the page already captured real time. Covers `fastForward` with MM:SS and HH:MM:SS string formats and millisecond integers.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Mock dates, times, and timezones in Playwright using page.clock and browser context timezoneId.
 license: MIT
 last_reviewed: 2026-05-02
 ---

@@ -1,7 +1,6 @@
 ---
 name: debugging
-description: Debug failing Playwright tests using the inspector, trace viewer, UI mode, and headed browser. Use this when a test fails with "Element not found", "Timeout exceeded", "Frame detached", or when you need to step through a test interactively; when you want to run `PWDEBUG=1 npx playwright test`, `npx playwright test --headed`, `npx playwright test --ui`, or `npx playwright test --debug`; when inspecting network requests with `page.on("request")` / `page.on("requestfailed")`; when reading `trace.zip` with `npx playwright show-trace`; or when debugging auth state by inspecting `context.storageState()` and cookies. Covers `page.pause()` for inline breakpoints, `slowMo` config option, `context.tracing.start/stop` for programmatic traces, `page.screenshot()` and `testInfo.attach()` for visual debugging, and a symptom-to-fix checklist (element not found, timeout issues, selector issues, frame issues). The article is opinionated: start with `PWDEBUG=1` and traces before adding `console.log`; always reproduce with `--repeat-each=10` before investing in a fix.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Debug failing Playwright tests using the inspector, trace viewer, UI mode, and headed browser.
 license: MIT
 last_reviewed: 2026-05-02
 ---

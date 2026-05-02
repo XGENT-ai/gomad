@@ -1,10 +1,11 @@
 ---
 name: imports-ordering
-description: Order Rust `use` declarations the standard way — `std` / `core` / `alloc` first, then external crates, then workspace crates, then `super::` and `crate::` — and configure `rustfmt` to enforce it. Use this whenever the user is reviewing a PR with imports merged across all groups, opens a file with `use anyhow::Result; use std::sync::Arc; use crate::foo;` interleaved, asks how to set up `rustfmt.toml` for `group_imports` / `imports_granularity` / `reorder_imports`, hits the "needs nightly" surprise when running `cargo fmt`, or wonders where to put internal-enterprise crates relative to public dependencies. Covers: the canonical group order, the `rustfmt.toml` recipe, the nightly-only caveat for sorting, the "enterprise crates between std and external" variant, and what NOT to do (mixing groups, separating with extra blank lines inside a group).
-source: https://github.com/apollographql/rust-best-practices
+description: Order Rust `use` declarations by group and enforce the layout with `rustfmt`.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when reviewing a PR with imports merged across groups, setting up `rustfmt.toml` for `group_imports` / `imports_granularity` / `reorder_imports`, hitting the nightly-only surprise with `cargo fmt`, or deciding where internal-enterprise crates go relative to public dependencies.
 
 # Import ordering and `rustfmt`
 

@@ -1,7 +1,6 @@
 ---
 name: react-bundle-optimization
-description: Reduce JavaScript bundle size and improve Time to Interactive in React and Next.js applications. Use this when the user reports large initial bundles, slow page loads, high TTI/LCP metrics, or wants to optimize imports from heavy libraries like `lucide-react`, `@mui/material`, or `lodash`. Covers `next/dynamic` code splitting, barrel file import optimization with `optimizePackageImports`, conditional module loading, third-party script deferral, and static path analysis for build tools. Distinguishes from runtime rendering optimizations by focusing on what the browser downloads and parses before hydration.
-source: original
+description: Reduce JavaScript bundle size and improve Time to Interactive in React and Next.js applications.
 license: MIT
 last_reviewed: 2026-05-02
 ---

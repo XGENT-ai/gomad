@@ -1,7 +1,6 @@
 ---
 name: locators
-description: Choose and write Playwright locators that survive refactoring. Use this when selecting between `getByRole`, `getByLabel`, `getByPlaceholder`, `getByText`, `getByTestId`, `locator('css=...')`, or `locator('xpath=...')`, or when a locator fails with "Element not found", "strict mode violation" (multiple elements match), or breaks after a UI change. Covers the priority order for picking locator types, `filter()` chaining, `nth()`/`first()`/`last()`, shadow DOM traversal, iframe `frameLocator`, and the `testIdAttribute` config option. The article is opinionated: CSS and XPath locators are last resort only; role-based locators are always preferred because they match how users and assistive technology perceive the page, making tests resilient to visual redesigns. Anti-patterns table covers `.btn-primary`, `#dynamic-id-123`, and implementation-detail selectors.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Choose resilient Playwright locators — getByRole, getByLabel, filter(), and shadow DOM traversal.
 license: MIT
 last_reviewed: 2026-05-02
 ---

@@ -1,7 +1,6 @@
 ---
 name: iframes
-description: Use this when testing iframes in Playwright — using `page.frameLocator()` to interact with same-origin or cross-origin iframe content, accessing frames by id/name/title/src selector, chaining `frameLocator()` calls for nested iframes, using `page.frame({ name })` for `Frame` object operations like `frame.goto()` and `frame.waitForURL()`, waiting for iframe content with `expect(frame.locator(...)).toBeVisible()`, handling Stripe payment iframes with `iframe[name*='__privateStripeFrame']`, testing OAuth iframes, listening to `framenavigated` events, mocking iframe content with `page.route()` returning HTML, handling dynamically created iframes with `page.waitForSelector()`, and debugging with `page.frames()`. Specific to Playwright's frame API — not for WebComponents or Shadow DOM.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test iframes in Playwright using frameLocator, nested frames, payment iframes, and dynamic frames.
 license: MIT
 last_reviewed: 2026-05-02
 ---

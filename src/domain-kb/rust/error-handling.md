@@ -1,10 +1,11 @@
 ---
 name: error-handling
-description: Design Rust error types and propagate failures idiomatically — `Result<T, E>` over `panic!`, `thiserror` for libraries, `anyhow` for binaries, the `?` operator, and `unwrap` / `expect` discipline. Use this whenever the user is choosing between `thiserror` and `anyhow`, debating whether to return `Result` or `panic!` from a fallible function, sees `unwrap()` / `expect()` in non-test code, asks how to wire `#[from]` for nested error enums, hits `Box<dyn Error>` and wonders if it's right for a library, or wants to know how `inspect_err` and `map_err` compose. Covers: when to return `Result`, when `panic!` / `todo!` / `unreachable!` / `unimplemented!` are right, the `thiserror` library-error pattern with `#[from]`, why `anyhow` is for binaries only, async-error `Send + Sync + 'static` requirements, and what NOT to do (`unwrap` in production, `anyhow::Result` in a library, `Box<dyn Error>` instead of a typed error).
-source: https://github.com/apollographql/rust-best-practices
+description: Design error types and propagate failures idiomatically with `thiserror`/`anyhow` in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when choosing between `thiserror` and `anyhow`, deciding whether to return `Result` or `panic!`, spotting `unwrap()` / `expect()` in non-test code, wiring `#[from]` for nested error enums, questioning `Box<dyn Error>` in a library, or composing `inspect_err` and `map_err`.
 
 # Error handling
 

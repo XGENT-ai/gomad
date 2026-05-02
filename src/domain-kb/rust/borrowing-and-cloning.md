@@ -1,10 +1,11 @@
 ---
 name: borrowing-and-cloning
-description: Choose between `&T`, `&mut T`, owned `T`, `.clone()`, and `Cow<'_, T>` in idiomatic Rust. Use this whenever the user is reviewing function signatures that take `String`/`Vec<T>` by value, sees clippy `redundant_clone` / `clone_on_copy` / `needless_borrow`, asks why their hot path is slow because of `.clone()` in a loop or inside `.map()`, debates whether to `#[derive(Copy)]` on a struct, wonders if `&[T]` is better than `&Vec<T>`, or asks when ownership should pass into a function. Covers: when borrowing wins, when cloning is genuinely required (`Arc`/`Rc`, builder mutation, snapshot diffs, owned-API requirements), when a type should be `Copy` (≤24 bytes / 3 words, no heap-owning fields), the `Cow<'_, T>` pattern for maybe-owned data, and the canonical clone anti-patterns (`.map(|x| x.clone())` instead of `.cloned()` / `.copied()`, cloning a reference argument, oversized stack copies).
-source: https://github.com/apollographql/rust-best-practices
+description: Choose between `&T`, `&mut T`, owned `T`, `.clone()`, and `Cow<'_, T>` in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when reviewing function signatures that take `String`/`Vec<T>` by value, seeing clippy `redundant_clone` / `clone_on_copy` / `needless_borrow` warnings, diagnosing slow hot paths caused by `.clone()` in a loop or `.map()`, debating `#[derive(Copy)]` on a struct, or asking when ownership should transfer into a function.
 
 # Borrowing, cloning, and ownership
 

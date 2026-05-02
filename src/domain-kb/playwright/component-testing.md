@@ -1,7 +1,6 @@
 ---
 name: component-testing
-description: Use this when setting up or writing Playwright component tests with `@playwright/experimental-ct-react`, `@playwright/experimental-ct-vue`, or `@playwright/experimental-ct-svelte` — mounting components with the `mount` fixture, using `component.update()` to change props, testing event callbacks via JavaScript closures, mocking API calls with `page.route()` inside component tests, using `beforeMount` hooks from `@playwright/experimental-ct-react/hooks`, configuring `playwright-ct.config.ts` with `ctPort` and `ctViteConfig`, and setting up the `playwright/index.tsx` entry point with global providers (React Query, ThemeProvider, AuthProvider). Covers v-model binding in Vue CT, named slots, render props, and controlled/uncontrolled input patterns. Specific to Playwright's CT runner — not for Vitest, Testing Library, or Storybook.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Write Playwright component tests with experimental-ct-react/vue/svelte using the mount fixture.
 license: MIT
 last_reviewed: 2026-05-02
 ---

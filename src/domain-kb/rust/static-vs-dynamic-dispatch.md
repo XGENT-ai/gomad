@@ -1,10 +1,11 @@
 ---
 name: static-vs-dynamic-dispatch
-description: Choose between generics with `impl Trait` / `<T: Trait>` (static dispatch, monomorphized at compile time) and trait objects with `Box<dyn Trait>` / `&dyn Trait` / `Arc<dyn Trait>` (dynamic dispatch, vtable at runtime) in Rust. Use this whenever the user is debating `fn process<T: Handler>(h: T)` vs `fn process(h: Box<dyn Handler>)`, asks if `dyn Trait` is "slow," wants to store heterogeneous types in a `Vec`, hits "the trait `Foo` cannot be made into an object" (object-safety error), wonders about `&dyn Trait` vs `Box<dyn Trait>`, or asks where to box at API boundaries vs internally. Covers: when generics win (perf-critical, single-implementation, known-at-compile-time), when `dyn Trait` is required (heterogeneous collections, plugin architectures, runtime-chosen impls), the object-safety rules (`no Self: Sized`, no generic methods, only `&self` / `&mut self` / `self`), the trade-off table, and what NOT to do (boxing internally without need, premature `dyn Trait` in struct fields).
-source: https://github.com/apollographql/rust-best-practices
+description: Choose between generics (`impl Trait`) and trait objects (`dyn Trait`) in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when debating `fn f<T: Trait>(h: T)` vs `fn f(h: Box<dyn Trait>)`, asking if `dyn Trait` is slow, storing heterogeneous types in a `Vec`, hitting "the trait cannot be made into an object," or deciding where to use `&dyn Trait` vs `Box<dyn Trait>` at API boundaries.
 
 # Static vs dynamic dispatch
 

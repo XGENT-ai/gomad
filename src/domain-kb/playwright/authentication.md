@@ -1,7 +1,6 @@
 ---
 name: authentication
-description: Use this when setting up Playwright authentication with storageState, global setup, per-worker auth fixtures, multiple user roles, OAuth/SSO mocking, MFA with TOTP generation, API-based login, session refresh, or unauthenticated test scenarios. Covers the `storageState` API, `page.context().storageState({ path })`, `browser.newContext({ storageState })`, `page.route()` for OAuth callback interception, `test.use({ storageState: { cookies: [], origins: [] } })` for clearing auth, and `{ scope: 'worker' }` fixture scoping. Also covers complex flows: email verification token capture, password reset flows, session timeout/expiry testing, remember-me persistence via `context.cookies()`, and logout with cookie cleanup. Use this when you encounter 401 errors during test runs, need role-based access control testing (admin/member/guest), or want to avoid logging in via UI before every test.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Set up Playwright auth with storageState, global setup, per-worker fixtures, and role-based access.
 license: MIT
 last_reviewed: 2026-05-02
 ---

@@ -1,7 +1,6 @@
 ---
 name: service-workers
-description: Use this when testing Progressive Web Apps (PWAs) and service workers in Playwright — waiting for SW registration with `navigator.serviceWorker.ready`, accessing workers with `context.serviceWorkers()` and `context.waitForEvent('serviceworker')`, evaluating code in SW context with `sw.evaluate()`, testing cache strategies using `caches.open()` and `caches.keys()`, simulating offline mode with `context.setOffline(true)`, testing background sync with `reg.sync.register()`, testing push notification handling with `PushEvent` dispatched to SW, clearing service worker registrations in `beforeEach` with `navigator.serviceWorker.getRegistrations()` and `r.unregister()`, and testing the SW update flow with `reg.update()` and `SKIP_WAITING` messages. Specific to Playwright's service worker testing API for PWA-style offline-first apps — not for general network interception.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test PWA service workers in Playwright — registration, cache strategies, offline mode, and sync.
 license: MIT
 last_reviewed: 2026-05-02
 ---

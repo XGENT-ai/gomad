@@ -1,7 +1,6 @@
 ---
 name: websockets
-description: Use this when testing WebSocket connections and real-time features in Playwright — listening for WebSocket events with `page.waitForEvent('websocket')`, monitoring frames with `ws.on('framereceived')` and `ws.on('framesent')`, injecting mock WebSocket messages via `page.evaluate()` and `MessageEvent`, intercepting WebSocket upgrades, wrapping `window.WebSocket` with `page.addInitScript()` to capture sent messages, testing Server-Sent Events (SSE) with `page.route()` returning `text/event-stream` responses, testing connection loss by calling `chatSocket.close()`, and asserting reconnection state. Also covers `expect.poll()` for async message arrival and testing collaborative editing, live price updates, and real-time notification delivery. Specific to Playwright WebSocket inspection — not for mocking at the network proxy level.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test WebSocket connections and real-time features in Playwright using frame events and SSE mocking.
 license: MIT
 last_reviewed: 2026-05-02
 ---

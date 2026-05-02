@@ -1,5 +1,4 @@
 ---
-source: original
 license: MIT
 last_reviewed: 2026-05-01
 ---
@@ -73,25 +72,23 @@ Both `{domain_slug}` and `{article}` filenames follow the same rules:
 
 ## Article Frontmatter Schema
 
-Every `{article}.md` MUST open with YAML frontmatter containing exactly these five fields:
+Every `{article}.md` MUST open with YAML frontmatter containing exactly these four fields:
 
 | Field | Required | Type | Rule |
 |---|---|---|---|
 | `name` | yes | string | Short human-readable title. Usually matches the filename slug. |
-| `description` | yes | string | The retrieval trigger. See [Writing the `description` Field](#writing-the-description-field). |
-| `source` | yes | string | `original` for in-repo content; otherwise URL or upstream project name. |
+| `description` | yes | string | One-line retrieval trigger. **Max 100 characters.** See [Writing the `description` Field](#writing-the-description-field). |
 | `license` | yes | string | SPDX identifier (`MIT`, `Apache-2.0`, `CC-BY-4.0`) or `proprietary`. |
 | `last_reviewed` | yes | ISO date `YYYY-MM-DD` | Date the content was last verified against reality. |
 
-No extra fields. No `tags`, no `author`, no `version`. If you think you need one, raise it in review first.
+No extra fields. No `tags`, no `author`, no `source`, no `version`. If you think you need one, raise it in review first.
 
 Example:
 
 ```yaml
 ---
 name: tls-handshake-debugging
-description: Diagnose TLS handshake failures in Rust gRPC/HTTP clients (rustls, tokio-rustls, tonic, hyper). Use this whenever the user reports a TLS connection failing with "Connection reset by peer", errno 54 / EPIPE, "transport error", SNI/SAN/ALPN issues, certificate-chain or cert-pinning errors, or wants to debug rustls/tonic client TLS code. The skill leads with a raw-tool probe matrix (openssl s_client) before any client-side patch, because apparent client-side TLS bugs are routinely server- or network-edge issues.
-source: original
+description: Diagnose TLS handshake failures in Rust gRPC/HTTP clients.
 license: MIT
 last_reviewed: 2026-04-25
 ---
@@ -99,35 +96,27 @@ last_reviewed: 2026-04-25
 
 ## Writing the `description` Field
 
-This is the most load-bearing field in the article. An agent decides whether to load your file based on this string alone. Treat it as a retrieval trigger, not a summary.
+The `description` is the retrieval index entry — an agent decides whether to load your file based on this string alone. Keep it tight: **max 100 characters**, single line.
 
-The canonical example is the opening of [`debugging/tls-handshake-debugging.md`](debugging/tls-handshake-debugging.md):
+Formula: `<action verb> <topic> in <tech/context>.`
 
-> Diagnose TLS handshake failures in Rust gRPC/HTTP clients (rustls, tokio-rustls, tonic, hyper). Use this whenever the user reports a TLS connection failing with "Connection reset by peer", errno 54 / EPIPE, "transport error", SNI/SAN/ALPN issues, certificate-chain or cert-pinning errors, or wants to debug rustls/tonic client TLS code.
+Examples:
 
-Note what it does:
+```
+Diagnose TLS handshake failures in Rust gRPC/HTTP clients.
+Configure structured logging in Go with slog.
+Choose between Zod and Valibot for TypeScript runtime validation.
+```
 
-- Starts with an action verb (`Diagnose`).
-- Names the exact tech stack (`rustls, tokio-rustls, tonic, hyper`).
-- Quotes the literal error strings a user would paste (`"Connection reset by peer"`, `errno 54 / EPIPE`).
-- Gives the trigger phrase ("Use this whenever the user reports...").
-- Tells the agent why the article is opinionated, so similar-sounding alternatives don't outrank it.
+Rules:
 
-Required content:
+- **Start with an action verb.** `Diagnose`, `Configure`, `Choose between`, `Write`. Not `About`, not `Notes on`.
+- **Name the tech stack** — library, language, framework. Be specific enough to distinguish from sibling articles.
+- **No "Use this when…" — that belongs in the article body** (a "When to use" section or opening paragraph).
+- **No marketing prose.** "A comprehensive guide…" is not a trigger.
+- **Don't restate the filename.** Zero new information.
 
-- **An action verb to open.** `Diagnose...`, `Configure...`, `Choose between...`, `Write...`. Not `About...`, not `Notes on...`.
-- **Specific error strings**, library names, command names, file names — anything a user would literally type. Agents match on tokens.
-- **Concrete situations.** "When the user reports X" or "When configuring Y for Z".
-- **A disambiguator** if sibling articles cover overlapping ground.
-
-Length: **80–250 words**. Below 80 you don't have enough tokens for the matcher to lock onto. Above 250 you are writing prose, not a trigger.
-
-Anti-patterns — reject in review:
-
-- Vague summaries: `About TLS in Rust.` Useless.
-- Marketing prose: `A comprehensive guide to debugging TLS issues with best practices.` No tokens, no triggers.
-- Restating the title: `tls-handshake-debugging covers TLS handshake debugging.` Zero new information.
-- Future tense / aspirational: `Will help you understand...`. Describe what the article does, not what it intends to.
+Detailed context (exact error strings, library lists, trigger phrases) goes in the article body, not here.
 
 ## Style Rules
 
@@ -142,13 +131,11 @@ These apply to article bodies. They are non-negotiable; existing articles alread
 - **Each article answers four questions:** when to use, how to use, when NOT to use, and common failure modes. If yours skips one, it isn't done.
 - **No filler.** Cut the introduction. Cut the conclusion. The first H2 should answer the question the title implies.
 
-## License & Source Fields
+## License Field
 
-- `source: original` — content authored fresh in this repo. Use the repo's default `license`.
-- `source: <url>` — adapted from a specific upstream document. Include attribution inline near the top of the body if the upstream license requires it.
-- `source: <upstream project>` — adapted from a project without a single canonical URL (e.g. `source: rustls`).
-- `license` MUST match the source's license when adapting. You cannot relicense `CC-BY-SA` content as `MIT`. When in doubt, ask.
-- For original content: default to the repo's license (currently `MIT` across existing articles). Do not invent license strings; use SPDX identifiers.
+- Default to the repo's license (`MIT` across existing articles). Use SPDX identifiers only.
+- If adapting content from an upstream source, set `license` to match and include attribution inline in the body.
+- Do not invent license strings.
 
 ## Review Cadence (`last_reviewed`)
 

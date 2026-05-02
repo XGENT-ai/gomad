@@ -1,10 +1,11 @@
 ---
 name: comments-and-rustdoc
-description: Decide between `//` comments, `///` item docs, and `//!` module/crate docs in Rust — and avoid the "comments as living documentation" trap. Use this whenever the user is reviewing code with multi-paragraph `//` blocks describing what the function does, sees an undocumented public API and asks if it matters, debates `///` vs `//!`, hits clippy `missing_docs` / `missing_panics_doc` / `missing_errors_doc` / `broken_intra_doc_links`, asks where `# Examples` / `# Errors` / `# Panics` / `# Safety` sections go, or wants to enforce doc coverage with `#![deny(missing_docs)]`. Covers: when a comment is right (safety, perf quirks, design rationale, ADR links), when it's wrong (restating the code, obsolete TODOs), the `///` checklist for public items, the `//!` use for crate / module overview, doc-test attributes (`no_run`, `compile_fail`, `should_panic`), and what NOT to do (treat comments as living docs, leave un-issue-linked TODOs, snapshot stale design discussion in code).
-source: https://github.com/apollographql/rust-best-practices
+description: Choose between `//`, `///`, and `//!` comments and write effective rustdoc in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
+
+**When to use:** Reach for this article when reviewing multi-paragraph `//` blocks describing what a function does, dealing with undocumented public APIs, debating `///` vs `//!`, hitting clippy `missing_docs` / `missing_panics_doc` / `missing_errors_doc` / `broken_intra_doc_links`, or wanting to enforce doc coverage with `#![deny(missing_docs)]`.
 
 # Comments and `rustdoc`
 

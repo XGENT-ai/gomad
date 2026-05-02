@@ -1,7 +1,6 @@
 ---
 name: browser-apis
-description: Use this when testing browser APIs in Playwright — mocking geolocation with `context.setGeolocation()`, granting permissions with `context.grantPermissions(['geolocation', 'notifications', 'camera', 'microphone', 'clipboard-read', 'clipboard-write'])`, testing permission denial by creating a context with `permissions: []`, reading clipboard content with `navigator.clipboard.readText()`, mocking `Notification` constructor with `page.addInitScript()`, mocking `navigator.mediaDevices.getUserMedia` for camera/microphone, testing the `NotAllowedError` DOMException from camera access denial, and using `navigator.permissions.query()` to verify permission state. Specific to browser permission APIs and device APIs (geolocation, camera, mic, clipboard, notifications) — not for network mocking or service workers.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Test browser device APIs in Playwright — geolocation, permissions, clipboard, and media devices.
 license: MIT
 last_reviewed: 2026-05-02
 ---

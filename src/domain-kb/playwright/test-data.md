@@ -1,7 +1,6 @@
 ---
 name: test-data
-description: Build and manage test data in Playwright using factories, `@faker-js/faker`, and database seeding fixtures. Use this when creating reusable test data builders with the factory pattern, when using `faker.seed()` for reproducible test data, when parameterizing tests with `for...of` loops over scenario arrays, when loading test data from CSV/JSON files, when building a `seedUser` fixture with API-based creation and automatic teardown, or when implementing transaction rollback via a `db` worker-scoped fixture. Covers factory functions with overrides (`createUser`, `createProduct`, `createOrder`), traits (`outOfStock`, `featured`, `sale`), faker integration with per-test seeding (`faker.seed(testInfo.title.length)`), data-driven tests from `checkoutScenarios` arrays and JSON files, `DataFixtures` pattern with `testUser` / `testProducts` fixtures, and API-based seeding with `cleanupUsers`. The article is opinionated: hardcoded test data is an anti-pattern; factories with overrides are the correct abstraction. Random data without a seed produces non-reproducible failures.
-source: https://github.com/currents-dev/playwright-best-practices-skill
+description: Build and manage Playwright test data using factories, faker-js, and database seeding fixtures.
 license: MIT
 last_reviewed: 2026-05-02
 ---

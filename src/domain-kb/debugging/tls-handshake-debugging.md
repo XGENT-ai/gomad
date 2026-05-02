@@ -1,9 +1,13 @@
 ---
 name: tls-handshake-debugging
-description: Diagnose TLS handshake failures in Rust gRPC/HTTP clients (rustls, tokio-rustls, tonic, hyper). Use this whenever the user reports a TLS connection failing with "Connection reset by peer", errno 54 / EPIPE, "transport error", SNI/SAN/ALPN issues, certificate-chain or cert-pinning errors, or wants to debug rustls/tonic client TLS code. The skill leads with a raw-tool probe matrix (`openssl s_client`) before any client-side patch, because apparent client-side TLS bugs are routinely server- or network-edge issues, and patching the wrong layer wastes time and pollutes commit history.
+description: Diagnose TLS handshake failures in Rust gRPC/HTTP clients.
 ---
 
 # TLS handshake debugging — methodology + recipes
+
+## When to use
+
+Apply this when a TLS connection fails in a Rust client using rustls, tokio-rustls, tonic, or hyper. Common triggers: `"Connection reset by peer"` (errno 54 macOS / errno 104 Linux), `EPIPE` (errno 32), `"transport error"`, SNI/SAN/ALPN negotiation failures, certificate-chain errors, or cert-pinning rejections.
 
 ## Why probe before patching
 

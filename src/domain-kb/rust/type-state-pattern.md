@@ -1,7 +1,6 @@
 ---
 name: type-state-pattern
-description: Encode state transitions in the Rust type system with `PhantomData` markers so illegal operations fail at compile time, not runtime. Use this whenever the user is designing a builder where some fields are required, modeling a connection that has `Disconnected` / `Connected` / `Authenticated` states, asks if there's a way to make `.send(...)` callable only after `.connect(...)`, wonders why their codebase has `struct Foo<S> { _state: PhantomData<S> }`, or wants to replace runtime `if !self.is_connected { panic!() }` checks. Covers: the core pattern (zero-sized state types + `PhantomData`), the canonical examples (file-open state machine, builder with required fields, network protocol FSM), why `PhantomData` is zero-cost at runtime, and what NOT to do (apply it to trivial enums, force every method through generics when one runtime check would suffice).
-source: https://github.com/apollographql/rust-best-practices
+description: Encode state transitions with `PhantomData` markers so invalid calls fail at compile time in Rust.
 license: MIT
 last_reviewed: 2026-05-02
 ---
