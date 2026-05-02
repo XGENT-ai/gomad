@@ -63,6 +63,16 @@ Features:
 - Network logs
 - Console logs
 
+### Code Generator
+
+Record real browser interactions to generate locators and test code:
+
+```bash
+npx playwright codegen http://localhost:3000
+```
+
+Opens a browser with the Inspector panel. Click elements in the browser; the inspector emits the corresponding `getByRole`, `getByLabel`, etc. calls in real time. Useful for discovering the correct locator for a stubborn element without trial and error.
+
 ### Debug in Code
 
 ```typescript

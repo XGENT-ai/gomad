@@ -138,6 +138,19 @@ page.getByText("Child").locator("..");
 page.getByText("Child").locator("xpath=ancestor::article");
 ```
 
+### Locator Combinators
+
+```typescript
+// .and() — both conditions must match the same element
+const visibleSubmit = page.getByRole('button', { name: 'Submit' }).and(page.locator(':visible'));
+const enabledInput = page.getByLabel('Email').and(page.locator(':not([disabled])'));
+
+// .or() — either locator matches (useful when an element can appear in two different states)
+const saveOrUpdate = page.getByRole('button', { name: 'Save' }).or(page.getByRole('button', { name: 'Update' }));
+```
+
+`.and()` is stricter than `filter()`: `filter()` narrows a set of matched elements, while `.and()` requires a single element to satisfy both locators simultaneously.
+
 ### nth() and first()/last()
 
 ```typescript

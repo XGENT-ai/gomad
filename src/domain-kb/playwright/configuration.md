@@ -172,6 +172,20 @@ playwright/.auth/
 npm install -D dotenv
 ```
 
+## Reporter in Agent / CLI Contexts
+
+When Playwright runs inside an AI coding agent (e.g. Claude Code) or any non-interactive CI pipeline, verbose HTML or list reporters can flood the output window. Use a line-based reporter so only failures and the final count appear.
+
+```ts
+export default defineConfig({
+  reporter: process.env.CI || process.env.CLAUDE
+    ? [['line'], ['html', { open: 'never' }]]
+    : 'list',
+});
+```
+
+Set `CLAUDE=1` (or any truthy value) when invoking Playwright from an agent or script that cannot render full reporter output. The `html` reporter is still generated for post-run inspection; it just does not auto-open.
+
 ## Artifact Collection Strategy
 
 | Setting | Local | CI | Reason |
