@@ -24,7 +24,7 @@ For each Acceptance Criterion above, fill at least one row:
 | AC# | What a human/operator runs | Against what (real system) | Expected observable result |
 |-----|----------------------------|-----------------------------|----------------------------|
 | 1   | e.g. `curl -X POST localhost:3000/api/orders -d '{...}'` | local dev server + real Postgres | HTTP 201 + new row visible in `orders` table via `psql` |
-| 2   | e.g. open https://localhost:3000/orders in browser, click "New" | local dev server + real browser session | new order appears in list within 2s |
+| 2   | e.g. open <https://localhost:3000/orders> in browser, click "New" | local dev server + real browser session | new order appears in list within 2s |
 
 Rules:
 - Each row MUST name a concrete command, URL, or UI flow — no "verify it works".
