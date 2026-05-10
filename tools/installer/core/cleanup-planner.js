@@ -159,8 +159,15 @@ async function isV11Legacy(workspaceRoot, gomadDir) {
 /**
  * Detect a v1.2 install that needs the persona-dir relocation cleanup.
  * Distinguishes from v1.1 by REQUIRING the manifest to exist (v1.1 has no
- * manifest). Returns true iff manifest exists AND >=1 of the 8 known persona
- * files is present at the legacy _gomad/gomad/agents/ location.
+ * manifest). Returns true iff manifest exists AND (legacy
+ * `_gomad/gomad/config.yaml` exists OR ≥1 persona file at
+ * `_gomad/gomad/agents/`).
+ *
+ * The widened config.yaml signal (quick task 260510-i7r bug2) catches the
+ * orphan that survives v1.2-or-earlier upgrades: the legacy-id migration
+ * in `existing-install.js:98` rewrites `gomad → agile` on read, hiding the
+ * dir from `_removeDeselectedModules`, so only this detector + the v12
+ * branch in buildCleanupPlan can clear it.
  *
  * Used by buildCleanupPlan's v12 branch (D-01, D-02) which queues the legacy
  * persona files for snapshot+remove regardless of newInstallSet membership
@@ -175,6 +182,12 @@ async function isV12LegacyAgentsDir(workspaceRoot, gomadDir) {
   // Manifest MUST exist — distinguishes v1.2→v1.3 upgrade from v1.1→v1.3.
   const manifestPath = path.join(gomadDir, '_config', 'files-manifest.csv');
   if (!(await fs.pathExists(manifestPath))) return false;
+
+  // bug2 (260510-i7r): widen detection to also cover the orphan
+  // _gomad/gomad/config.yaml that survives v1.2-or-earlier upgrades.
+  const legacyModuleConfigPath = path.join(gomadDir, 'gomad', 'config.yaml');
+  if (await fs.pathExists(legacyModuleConfigPath)) return true;
+
   const legacyAgentsDir = path.join(gomadDir, ...LEGACY_AGENTS_PERSONA_SUBPATH.split('/'));
   if (!(await fs.pathExists(legacyAgentsDir))) return false;
   for (const shortName of LEGACY_AGENT_SHORT_NAMES) {
@@ -337,6 +350,67 @@ async function buildCleanupPlan(input) {
       });
       plan.to_remove.push(resolved);
       handledPaths.add(resolved);
+    }
+
+    // bug2 (260510-i7r): orphan _gomad/gomad/config.yaml from v1.2-or-earlier
+    // installs survives because existing-install.js:98 maps `gomad → agile` on
+    // read, hiding the dir from _removeDeselectedModules. Snapshot+remove it
+    // here so D-34 backup invariant is preserved, then drop the now-empty
+    // _gomad/gomad/ parent dir.
+    let v12ChildrenCleared = plan.to_remove.length > 0;
+
+    const legacyModuleConfig = path.join(workspaceRoot, '_gomad', 'gomad', 'config.yaml');
+    if (await fs.pathExists(legacyModuleConfig)) {
+      let resolved;
+      try {
+        resolved = await fs.realpath(legacyModuleConfig);
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+        resolved = null; // race: removed mid-flight
+      }
+      if (resolved) {
+        if (isContained(resolved, workspaceRoot)) {
+          const priorEntry = priorManifest.find((e) => (e.absolutePath || '') === resolved);
+          const orig_hash = (priorEntry && priorEntry.hash) || null;
+          let was_modified = null;
+          if (orig_hash && hashGen) {
+            const currentHash = await hashGen.calculateFileHash(resolved);
+            was_modified = currentHash !== orig_hash;
+          }
+          plan.to_snapshot.push({
+            src: resolved,
+            install_root: '_gomad',
+            relative_path: 'gomad/config.yaml',
+            orig_hash,
+            was_modified,
+          });
+          plan.to_remove.push(resolved);
+          handledPaths.add(resolved);
+          v12ChildrenCleared = true;
+        } else {
+          await prompts.log.warn('SYMLINK_ESCAPE: ' + legacyModuleConfig + ' → ' + resolved + ', refusing to touch');
+          plan.refused.push({ idx: null, entry: { path: legacyModuleConfig }, reason: 'SYMLINK_ESCAPE' });
+        }
+      }
+    }
+
+    // Empty parent dir removal — only if at least one child was queued.
+    // No snapshot (empty dirs carry no recoverable content). Children
+    // appear before the parent in to_remove, so fs.remove sees the dir
+    // empty when it gets there.
+    if (v12ChildrenCleared) {
+      const legacyParent = path.join(workspaceRoot, '_gomad', 'gomad');
+      if (await fs.pathExists(legacyParent)) {
+        try {
+          const parentResolved = await fs.realpath(legacyParent);
+          if (isContained(parentResolved, workspaceRoot) && !handledPaths.has(parentResolved)) {
+            plan.to_remove.push(parentResolved);
+            handledPaths.add(parentResolved);
+          }
+        } catch (error) {
+          if (error.code !== 'ENOENT') throw error;
+        }
+      }
     }
   }
 
