@@ -102,8 +102,8 @@ function resetLogs() {
   // ─── LEGACY_AGENT_SHORT_NAMES ─────────────────────────────────────────
   const { LEGACY_AGENT_SHORT_NAMES } = cleanupPlanner;
   assert(Array.isArray(LEGACY_AGENT_SHORT_NAMES), 'LEGACY_AGENT_SHORT_NAMES: is an array');
-  assert(LEGACY_AGENT_SHORT_NAMES.length === 7, `LEGACY_AGENT_SHORT_NAMES: has exactly 7 entries (got ${LEGACY_AGENT_SHORT_NAMES.length})`);
-  const expected = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev'];
+  assert(LEGACY_AGENT_SHORT_NAMES.length === 8, `LEGACY_AGENT_SHORT_NAMES: has exactly 8 entries (got ${LEGACY_AGENT_SHORT_NAMES.length})`);
+  const expected = ['analyst', 'tech-writer', 'pm', 'ux-designer', 'architect', 'sm', 'dev', 'solo-dev'];
   assert(
     JSON.stringify(LEGACY_AGENT_SHORT_NAMES) === JSON.stringify(expected),
     `LEGACY_AGENT_SHORT_NAMES: matches expected order (got ${JSON.stringify(LEGACY_AGENT_SHORT_NAMES)})`,
@@ -550,8 +550,8 @@ function resetLogs() {
       isV11Legacy: true,
     });
     assert(plan.reason === 'legacy_v1_cleanup', `buildCleanupPlan legacy: reason=legacy_v1_cleanup (got ${plan.reason})`);
-    assert(plan.to_snapshot.length === 7, `buildCleanupPlan legacy: 7 snapshots (got ${plan.to_snapshot.length})`);
-    assert(plan.to_remove.length === 7, 'buildCleanupPlan legacy: 7 removals');
+    assert(plan.to_snapshot.length === 8, `buildCleanupPlan legacy: 8 snapshots (got ${plan.to_snapshot.length})`);
+    assert(plan.to_remove.length === 8, 'buildCleanupPlan legacy: 8 removals');
     assert(
       plan.to_snapshot.every((s) => s.was_modified === null),
       'buildCleanupPlan legacy: was_modified=null on every entry (no v1.1 hash)',
@@ -730,6 +730,165 @@ function resetLogs() {
 
     assert(/a\.md/.test(csvContent), 'D-39 native-sep: good file included');
     assert(!/meta\.json/.test(csvContent), String.raw`D-39 native-sep: backslash _gomad\_backups\ path EXCLUDED`);
+  }
+
+  // ─── bug2 (260510-i7r): orphan _gomad/gomad/config.yaml on v1.2 upgrade ──
+  // Quick task 260510-i7r — pre-v1.3 manifests recorded the agile module
+  // as `gomad`, leaving `_gomad/gomad/config.yaml` + an empty
+  // `_gomad/gomad/` parent dir orphaned after upgrade. The legacy-id
+  // migration in existing-install.js:98 (`gomad → agile` on read) hides the
+  // dir from `_removeDeselectedModules`, so only cleanup-planner can catch it.
+  const { isV12LegacyAgentsDir } = cleanupPlanner;
+
+  // Helper: write the v1.2 manifest header that gates `isV12LegacyAgentsDir`.
+  function writeV12Manifest(gomadDir) {
+    fs.ensureDirSync(path.join(gomadDir, '_config'));
+    fs.writeFileSync(path.join(gomadDir, '_config', 'files-manifest.csv'), 'type,name,module,path,hash,schema_version,install_root\n');
+  }
+
+  // Test 1 (the bug repro): config.yaml-only orphan, no agents/ files.
+  resetLogs();
+  {
+    const ws = makeRealWs('gomad-bug2-config-only-');
+    const gomadDir = path.join(ws, '_gomad');
+    writeV12Manifest(gomadDir);
+    fs.ensureDirSync(path.join(gomadDir, 'gomad'));
+    const configPath = path.join(gomadDir, 'gomad', 'config.yaml');
+    fs.writeFileSync(configPath, 'name: gomad\nversion: 1.2.0\n');
+
+    // (a) Detector fires on config.yaml alone.
+    const detected = await isV12LegacyAgentsDir(ws, gomadDir);
+    assert(detected === true, 'bug2 detector: returns true on config.yaml-only orphan (no agents/ files)');
+
+    // (b) Plan snapshots config.yaml AND queues parent dir for removal.
+    const plan = await buildCleanupPlan({
+      priorManifest: [],
+      newInstallSet: new Set(),
+      workspaceRoot: ws,
+      allowedRoots: new Set(['_gomad', '.claude']),
+      isV11Legacy: false,
+      isV12LegacyAgentsDir: true,
+    });
+
+    const realConfigPath = fs.realpathSync(configPath);
+    const realParent = fs.realpathSync(path.join(gomadDir, 'gomad'));
+
+    const configSnap = plan.to_snapshot.find((s) => s.relative_path === 'gomad/config.yaml');
+    assert(configSnap, 'bug2: orphan _gomad/gomad/config.yaml is snapshot+removed even when no agents/ files remain');
+    assert(configSnap && configSnap.install_root === '_gomad', 'bug2: config.yaml snapshot install_root="_gomad"');
+    assert(configSnap && configSnap.src === realConfigPath, 'bug2: config.yaml snapshot.src is realpath');
+    assert(
+      configSnap && configSnap.orig_hash === null,
+      'bug2: config.yaml orig_hash=null (no prior-manifest entry — gomad → agile rewrite)',
+    );
+    assert(configSnap && configSnap.was_modified === null, 'bug2: config.yaml was_modified=null (no orig_hash)');
+    assert(plan.to_remove.includes(realConfigPath), 'bug2: config.yaml is queued for remove');
+    assert(plan.to_remove.includes(realParent), 'bug2: empty _gomad/gomad/ parent dir is queued for remove');
+    // Order matters: child must come before parent so fs.remove sees the dir empty.
+    const idxChild = plan.to_remove.indexOf(realConfigPath);
+    const idxParent = plan.to_remove.indexOf(realParent);
+    assert(idxChild < idxParent, `bug2: config.yaml (idx ${idxChild}) precedes parent dir (idx ${idxParent}) in to_remove`);
+    // Empty dir is NOT snapshotted (snapshotting empty dirs has no value).
+    const parentSnap = plan.to_snapshot.find((s) => s.src === realParent);
+    assert(!parentSnap, 'bug2: empty parent dir is NOT in to_snapshot');
+  }
+
+  // Test 2: combined — agents persona files AND config.yaml both present.
+  resetLogs();
+  {
+    const ws = makeRealWs('gomad-bug2-combined-');
+    const gomadDir = path.join(ws, '_gomad');
+    writeV12Manifest(gomadDir);
+    fs.ensureDirSync(path.join(gomadDir, 'gomad', 'agents'));
+    for (const sn of cleanupPlanner.LEGACY_AGENT_SHORT_NAMES) {
+      fs.writeFileSync(path.join(gomadDir, 'gomad', 'agents', `${sn}.md`), `body ${sn}`);
+    }
+    const configPath = path.join(gomadDir, 'gomad', 'config.yaml');
+    fs.writeFileSync(configPath, 'name: gomad\nversion: 1.2.0\n');
+
+    const plan = await buildCleanupPlan({
+      priorManifest: [],
+      newInstallSet: new Set(),
+      workspaceRoot: ws,
+      allowedRoots: new Set(['_gomad', '.claude']),
+      isV11Legacy: false,
+      isV12LegacyAgentsDir: true,
+    });
+
+    const personaSnaps = plan.to_snapshot.filter((s) => s.relative_path.startsWith('gomad/agents/'));
+    const configSnap = plan.to_snapshot.find((s) => s.relative_path === 'gomad/config.yaml');
+    assert(personaSnaps.length === 8, `bug2 combined: 8 persona snapshots (got ${personaSnaps.length})`);
+    assert(configSnap, 'bug2 combined: config.yaml snapshot present');
+
+    const realParent = fs.realpathSync(path.join(gomadDir, 'gomad'));
+    assert(plan.to_remove.includes(realParent), 'bug2 combined: parent _gomad/gomad/ queued for remove');
+    // 8 personas + 1 config.yaml + 1 parent = 10 removals.
+    assert(plan.to_remove.length === 10, `bug2 combined: 10 removals (8 personas + config.yaml + parent), got ${plan.to_remove.length}`);
+    // Parent comes last (child files before parent dir).
+    const lastRemove = plan.to_remove.at(-1);
+    assert(lastRemove === realParent, `bug2 combined: parent dir is last in to_remove (got ${lastRemove})`);
+  }
+
+  // Test 3: no orphan (neither agents nor config.yaml) — detector returns false.
+  resetLogs();
+  {
+    const ws = makeRealWs('gomad-bug2-clean-');
+    const gomadDir = path.join(ws, '_gomad');
+    writeV12Manifest(gomadDir); // manifest exists
+    // No `_gomad/gomad/` content at all.
+    const detected = await isV12LegacyAgentsDir(ws, gomadDir);
+    assert(detected === false, 'bug2 detector: returns false when no orphan (no agents/, no config.yaml)');
+
+    // v12Reloc=false ⇒ branch must NOT enqueue anything.
+    const plan = await buildCleanupPlan({
+      priorManifest: [],
+      newInstallSet: new Set(),
+      workspaceRoot: ws,
+      allowedRoots: new Set(['_gomad', '.claude']),
+      isV11Legacy: false,
+      isV12LegacyAgentsDir: false,
+    });
+    assert(plan.to_snapshot.length === 0, 'bug2 no-orphan: to_snapshot empty');
+    assert(plan.to_remove.length === 0, 'bug2 no-orphan: to_remove empty');
+  }
+
+  // Test 4: containment — config.yaml is a symlink escaping workspaceRoot.
+  // Refused; parent dir NOT enqueued; manifest-cleanup continues normally.
+  resetLogs();
+  {
+    const ws = makeRealWs('gomad-bug2-symlink-');
+    const gomadDir = path.join(ws, '_gomad');
+    writeV12Manifest(gomadDir);
+    fs.ensureDirSync(path.join(gomadDir, 'gomad'));
+
+    // Create a real file OUTSIDE the workspace and symlink it as config.yaml.
+    const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gomad-bug2-outside-'));
+    const realOutside = fs.realpathSync(outsideDir);
+    const escapeTarget = path.join(realOutside, 'config.yaml');
+    fs.writeFileSync(escapeTarget, 'sneaky: yes\n');
+    const linkPath = path.join(gomadDir, 'gomad', 'config.yaml');
+    fs.symlinkSync(escapeTarget, linkPath);
+
+    const plan = await buildCleanupPlan({
+      priorManifest: [],
+      newInstallSet: new Set(),
+      workspaceRoot: ws,
+      allowedRoots: new Set(['_gomad', '.claude']),
+      isV11Legacy: false,
+      isV12LegacyAgentsDir: true,
+    });
+
+    const configSnap = plan.to_snapshot.find((s) => s.relative_path === 'gomad/config.yaml');
+    assert(!configSnap, 'bug2 symlink-escape: config.yaml NOT in to_snapshot');
+    const refusedConfig = plan.refused.find((r) => r.entry?.path === linkPath && r.reason === 'SYMLINK_ESCAPE');
+    assert(refusedConfig, 'bug2 symlink-escape: refused entry recorded with SYMLINK_ESCAPE reason');
+    // Parent dir is NOT enqueued because no child was successfully cleared.
+    const realParent = fs.realpathSync(path.join(gomadDir, 'gomad'));
+    assert(!plan.to_remove.includes(realParent), 'bug2 symlink-escape: parent _gomad/gomad/ NOT enqueued for removal');
+    assert(
+      warnLog.some((m) => m.startsWith('SYMLINK_ESCAPE:') && m.includes('config.yaml')),
+      'bug2 symlink-escape: SYMLINK_ESCAPE warn logged for config.yaml',
+    );
   }
 
   // ─── Final ─────────────────────────────────────────────────────────────
