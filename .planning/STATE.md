@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: TBD (run /gsd-new-milestone to scope)
 status: between_milestones
 stopped_at: v1.3 archived; awaiting v1.4 scoping
-last_updated: "2026-05-10T05:30:00.000Z"
-last_activity: 2026-05-10 -- Completed quick task 260510-i7r: Fix install bugs (gm:agent-* duplicate skills + _gomad/gomad/ orphan)
+last_updated: "2026-05-10T11:08:36.532Z"
+last_activity: 2026-05-10 -- Completed quick task 260510-ql6: Close mock-only-done loophole in gm-create-story skill (template + workflow + checklist)
 progress:
   total_phases: 0
   completed_phases: 0
@@ -67,6 +67,7 @@ None. v1.3 closed and archived 2026-04-27. Awaiting `/gsd-new-milestone` to scop
 | 260501-vy9 | 将 Append summary 步骤从 gm-sprint-agent 移到 gm-dev-story；gm-code-review 中加入 Update summary（仅当 review 涉及代码修改时） | 2026-05-01 | 5566284 | [260501-vy9-gm-sprint-agent-skill-append-summary-gm-](./quick/260501-vy9-gm-sprint-agent-skill-append-summary-gm-/) |
 | 260501-wqw | 写一个 src/domain-kb/{domain_slug}/{article}.md 的guideline | 2026-05-01 | 56c66b6 | [260501-wqw-src-domain-kb-domain-slug-article-md-gui](./quick/260501-wqw-src-domain-kb-domain-slug-article-md-gui/) |
 | 260510-i7r | Drop duplicate `.claude/skills/gm:agent-*` on Claude Code install (bug1); snapshot+remove orphan `_gomad/gomad/` on v1.2 upgrade (bug2) | 2026-05-10 | 9fa0602 | [260510-i7r-bug1-drop-duplicate-gm-agent-skills-from](./quick/260510-i7r-bug1-drop-duplicate-gm-agent-skills-from/) |
+| 260510-ql6 | Raise gm-create-story quality bar: add Real-World Verification + Anti-Acceptance to story template; close mock-only-done loophole | 2026-05-10 | 7c214dd | [260510-ql6-review-and-optimize-gm-create-story-skil](./quick/260510-ql6-review-and-optimize-gm-create-story-skil/) |
 
 ## Deferred Items
 
