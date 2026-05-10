@@ -169,15 +169,21 @@ You will systematically re-do the entire story creation process, but with a crit
 
 The single most common failure mode of LLM dev agents: declaring "done" because mocked tests pass. The story format must make this impossible. **REJECT the story** if any of the following is true:
 
-- [ ] **Missing Real-World Verification section** — the H2 section `## Real-World Verification` is absent or has zero filled rows
+- [ ] **Missing Real-World Verification section** — the H2 section `## Real-World Verification` is absent
+- [ ] **Mode `real-world` but zero filled rows** — section declares default mode, no per-AC rows
 - [ ] **Verification rows name no real system** — a row says "run tests" / "verify it works" / "check the function" instead of a concrete command, URL, or UI flow against a real DB / real upstream / real browser
-- [ ] **AC without a verification row** — any Acceptance Criterion has no corresponding Real-World Verification row mapped to it
+- [ ] **AC without a verification row** (mode `real-world`) — any Acceptance Criterion has no corresponding Real-World Verification row mapped to it
+- [ ] **Mode `test-only-justified` defaulted, not earned** — story introduces user-observable behavior (new endpoint, new UI, new CLI flag) yet was filed as `test-only-justified`. The escape hatch is for refactor / internal-only / doc / spike work; using it on a behavior-bearing story is itself a REJECT.
+- [ ] **Mode `test-only-justified` justification is vague** — "internal change", "no user impact", "low risk" without naming *why this specific story* cannot produce real-world evidence
+- [ ] **Mode `test-only-justified` missing strongest-available verification** — no fallback bar named (test suite green, before/after benchmark, second-reviewer reading, etc.)
 - [ ] **Missing Anti-Acceptance section** — the H2 section `## Anti-Acceptance` is absent
 - [ ] **Anti-Acceptance softened** — bullets reworded, removed, or hedged (e.g. "mocks discouraged" instead of "mocks are NOT acceptance")
 - [ ] **Missing Real-World Verification Evidence slot** — the `### Real-World Verification Evidence` heading is absent under Dev Agent Record
-- [ ] **Vague verification** — uses "should", "may", "could" instead of imperative real-system instructions
+- [ ] **Vague verification** — uses "should", "may", "could" instead of imperative instructions
 
 If any box above would be checked, the story is NOT ready-for-dev. Return to the workflow and force-populate the missing field — do NOT pass the story to gm-dev-story.
+
+**On the escape hatch (`test-only-justified`):** real-world verification is the default bar, not a universal mandate. Refactors, internal type-tightening, doc edits, and time-boxed spikes legitimately cannot produce user-observable evidence — for those, the mode must be earned with a concrete one-sentence justification *and* a named fallback bar. Defaulting to `test-only-justified` to avoid filling the table is the failure mode this gate exists to catch.
 
 **Why this matters:** gm-dev-story reads only the story file. If the story does not literally name the forbidden patterns and the real-system commands, the dev agent will pick the cheapest path. The story IS the bar.
 

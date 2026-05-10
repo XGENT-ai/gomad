@@ -16,8 +16,10 @@ so that {{benefit}}.
 
 ## Real-World Verification
 
+**Verification Mode:** `real-world` (default) | `test-only-justified` (refactor / internal-only / doc-change / spike)
+
 **This section is the proof-of-done contract. Mocks-only test passage is NOT acceptance.**
-The dev agent MUST execute every command/flow below against the real system (real DB, real upstream service, real browser, real network) and paste the actual observed output/screenshot path/log excerpt into "Dev Agent Record → Real-World Verification Evidence" before setting Status to `review`.
+For `real-world` mode (the default for any story that introduces or changes user-observable behavior), the dev agent MUST execute every command/flow below against the real system (real DB, real upstream service, real browser, real network) and paste the actual observed output/screenshot path/log excerpt into "Dev Agent Record → Real-World Verification Evidence" before setting Status to `review`.
 
 For each Acceptance Criterion above, fill at least one row:
 
@@ -30,6 +32,17 @@ Rules:
 - Each row MUST name a concrete command, URL, or UI flow — no "verify it works".
 - Mocks, stubs, fakes, in-memory replacements, and `console.log` of expected values are NOT acceptable evidence here.
 - If a row cannot be satisfied without a real external dependency the dev agent cannot reach (e.g. third-party prod API), the dev agent MUST HALT and report — NOT substitute a mock and declare done.
+
+**Mode `test-only-justified` (escape hatch — must be earned, not defaulted):**
+Use ONLY when the story's nature genuinely cannot produce user-observable behavior to verify — e.g. pure refactor with no behavior change, internal type-system tightening, doc-only edit, dependency upgrade with no API change, time-boxed spike. In that case, REPLACE the table above with this block:
+
+```text
+Mode: test-only-justified
+Why real-world verification does not apply: <one concrete sentence — "this story renames internals; no caller-visible change" / "this story is a doc edit; no runtime"/etc.>
+Strongest available verification: <the actual bar — e.g. "full test suite green AND identical behavior on the 3 worked-example flows in <link>", "before/after benchmark within 2%", "manual reading by a second reviewer">
+```
+
+The justification line is read by the dev agent and the reviewer. A vague justification ("internal change", "no user impact") is itself a REJECT — it must name *why this specific story* cannot produce real-world evidence.
 
 ## Anti-Acceptance (what does NOT count as done)
 
