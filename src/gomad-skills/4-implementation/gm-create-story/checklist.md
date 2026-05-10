@@ -165,6 +165,22 @@ You will systematically re-do the entire story creation process, but with a crit
 - **Scope creep:** Missing boundaries that could cause unnecessary work
 - **Quality failures:** Missing quality requirements that could deliver broken features
 
+#### **3.6 Mock-Only Acceptance DISASTERS** 🚨
+
+The single most common failure mode of LLM dev agents: declaring "done" because mocked tests pass. The story format must make this impossible. **REJECT the story** if any of the following is true:
+
+- [ ] **Missing Real-World Verification section** — the H2 section `## Real-World Verification` is absent or has zero filled rows
+- [ ] **Verification rows name no real system** — a row says "run tests" / "verify it works" / "check the function" instead of a concrete command, URL, or UI flow against a real DB / real upstream / real browser
+- [ ] **AC without a verification row** — any Acceptance Criterion has no corresponding Real-World Verification row mapped to it
+- [ ] **Missing Anti-Acceptance section** — the H2 section `## Anti-Acceptance` is absent
+- [ ] **Anti-Acceptance softened** — bullets reworded, removed, or hedged (e.g. "mocks discouraged" instead of "mocks are NOT acceptance")
+- [ ] **Missing Real-World Verification Evidence slot** — the `### Real-World Verification Evidence` heading is absent under Dev Agent Record
+- [ ] **Vague verification** — uses "should", "may", "could" instead of imperative real-system instructions
+
+If any box above would be checked, the story is NOT ready-for-dev. Return to the workflow and force-populate the missing field — do NOT pass the story to gm-dev-story.
+
+**Why this matters:** gm-dev-story reads only the story file. If the story does not literally name the forbidden patterns and the real-system commands, the dev agent will pick the cheapest path. The story IS the bar.
+
 ### **Step 4: LLM-Dev-Agent Optimization Analysis**
 
 **CRITICAL STEP: Optimize story context for LLM developer agent consumption**
