@@ -390,6 +390,8 @@ When writing to `{sprint_status}`:
       - Dev Agent Record contains implementation notes
       - Change Log includes summary of changes
       - Only permitted story sections were modified
+      - Real-World Verification Evidence slot filled per story mode (skip if story has no `## Real-World Verification` section): for `real-world` mode, an entry per Real-World Verification row with actual command + actual observed output; for `test-only-justified` mode, the actual output of the strongest-available verification named in the story. "Tests pass" alone is NOT evidence in either mode.
+      - Anti-Acceptance self-audit clean (skip if story has no `## Anti-Acceptance` section): no bullet from the story's Anti-Acceptance list applies to the current implementation (mock-only test pass, console.log substitutes, TODO in AC code path, hardcoded fixtures, skipped/disabled tests, compile-only verification).
     </action>
 
     <!-- Mark story ready for review - sprint status conditional -->
@@ -420,6 +422,8 @@ When writing to `{sprint_status}`:
     <action if="regression failures exist">HALT - Fix regression issues before completing</action>
     <action if="File List is incomplete">HALT - Update File List with all changed files</action>
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
+    <action if="story contains '## Real-World Verification' section AND '### Real-World Verification Evidence' slot under Dev Agent Record is empty/absent OR does not contain actual observed output for the story's mode">HALT - Fill Real-World Verification Evidence before Status=review. For `real-world` mode, paste actual command + observed output per Real-World Verification row. For `test-only-justified` mode, paste the strongest-available verification's actual output (test-suite run summary, before/after benchmark, reviewer note) — NOT just "tests pass". If the bar cannot be met, escalate to user; do NOT redefine "done".</action>
+    <action if="story contains '## Anti-Acceptance' section AND any bullet from that list applies to the current implementation">HALT - Implementation matches a forbidden proof of done (mock-only test pass, console.log of expected value, TODO/FIXME in AC code path, hardcoded fixture, disabled/skipped/.only test in changed files, or compile-only verification). Fix the implementation or escalate to the user — do NOT mark Status=review.</action>
   </step>
 
   <step n="10" goal="Append per-story summary entry to epic-done file" tag="summary">

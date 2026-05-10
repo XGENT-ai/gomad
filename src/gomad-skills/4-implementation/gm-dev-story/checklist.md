@@ -47,6 +47,13 @@ validation-rules:
 - [ ] **Code Quality:** Linting and static checks pass when configured in project
 - [ ] **Test Framework Compliance:** Tests use project's testing frameworks and patterns from Dev Notes
 
+### Real-World Verification (when story has `## Real-World Verification` section)
+
+- [ ] **Evidence filled — `real-world` mode:** If the story declares `Mode: real-world`, the `### Real-World Verification Evidence` slot under Dev Agent Record contains an entry per Real-World Verification row — actual command run + actual observed output / log excerpt / screenshot path. "All tests pass" alone is NOT acceptable here; the entry must reproduce real-system observation.
+- [ ] **Evidence filled — `test-only-justified` mode:** If the story declares `Mode: test-only-justified`, the evidence slot contains the actual output of the *strongest available verification* the story named (test-suite run summary, before/after benchmark numbers, reviewer-reading note) — not just "tests pass".
+- [ ] **Anti-Acceptance self-audit:** Confirm NONE of the Anti-Acceptance bullets in the story apply to your implementation: no mock-only test pass treated as evidence, no `console.log` of expected values in lieu of producing them, no TODO/FIXME in code paths reachable by an AC, no hardcoded fixture responses replacing real logic, no disabled/skipped/`.only`'d tests in changed files, no "compiles / type-checks" claimed as Real-World evidence. If any apply, HALT and report — do NOT mark Status=review.
+- [ ] **Bar held, not lowered:** If you could not meet the Real-World Verification bar this story specified, you HALTED and reported (per the story's contract) — you did NOT redefine "done" to fit the implementation.
+
 ## 📝 Documentation & Tracking
 
 - [ ] **File List Complete:** File List includes EVERY new, modified, or deleted file (paths relative to repo root)
