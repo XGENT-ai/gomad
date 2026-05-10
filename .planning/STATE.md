@@ -4,8 +4,8 @@ milestone: v1.4
 milestone_name: TBD (run /gsd-new-milestone to scope)
 status: between_milestones
 stopped_at: v1.3 archived; awaiting v1.4 scoping
-last_updated: "2026-05-01T13:42:00.000Z"
-last_activity: 2026-05-01 -- Completed quick task 260501-wqw: 写一个 src/domain-kb/{domain_slug}/{article}.md 的guideline
+last_updated: "2026-05-10T05:30:00.000Z"
+last_activity: 2026-05-10 -- Completed quick task 260510-i7r: Fix install bugs (gm:agent-* duplicate skills + _gomad/gomad/ orphan)
 progress:
   total_phases: 0
   completed_phases: 0
@@ -66,6 +66,7 @@ None. v1.3 closed and archived 2026-04-27. Awaiting `/gsd-new-milestone` to scop
 | 260501-ug9 | 优化 gm-dev-story 和 gm-code-review skill 的 sprint-status.yaml 写入行为 | 2026-05-01 | 9e42974 | [260501-ug9-src-gomad-skills-4-implementation-gm-dev](./quick/260501-ug9-src-gomad-skills-4-implementation-gm-dev/) |
 | 260501-vy9 | 将 Append summary 步骤从 gm-sprint-agent 移到 gm-dev-story；gm-code-review 中加入 Update summary（仅当 review 涉及代码修改时） | 2026-05-01 | 5566284 | [260501-vy9-gm-sprint-agent-skill-append-summary-gm-](./quick/260501-vy9-gm-sprint-agent-skill-append-summary-gm-/) |
 | 260501-wqw | 写一个 src/domain-kb/{domain_slug}/{article}.md 的guideline | 2026-05-01 | 56c66b6 | [260501-wqw-src-domain-kb-domain-slug-article-md-gui](./quick/260501-wqw-src-domain-kb-domain-slug-article-md-gui/) |
+| 260510-i7r | Drop duplicate `.claude/skills/gm:agent-*` on Claude Code install (bug1); snapshot+remove orphan `_gomad/gomad/` on v1.2 upgrade (bug2) | 2026-05-10 | 9fa0602 | [260510-i7r-bug1-drop-duplicate-gm-agent-skills-from](./quick/260510-i7r-bug1-drop-duplicate-gm-agent-skills-from/) |
 
 ## Deferred Items
 
