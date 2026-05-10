@@ -187,6 +187,27 @@ If any box above would be checked, the story is NOT ready-for-dev. Return to the
 
 **Why this matters:** gm-dev-story reads only the story file. If the story does not literally name the forbidden patterns and the real-system commands, the dev agent will pick the cheapest path. The story IS the bar.
 
+#### **3.7 Source-Alignment Cross-Check** 🎯
+
+The previous DISASTER categories ask "is the story comprehensive?" — this one asks "**is the story aligned with PRD / architecture / epics?**" Both are needed. Misalignment is invisible to gm-dev-story (which only reads the story file) and to gm-code-review (which audits the diff vs. story, not the story vs. its sources). The SM at story-creation time is the ONLY layer that can catch source-alignment drift.
+
+For each REJECT below, you must cite the **specific source location** that contradicts (e.g. "AC#3 has no PRD requirement — checked PRD §2.1 and §3.4", "story specifies SQLite but architecture.md §Tech Stack mandates PostgreSQL"). A REJECT without a source citation is itself invalid — it forces the reviewer to actually read the sources, not pattern-match.
+
+**REJECT the story** if any of the following is true:
+
+- [ ] **Orphan AC** — Any Acceptance Criterion cannot be traced to a PRD requirement, an Epic AC, or a story_context decision (from gm-discuss-story). Reasonable inference IS allowed but must be explicitly flagged in the story body as `*(derived: <source §> — <one-sentence rationale>)*`. Silent invention is REJECT.
+- [ ] **Dropped Epic AC** — The Epic file lists ACs/requirements scoped to this story (epic_num.story_num), and one or more is not covered by any AC in the generated story. Cite the missed Epic line.
+- [ ] **Tech-stack drift** — The story names a library, framework, language, runtime, or version that does NOT match architecture.md's tech-stack section. Includes adding (architecture says X; story uses X+Y), substituting (architecture says PostgreSQL; story says SQLite), or version-skewing without explicit architecture sign-off.
+- [ ] **Architecture constraint violation** — The story's proposed approach contradicts an explicit constraint in architecture.md (e.g., security: must go through auth middleware; integration: must use API gateway; performance: must cache at edge; data: must use event log not direct DB writes). Cite the architecture section.
+- [ ] **Persona drift** — `As a {{role}}` in the User Story is not a persona listed in the PRD's user/persona section. (If the PRD has no persona section, this check is N/A — note that explicitly in the checklist run.)
+- [ ] **Scope creep into other stories/epics** — The story's Tasks/Subtasks or AC include work that the Epic file assigns to a different story (epic_num.OTHER_story_num) or to a different Epic. Cite the conflicting Epic line.
+- [ ] **Cross-story duplication** — The story's File List or Tasks duplicate work from a previously completed story in the same Epic (visible via the previous-story-intelligence load in workflow Step 2). Intentional extension is fine, but the story must say so explicitly (e.g. *"extends `auth.ts` introduced in story 1-1"*); silent overlap is REJECT.
+- [ ] **Story-context decision contradiction** — `story_context_content` (from gm-discuss-story) recorded a locked decision (e.g. "use cookies not localStorage"), and the story's AC, Dev Notes, or Tasks contradict it without re-discussion. Cite the decision and the contradicting line.
+
+**Calibrated escape — visible inference via `derived:` markings.** Inference beyond the literal source IS sometimes correct: PRDs don't enumerate every edge case; architecture documents don't pre-decide every minor library version. The failure mode is *silent* inference, not inference itself. The fix is **visible inference**: any AC, library choice, persona, or constraint not present in the source documents must carry a `*(derived: <source §> — <one-sentence rationale>)*` marker inline in the story body. The user and reviewer can then disagree explicitly. A bare orphan with no `derived` marker is REJECT; a `derived` marker with vague rationale ("seems reasonable", "for completeness") is also REJECT. Same calibration philosophy as `test-only-justified` — escape exists, must be earned.
+
+**Why this matters:** gm-dev-story reads only the story file. gm-code-review audits diff vs. story. Neither layer ever re-reads PRD/Epic/architecture to check that the story honored them. The SM is the only checkpoint where source alignment can be enforced. Misalignment slipping past here propagates as silent scope drift, tech-stack rot, dropped requirements, and persona mismatch — none of which the downstream pipeline will catch.
+
 ### **Step 4: LLM-Dev-Agent Optimization Analysis**
 
 **CRITICAL STEP: Optimize story context for LLM developer agent consumption**
