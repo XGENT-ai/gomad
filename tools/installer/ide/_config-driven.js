@@ -520,6 +520,15 @@ class ConfigDrivenIdeSetup {
       const canonicalId = record.canonicalId;
       if (!canonicalId) continue;
 
+      // bug1 fix (260510-i7r): on platforms that ship agents as flat launcher
+      // commands (Claude Code via writeAgentLaunchers below), the 8 gm:agent-*
+      // persona skills MUST NOT be copied as `.claude/skills/gm:agent-*`. They
+      // would duplicate the /gm:agent-<sn> commands and clutter the skill list.
+      // Codex/Junie/etc. (no launcher_target_dir) keep installing them as skills.
+      if (config.launcher_target_dir && canonicalId.startsWith('gm:agent-')) {
+        continue;
+      }
+
       // Derive source directory from path column
       // path is like "_gomad/agile/workflows/gomad-quick-flow/gomad-quick-dev-new-preview/SKILL.md"
       // Strip gomadFolderName prefix and join with gomadDir, then get dirname

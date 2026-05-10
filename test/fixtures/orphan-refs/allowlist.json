@@ -256,5 +256,10 @@
     "path": "test/test-codex-syntax-transform.js",
     "lineContainsPattern": "gm-agent-",
     "reason": "260430-q3c unit test for the invocation-syntax transform — input/expected fixtures legitimately reference both `gm:agent-<short>` and `gm-agent-<short>` forms (that is what the test verifies)."
+  },
+  {
+    "path": "test/test-config-driven-agent-skill-skip.js",
+    "lineContainsPattern": "gm-agent-",
+    "reason": "260510-i7r bug1 test seeds both colon-form (`.claude/skills/gm:agent-pm`) and dash-form (`.claude/skills/gm-agent-dev`) leftovers and asserts removeLegacyAgentSkillDirs sweeps both (REF-02 filesystem-path refs)."
   }
 ]

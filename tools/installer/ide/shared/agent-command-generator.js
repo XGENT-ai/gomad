@@ -185,8 +185,11 @@ class AgentCommandGenerator {
   }
 
   /**
-   * D-29: atomically remove legacy v1.1 .claude/skills/gm-agent-*\/ directories
+   * Atomically remove legacy `.claude/skills/gm[-:]agent-*\/` directories
    * during the same install that writes new launchers. No overlap window.
+   * Sweeps BOTH historical naming forms (D-29 original + bug1 leftovers):
+   *   - `gm-agent-<sn>`  (v1.1 — D-29)
+   *   - `gm:agent-<sn>`  (v1.3.0/1.3.1 regression — quick task 260510-i7r bug1)
    * No-op if none exist.
    *
    * @param {string} workspaceRoot - Target workspace
@@ -196,10 +199,12 @@ class AgentCommandGenerator {
     const legacyBase = path.join(workspaceRoot, '.claude', 'skills');
     const removed = [];
     for (const { shortName } of AgentCommandGenerator.AGENT_SOURCES) {
-      const legacyDir = path.join(legacyBase, `gm-agent-${shortName}`);
-      if (await fs.pathExists(legacyDir)) {
-        await fs.remove(legacyDir);
-        removed.push(legacyDir);
+      for (const variant of [`gm-agent-${shortName}`, `gm:agent-${shortName}`]) {
+        const legacyDir = path.join(legacyBase, variant);
+        if (await fs.pathExists(legacyDir)) {
+          await fs.remove(legacyDir);
+          removed.push(legacyDir);
+        }
       }
     }
     return removed;
