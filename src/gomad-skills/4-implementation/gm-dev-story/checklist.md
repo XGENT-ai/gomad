@@ -49,10 +49,12 @@ validation-rules:
 
 ### Real-World Verification (when story has `## Real-World Verification` section)
 
+These items prepare for the code-review audit. Real enforcement happens in `gm-code-review` (Acceptance Auditor) — autonomous flow does NOT HALT here. Record honestly; the auditor decides.
+
 - [ ] **Evidence filled — `real-world` mode:** If the story declares `Mode: real-world`, the `### Real-World Verification Evidence` slot under Dev Agent Record contains an entry per Real-World Verification row — actual command run + actual observed output / log excerpt / screenshot path. "All tests pass" alone is NOT acceptable here; the entry must reproduce real-system observation.
 - [ ] **Evidence filled — `test-only-justified` mode:** If the story declares `Mode: test-only-justified`, the evidence slot contains the actual output of the *strongest available verification* the story named (test-suite run summary, before/after benchmark numbers, reviewer-reading note) — not just "tests pass".
-- [ ] **Anti-Acceptance self-audit:** Confirm NONE of the Anti-Acceptance bullets in the story apply to your implementation: no mock-only test pass treated as evidence, no `console.log` of expected values in lieu of producing them, no TODO/FIXME in code paths reachable by an AC, no hardcoded fixture responses replacing real logic, no disabled/skipped/`.only`'d tests in changed files, no "compiles / type-checks" claimed as Real-World evidence. If any apply, HALT and report — do NOT mark Status=review.
-- [ ] **Bar held, not lowered:** If you could not meet the Real-World Verification bar this story specified, you HALTED and reported (per the story's contract) — you did NOT redefine "done" to fit the implementation.
+- [ ] **Bar-not-met recorded honestly (not fabricated):** If a Real-World Verification row could not be run (real dependency unreachable, environment limitation), the Evidence slot says so explicitly — e.g., "AC#2: could not run, real upstream API unreachable from sandbox; deferred to review". You did NOT fabricate output to fill the slot.
+- [ ] **Anti-Acceptance self-audit recorded:** You scanned your diff against each Anti-Acceptance bullet (mock-only tests, `console.log` substitutes, TODO/FIXME in AC code paths, hardcoded fixtures, disabled/skipped/`.only` tests in changed files, "compiles ≠ works"). If any apply, you noted it in Dev Agent Record so the code-review auditor can address it — you did NOT sneak any into the diff hoping it slips through review.
 
 ## 📝 Documentation & Tracking
 

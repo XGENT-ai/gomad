@@ -422,8 +422,16 @@ When writing to `{sprint_status}`:
     <action if="regression failures exist">HALT - Fix regression issues before completing</action>
     <action if="File List is incomplete">HALT - Update File List with all changed files</action>
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
-    <action if="story contains '## Real-World Verification' section AND '### Real-World Verification Evidence' slot under Dev Agent Record is empty/absent OR does not contain actual observed output for the story's mode">HALT - Fill Real-World Verification Evidence before Status=review. For `real-world` mode, paste actual command + observed output per Real-World Verification row. For `test-only-justified` mode, paste the strongest-available verification's actual output (test-suite run summary, before/after benchmark, reviewer note) — NOT just "tests pass". If the bar cannot be met, escalate to user; do NOT redefine "done".</action>
-    <action if="story contains '## Anti-Acceptance' section AND any bullet from that list applies to the current implementation">HALT - Implementation matches a forbidden proof of done (mock-only test pass, console.log of expected value, TODO/FIXME in AC code path, hardcoded fixture, disabled/skipped/.only test in changed files, or compile-only verification). Fix the implementation or escalate to the user — do NOT mark Status=review.</action>
+
+    <!--
+      Story-contract recording (NOT a HALT — autonomous flow must keep moving).
+      Real enforcement lives in gm-code-review (Acceptance Auditor), which audits
+      the Evidence slot and Anti-Acceptance compliance and REJECTS via review
+      findings. Dev agent's job here is to record honestly so the auditor has
+      something real to check.
+    -->
+    <action if="story contains '## Real-World Verification' section">Before setting Status=review, fill the '### Real-World Verification Evidence' slot under Dev Agent Record honestly. For `real-world` mode: paste the actual command run + actual observed output (or screenshot path / log excerpt) for each Real-World Verification row. For `test-only-justified` mode: paste the actual run-output of the strongest-available verification named in the story (test-suite summary, before/after benchmark numbers, reviewer-reading note) — "tests pass" alone is NOT evidence in either mode. If you could not run a particular row (real dependency unavailable, environment limitation, etc.), record that truthfully in the slot — e.g., "AC#2: could not run, real upstream API unreachable from sandbox; deferred to review". DO NOT fabricate output. The code-review phase audits this and will REJECT if evidence is missing or fake.</action>
+    <action if="story contains '## Anti-Acceptance' section">Before setting Status=review, self-audit your implementation against each Anti-Acceptance bullet in the story. If any apply (mock-only test pass, console.log of expected value, TODO/FIXME in AC code path, hardcoded fixture, skipped/disabled/.only test in changed files, or compile-only verification claimed as Real-World evidence), record this honestly in Dev Agent Record under Implementation Notes — do not silently include such patterns in your diff. The code-review Acceptance Auditor scans the diff for these and will REJECT if found. Recording them honestly is fine; sneaking them in is the failure mode.</action>
   </step>
 
   <step n="10" goal="Append per-story summary entry to epic-done file" tag="summary">
