@@ -302,6 +302,8 @@ frameworks</action>
 
 <step n="5" goal="Create comprehensive story file">
   <critical>📝 CREATE ULTIMATE STORY FILE - The developer's master implementation guide!</critical>
+  <critical>🚧 PROOF-OF-DONE CONTRACT (anti-mock-only): For every Acceptance Criterion you write, you MUST also populate the "Real-World Verification" table with at least one row naming a CONCRETE real-system command, URL, or UI flow (not "verify it works", not "run tests"). If you cannot name a real-system verification for an AC, that AC is malformed — split it, sharpen it, or flag it for the user. Do NOT emit the story until every AC has at least one Real-World Verification row.</critical>
+  <critical>🚫 The "Anti-Acceptance" list in template.md is canonical. Do NOT soften, shorten, paraphrase, or remove its bullets when emitting the story — copy them VERBATIM. The dev agent will read this list as the off-limits register.</critical>
 
 <action>Initialize from template.md:
 {default_output_file}</action>
@@ -322,6 +324,10 @@ frameworks</action>
   <template-output file="{default_output_file}">
   file_structure_requirements</template-output>
   <template-output file="{default_output_file}">testing_requirements</template-output>
+
+  <!-- Real-world verification contract — see template.md "Real-World Verification" + "Anti-Acceptance" -->
+  <template-output file="{default_output_file}">real_world_verification</template-output>
+  <template-output file="{default_output_file}">anti_acceptance</template-output>
 
   <!-- Domain KB pre-bake citations (STORY-12, read-as-skill) -->
   <check if="kb_citations is non-empty">
