@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Python Type Safety
+
 ## Frozen Dataclasses for Immutable Domain Models
 
 Use `@dataclass(frozen=True)` for value objects that should never change after construction.

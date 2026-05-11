@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Service Workers in Playwright
+
 ## Service Worker Basics
 
 ### Waiting for Service Worker Registration

@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Featured Snippets
+
 ## Snippet Type Selection
 
 | Query type | Snippet format | Structure to use |

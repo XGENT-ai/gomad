@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# SEO Content Planning
+
 ## Topic Cluster Model
 
 A topic cluster is a pillar page (broad, comprehensive) linked bidirectionally to a set of supporting articles (narrow, deep). The structure signals topical authority to Google's crawlers better than isolated articles.

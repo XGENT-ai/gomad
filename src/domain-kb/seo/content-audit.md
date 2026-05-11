@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# SEO Content Audit
+
 ## When to Run a Content Audit
 
 Run an audit when:

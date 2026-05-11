@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# SEO Content Structure
+
 ## Header Hierarchy Rules
 
 - **One H1 per page**, matching the primary keyword and title tag (within a few words)

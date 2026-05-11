@@ -6,12 +6,10 @@
  * takedown risk. This validator MUST run in `npm run quality` and MUST land
  * BEFORE any KB content is committed.
  *
- * What it checks (STORY-08/09/10):
+ * What it checks (aligned with src/domain-kb/GUIDELINE.md schema):
  * - KB-01 CRITICAL: YAML frontmatter present (`---\n...\n---`).
- * - KB-02 CRITICAL: frontmatter has `source` key (non-empty).
  * - KB-03 CRITICAL: frontmatter has `license` key (non-empty).
  * - KB-04 CRITICAL: frontmatter has `last_reviewed` key matching `YYYY-MM-DD`.
- * - KB-05 HIGH:     `source` is `original` OR starts with `http://` / `https://`.
  * - KB-06 HIGH:     `license` is in allowlist (`MIT`, `Apache-2.0`, `BSD-3-Clause`,
  *                   `CC-BY-4.0`, `CC0-1.0`, `original`).
  * - KB-07 HIGH:     file has an H1 (`# ...`) after the frontmatter (D-09 catalog).
@@ -44,10 +42,9 @@ const JSON_OUTPUT = args.has('--json');
 // --- Constants ---
 
 const LICENSE_ALLOWLIST = ['MIT', 'Apache-2.0', 'BSD-3-Clause', 'CC-BY-4.0', 'CC0-1.0', 'original'];
-const REQUIRED_KEYS = ['source', 'license', 'last_reviewed'];
+const REQUIRED_KEYS = ['license', 'last_reviewed'];
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const H1_REGEX = /^#\s+\S/m;
-const URL_REGEX = /^https?:\/\/\S+/i;
 
 const SEVERITY_ORDER = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 
@@ -154,7 +151,7 @@ function validateFile(filePath) {
       severity: 'CRITICAL',
       file: relFile,
       detail: 'No YAML frontmatter found — file must start with `---\\n...\\n---`.',
-      fix: 'Prepend `---\\nsource: <url-or-original>\\nlicense: <SPDX-or-original>\\nlast_reviewed: YYYY-MM-DD\\n---` to the file.',
+      fix: 'Prepend `---\\nname: <slug>\\ndescription: <one-line trigger>\\nlicense: <SPDX-or-original>\\nlast_reviewed: YYYY-MM-DD\\n---` to the file.',
     });
     // Without frontmatter, downstream rules cannot fire. Still check KB-07 on body.
     checkHeading(content, relFile, findings);
@@ -174,17 +171,17 @@ function validateFile(filePath) {
     return { file: relFile, findings };
   }
 
-  // --- KB-02, KB-03, KB-04: required keys present + non-empty ---
+  // --- KB-03, KB-04: required keys present + non-empty ---
   for (const key of REQUIRED_KEYS) {
     if (!(key in fm) || fm[key] === null || fm[key] === undefined || String(fm[key]).trim() === '') {
-      const ruleMap = { source: 'KB-02', license: 'KB-03', last_reviewed: 'KB-04' };
+      const ruleMap = { license: 'KB-03', last_reviewed: 'KB-04' };
       findings.push({
         rule: ruleMap[key],
         title: `KB Frontmatter Must Have \`${key}\``,
         severity: 'CRITICAL',
         file: relFile,
         detail: `Frontmatter is missing required key \`${key}\` (or value is empty).`,
-        fix: `Add \`${key}: <value>\` to the frontmatter. See STORY-08/09 for expected format.`,
+        fix: `Add \`${key}: <value>\` to the frontmatter. See src/domain-kb/GUIDELINE.md.`,
       });
     }
   }
@@ -206,21 +203,6 @@ function validateFile(filePath) {
         file: relFile,
         detail: `\`last_reviewed: "${dateStr}"\` does not match YYYY-MM-DD format.`,
         fix: 'Use an ISO date, e.g. `last_reviewed: 2026-04-24`.',
-      });
-    }
-  }
-
-  // --- KB-05 HIGH: source must be `original` or a URL ---
-  if ('source' in fm && fm.source !== null && fm.source !== undefined) {
-    const sourceStr = String(fm.source).trim();
-    if (sourceStr !== '' && sourceStr !== 'original' && !URL_REGEX.test(sourceStr)) {
-      findings.push({
-        rule: 'KB-05',
-        title: 'KB Frontmatter `source` Format',
-        severity: 'HIGH',
-        file: relFile,
-        detail: `\`source: "${sourceStr}"\` is not \`original\` and is not an http(s) URL.`,
-        fix: 'Use `source: original` for GoMad-authored content, or a full URL (https://...) for third-party material.',
       });
     }
   }

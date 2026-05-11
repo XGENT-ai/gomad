@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Flaky Test Handling
+
 **When to use:** A test fails intermittently in CI, you are tempted to add a `sleep()` or retry decorator as a quick fix, or you need to decide whether a failing test is genuinely flaky, outdated, or masking a real bug. Trigger phrases: "test is flaky", "passes locally fails in CI", "intermittent failure", "retry on failure", "add sleep to fix", "flakey test", "non-deterministic test", "CI green but fails sometimes".
 
 ## Classify before fixing

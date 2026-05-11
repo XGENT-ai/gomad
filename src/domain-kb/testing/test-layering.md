@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Test Layering
+
 **When to use:** Unsure whether a test should mock its dependencies, hit real services, or drive a full user workflow. Apply before writing tests to avoid false confidence from mocked integration tests or edge cases buried in e2e. Trigger phrases: "should I mock this?", "unit vs integration", "e2e is flaky and slow", "test pyramid", "where does this test belong?", "integration tests passing but prod broke".
 
 ## Layer decision table

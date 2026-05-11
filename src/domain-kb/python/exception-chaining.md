@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Python Exception Chaining
+
 ## When to Use Exception Chaining
 
 Use `raise B from A` whenever you catch exception `A` and want to surface a higher-level exception `B` without losing the original traceback.

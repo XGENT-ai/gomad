@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# CI Test Lanes
+
 **When to use:** Setting up a new CI pipeline, deciding which tests belong on the PR check vs. a nightly schedule, or diagnosing a CI suite that is too slow for PR feedback loops. Trigger phrases: "CI is too slow", "what to run on PR", "nightly test suite", "test pipeline design", "smoke tests", "full suite schedule", "PR feedback time", "CI pipeline setup".
 
 ## Two-lane model

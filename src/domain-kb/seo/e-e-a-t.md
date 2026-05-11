@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# E-E-A-T (Experience, Expertise, Authority, Trust)
+
 ## When to Apply
 
 E-E-A-T signals matter most for **YMYL (Your Money or Your Life)** topics: health, finance, legal, safety. Google's Quality Rater Guidelines weight these heavily. For non-YMYL content, E-E-A-T still affects quality scores but is rarely the primary ranking lever.

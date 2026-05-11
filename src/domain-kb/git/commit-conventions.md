@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Conventional Commits
+
 ## Format
 
 ```

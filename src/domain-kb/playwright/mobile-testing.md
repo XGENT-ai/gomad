@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Mobile Testing in Playwright
+
 ## Device Emulation
 
 ### Use Built-in Devices

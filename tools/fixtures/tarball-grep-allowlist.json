@@ -107,5 +107,10 @@
     "path": "tools/installer/assets/hooks/gomad-agent-tracker.js",
     "reason": "Shipped Claude Code agent-tracker hook (installed verbatim into the user's .claude/ tree). Composes the active skill id as `gm-agent-${shortName}` from the invoked slash command before persisting it to the per-session state file (REF-02 filesystem-name composition).",
     "category": "gm-agent"
+  },
+  {
+    "path": "tools/installer/ide/shared/invocation-syntax.js",
+    "reason": "Shipped installer module (260430-q3c); install-time transform that emits `$gm-agent-<short>` / `gm-agent-<short>` dash-form invocations for non-Claude-Code platforms (Codex et al). Regex literals and replacement strings must contain the dash form because that is the produced output (REF-02).",
+    "category": "gm-agent"
   }
 ]

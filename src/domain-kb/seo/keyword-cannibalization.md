@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Keyword Cannibalization
+
 ## What Cannibalization Looks Like
 
 Two or more pages on the same domain compete for the same query. Google alternates which one it ranks, neither reaches its potential, and CTR splits. Signs:

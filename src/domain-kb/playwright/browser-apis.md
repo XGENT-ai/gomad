@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Browser Device APIs in Playwright
+
 ## Geolocation
 
 ### Mock Location

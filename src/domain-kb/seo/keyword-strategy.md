@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# SEO Keyword Strategy
+
 ## Density Guidelines
 
 | Keyword type | Target density | Placement |

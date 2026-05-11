@@ -12,10 +12,12 @@
  * tempdir. This exercises the full install path end-to-end (modules → KB copy →
  * manifest generation) without the `npm pack` overhead of test-e2e-install.js.
  *
- * Assertions (driven by plan 10-02 acceptance criteria):
- *   1. `_config/kb/testing/SKILL.md` + `_config/kb/architecture/SKILL.md` land on disk
- *   2. At least one file under `_config/kb/testing/reference/` + `_config/kb/architecture/reference/`
- *   3. Every KB row in `files-manifest.csv` has `install_root="_gomad"` + `schema_version="2.0"`
+ * Assertions (driven by plan 10-02 acceptance criteria; the `testing/`/`architecture/`
+ * skill-pack examples were retired in 79532df — current GUIDELINE.md mandates
+ * markdown-only KB with no `SKILL.md` and no `reference/` subdirs):
+ *   1. `_gomad/_config/kb/` directory exists after fresh install
+ *   2. Every KB row in `files-manifest.csv` has `install_root="_gomad"` + `schema_version="2.0"`
+ *   3. Every KB .md file on disk has a corresponding manifest row
  *   4. Re-install: the KB row count stays stable (no duplicates)
  *
  * Exit code: 0 on success, 1 on any assertion failure.
@@ -77,15 +79,12 @@ function readFilesManifest(gomadDir) {
 async function main() {
   console.log(`\n${colors.cyan}Domain KB Install Test (STORY-11)${colors.reset}\n`);
 
-  // ── Pre-flight: confirm seed packs exist (Wave 1 Plan 10-05 output) ───
+  // ── Pre-flight: confirm src/domain-kb/ exists ─────────────────────────
   const seedRoot = path.join(projectRoot, 'src', 'domain-kb');
   if (!fs.existsSync(seedRoot)) {
     console.log(`${colors.red}✗${colors.reset} src/domain-kb/ missing — STORY-11 prerequisite not met`);
-    console.log(`  ${colors.dim}Expected Wave 1 (Plan 10-05) seed KB packs at ${seedRoot}${colors.reset}`);
     process.exit(1);
   }
-  assert(fs.existsSync(path.join(seedRoot, 'testing')), 'Pre-flight: src/domain-kb/testing/ exists (Wave 1 output)');
-  assert(fs.existsSync(path.join(seedRoot, 'architecture')), 'Pre-flight: src/domain-kb/architecture/ exists (Wave 1 output)');
 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gomad-kb-install-'));
 
@@ -100,23 +99,6 @@ async function main() {
     const kbDir = path.join(gomadDir, '_config', 'kb');
 
     assert(fs.existsSync(kbDir), 'Fresh install creates _gomad/_config/kb/ directory');
-    assert(fs.existsSync(path.join(kbDir, 'testing', 'SKILL.md')), '_config/kb/testing/SKILL.md landed from src/domain-kb/testing/');
-    assert(
-      fs.existsSync(path.join(kbDir, 'architecture', 'SKILL.md')),
-      '_config/kb/architecture/SKILL.md landed from src/domain-kb/architecture/',
-    );
-
-    // At least one nested reference file in each pack — confirms recursive copy
-    const testingRefDir = path.join(kbDir, 'testing', 'reference');
-    const archRefDir = path.join(kbDir, 'architecture', 'reference');
-    assert(
-      fs.existsSync(testingRefDir) && fs.readdirSync(testingRefDir).length > 0,
-      '_config/kb/testing/reference/ is non-empty (recursive copy worked)',
-    );
-    assert(
-      fs.existsSync(archRefDir) && fs.readdirSync(archRefDir).length > 0,
-      '_config/kb/architecture/reference/ is non-empty (recursive copy worked)',
-    );
 
     // ── MANIFEST SHAPE ────────────────────────────────────────────────
     const manifest = readFilesManifest(gomadDir);

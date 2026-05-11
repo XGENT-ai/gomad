@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Test Fixture Patterns
+
 **When to use:** Setting up test data, choosing between factory functions and shared fixture objects, introducing seeded randomness, implementing polling for async state changes, or running e2e preflight checks. Also applies when you see flaky tests caused by non-deterministic data, cross-test fixture pollution, or `sleep()`/`waitForTimeout()` calls masking timing problems. Trigger phrases: "fixture factory", "seeded faker", "shared test state", "waitForTimeout", "poll until ready", "async assertion", "preflight check", "services not ready", "test data setup".
 
 ## Deterministic fixtures

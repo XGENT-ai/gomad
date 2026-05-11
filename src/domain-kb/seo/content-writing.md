@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# SEO Content Writing
+
 ## Structure First
 
 Write the outline before writing a word of content. Each H2 maps to a searcher question or subtopic. If you can't define what each section answers before you write it, the content will meander.

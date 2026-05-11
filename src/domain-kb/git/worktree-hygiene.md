@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# Git Worktree Hygiene
+
 ## Applicability
 
 This procedure applies to repos using a **bare-repo + worktree layout**:

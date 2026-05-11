@@ -5,6 +5,8 @@ license: MIT
 last_reviewed: 2026-05-02
 ---
 
+# SEO Content Freshness
+
 ## When Freshness Matters
 
 Google's QDF (Query Deserves Freshness) algorithm boosts recent content for:

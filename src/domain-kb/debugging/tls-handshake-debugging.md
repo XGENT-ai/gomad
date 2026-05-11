@@ -1,6 +1,8 @@
 ---
 name: tls-handshake-debugging
 description: Diagnose TLS handshake failures in Rust gRPC/HTTP clients.
+license: MIT
+last_reviewed: 2026-05-11
 ---
 
 # TLS handshake debugging — methodology + recipes
