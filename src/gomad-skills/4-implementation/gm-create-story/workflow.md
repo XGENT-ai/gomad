@@ -14,6 +14,22 @@
 
 ---
 
+## 🎯 Core Principle: Craftsmanship Mindset (精品意识)
+
+Every story you author must serve a **whole, premium product** — not a patchwork of scattered local fixes, and not a showcase of clever engineering nobody asked for. Hold three commitments simultaneously, not picking favorites:
+
+1. **Craftsmanship (精品意识).** Treat quality and functional completeness as first-class outcomes. A story that is "technically correct but ships a half-finished feature the user cannot actually use end-to-end" fails the bar — even if every AC checkbox is technically green.
+
+2. **Whole-product thinking (全局思维).** Each story is one move inside a larger product. Before scoping, ask: how does this fit the user's whole journey, the product's full surface, the architecture's full plan? A story that fixes one symptom locally while leaving the same antipattern elsewhere in the codebase, or that introduces a pattern inconsistent with adjacent code without rationale, is a patch (打补丁), not progress.
+
+3. **No flashy over-engineering (不做华而不实的过度设计).** Holistic does NOT mean maximalist. Add only what is genuinely needed *now*: AC-justified, architecture-required, or fixing a real failure mode. Speculative abstractions, premature flexibility, "while we're at it" refactors beyond scope, clever-but-unrequested patterns — these look impressive but rot the product. YAGNI applies.
+
+The tension between #2 and #3 is intentional. The right answer is rarely "minimum patch" OR "grand redesign" — it is **the smallest move that leaves the system coherent and the user genuinely served**. When torn, prefer the smaller move that keeps the whole consistent over the larger move that adds speculative capability. Real deferred concerns are valid — write them as follow-up stories or known-issue notes in Dev Agent Record. Do NOT silently pad the current story to dodge the discipline.
+
+This principle governs every downstream decision in this workflow: scope (Step 2), architecture compliance (Step 3), story content (Step 5), and self-validation (Step 6 / checklist.md §3.8).
+
+---
+
 ## INITIALIZATION
 
 ### Configuration Loading
@@ -305,6 +321,7 @@ frameworks</action>
   <critical>🚧 PROOF-OF-DONE CONTRACT (anti-mock-only): Real-World Verification is the DEFAULT bar (mode `real-world`). For any story that introduces or changes user-observable behavior, populate the table with at least one row per Acceptance Criterion naming a CONCRETE real-system command, URL, or UI flow (not "verify it works", not "run tests"). The escape hatch is mode `test-only-justified` — use ONLY for pure refactor / internal-only / doc-only / spike stories that cannot produce user-observable evidence; require a one-sentence concrete justification AND a named fallback bar (test suite green / before-after benchmark / second-reviewer reading). Defaulting to `test-only-justified` to avoid the table is itself a contract violation. If a `real-world` AC cannot be matched to a real-system verification, that AC is malformed — split it, sharpen it, or flag it for the user.</critical>
   <critical>🚫 The "Anti-Acceptance" list in template.md is canonical. Do NOT soften, shorten, paraphrase, or remove its bullets when emitting the story — copy them VERBATIM. The dev agent will read this list as the off-limits register.</critical>
   <critical>📐 SOURCE-ALIGNMENT CONTRACT (anti-drift): While generating each section, hold the story to its sources. Every Acceptance Criterion must trace to a PRD requirement, Epic AC, or story_context decision — if you must infer beyond the source, mark the inferred element inline as `*(derived: <source §> — <one-sentence rationale>)*` so the user can see and challenge it. Every library/framework/version named in the story MUST match architecture.md's tech-stack — adding, substituting, or version-skewing without explicit architecture sign-off is REJECT. Every persona in `As a {{role}}` MUST be a persona listed in the PRD (or N/A if PRD has no persona section). Do NOT include Tasks that the Epic file assigns to a different story or Epic. Step 6's checklist (3.7 Source-Alignment Cross-Check) re-validates this with mandatory source citations; catching drift while generating is cheaper than re-doing the story in Step 6.</critical>
+  <critical>✨ CRAFTSMANSHIP MINDSET (per Core Principle at top of file): Hold the three commitments simultaneously while scoping AC, Tasks, and Dev Notes — (1) craftsmanship: ship a usable whole, not a half-feature; (2) whole-product thinking: the story must leave the system coherent, not just locally patched (decide explicitly about adjacent occurrences of the same pattern — fix-all, leave-out-of-scope, or defer-with-followup; silence is not OK); (3) no over-engineering: YAGNI — no speculative abstractions, no "while we're at it" refactors, no flashy patterns without current need. When torn between #2 and #3, prefer the smallest move that keeps the whole consistent. Step 6's checklist (3.8 Craftsmanship vs. Bloat) re-validates both failure modes.</critical>
 
 <action>Initialize from template.md:
 {default_output_file}</action>

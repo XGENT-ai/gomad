@@ -208,6 +208,26 @@ For each REJECT below, you must cite the **specific source location** that contr
 
 **Why this matters:** gm-dev-story reads only the story file. gm-code-review audits diff vs. story. Neither layer ever re-reads PRD/Epic/architecture to check that the story honored them. The SM is the only checkpoint where source alignment can be enforced. Misalignment slipping past here propagates as silent scope drift, tech-stack rot, dropped requirements, and persona mismatch — none of which the downstream pipeline will catch.
 
+#### **3.8 Craftsmanship vs. Bloat Cross-Check** ✨
+
+Operationalizes the **Core Principle** at the top of `workflow.md` (精品意识 — craftsmanship + 全局思维 + 不做过度设计). Two failure modes, neither is safe default: under-delivering by patching, OR over-delivering by gold-plating. This check catches both edges.
+
+**Patch / half-feature REJECT criteria** (under-delivery):
+
+- [ ] **Half-shipped feature** — AC list covers the happy path but ignores error states, edge cases, or user-visible failure modes that would make the feature actually usable end-to-end. Not "edge case for testing" — "user can complete the task without hitting a dead end". A green AC checkbox on a half-finished feature fails the bar.
+- [ ] **Local-fix blind spot** — story fixes one instance of a pattern, antipattern, or data-flow while the same exists nearby in the diff scope, with no explicit decision about the other instances. Decision = "fix all", "leave alone — out of scope", or "defer with follow-up story". Silence is REJECT.
+- [ ] **Inconsistency with adjacent code** — story introduces a pattern, naming convention, error-handling style, or data shape that conflicts with how the same problem is solved nearby, without rationale for the divergence.
+
+**Over-engineering / bloat REJECT criteria** (gold-plating):
+
+- [ ] **Speculative abstraction** — story specifies an interface, plugin point, configuration knob, or extension mechanism that no AC requires and no architecture constraint mandates. YAGNI.
+- [ ] **"While we're at it" refactor** — Tasks/Subtasks include code reorganization, renaming, or restructuring beyond what is needed to satisfy the AC. Genuinely needed refactors deserve their own story (and their own Epic alignment); they do not piggy-back here.
+- [ ] **Flashy-not-useful pattern** — a design pattern (factory/strategy/observer/etc.), generic type, or indirection where a direct call would suffice. Pattern use must be justified by a *current* need, not future flexibility ("might need to swap implementations someday").
+
+**Calibration:** When torn between whole-product thinking (#2) and no-over-engineering (#3), prefer **the smallest move that leaves the system coherent** over the larger move adding speculative capability. Real deferred concerns → write a follow-up story or a known-issue note in Dev Agent Record — do NOT silently pad the current story. The principle is "premium product, not patchwork, not gold-plating" — REJECT either extreme.
+
+**Why this matters:** Once the story is approved, gm-dev-story executes whatever scope is written. If the story is patch-shaped, the dev ships patches and the product accumulates inconsistency. If the story is gold-plated, the dev builds machinery the product does not need and the codebase accumulates rot. The SM is the only point where this gets calibrated.
+
 ### **Step 4: LLM-Dev-Agent Optimization Analysis**
 
 **CRITICAL STEP: Optimize story context for LLM developer agent consumption**
