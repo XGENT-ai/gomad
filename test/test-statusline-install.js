@@ -73,8 +73,8 @@ function makeClaudeCodeConfig() {
       target_dir: '.claude/skills',
       hooks_target_dir: '.claude/hooks',
       statusline: {
-        source: 'tools/installer/assets/hooks/gomad-statusline.js',
-        dest_name: 'gomad-statusline.js',
+        source: 'tools/installer/assets/hooks/gomad-statusline.cjs',
+        dest_name: 'gomad-statusline.cjs',
         settings_file: '.claude/settings.json',
       },
     },
@@ -106,7 +106,7 @@ async function makeTmpDir() {
       trackInstalledFile: (p) => tracked.push(p),
     });
 
-    const hookPath = path.join(caseATmp, '.claude/hooks/gomad-statusline.js');
+    const hookPath = path.join(caseATmp, '.claude/hooks/gomad-statusline.cjs');
     const settingsPath = path.join(caseATmp, '.claude/settings.json');
 
     check('A1 install returns true', () => assert.equal(installed, true));
@@ -126,13 +126,13 @@ async function makeTmpDir() {
     check('A5 settings.statusLine.type === "command"', () => assert.equal(settings.statusLine?.type, 'command'));
     check('A6 settings.statusLine.padding === 0', () => assert.equal(settings.statusLine?.padding, 0));
     check('A7 settings.statusLine.command references hook', () => {
-      assert.match(settings.statusLine?.command || '', /gomad-statusline\.js/);
+      assert.match(settings.statusLine?.command || '', /gomad-statusline\.cjs/);
       assert.match(settings.statusLine?.command || '', /\$CLAUDE_PROJECT_DIR/);
     });
 
     check('A8 install tracked the hook file', () => {
       assert.equal(
-        tracked.some((p) => p.endsWith('gomad-statusline.js')),
+        tracked.some((p) => p.endsWith('gomad-statusline.cjs')),
         true,
       );
     });
@@ -182,7 +182,7 @@ async function makeTmpDir() {
     });
     check('B4 statusLine added', () => {
       assert.equal(settings.statusLine?.type, 'command');
-      assert.match(settings.statusLine?.command || '', /gomad-statusline\.js/);
+      assert.match(settings.statusLine?.command || '', /gomad-statusline\.cjs/);
     });
   } catch (error) {
     check('B0 case B ran without throwing', () => {
@@ -213,7 +213,7 @@ async function makeTmpDir() {
 
     const installed = await setup.installStatusline(caseCTmp, cfg.installer, { silent: true });
 
-    const hookPath = path.join(caseCTmp, '.claude/hooks/gomad-statusline.js');
+    const hookPath = path.join(caseCTmp, '.claude/hooks/gomad-statusline.cjs');
     const settings = await fs.readJson(settingsPath);
 
     check('C1 install returns true (we still copy the hook)', () => assert.equal(installed, true));
@@ -256,8 +256,8 @@ async function makeTmpDir() {
 
     const settings = await fs.readJson(settingsPath);
 
-    check('C2.1 statusLine.command now references gomad-statusline.js', () => {
-      assert.match(settings.statusLine?.command || '', /gomad-statusline\.js/);
+    check('C2.1 statusLine.command now references gomad-statusline.cjs', () => {
+      assert.match(settings.statusLine?.command || '', /gomad-statusline\.cjs/);
     });
     check('C2.2 unrelated keys (env.KEEP) survive the override', () => {
       assert.equal(settings.env?.KEEP, 'me');
@@ -289,7 +289,7 @@ async function makeTmpDir() {
       overrideExistingStatusline: false,
     });
 
-    const hookPath = path.join(caseC3Tmp, '.claude/hooks/gomad-statusline.js');
+    const hookPath = path.join(caseC3Tmp, '.claude/hooks/gomad-statusline.cjs');
     const settings = await fs.readJson(settingsPath);
 
     check('C3.1 hook file IS copied even when override declined', () => assert.equal(fs.pathExistsSync(hookPath), true));
@@ -314,11 +314,11 @@ async function makeTmpDir() {
       // installerConfig is read by cleanupStatusline — assign manually because
       // we constructed via ConfigDrivenIdeSetup with the platformConfig wrapper.
       // (The constructor already does this from platformConfig.installer; assert.)
-      assert.equal(setup.installerConfig?.statusline?.dest_name, 'gomad-statusline.js');
+      assert.equal(setup.installerConfig?.statusline?.dest_name, 'gomad-statusline.cjs');
 
       await setup.cleanupStatusline(caseATmp, { silent: true });
 
-      const hookPath = path.join(caseATmp, '.claude/hooks/gomad-statusline.js');
+      const hookPath = path.join(caseATmp, '.claude/hooks/gomad-statusline.cjs');
       const settingsPath = path.join(caseATmp, '.claude/settings.json');
 
       check('D1 hook file removed', () => assert.equal(fs.pathExistsSync(hookPath), false));
@@ -377,8 +377,8 @@ async function makeTmpDir() {
   console.log(`${colors.yellow}Case F: hook-driven agent state${colors.reset}`);
   let caseFSession;
   try {
-    const { readAgentState, SHORTNAMES } = require('../tools/installer/assets/hooks/gomad-statusline.js');
-    const tracker = require('../tools/installer/assets/hooks/gomad-agent-tracker.js');
+    const { readAgentState, SHORTNAMES } = require('../tools/installer/assets/hooks/gomad-statusline.cjs');
+    const tracker = require('../tools/installer/assets/hooks/gomad-agent-tracker.cjs');
 
     check('F1 SHORTNAMES covers all 8 personas', () => {
       assert.equal(Object.keys(SHORTNAMES).length, 8);
@@ -497,7 +497,7 @@ async function makeTmpDir() {
   // Cleanup any state file we left behind.
   if (caseFSession) {
     try {
-      const trackerMod = require('../tools/installer/assets/hooks/gomad-agent-tracker.js');
+      const trackerMod = require('../tools/installer/assets/hooks/gomad-agent-tracker.cjs');
       const sf = trackerMod.stateFileFor(caseFSession);
       if (sf) fs.removeSync(sf);
     } catch {
@@ -518,8 +518,8 @@ async function makeTmpDir() {
         target_dir: '.claude/skills',
         hooks_target_dir: '.claude/hooks',
         agent_tracker: {
-          source: 'tools/installer/assets/hooks/gomad-agent-tracker.js',
-          dest_name: 'gomad-agent-tracker.js',
+          source: 'tools/installer/assets/hooks/gomad-agent-tracker.cjs',
+          dest_name: 'gomad-agent-tracker.cjs',
           settings_file: '.claude/settings.json',
           events: ['UserPromptSubmit', 'SessionStart', 'SessionEnd'],
         },
@@ -544,7 +544,7 @@ async function makeTmpDir() {
     const installed = await setup.installAgentTracker(tmp, cfg.installer, { silent: true });
     check('G1 installAgentTracker returns true', () => assert.equal(installed, true));
 
-    const trackerPath = path.join(tmp, '.claude/hooks/gomad-agent-tracker.js');
+    const trackerPath = path.join(tmp, '.claude/hooks/gomad-agent-tracker.cjs');
     check('G2 tracker file copied + executable', () => {
       assert.equal(fs.pathExistsSync(trackerPath), true);
       if (process.platform !== 'win32') {
@@ -564,7 +564,7 @@ async function makeTmpDir() {
       for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
         const groups = settingsAfter.hooks?.[event] || [];
         const found = groups.some((g) =>
-          (g.hooks || []).some((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')),
+          (g.hooks || []).some((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.cjs')),
         );
         assert.equal(found, true, `missing tracker registration on ${event}`);
       }
@@ -576,7 +576,8 @@ async function makeTmpDir() {
     check('G6 re-install does not duplicate registrations', () => {
       for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
         const matches = (settingsAfter2.hooks?.[event] || []).reduce(
-          (n, g) => n + (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')).length,
+          (n, g) =>
+            n + (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.cjs')).length,
           0,
         );
         assert.equal(matches, 1, `expected 1 tracker entry on ${event}, got ${matches}`);
@@ -599,7 +600,8 @@ async function makeTmpDir() {
       for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
         const groups = settingsCleaned.hooks?.[event] || [];
         const trackerEntries = groups.reduce(
-          (n, g) => n + (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')).length,
+          (n, g) =>
+            n + (g.hooks || []).filter((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.cjs')).length,
           0,
         );
         assert.equal(trackerEntries, 0, `tracker still registered on ${event}`);
@@ -609,6 +611,160 @@ async function makeTmpDir() {
     await fs.remove(tmp);
   } catch (error) {
     check('G0 case G ran without throwing', () => {
+      throw error;
+    });
+  }
+  console.log('');
+
+  // -------------------------------------------------------------------------
+  // Case H — quick task 260512-vc3: hook MUST load under a host project whose
+  // package.json has "type": "module". With the old .js extension this would
+  // throw `ReferenceError: require is not defined in ES module scope` at
+  // module load (Node treats `.js` files as ESM when the nearest parent
+  // package.json sets `"type": "module"`). The .cjs extension forces CJS.
+  // -------------------------------------------------------------------------
+  console.log(`${colors.yellow}Case H: hook loads under type:module parent (260512-vc3)${colors.reset}`);
+  let caseHTmp;
+  try {
+    caseHTmp = await makeTmpDir();
+    // Synthetic host project with `"type": "module"` at the package root.
+    await fs.writeJson(path.join(caseHTmp, 'package.json'), { type: 'module' }, { spaces: 2 });
+    const hookDir = path.join(caseHTmp, '.claude', 'hooks');
+    await fs.ensureDir(hookDir);
+    const hookDest = path.join(hookDir, 'gomad-agent-tracker.cjs');
+    await fs.copy(path.join(projectRoot, 'tools/installer/assets/hooks/gomad-agent-tracker.cjs'), hookDest);
+
+    // Spawn a fresh node process so require() actually resolves against the
+    // host package.json — `require()` from this test process would resolve
+    // against gomad's own package.json instead.
+    const { spawnSync } = require('node:child_process');
+    const sessionId = `gomad-test-esm-${process.pid}-${Date.now()}`;
+    const stdin = JSON.stringify({
+      session_id: sessionId,
+      hook_event_name: 'UserPromptSubmit',
+      prompt: '/gm:agent-pm hi',
+    });
+    const result = spawnSync(process.execPath, [hookDest], {
+      input: stdin,
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+    check('H1 hook process exits 0 under type:module parent', () => {
+      assert.equal(result.status, 0, `stderr: ${result.stderr}`);
+    });
+    check('H2 hook stderr is empty (no ESM scope error)', () => {
+      assert.equal(result.stderr, '', `unexpected stderr: ${result.stderr}`);
+    });
+    // The state file lives in os.tmpdir() (not host tmp). Use the source
+    // module to compute its path consistently.
+    const trackerMod = require('../tools/installer/assets/hooks/gomad-agent-tracker.cjs');
+    const stateFile = trackerMod.stateFileFor(sessionId);
+    check('H3 hook wrote per-session state file', () => {
+      assert.equal(fs.pathExistsSync(stateFile), true, `state file missing: ${stateFile}`);
+      const state = fs.readJsonSync(stateFile);
+      assert.equal(state.persona, 'John');
+      assert.equal(state.skill, 'gm-agent-pm');
+    });
+    // Cleanup state file.
+    try {
+      fs.unlinkSync(stateFile);
+    } catch {
+      /* ignore */
+    }
+  } catch (error) {
+    check('H0 case H ran without throwing', () => {
+      throw error;
+    });
+  }
+  if (caseHTmp) await fs.remove(caseHTmp);
+  console.log('');
+
+  // -------------------------------------------------------------------------
+  // Case I — quick task 260512-vc3: cleanup migrates legacy .js artifacts
+  // left behind by prior installer versions. Verifies both the file
+  // removal and the settings.json strip handle the legacy name.
+  // -------------------------------------------------------------------------
+  console.log(`${colors.yellow}Case I: cleanup migrates legacy .js artifacts (260512-vc3)${colors.reset}`);
+  try {
+    const tmp = await makeTmpDir();
+    const cfg = makeClaudeCodeConfig();
+    // Add agent_tracker to exercise its cleanup as well.
+    cfg.installer.agent_tracker = {
+      source: 'tools/installer/assets/hooks/gomad-agent-tracker.cjs',
+      dest_name: 'gomad-agent-tracker.cjs',
+      settings_file: '.claude/settings.json',
+      events: ['UserPromptSubmit', 'SessionStart', 'SessionEnd'],
+    };
+    const setup = new ConfigDrivenIdeSetup('claude-code', cfg);
+
+    // Seed legacy .js artifacts (statusline + tracker) plus matching
+    // settings.json entries that reference the .js filenames.
+    const hooksDir = path.join(tmp, '.claude/hooks');
+    await fs.ensureDir(hooksDir);
+    const legacyStatuslineFile = path.join(hooksDir, 'gomad-statusline.js');
+    const legacyTrackerFile = path.join(hooksDir, 'gomad-agent-tracker.js');
+    await fs.writeFile(legacyStatuslineFile, '// stale legacy statusline\n');
+    await fs.writeFile(legacyTrackerFile, '// stale legacy tracker\n');
+
+    const settingsPath = path.join(tmp, '.claude/settings.json');
+    await fs.writeJson(
+      settingsPath,
+      {
+        env: { KEEP: 'me' },
+        statusLine: {
+          type: 'command',
+          command: 'node "$CLAUDE_PROJECT_DIR"/.claude/hooks/gomad-statusline.js',
+          padding: 0,
+        },
+        hooks: {
+          UserPromptSubmit: [
+            { hooks: [{ type: 'command', command: 'node "$CLAUDE_PROJECT_DIR"/.claude/hooks/gomad-agent-tracker.js', timeout: 5 }] },
+          ],
+          SessionStart: [
+            { hooks: [{ type: 'command', command: 'node "$CLAUDE_PROJECT_DIR"/.claude/hooks/gomad-agent-tracker.js', timeout: 5 }] },
+            { hooks: [{ type: 'command', command: 'echo other' }] }, // unrelated — must survive
+          ],
+          SessionEnd: [
+            { hooks: [{ type: 'command', command: 'node "$CLAUDE_PROJECT_DIR"/.claude/hooks/gomad-agent-tracker.js', timeout: 5 }] },
+          ],
+        },
+      },
+      { spaces: 2 },
+    );
+
+    await setup.cleanupStatusline(tmp, { silent: true });
+    await setup.cleanupAgentTracker(tmp, { silent: true });
+
+    check('I1 legacy gomad-statusline.js removed', () => {
+      assert.equal(fs.pathExistsSync(legacyStatuslineFile), false);
+    });
+    check('I2 legacy gomad-agent-tracker.js removed', () => {
+      assert.equal(fs.pathExistsSync(legacyTrackerFile), false);
+    });
+
+    const after = await fs.readJson(settingsPath);
+    check('I3 legacy statusLine stripped from settings.json', () => {
+      assert.equal(after.statusLine, undefined);
+    });
+    check('I4 legacy tracker entries stripped from all three events', () => {
+      for (const event of ['UserPromptSubmit', 'SessionStart', 'SessionEnd']) {
+        const groups = after.hooks?.[event] || [];
+        const stillThere = groups.some((g) =>
+          (g.hooks || []).some((h) => typeof h.command === 'string' && h.command.includes('gomad-agent-tracker.js')),
+        );
+        assert.equal(stillThere, false, `legacy tracker still registered on ${event}`);
+      }
+    });
+    check('I5 unrelated env.KEEP survived', () => assert.equal(after.env?.KEEP, 'me'));
+    check('I6 unrelated `echo other` hook survived', () => {
+      const groups = after.hooks?.SessionStart || [];
+      const echoSurvived = groups.some((g) => (g.hooks || []).some((h) => h.command === 'echo other'));
+      assert.equal(echoSurvived, true);
+    });
+
+    await fs.remove(tmp);
+  } catch (error) {
+    check('I0 case I ran without throwing', () => {
       throw error;
     });
   }

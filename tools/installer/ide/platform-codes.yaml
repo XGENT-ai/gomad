@@ -37,8 +37,11 @@ platforms:
       hooks_target_dir: .claude/hooks
       invocation_syntax: colon
       statusline:
-        source: tools/installer/assets/hooks/gomad-statusline.js
-        dest_name: gomad-statusline.js
+        # .cjs extension is load-bearing: when a host project's package.json
+        # declares "type": "module", a `.js` hook is loaded as ESM and crashes
+        # on require(...) (quick task 260512-vc3). `.cjs` pins it to CommonJS.
+        source: tools/installer/assets/hooks/gomad-statusline.cjs
+        dest_name: gomad-statusline.cjs
         settings_file: .claude/settings.json
       # Active-persona tracker — three Claude Code hook events, one script.
       # The statusline reads the tracker's state file rather than scanning
@@ -46,8 +49,10 @@ platforms:
       # false positives. Same script handles all three events via
       # hook_event_name dispatch.
       agent_tracker:
-        source: tools/installer/assets/hooks/gomad-agent-tracker.js
-        dest_name: gomad-agent-tracker.js
+        # See note above on statusline source — .cjs is required for hosts
+        # whose package.json has "type": "module" (quick task 260512-vc3).
+        source: tools/installer/assets/hooks/gomad-agent-tracker.cjs
+        dest_name: gomad-agent-tracker.cjs
         settings_file: .claude/settings.json
         events:
           - UserPromptSubmit

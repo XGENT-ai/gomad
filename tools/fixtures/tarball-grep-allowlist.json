@@ -99,12 +99,12 @@
     "category": "gomad-agents"
   },
   {
-    "path": "tools/installer/assets/hooks/gomad-statusline.js",
+    "path": "tools/installer/assets/hooks/gomad-statusline.cjs",
     "reason": "Shipped Claude Code statusline hook (installed verbatim into the user's .claude/ tree). PERSONAS map binds display names to filesystem-source skill ids (`gm-agent-analyst`, `gm-agent-pm`, …) and uses the skill-id pattern as an anchored regex for transcript-free persona detection (REF-02 filesystem-name refs).",
     "category": "gm-agent"
   },
   {
-    "path": "tools/installer/assets/hooks/gomad-agent-tracker.js",
+    "path": "tools/installer/assets/hooks/gomad-agent-tracker.cjs",
     "reason": "Shipped Claude Code agent-tracker hook (installed verbatim into the user's .claude/ tree). Composes the active skill id as `gm-agent-${shortName}` from the invoked slash command before persisting it to the per-session state file (REF-02 filesystem-name composition).",
     "category": "gm-agent"
   },

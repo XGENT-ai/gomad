@@ -12,8 +12,13 @@
 //     so /tmp doesn't accumulate stale entries on logout / shell exit.
 //
 // State file lives at  ${os.tmpdir()}/gomad-agent-${session_id}.json  and is
-// read by gomad-statusline.js. Any throw, parse error, or missing field is
+// read by gomad-statusline.cjs. Any throw, parse error, or missing field is
 // silently swallowed — a tracker hook MUST NEVER break the user's session.
+//
+// The `.cjs` extension is load-bearing: when the host project's package.json
+// has "type": "module", a `.js` extension forces ESM resolution and the
+// `require(...)` calls below throw at module load. `.cjs` pins this file to
+// CommonJS regardless of the host's package type (quick task 260512-vc3).
 
 const fs = require('node:fs');
 const path = require('node:path');

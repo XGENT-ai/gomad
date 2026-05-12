@@ -458,7 +458,6 @@ if (require.main === module) {
     console.log('  ✓ Reference tables injected');
   } catch (error) {
     console.error(`  ✗ ${error.message}`);
-    // eslint-disable-next-line n/no-process-exit, unicorn/no-process-exit -- CLI entry; non-zero exit signals failure to npm script chain
     process.exit(1);
   }
 }

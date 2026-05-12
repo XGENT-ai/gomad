@@ -79,7 +79,7 @@ const SHORTNAMES = {
  * Read the active gomad persona for this session from the tracker hook's
  * state file. Returns `{ persona, skill }` or `null`.
  *
- * The state file is written by `gomad-agent-tracker.js` on UserPromptSubmit
+ * The state file is written by `gomad-agent-tracker.cjs` on UserPromptSubmit
  * (when the prompt starts with `/gm:agent-<short>`) and deleted on
  * SessionStart / SessionEnd. The statusline just reads — no transcript
  * scanning, no regex over chat text.

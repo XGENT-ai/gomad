@@ -173,12 +173,12 @@
     "reason": "Docs build tool emits an index link string describing the eight `gm-agent-*` personas; pedagogical reference to the filesystem-source pattern (REF-02)."
   },
   {
-    "path": "tools/installer/assets/hooks/gomad-statusline.js",
+    "path": "tools/installer/assets/hooks/gomad-statusline.cjs",
     "lineContainsPattern": "gm-agent-",
     "reason": "Claude Code statusline hook: PERSONAS map binds display names (Mary, John, …) to filesystem-source skill ids (`gm-agent-analyst`, `gm-agent-pm`, …) and uses the skill-id pattern as an anchored regex for transcript-free persona detection (REF-02 filesystem-name refs)."
   },
   {
-    "path": "tools/installer/assets/hooks/gomad-agent-tracker.js",
+    "path": "tools/installer/assets/hooks/gomad-agent-tracker.cjs",
     "lineContainsPattern": "gm-agent-",
     "reason": "Claude Code agent-tracker hook composes the active skill id as `gm-agent-${shortName}` from the invoked slash command before persisting it to the per-session state file (REF-02 filesystem-name composition)."
   },

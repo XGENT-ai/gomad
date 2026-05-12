@@ -275,7 +275,7 @@ class ConfigDrivenIdeSetup {
             default: false,
           });
           if (!shouldWrite) {
-            await prompts.log.message(`  Keeping existing statusLine — gomad-statusline.js still copied to ${hooks_target_dir}/`);
+            await prompts.log.message(`  Keeping existing statusLine — gomad-statusline.cjs still copied to ${hooks_target_dir}/`);
           }
         }
       }
@@ -305,12 +305,12 @@ class ConfigDrivenIdeSetup {
   }
 
   /**
-   * Copy the gomad-agent-tracker.js hook and register it under each requested
+   * Copy the gomad-agent-tracker.cjs hook and register it under each requested
    * `hooks.<EventName>` entry in `.claude/settings.json`. Additive merge —
    * preserves any non-gomad hook entries the user had configured.
    *
    * Identifying our entries on uninstall: the command string contains the
-   * tracker's dest_name (e.g. `gomad-agent-tracker.js`), which is gomad-specific.
+   * tracker's dest_name (e.g. `gomad-agent-tracker.cjs`), which is gomad-specific.
    *
    * @param {string} projectDir
    * @param {Object} config - installer config block (must have agent_tracker + hooks_target_dir)
@@ -408,13 +408,24 @@ class ConfigDrivenIdeSetup {
     const { hooks_target_dir, agent_tracker } = installerCfg;
     if (!hooks_target_dir || !agent_tracker?.dest_name) return;
 
+    // Quick task 260512-vc3: legacy installs used `gomad-agent-tracker.js`,
+    // which crashes under host projects with package.json `"type": "module"`.
+    // Migration cleanup must remove BOTH the current .cjs file and any
+    // stale .js artifact, and strip settings.json entries referencing
+    // either name.
+    const legacyDest = agent_tracker.dest_name.replace(/\.cjs$/, '.js');
+    const candidateNames = new Set([agent_tracker.dest_name]);
+    if (legacyDest !== agent_tracker.dest_name) candidateNames.add(legacyDest);
+
     const destDir = path.join(projectDir, hooks_target_dir);
-    const destFile = path.join(destDir, agent_tracker.dest_name);
-    if (await fs.pathExists(destFile)) {
-      try {
-        await fs.remove(destFile);
-      } catch {
-        // Best-effort.
+    for (const name of candidateNames) {
+      const destFile = path.join(destDir, name);
+      if (await fs.pathExists(destFile)) {
+        try {
+          await fs.remove(destFile);
+        } catch {
+          // Best-effort.
+        }
       }
     }
 
@@ -433,6 +444,8 @@ class ConfigDrivenIdeSetup {
 
     if (!parsed.hooks || typeof parsed.hooks !== 'object') return;
 
+    const ours = (cmd) => typeof cmd === 'string' && [...candidateNames].some((n) => cmd.includes(n));
+
     let mutated = false;
     for (const [event, groups] of Object.entries(parsed.hooks)) {
       if (!Array.isArray(groups)) continue;
@@ -442,7 +455,7 @@ class ConfigDrivenIdeSetup {
           filteredGroups.push(group);
           continue;
         }
-        const remaining = group.hooks.filter((h) => !(typeof h?.command === 'string' && h.command.includes(agent_tracker.dest_name)));
+        const remaining = group.hooks.filter((h) => !ours(h?.command));
         if (remaining.length === 0) {
           mutated = true;
           continue; // Drop the entire group — it was only ours.
@@ -693,18 +706,32 @@ class ConfigDrivenIdeSetup {
     const hooks_target_dir = this.installerConfig?.hooks_target_dir;
     if (!cfg || !cfg.dest_name || !hooks_target_dir) return;
 
-    const hookFile = path.join(projectDir, hooks_target_dir, cfg.dest_name);
+    // Quick task 260512-vc3: prior installer versions shipped this hook
+    // as `gomad-statusline.js`. That extension causes ESM-scope crashes
+    // when the host project's package.json has "type": "module". We've
+    // renamed the asset to `.cjs`; this set lists every name we might
+    // need to clean up (current + legacy). `cleanup()` always runs
+    // before `installStatusline()`, so this also self-heals stale `.js`
+    // installs the next time the user runs `gomad install`.
+    const legacyDest = cfg.dest_name.replace(/\.cjs$/, '.js');
+    const candidateNames = new Set([cfg.dest_name]);
+    if (legacyDest !== cfg.dest_name) candidateNames.add(legacyDest);
+
     let removed = false;
-    if (await fs.pathExists(hookFile)) {
-      try {
-        await fs.remove(hookFile);
-        removed = true;
-      } catch {
-        // Best-effort — keep going.
+    for (const name of candidateNames) {
+      const hookFile = path.join(projectDir, hooks_target_dir, name);
+      if (await fs.pathExists(hookFile)) {
+        try {
+          await fs.remove(hookFile);
+          removed = true;
+        } catch {
+          // Best-effort — keep going.
+        }
       }
     }
 
-    // Strip our statusLine from settings.json if it's still ours.
+    // Strip our statusLine from settings.json if it's still ours
+    // (matches either the current .cjs name or the legacy .js name).
     if (cfg.settings_file) {
       const settingsFile = path.join(projectDir, cfg.settings_file);
       if (await fs.pathExists(settingsFile)) {
@@ -713,7 +740,8 @@ class ConfigDrivenIdeSetup {
           const parsed = raw.trim() ? JSON.parse(raw) : {};
           if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
             const cmd = parsed.statusLine?.command;
-            if (typeof cmd === 'string' && cmd.includes(cfg.dest_name)) {
+            const isOurs = typeof cmd === 'string' && [...candidateNames].some((n) => cmd.includes(n));
+            if (isOurs) {
               delete parsed.statusLine;
               await fs.writeFile(settingsFile, JSON.stringify(parsed, null, 2) + '\n', 'utf8');
             }
